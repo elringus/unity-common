@@ -65,5 +65,16 @@ public static class StringUtils
 
         return content.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
     }
+
+    /// <summary>
+    /// Checks whether string is null, empty or consists of whitespace chars.
+    /// </summary>
+    public static bool IsNullEmptyOrWhiteSpace (string content)
+    {
+        if (String.IsNullOrEmpty(content))
+            return true;
+
+        return String.IsNullOrEmpty(content.Trim());
+    }
 }
 
