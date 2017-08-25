@@ -10,7 +10,7 @@ public static class LinqUtils
     {
         if (list == null || list.Count == 0) return;
 
-        var elementIndex = predicate == null ? list.Count - 1 : list.FindIndex(predicate);
+        var elementIndex = predicate == null ? list.Count - 1 : list.FindLastIndex(predicate);
         if (elementIndex >= 0)
             list.RemoveAt(elementIndex);
     }
