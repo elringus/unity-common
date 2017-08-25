@@ -76,5 +76,16 @@ public static class StringUtils
 
         return String.IsNullOrEmpty(content.Trim());
     }
+
+    /// <summary>
+    /// Removes mathing trailing string.
+    /// </summary>
+    public static string TrimEnd (this string source, string value)
+    {
+        if (!source.EndsWith(value))
+            return source;
+
+        return source.Remove(source.LastIndexOf(value));
+    }
 }
 
