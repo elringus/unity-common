@@ -58,12 +58,18 @@ public static class StringUtils
 
     /// <summary>
     /// Splits the string using new line symbol as a separator.
+    /// Will split by all type of new lines, independant of environment.
     /// </summary>
     public static string[] SplitByNewLine (this string content)
     {
         if (string.IsNullOrEmpty(content)) return null;
 
-        return content.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+        // "\r\n"   (\u000D\u000A)  Windows
+        // "\n"     (\u000A)        Unix
+        // "\r"     (\u000D)        Mac
+        // Not using Environment.NewLine here, as content could've been produced 
+        // in not the same environment we running the program in.
+        return content.Split(new string[] { "\r\n", "\n", "\r" }, StringSplitOptions.RemoveEmptyEntries);
     }
 
     /// <summary>
