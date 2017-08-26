@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-/// <summary>
-/// Dictionary with case-insensitive string keys.
-/// </summary>
-public class LiteralMap<TValue> : SerializableDictionary<string, TValue>
+public abstract class SerializableLiteralMap<TValue> : SerializableDictionary<string, TValue>
 {
     public override IEqualityComparer<string> Comparer { get { return StringComparer.OrdinalIgnoreCase; } }
 }
@@ -13,5 +10,4 @@ public class LiteralMap<TValue> : SerializableDictionary<string, TValue>
 /// A serializable version of LiteralMap with string values.
 /// </summary>
 [Serializable]
-public class LiteralStringMap : LiteralMap<string> { }
-
+public class SerializableLiteralStringMap : SerializableLiteralMap<string> { }

@@ -4,55 +4,57 @@ using System.Collections;
 using System.Diagnostics;
 using UnityEngine;
 
+/// <summary>
+/// Serializable version of generic C# dictionary.
+/// Derive non-generic versions to use (Unity serialization doesn't support generic types).
+/// </summary>
 [Serializable]
 public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDictionary
 {
-    // can't serialize internal generic struct.
-    // extract to 4 arrays.
-
-    //struct Entry
-    //{
-    //    public int hashCode;
-    //    public int next;
-    //    public TKey key;
-    //    public TValue value;
-    //}
-
-    // serializable state.
-    [SerializeField, HideInInspector]
-    int[] buckets; // link index of first entry. empty is -1.
-    [SerializeField, HideInInspector]
-    int count;
-
-    // Entry[] entries;
-    [SerializeField, HideInInspector]
-    int[] entriesHashCode;
-    [SerializeField, HideInInspector]
-    int[] entriesNext;
-    [SerializeField, HideInInspector]
-    TKey[] entriesKey;
-    [SerializeField, HideInInspector]
-    TValue[] entriesValue;
-
-    // when remove, mark slot to free
-    [SerializeField, HideInInspector]
-    int freeCount;
-    [SerializeField, HideInInspector]
-    int freeList;
-
-    int version; // version does not serialize
-
-    KeyCollection keys;
-    ValueCollection values;
-    object _syncRoot;
-
-    // equality comparer is not serializable, use specified comparer.
-    public virtual IEqualityComparer<TKey> Comparer {
-        get
-        {
-            return EqualityComparer<TKey>.Default;
-        }
+    public TValue this[TKey key]
+    {
+        get { return GetValueByKey(key); }
+        set { Insert(key, value, false); }
     }
+
+    public int Count { get { return count - freeCount; } }
+    public KeyCollection Keys { get { if (keys == null) keys = new KeyCollection(this); return keys; } }
+    public ValueCollection Values { get { if (values == null) values = new ValueCollection(this); return values; } }
+    ICollection<TKey> IDictionary<TKey, TValue>.Keys { get { if (keys == null) keys = new KeyCollection(this); return keys; } }
+    ICollection<TValue> IDictionary<TKey, TValue>.Values { get { if (values == null) values = new ValueCollection(this); return values; } }
+    ICollection IDictionary.Keys { get { return (ICollection)Keys; } }
+    ICollection IDictionary.Values { get { return (ICollection)Values; } }
+    bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly { get { return false; } }
+    bool IDictionary.IsFixedSize { get { return false; } }
+    bool IDictionary.IsReadOnly { get { return false; } }
+
+    // Equality comparer is not serializable, use specified comparer.
+    public virtual IEqualityComparer<TKey> Comparer { get { return EqualityComparer<TKey>.Default; } }
+
+    /// <summary>
+    /// Link index of first entry. Empty is -1.
+    /// </summary>
+    [SerializeField, HideInInspector]
+    private int[] buckets;
+    [SerializeField, HideInInspector]
+    private int count;
+    [SerializeField, HideInInspector]
+    private int[] entriesHashCode;
+    [SerializeField, HideInInspector]
+    private int[] entriesNext;
+    [SerializeField, HideInInspector]
+    private TKey[] entriesKey;
+    [SerializeField, HideInInspector]
+    private TValue[] entriesValue;
+    [SerializeField, HideInInspector]
+    private int freeCount;
+    [SerializeField, HideInInspector]
+    private int freeList;
+
+    private int version;
+    private KeyCollection keys;
+    private ValueCollection values;
+    private object _syncRoot;
 
     protected SerializableDictionary ()
     {
@@ -64,58 +66,9 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, I
         Initialize(initialCapacity);
     }
 
-    SerializableDictionary (int staticCapacity, bool forceSize)
+    protected SerializableDictionary (int staticCapacity, bool forceSize)
     {
         Initialize(staticCapacity, forceSize);
-    }
-
-    public int Count {
-        get { return count - freeCount; }
-    }
-
-    public KeyCollection Keys {
-        get
-        {
-            if (keys == null) keys = new KeyCollection(this);
-            return keys;
-        }
-    }
-
-    ICollection<TKey> IDictionary<TKey, TValue>.Keys {
-        get
-        {
-            if (keys == null) keys = new KeyCollection(this);
-            return keys;
-        }
-    }
-
-    public ValueCollection Values {
-        get
-        {
-            if (values == null) values = new ValueCollection(this);
-            return values;
-        }
-    }
-
-    ICollection<TValue> IDictionary<TKey, TValue>.Values {
-        get
-        {
-            if (values == null) values = new ValueCollection(this);
-            return values;
-        }
-    }
-
-    public TValue this[TKey key] {
-        get
-        {
-            int i = FindEntry(key);
-            if (i >= 0) return entriesValue[i];
-            throw new KeyNotFoundException();
-        }
-        set
-        {
-            Insert(key, value, false);
-        }
     }
 
     public void Add (TKey key, TValue value)
@@ -176,17 +129,13 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, I
         if (value == null)
         {
             for (int i = 0; i < count; i++)
-            {
                 if (entriesHashCode[i] >= 0 && entriesValue[i] == null) return true;
-            }
         }
         else
         {
             EqualityComparer<TValue> c = EqualityComparer<TValue>.Default;
             for (int i = 0; i < count; i++)
-            {
                 if (entriesHashCode[i] >= 0 && c.Equals(entriesValue[i], value)) return true;
-            }
         }
         return false;
     }
@@ -194,28 +143,18 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, I
     private void CopyTo (KeyValuePair<TKey, TValue>[] array, int index)
     {
         if (array == null)
-        {
             throw new ArgumentNullException("array");
-        }
 
         if (index < 0 || index > array.Length)
-        {
             throw new ArgumentOutOfRangeException("index", index, SR.ArgumentOutOfRange_Index);
-        }
 
         if (array.Length - index < Count)
-        {
             throw new ArgumentException(SR.Arg_ArrayPlusOffTooSmall);
-        }
 
         int count = this.count;
         for (int i = 0; i < count; i++)
-        {
             if (entriesHashCode[i] >= 0)
-            {
                 array[index++] = new KeyValuePair<TKey, TValue>(entriesKey[i], entriesValue[i]);
-            }
-        }
     }
 
     public Enumerator GetEnumerator ()
@@ -228,7 +167,7 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, I
         return new Enumerator(this, Enumerator.KeyValuePair);
     }
 
-    int FindEntry (TKey key)
+    private int FindEntry (TKey key)
     {
         if (key == null) throw new ArgumentNullException("key");
 
@@ -236,24 +175,23 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, I
         {
             int hashCode = Comparer.GetHashCode(key) & 0x7FFFFFFF;
             for (int i = buckets[hashCode % buckets.Length]; i >= 0; i = entriesNext[i])
-            {
                 if (entriesHashCode[i] == hashCode && Comparer.Equals(entriesKey[i], key)) return i;
-            }
         }
 
         return -1;
     }
 
-    void Initialize (int capacity)
+    private void Initialize (int capacity)
     {
         Initialize(capacity, false);
     }
 
-    void Initialize (int capacity, bool forceSize)
+    private void Initialize (int capacity, bool forceSize)
     {
         int size = forceSize ? capacity : HashHelpers.GetPrime(capacity);
         buckets = new int[size];
-        for (int i = 0; i < buckets.Length; i++) buckets[i] = -1;
+        for (int i = 0; i < buckets.Length; i++)
+            buckets[i] = -1;
         entriesHashCode = new int[size];
         entriesKey = new TKey[size];
         entriesNext = new int[size];
@@ -262,7 +200,7 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, I
         freeList = -1;
     }
 
-    void Insert (TKey key, TValue value, bool add)
+    private void Insert (TKey key, TValue value, bool add)
     {
         if (key == null) throw new ArgumentNullException("key");
         if (buckets == null || buckets.Length == 0) Initialize(0);
@@ -274,10 +212,7 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, I
         {
             if (entriesHashCode[i] == hashCode && Comparer.Equals(entriesKey[i], key))
             {
-                if (add)
-                {
-                    throw new ArgumentException(SR.Format(SR.Argument_AddingDuplicate, key));
-                }
+                if (add) throw new ArgumentException(SR.Format(SR.Argument_AddingDuplicate, key));
                 entriesValue[i] = value;
                 version++;
                 return;
@@ -311,12 +246,12 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, I
         version++;
     }
 
-    void Resize ()
+    private void Resize ()
     {
         Resize(HashHelpers.ExpandPrime(count), false);
     }
 
-    void Resize (int newSize, bool forceNewHashCodes)
+    private void Resize (int newSize, bool forceNewHashCodes)
     {
         int[] newBuckets = new int[newSize];
         for (int i = 0; i < newBuckets.Length; i++) newBuckets[i] = -1;
@@ -333,12 +268,8 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, I
         if (forceNewHashCodes)
         {
             for (int i = 0; i < count; i++)
-            {
                 if (newEntriesHashCode[i] != -1)
-                {
                     newEntriesHashCode[i] = (Comparer.GetHashCode(newEntriesKey[i]) & 0x7FFFFFFF);
-                }
-            }
         }
 
         for (int i = 0; i < count; i++)
@@ -373,14 +304,8 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, I
             {
                 if (entriesHashCode[i] == hashCode && Comparer.Equals(entriesKey[i], key))
                 {
-                    if (last < 0)
-                    {
-                        buckets[bucket] = entriesNext[i];
-                    }
-                    else
-                    {
-                        entriesNext[last] = entriesNext[i];
-                    }
+                    if (last < 0) buckets[bucket] = entriesNext[i];
+                    else entriesNext[last] = entriesNext[i];
                     entriesHashCode[i] = -1;
                     entriesNext[i] = freeList;
                     entriesKey[i] = default(TKey);
@@ -407,10 +332,6 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, I
         return false;
     }
 
-    bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly {
-        get { return false; }
-    }
-
     void ICollection<KeyValuePair<TKey, TValue>>.CopyTo (KeyValuePair<TKey, TValue>[] array, int index)
     {
         CopyTo(array, index);
@@ -419,64 +340,41 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, I
     void ICollection.CopyTo (Array array, int index)
     {
         if (array == null)
-        {
             throw new ArgumentNullException("array");
-        }
 
         if (array.Rank != 1)
-        {
             throw new ArgumentException(SR.Arg_RankMultiDimNotSupported, "array");
-        }
 
         if (array.GetLowerBound(0) != 0)
-        {
             throw new ArgumentException(SR.Arg_NonZeroLowerBound, "array");
-        }
 
         if (index < 0 || index > array.Length)
-        {
             throw new ArgumentOutOfRangeException("index", index, SR.ArgumentOutOfRange_Index);
-        }
 
         if (array.Length - index < Count)
-        {
             throw new ArgumentException(SR.Arg_ArrayPlusOffTooSmall);
-        }
 
         KeyValuePair<TKey, TValue>[] pairs = array as KeyValuePair<TKey, TValue>[];
-        if (pairs != null)
-        {
-            CopyTo(pairs, index);
-        }
+        if (pairs != null) CopyTo(pairs, index);
         else if (array is DictionaryEntry[])
         {
             DictionaryEntry[] dictEntryArray = array as DictionaryEntry[];
             for (int i = 0; i < count; i++)
-            {
                 if (entriesHashCode[i] >= 0)
-                {
                     dictEntryArray[index++] = new DictionaryEntry(entriesKey[i], entriesValue[i]);
-                }
-            }
         }
         else
         {
             object[] objects = array as object[];
             if (objects == null)
-            {
                 throw new ArgumentException(SR.Argument_InvalidArrayType, "array");
-            }
 
             try
             {
                 int count = this.count;
                 for (int i = 0; i < count; i++)
-                {
                     if (entriesHashCode[i] >= 0)
-                    {
                         objects[index++] = new KeyValuePair<TKey, TValue>(entriesKey[i], entriesValue[i]);
-                    }
-                }
             }
             catch (ArrayTypeMismatchException)
             {
@@ -490,56 +388,37 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, I
         return new Enumerator(this, Enumerator.KeyValuePair);
     }
 
-    bool ICollection.IsSynchronized {
+    bool ICollection.IsSynchronized
+    {
         get { return false; }
     }
 
-    object ICollection.SyncRoot {
+    object ICollection.SyncRoot
+    {
         get
         {
             if (_syncRoot == null)
-            {
                 System.Threading.Interlocked.CompareExchange<object>(ref _syncRoot, new object(), null);
-            }
             return _syncRoot;
         }
     }
 
-    bool IDictionary.IsFixedSize {
-        get { return false; }
-    }
-
-    bool IDictionary.IsReadOnly {
-        get { return false; }
-    }
-
-    ICollection IDictionary.Keys {
-        get { return (ICollection)Keys; }
-    }
-
-    ICollection IDictionary.Values {
-        get { return (ICollection)Values; }
-    }
-
-    object IDictionary.this[object key] {
+    object IDictionary.this[object key]
+    {
         get
         {
             if (IsCompatibleKey(key))
             {
                 int i = FindEntry((TKey)key);
                 if (i >= 0)
-                {
                     return entriesValue[i];
-                }
             }
             return null;
         }
         set
         {
             if (key == null)
-            {
                 throw new ArgumentNullException("key");
-            }
             if (value == null && !(default(TValue) == null))
                 throw new ArgumentNullException("value");
 
@@ -693,7 +572,8 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, I
             return false;
         }
 
-        public KeyValuePair<TKey, TValue> Current {
+        public KeyValuePair<TKey, TValue> Current
+        {
             get { return current; }
         }
 
@@ -701,7 +581,8 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, I
         {
         }
 
-        object IEnumerator.Current {
+        object IEnumerator.Current
+        {
             get
             {
                 if (index == 0 || (index == dictionary.count + 1))
@@ -731,7 +612,8 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, I
             current = new KeyValuePair<TKey, TValue>();
         }
 
-        DictionaryEntry IDictionaryEnumerator.Entry {
+        DictionaryEntry IDictionaryEnumerator.Entry
+        {
             get
             {
                 if (index == 0 || (index == dictionary.count + 1))
@@ -743,7 +625,8 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, I
             }
         }
 
-        object IDictionaryEnumerator.Key {
+        object IDictionaryEnumerator.Key
+        {
             get
             {
                 if (index == 0 || (index == dictionary.count + 1))
@@ -755,7 +638,8 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, I
             }
         }
 
-        object IDictionaryEnumerator.Value {
+        object IDictionaryEnumerator.Value
+        {
             get
             {
                 if (index == 0 || (index == dictionary.count + 1))
@@ -813,11 +697,13 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, I
             }
         }
 
-        public int Count {
+        public int Count
+        {
             get { return dictionary.Count; }
         }
 
-        bool ICollection<TKey>.IsReadOnly {
+        bool ICollection<TKey>.IsReadOnly
+        {
             get { return true; }
         }
 
@@ -906,11 +792,13 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, I
             }
         }
 
-        bool ICollection.IsSynchronized {
+        bool ICollection.IsSynchronized
+        {
             get { return false; }
         }
 
-        object ICollection.SyncRoot {
+        object ICollection.SyncRoot
+        {
             get { return ((ICollection)dictionary).SyncRoot; }
         }
 
@@ -956,14 +844,16 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, I
                 return false;
             }
 
-            public TKey Current {
+            public TKey Current
+            {
                 get
                 {
                     return currentKey;
                 }
             }
 
-            object System.Collections.IEnumerator.Current {
+            object System.Collections.IEnumerator.Current
+            {
                 get
                 {
                     if (index == 0 || (index == dictionary.count + 1))
@@ -1033,11 +923,13 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, I
             }
         }
 
-        public int Count {
+        public int Count
+        {
             get { return dictionary.Count; }
         }
 
-        bool ICollection<TValue>.IsReadOnly {
+        bool ICollection<TValue>.IsReadOnly
+        {
             get { return true; }
         }
 
@@ -1124,11 +1016,13 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, I
             }
         }
 
-        bool ICollection.IsSynchronized {
+        bool ICollection.IsSynchronized
+        {
             get { return false; }
         }
 
-        object ICollection.SyncRoot {
+        object ICollection.SyncRoot
+        {
             get { return ((ICollection)dictionary).SyncRoot; }
         }
 
@@ -1173,14 +1067,16 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, I
                 return false;
             }
 
-            public TValue Current {
+            public TValue Current
+            {
                 get
                 {
                     return currentValue;
                 }
             }
 
-            object System.Collections.IEnumerator.Current {
+            object System.Collections.IEnumerator.Current
+            {
                 get
                 {
                     if (index == 0 || (index == dictionary.count + 1))
@@ -1288,6 +1184,17 @@ public class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, I
         // This is the maximum prime smaller than Array.MaxArrayLength
         public const int MaxPrimeArrayLength = 0x7FEFFFFD;
     }
+
+    private TValue GetValueByKey (TKey key)
+    {
+        int entryIndex = FindEntry(key);
+        if (entryIndex >= 0) return entriesValue[entryIndex];
+        else
+        {
+            UnityEngine.Debug.LogError("Key not found in SerializableDictionary.");
+            return default(TValue);
+        }
+    }
 }
 
 internal sealed class IDictionaryDebugView<K, V>
@@ -1303,7 +1210,8 @@ internal sealed class IDictionaryDebugView<K, V>
     }
 
     [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-    public KeyValuePair<K, V>[] Items {
+    public KeyValuePair<K, V>[] Items
+    {
         get
         {
             KeyValuePair<K, V>[] items = new KeyValuePair<K, V>[_dict.Count];
@@ -1326,7 +1234,8 @@ internal sealed class DictionaryKeyCollectionDebugView<TKey, TValue>
     }
 
     [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-    public TKey[] Items {
+    public TKey[] Items
+    {
         get
         {
             TKey[] items = new TKey[_collection.Count];
@@ -1349,7 +1258,8 @@ internal sealed class DictionaryValueCollectionDebugView<TKey, TValue>
     }
 
     [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-    public TValue[] Items {
+    public TValue[] Items
+    {
         get
         {
             TValue[] items = new TValue[_collection.Count];
@@ -1358,4 +1268,3 @@ internal sealed class DictionaryValueCollectionDebugView<TKey, TValue>
         }
     }
 }
-
