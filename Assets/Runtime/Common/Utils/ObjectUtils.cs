@@ -37,4 +37,3 @@ public static class ObjectUtils
            string.Format("More than one instance of {0} found on scene.", objectType.Name));
     }
 }
-

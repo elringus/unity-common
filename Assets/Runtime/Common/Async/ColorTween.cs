@@ -47,4 +47,3 @@ public struct ColorTween : ITweenValue
         onColorTween.Invoke(newColor);
     }
 }
-

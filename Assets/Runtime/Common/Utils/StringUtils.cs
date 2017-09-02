@@ -94,4 +94,3 @@ public static class StringUtils
         return source.Remove(source.LastIndexOf(value));
     }
 }
-

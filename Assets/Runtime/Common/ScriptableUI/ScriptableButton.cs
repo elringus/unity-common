@@ -14,4 +14,3 @@ public abstract class ScriptableButton : ScriptableUIControl<Button>
 
     protected abstract void OnButtonClick ();
 }
-

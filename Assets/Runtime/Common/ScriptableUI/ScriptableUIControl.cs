@@ -17,4 +17,3 @@ public abstract class ScriptableUIControl<T> : ScriptableUIComponent<T> where T 
     protected abstract void BindUIEvents ();
     protected abstract void UnbindUIEvents ();
 }
-

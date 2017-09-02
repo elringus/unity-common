@@ -46,4 +46,3 @@ public static class SpriteUtils
         return new Tweener<FloatTween>(coroutineContainer, onComplete).Run(tween);
     }
 }
-

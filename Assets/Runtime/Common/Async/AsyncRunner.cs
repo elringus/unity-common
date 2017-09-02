@@ -109,4 +109,3 @@ public abstract class AsyncRunner
         return containerObject.AddComponent<AsyncRunnerContainer>();
     }
 }
-

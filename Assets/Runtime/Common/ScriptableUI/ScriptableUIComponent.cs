@@ -14,4 +14,3 @@ public abstract class ScriptableUIComponent<T> : ScriptableUIBehaviour where T :
 
     private T _uiComponent;
 }
-

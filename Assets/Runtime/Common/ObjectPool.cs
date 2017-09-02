@@ -1,7 +1,12 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public enum StartupPoolMode { Awake, Start, CallManually };
+public enum StartupPoolMode
+{
+    Awake,
+    Start,
+    CallManually
+};
 
 [System.Serializable]
 public class StartupPool
@@ -13,13 +18,16 @@ public class StartupPool
 [RegisterInContext, SpawnOnContextResolve(HideFlags.HideInHierarchy)]
 public class ObjectPool : MonoBehaviour
 {
-    public StartupPoolMode StartupPoolMode;
-    public StartupPool[] StartupPools;
+    public StartupPoolMode StartupPoolMode { get { return _startupPoolMode; } private set { _startupPoolMode = value; } }
+    public StartupPool[] StartupPools { get { return _startupPools; } private set { _startupPools = value; } }
 
     private Dictionary<GameObject, List<GameObject>> pooledObjects = new Dictionary<GameObject, List<GameObject>>();
     private Dictionary<GameObject, GameObject> spawnedObjects = new Dictionary<GameObject, GameObject>();
     private List<GameObject> tempList = new List<GameObject>();
     private bool startupPoolsCreated;
+
+    [SerializeField] private StartupPoolMode _startupPoolMode;
+    [SerializeField] private StartupPool[] _startupPools;
 
     private void Awake ()
     {

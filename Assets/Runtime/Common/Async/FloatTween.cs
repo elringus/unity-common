@@ -31,4 +31,3 @@ public struct FloatTween : ITweenValue
         onFloatTween.Invoke(newValue);
     }
 }
-

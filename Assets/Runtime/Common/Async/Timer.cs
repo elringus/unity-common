@@ -9,10 +9,7 @@ public class Timer : AsyncRunner
     public float ElapsedTime { get; private set; }
 
     public Timer (MonoBehaviour coroutineContainer = null, UnityAction onResponse = null) :
-        base(coroutineContainer, onResponse)
-    {
-
-    }
+        base(coroutineContainer, onResponse) { }
 
     public Timer Run (float duration, bool ignoreTimeScale = false)
     {
@@ -37,4 +34,3 @@ public class Timer : AsyncRunner
         ElapsedTime += IsTimeScaleIgnored ? Time.unscaledDeltaTime : Time.deltaTime;
     }
 }
-

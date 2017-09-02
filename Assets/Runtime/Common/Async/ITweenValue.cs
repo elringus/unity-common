@@ -6,4 +6,3 @@ public interface ITweenValue
     float TweenDuration { get; }
     void TweenValue (float tweenPercent);
 }
-

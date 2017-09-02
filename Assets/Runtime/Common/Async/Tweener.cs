@@ -44,4 +44,3 @@ public class Tweener<T> : AsyncRunner where T : struct, ITweenValue
         tweenValue.TweenValue(1f);
     }
 }
-

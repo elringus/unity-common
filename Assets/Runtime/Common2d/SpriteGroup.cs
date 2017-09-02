@@ -15,14 +15,17 @@ public class SpriteGroup : MonoBehaviour
 
     public string Name { get { return name; } }
     public string SelectedItemName { get { return selectedItemName; } }
-    public SpriteRenderer DefaultItem;
-    public SpriteGroupType SpriteGroupType;
+    public SpriteRenderer DefaultItem { get { return _defaultItem; } private set { _defaultItem = value; } }
+    public SpriteGroupType SpriteGroupType { get { return _spriteGroupType; } private set { _spriteGroupType = value; } }
 
     private Tweener<FloatTween> stackedSpriteTweener;
     private List<SpriteRenderer> items = new List<SpriteRenderer>();
     private string selectedItemName;
     private bool isHidden;
     private int zStackDepth;
+
+    [SerializeField] private SpriteRenderer _defaultItem;
+    [SerializeField] private SpriteGroupType _spriteGroupType;
 
     private void Awake ()
     {
@@ -108,4 +111,3 @@ public class SpriteGroup : MonoBehaviour
         }
     }
 }
-

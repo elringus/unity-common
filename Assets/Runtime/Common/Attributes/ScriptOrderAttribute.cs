@@ -12,4 +12,3 @@ public class ScriptOrderAttribute : Attribute
         ExecutionOrder = order;
     }
 }
-

@@ -6,39 +6,23 @@ public class OnUIVisibilityChanged : UnityEvent<bool> { }
 
 public abstract class ScriptableUIBehaviour : UIBehaviour
 {
-    public float FadeTime = .3f;
-
     public readonly UnityEvent OnFadeComplete = new UnityEvent();
     public readonly OnUIVisibilityChanged OnVisibilityChanged = new OnUIVisibilityChanged();
 
-    public RectTransform RectTransform
-    {
-        get
-        {
-            if (!_rectTransform)
-                _rectTransform = GetComponent<RectTransform>();
-            return _rectTransform;
-        }
-    }
-
-    public bool IsVisibleOnAwake
-    {
-        get { return _isVisibleOnAwake; }
-        set { _isVisibleOnAwake = value; }
-    }
-
-    public virtual bool IsVisible
-    {
-        get { return _isVisible; }
-        set { SetIsVisible(value); }
-    }
-
+    public float FadeTime { get { return _fadeTime; } set { _fadeTime = value; } }
+    public bool IsVisibleOnAwake { get { return _isVisibleOnAwake; } }
+    public virtual bool IsVisible { get { return _isVisible; } set { SetIsVisible(value); } }
     public virtual float CurrentOpacity { get { return GetCurrentOpacity(); } }
+    public RectTransform RectTransform { get { return GetRectTransform(); } }
 
-    [SerializeField] private bool _isVisibleOnAwake = true;
     private RectTransform _rectTransform;
     private CanvasGroup canvasGroup;
     private bool _isVisible;
+
+    [Tooltip("Whether UI element should be visible or hidden on awake.")]
+    [SerializeField] private bool _isVisibleOnAwake = true;
+    [Tooltip("Fade duration (in seconds) when changing visiblity.")]
+    [SerializeField] private float _fadeTime = .3f;
 
     protected override void Awake ()
     {
@@ -104,5 +88,11 @@ public abstract class ScriptableUIBehaviour : UIBehaviour
         if (EventSystem.current)
             EventSystem.current.SetSelectedGameObject(gameObject);
     }
-}
 
+    private RectTransform GetRectTransform ()
+    {
+        if (!_rectTransform)
+            _rectTransform = GetComponent<RectTransform>();
+        return _rectTransform;
+    }
+}

@@ -14,4 +14,3 @@ public abstract class ScriptableSlider : ScriptableUIControl<Slider>
 
     protected abstract void OnValueChanged (float value);
 }
-

@@ -2,17 +2,20 @@
 
 public class ParallaxLayer : MonoBehaviour
 {
-    public Camera Camera;
-    [Range(0f, 1f)]
-    public float ParallaxFactor = 1f;
+    public Camera Camera { get { return _camera; } }
+    public float ParallaxFactor { get { return _parallaxFactor; } }
 
     private Transform cameraTrs;
     private float initialOffset;
 
+    [SerializeField] private Camera _camera;
+    [Range(0f, 1f)]
+    [SerializeField] private float _parallaxFactor = 1f;
+
     private void Awake ()
     {
         cameraTrs = Camera ? Camera.transform : Camera.main.transform;
-        Debug.Assert(cameraTrs, "Assign a camera.");
+        Debug.Assert(cameraTrs, "Assign required objects to ParallaxLayer.");
         initialOffset = (transform.position.x - cameraTrs.position.x) / ParallaxFactor;
     }
 

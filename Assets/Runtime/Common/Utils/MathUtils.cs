@@ -26,4 +26,3 @@ public static class MathUtils
         return value >= minimum && value <= maximum;
     }
 }
-

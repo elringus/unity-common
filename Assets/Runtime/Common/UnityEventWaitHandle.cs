@@ -103,4 +103,3 @@ public class UnityEventWaitHandle : IDisposable
         OnComplete.RemoveAllListeners();
     }
 }
-
