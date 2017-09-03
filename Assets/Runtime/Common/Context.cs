@@ -50,7 +50,7 @@ public class Context : MonoBehaviour
         instance = null;
     }
 
-    public static T Resolve<T> (Predicate<T> predicate = null, bool strictType = true) where T : class
+    public static T Resolve<T> (Predicate<T> predicate = null, bool strictType = true, bool assertResult = false) where T : class
     {
         if (!AssertUsage()) return null;
 
@@ -70,10 +70,13 @@ public class Context : MonoBehaviour
         if (result == null && ShouldAutoSpawn(resolvingType))
             return SpawnAndRegister(resolvingType) as T;
 
+        if (result == null && assertResult)
+            Debug.LogError(string.Format("Failed to resolve object of type '{0}'", resolvingType.Name));
+
         return result;
     }
 
-    public static List<T> ResolveAll<T> (Predicate<T> predicate = null, bool strictType = true) where T : class
+    public static List<T> ResolveAll<T> (Predicate<T> predicate = null, bool strictType = true, bool assertResult = false) where T : class
     {
         if (!AssertUsage()) return null;
 
@@ -83,7 +86,11 @@ public class Context : MonoBehaviour
 
         var refsOfType = GetReferencesOfType(resolvingType, strictType);
         if (refsOfType == null || refsOfType.Count == 0)
+        {
+            if (assertResult)
+                Debug.LogError(string.Format("Failed to resolve objects of type '{0}'", resolvingType.Name));
             return new List<T>();
+        }
 
         return refsOfType
             .Where(r => IsWeakRefValid(r) && (predicate == null || predicate(r.Target as T)))
