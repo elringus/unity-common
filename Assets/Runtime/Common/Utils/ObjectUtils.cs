@@ -36,4 +36,23 @@ public static class ObjectUtils
         Debug.Assert(Object.FindObjectsOfType(objectType).Length == 1,
            string.Format("More than one instance of {0} found on scene.", objectType.Name));
     }
+
+    /// <summary>
+    /// Asserts validity of all the required objects.
+    /// </summary>
+    /// <param name="requiredObjects">Objects to check for validity.</param>
+    /// <returns>Whether all the required objects are valid.</returns>
+    public static bool AssertRequiredObjects (this Object unityObject, params Object[] requiredObjects)
+    {
+        var assertFailed = false;
+        for (int i = 0; i < requiredObjects.Length; ++i)
+        {
+            if (!requiredObjects[i])
+            {
+                Debug.LogError(string.Format("Required object of type '{0}' is not valid for '{1}'", requiredObjects[i].GetType().Name, unityObject.name));
+                assertFailed = true;
+            }
+        }
+        return !assertFailed;
+    }
 }
