@@ -233,13 +233,15 @@ public class Context : MonoBehaviour
 
     private IEnumerator RemoveDeadReferences ()
     {
+        var waitForGcInterval = new WaitForSeconds(GC_INTERVAL);
+
         while (true)
         {
             references.Values.ToList()
                 .ForEach(refList => refList
                 .RemoveAll(r => !r.IsAlive));
 
-            yield return new WaitForSeconds(GC_INTERVAL);
+            yield return waitForGcInterval;
         }
     }
 }

@@ -28,14 +28,14 @@ public static class StringUtils
     }
 
     /// <summary>
-    /// Attempts to extract content before the specified match (on first occurence).
+    /// Attempts to extract content before the specified match.
     /// </summary>
-    public static string GetBefore (this string content, string matchString)
+    public static string GetBefore (this string content, string matchString, bool onFirstOccurence = true)
     {
         Debug.Assert(content != null);
         if (content.Contains(matchString))
         {
-            var endIndex = content.IndexOf(matchString);
+            var endIndex = onFirstOccurence ? content.IndexOf(matchString) : content.LastIndexOf(matchString);
             return content.Substring(0, endIndex);
         }
         else return null;
