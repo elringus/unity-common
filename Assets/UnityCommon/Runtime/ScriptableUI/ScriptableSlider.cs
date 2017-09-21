@@ -1,4 +1,12 @@
-﻿using UnityEngine.UI;
+﻿// Copyright 2014-2017 Artyom Sovetnikov. All Rights Reserved.
+
+namespace UnityCommon
+{
+// Copyright 2014-2017 Artyom Sovetnikov. All Rights Reserved.
+
+namespace UnityCommon
+{
+using UnityEngine.UI;
 
 public abstract class ScriptableSlider : ScriptableUIControl<Slider>
 {
@@ -13,4 +21,8 @@ public abstract class ScriptableSlider : ScriptableUIControl<Slider>
     }
 
     protected abstract void OnValueChanged (float value);
+}
+
+}
+
 }
