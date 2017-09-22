@@ -20,14 +20,21 @@ public class PackageExporter : EditorWindow
     private static string tabChars = "    ";
     private static Dictionary<string, string> modifiedScripts = new Dictionary<string, string>();
 
-    [MenuItem("Assets/Export Custom Package", priority = 20)]
-    public static void ExportNovelEngine ()
+    [MenuItem("Assets/+ Export Package", priority = 20)]
+    public static void ExportPackage ()
     {
         if (IsReadyToExport)
             Export();
     }
 
-    private static void Export ()
+    [MenuItem("Assets/+ Export Package (Store)", priority = 20)]
+    public static void ExportPackageStore ()
+    {
+        if (IsReadyToExport)
+            Export(true);
+    }
+
+    private static void Export (bool wrapNamespace = false)
     {
         if (!string.IsNullOrEmpty(namespaceToWrap))
         {
@@ -41,9 +48,10 @@ public class PackageExporter : EditorWindow
 
                 string scriptText = string.Empty;
                 var isImportedScript = path.Contains("ThirdParty");
-                if (!isImportedScript) scriptText += copyright + Environment.NewLine + Environment.NewLine + "namespace " + namespaceToWrap + Environment.NewLine + "{" + Environment.NewLine;
+                var copyright = isImportedScript ? string.Empty : PackageExporter.copyright;
+                if (!isImportedScript || wrapNamespace) scriptText += copyright + Environment.NewLine + Environment.NewLine + "namespace " + namespaceToWrap + Environment.NewLine + "{" + Environment.NewLine;
                 scriptText += isImportedScript ? originalScriptText : tabChars + originalScriptText.Replace(Environment.NewLine, Environment.NewLine + tabChars);
-                if (!isImportedScript) scriptText += Environment.NewLine + "}" + Environment.NewLine;
+                if (!isImportedScript || wrapNamespace) scriptText += Environment.NewLine + "}" + Environment.NewLine;
                 File.WriteAllText(fullpath, scriptText, Encoding.UTF8);
 
                 modifiedScripts.Add(fullpath, originalScriptText);
