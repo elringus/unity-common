@@ -8,7 +8,7 @@ public class ParallaxLayer : MonoBehaviour
     private Transform cameraTrs;
     private float initialOffset;
 
-    [SerializeField] private Camera _camera;
+    [SerializeField] private Camera _camera = null;
     [Range(0f, 1f)]
     [SerializeField] private float _parallaxFactor = 1f;
 
