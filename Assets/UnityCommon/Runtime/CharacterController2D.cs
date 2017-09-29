@@ -4,22 +4,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-public enum MoveDirection2D { Idle, Left, Right }
-
-public class OnMoveDirectionChangedEvent : UnityEvent<MoveDirection2D> { }
-public class OnControllerCollidedEvent : UnityEvent<RaycastHit2D> { }
-public class OnTriggerEnterEvent : UnityEvent<Collider2D> { }
-public class OnTriggerStayEvent : UnityEvent<Collider2D> { }
-public class OnTriggerExitEvent : UnityEvent<Collider2D> { }
-
 public class CharacterCollisionState2D
 {
-    public bool Right;
-    public bool Left;
-    public bool Above;
-    public bool Below;
-    public bool BecameGroundedThisFrame;
-    public bool WasGroundedLastFrame;
+    public bool Right, Left, Above, Below;
+    public bool BecameGroundedThisFrame, WasGroundedLastFrame;
     public bool MovingDownSlope;
     public float SlopeAngle;
 
@@ -44,22 +32,21 @@ public class CharacterCollisionState2D
 [RequireComponent(typeof(BoxCollider2D))]
 public class CharacterController2D : MonoBehaviour
 {
-    #region Internal types
+    public enum MoveDirection2D { Idle, Left, Right }
 
-    struct CharacterRaycastOrigins
-    {
-        public Vector3 TopLeft;
-        public Vector3 BottomRight;
-        public Vector3 BottomLeft;
-    }
+    public class OnMoveDirectionChangedEvent : UnityEvent<MoveDirection2D> { }
+    public class OnCollidedEvent : UnityEvent<RaycastHit2D> { }
+    public class OnTriggerEnterEvent : UnityEvent<Collider2D> { }
+    public class OnTriggerStayEvent : UnityEvent<Collider2D> { }
+    public class OnTriggerExitEvent : UnityEvent<Collider2D> { }
 
-    #endregion
+    private struct CharacterRaycastOrigins { public Vector3 TopLeft, BottomRight, BottomLeft; }
 
     #region Events, properties and fields
 
-    const float SKIN_WIDTH_FUDGE = 0.001f;
+    private const float SKIN_WIDTH_FUDGE = 0.001f;
 
-    public readonly OnControllerCollidedEvent OnControllerCollided = new OnControllerCollidedEvent();
+    public readonly OnCollidedEvent OnControllerCollided = new OnCollidedEvent();
     public readonly OnTriggerEnterEvent OnTriggerEnter = new OnTriggerEnterEvent();
     public readonly OnTriggerStayEvent OnTriggerStay = new OnTriggerStayEvent();
     public readonly OnTriggerExitEvent OnTriggerExit = new OnTriggerExitEvent();
@@ -115,7 +102,7 @@ public class CharacterController2D : MonoBehaviour
     public float InAirDamping = 5f;
     public float JumpHeight = 3f;
 
-    [Header("Control")]
+    [Header("Input")]
     public string HorizontalAxisName = "Horizontal";
     public string VerticalAxisName = "Vertical";
     public string JumpButtonName = "Jump";
@@ -124,7 +111,7 @@ public class CharacterController2D : MonoBehaviour
     private BoxCollider2D boxCollider;
     private CharacterCollisionState2D collisionState = new CharacterCollisionState2D();
     private Vector3 velocity;
-    private Vector3 controlVelocity;
+    private Vector3 inputVelocity;
     private bool ignoreOneWayPlatformsThisFrame;
     private float normalizedHorizontalSpeed;
     private float _skinWidth = 0.02f;
@@ -184,8 +171,9 @@ public class CharacterController2D : MonoBehaviour
 
     private void Update ()
     {
-        Manipulate();
+        HandleInput();
         DetectLanding();
+        DetectMovement();
         DetectMoveDirection();
     }
 
@@ -210,12 +198,6 @@ public class CharacterController2D : MonoBehaviour
     }
 
     #endregion
-
-    [System.Diagnostics.Conditional("DEBUG_CC2D_RAYS")]
-    private void DrawRay (Vector3 start, Vector3 dir, Color color)
-    {
-        Debug.DrawRay(start, dir, color);
-    }
 
     #region Public methods
     /// <summary>
@@ -303,7 +285,7 @@ public class CharacterController2D : MonoBehaviour
 
     #endregion
 
-    #region Movement Methods
+    #region Movement
 
     /// <summary>
     /// resets the raycastOrigins to the current extents of the box collider inset by the skinWidth. It is inset
@@ -540,11 +522,11 @@ public class CharacterController2D : MonoBehaviour
 
     #endregion
 
-    #region Manipulation
-    private void Manipulate ()
+    #region Input
+    private void HandleInput ()
     {
         if (IsGrounded)
-            controlVelocity.y = 0;
+            inputVelocity.y = 0;
 
         normalizedHorizontalSpeed = Input.GetAxis(HorizontalAxisName);
         var vertiacalAxis = Input.GetAxis(VerticalAxisName);
@@ -552,29 +534,29 @@ public class CharacterController2D : MonoBehaviour
         // We can only jump whilst grounded.
         if (IsGrounded && Input.GetButtonDown(JumpButtonName))
         {
-            controlVelocity.y = Mathf.Sqrt(2f * JumpHeight * -Gravity);
+            inputVelocity.y = Mathf.Sqrt(2f * JumpHeight * -Gravity);
             OnJumped.Invoke();
         }
 
         // Apply horizontal speed smoothing it. 
         var smoothedMovementFactor = IsGrounded ? GroundDamping : InAirDamping; // how fast do we change direction?
-        controlVelocity.x = Mathf.Lerp(controlVelocity.x, normalizedHorizontalSpeed * RunSpeed, Time.deltaTime * smoothedMovementFactor);
+        inputVelocity.x = Mathf.Lerp(inputVelocity.x, normalizedHorizontalSpeed * RunSpeed, Time.deltaTime * smoothedMovementFactor);
 
         // Apply gravity before moving.
-        controlVelocity.y += Gravity * Time.deltaTime;
+        inputVelocity.y += Gravity * Time.deltaTime;
 
         // If holding down bump up our movement amount and turn off one way platform detection for a frame.
         // This lets us jump down through one way platforms.
         if (IsGrounded && vertiacalAxis < 0)
         {
-            controlVelocity.y *= 3f;
+            inputVelocity.y *= 3f;
             ignoreOneWayPlatformsThisFrame = true;
         }
 
-        Move(controlVelocity * Time.deltaTime);
+        Move(inputVelocity * Time.deltaTime);
 
         // Grab our current velocity to use as a base for all calculations.
-        controlVelocity = Velocity;
+        inputVelocity = Velocity;
     }
 
     private void DetectLanding ()
@@ -601,4 +583,9 @@ public class CharacterController2D : MonoBehaviour
     }
     #endregion
 
+    [System.Diagnostics.Conditional("DEBUG_CC2D_RAYS")]
+    private void DrawRay (Vector3 start, Vector3 dir, Color color)
+    {
+        Debug.DrawRay(start, dir, color);
+    }
 }
