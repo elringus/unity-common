@@ -17,7 +17,7 @@ public class Timer : AsyncRunner
         Duration = duration;
         IsTimeScaleIgnored = ignoreTimeScale;
 
-        StartCoroutine();
+        StartRunner(new WaitForEndOfFrame());
 
         return this;
     }

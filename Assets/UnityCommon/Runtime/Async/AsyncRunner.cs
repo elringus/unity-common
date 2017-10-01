@@ -12,7 +12,7 @@ public abstract class AsyncRunner
     public bool IsComplete { get; private set; }
 
     protected MonoBehaviour CoroutineContainer { get; private set; }
-    protected AsyncOperation AsyncOperation { get; private set; }
+    protected YieldInstruction YieldInstruction { get; private set; }
     protected IEnumerator Coroutine { get; private set; }
     protected int RoutineTickCount { get; private set; }
 
@@ -48,13 +48,28 @@ public abstract class AsyncRunner
         OnComplete();
     }
 
-    protected void RunAsyncOperation (AsyncOperation asyncOperation)
+    protected void StartRunner (YieldInstruction yieldInstruction = null)
     {
-        AsyncOperation = asyncOperation;
+        YieldInstruction = yieldInstruction;
         StartCoroutine();
     }
 
-    protected virtual void StartCoroutine ()
+    protected virtual bool LoopCondition ()
+    {
+        return RoutineTickCount == 0;
+    }
+
+    protected virtual void OnRoutineTick () { }
+
+    protected virtual void OnComplete ()
+    {
+        IsComplete = true;
+        OnCompleteEvent.Invoke();
+        if (containerObject)
+            UnityEngine.Object.Destroy(containerObject);
+    }
+
+    private void StartCoroutine ()
     {
         if (!CoroutineContainer)
         {
@@ -75,27 +90,12 @@ public abstract class AsyncRunner
         CoroutineContainer.StartCoroutine(Coroutine);
     }
 
-    protected virtual bool LoopCondition ()
-    {
-        return RoutineTickCount == 0;
-    }
-
-    protected virtual void OnRoutineTick () { }
-
-    protected virtual void OnComplete ()
-    {
-        IsComplete = true;
-        OnCompleteEvent.Invoke();
-        if (containerObject)
-            UnityEngine.Object.Destroy(containerObject);
-    }
-
     private IEnumerator AsyncRoutine ()
     {
         while (LoopCondition())
         {
             OnRoutineTick();
-            yield return AsyncOperation;
+            yield return YieldInstruction;
             RoutineTickCount++;
         }
 

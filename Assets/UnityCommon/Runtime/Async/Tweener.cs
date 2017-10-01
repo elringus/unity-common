@@ -18,7 +18,7 @@ public class Tweener<T> : AsyncRunner where T : struct, ITweenValue
     {
         elapsedTime = 0f;
         this.tweenValue = tweenValue;
-        StartCoroutine();
+        StartRunner(new WaitForEndOfFrame());
 
         return this;
     }

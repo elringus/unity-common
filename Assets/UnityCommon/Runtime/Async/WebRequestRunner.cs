@@ -22,7 +22,7 @@ public class WebRequestRunner : AsyncRunner
     public WebRequestRunner Run (UnityWebRequest webRequest)
     {
         this.webRequest = webRequest;
-        RunAsyncOperation(webRequest.Send());
+        StartRunner(webRequest.Send());
 
         return this;
     }
