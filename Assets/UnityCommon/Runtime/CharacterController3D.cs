@@ -48,9 +48,10 @@ public class CharacterController3D : MonoBehaviour
 
     private void HandleInput ()
     {
-        var inputHor = Input.GetAxis(horizontalAxisName) * movementSpeed;
-        var inputVer = Input.GetAxis(verticalAxisName) * movementSpeed;
-        velocity = new Vector3(inputHor, velocity.y, inputVer);
+        var inputHor = Input.GetAxis(horizontalAxisName);
+        var inputVer = Input.GetAxis(verticalAxisName);
+        var input = new Vector3(inputHor, inputVer).normalized * movementSpeed;
+        velocity = new Vector3(input.x, velocity.y, input.y);
 
         if (IsGrounded && Input.GetButtonDown(jumpButtonName))
         {
