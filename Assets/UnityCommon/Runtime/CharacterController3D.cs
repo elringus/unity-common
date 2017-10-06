@@ -9,26 +9,40 @@ public class CharacterController3D : MonoBehaviour
     public readonly UnityEvent OnJumped = new UnityEvent();
     public readonly UnityEvent OnLanded = new UnityEvent();
 
-    public bool IsMoving { get { return Velocity.sqrMagnitude > .1f; } }
+    public bool IsMoving { get { return Velocity.magnitude > 0; } }
+    public bool IsSprinting { get { return isSprinting; } }
     public bool IsGrounded { get { return characterController.isGrounded; } }
+    public bool IsMoveInputActive { get { return moveInputVelocity.magnitude > 0; } }
+    public float TimeSinceLastMoveInputStart { get { return Time.time - lastMoveInputStartTime; } }
+    public float TimeSinceLastMoveInputEnd { get { return Time.time - lastMoveInputEndTime; } }
     public Vector3 Velocity { get { return characterController.velocity; } }
     public CharacterController CharacterController { get { return characterController; } }
-
-    [Header("Movement")]
-    [SerializeField] private float movementSpeed = 5f;
-    [SerializeField] private float jumpHeight = 15f;
-    [SerializeField] private float gravity = .981f;
-    [SerializeField] private bool updateForwardDirection = true;
 
     [Header("Input")]
     [SerializeField] private string horizontalAxisName = "Horizontal";
     [SerializeField] private string verticalAxisName = "Vertical";
     [SerializeField] private string jumpButtonName = "Jump";
+    [SerializeField] private string sprintButtonName = null;
+
+    [Header("Movement")]
+    [SerializeField] private float movementSpeed = 5f;
+    [SerializeField] private AnimationCurve accelerationCurve = AnimationCurve.Linear(0, 1, 1, 1);
+    [SerializeField] private float jumpHeight = 15f;
+    [SerializeField] private float sprintModifier = 2f;
+    [SerializeField] private float gravity = .981f;
+
+    [Header("Behaviour")]
+    [SerializeField] private bool updateForwardDirection = true;
 
     private CharacterController characterController;
-    private Vector3 velocity;
+    private Vector3 moveVelocity;
+    private Vector2 moveInputVelocity;
+    private float lastMoveInputStartTime;
+    private float lastMoveInputEndTime;
+    private bool isSprinting;
     private bool wasGroundedLastFrame;
     private bool wasMovingLastFrame;
+    private bool wasMoveInputActiveLastFrame;
 
     private void Awake ()
     {
@@ -41,31 +55,57 @@ public class CharacterController3D : MonoBehaviour
         HandleMovement();
         DetectLanding();
         DetectMovement();
+        DetectMoveInput();
 
         if (updateForwardDirection)
             UpdateForwardDirection();
     }
 
+    public bool Jump ()
+    {
+        if (!IsGrounded) return false;
+
+        moveVelocity.y = jumpHeight;
+        OnJumped.Invoke();
+
+        return true;
+    }
+
+    public void StartSprint ()
+    {
+        isSprinting = true;
+    }
+
+    public void EndSprint ()
+    {
+        isSprinting = false;
+    }
+
     private void HandleInput ()
     {
-        var inputHor = Input.GetAxis(horizontalAxisName);
-        var inputVer = Input.GetAxis(verticalAxisName);
-        var input = new Vector3(inputHor, inputVer).normalized * movementSpeed;
-        velocity = new Vector3(input.x, velocity.y, input.y);
+        var inputHor = !string.IsNullOrEmpty(horizontalAxisName) ? Input.GetAxis(horizontalAxisName) : 0;
+        var inputVer = !string.IsNullOrEmpty(verticalAxisName) ? Input.GetAxis(verticalAxisName) : 0;
+        moveInputVelocity = new Vector2(inputHor, inputVer);
+        if (moveInputVelocity.magnitude > 1) moveInputVelocity.Normalize();
 
-        if (IsGrounded && Input.GetButtonDown(jumpButtonName))
+        if (!string.IsNullOrEmpty(jumpButtonName) && Input.GetButtonDown(jumpButtonName)) Jump();
+
+        if (!string.IsNullOrEmpty(sprintButtonName))
         {
-            velocity.y = jumpHeight;
-            OnJumped.Invoke();
+            if (!IsSprinting && Input.GetButtonDown(sprintButtonName)) StartSprint();
+            if (IsSprinting && Input.GetButtonUp(sprintButtonName)) EndSprint();
         }
     }
 
     private void HandleMovement ()
     {
-        if (!IsGrounded) velocity.y -= gravity;
-        else velocity.y = Mathf.Max(velocity.y, -characterController.stepOffset);
+        if (!IsGrounded) moveVelocity.y -= gravity;
+        else moveVelocity.y = Mathf.Max(moveVelocity.y, -characterController.stepOffset);
 
-        characterController.Move(velocity * Time.deltaTime);
+        var velocityModifier = movementSpeed * (IsSprinting ? sprintModifier : accelerationCurve.Evaluate(TimeSinceLastMoveInputStart));
+        moveVelocity = new Vector3(moveInputVelocity.x * velocityModifier, moveVelocity.y, moveInputVelocity.y * velocityModifier);
+
+        characterController.Move(moveVelocity * Time.deltaTime);
     }
 
     private void DetectLanding ()
@@ -84,10 +124,19 @@ public class CharacterController3D : MonoBehaviour
         wasMovingLastFrame = IsMoving;
     }
 
+    private void DetectMoveInput ()
+    {
+        if (!wasMoveInputActiveLastFrame && IsMoveInputActive)
+            lastMoveInputStartTime = Time.time;
+        if (wasMoveInputActiveLastFrame && !IsMoveInputActive)
+            lastMoveInputEndTime = Time.time;
+        wasMoveInputActiveLastFrame = IsMoveInputActive;
+    }
+
     private void UpdateForwardDirection ()
     {
-        var forwardVector = new Vector3(velocity.x, 0, velocity.z).normalized;
+        var forwardVector = new Vector3(moveVelocity.x, 0, moveVelocity.z).normalized;
         if (forwardVector != Vector3.zero)
-            transform.forward = new Vector3(velocity.x, 0, velocity.z);
+            transform.forward = new Vector3(moveVelocity.x, 0, moveVelocity.z);
     }
 }
