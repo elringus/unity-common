@@ -60,6 +60,7 @@ public class TopDownCamera : MonoBehaviour
             Rotate(Input.GetAxis(rotationAxisName) * rotationInputSensitivity);
         if (!string.IsNullOrEmpty(zoomAxisName))
             Zoom(Input.GetAxis(zoomAxisName) * zoomInputSensitivity);
+        else Zoom(0);
     }
 
     private void Rotate (float direction)
