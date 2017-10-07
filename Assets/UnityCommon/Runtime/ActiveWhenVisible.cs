@@ -2,7 +2,7 @@
 
 public class ActiveWhenVisible : MonoBehaviour
 {
-    [SerializeField] private MonoBehaviour[] affectedScripts;
+    [SerializeField] private MonoBehaviour[] affectedScripts = null;
 
     private void Start ()
     {
