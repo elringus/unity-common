@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 
 public class Updater : MonoBehaviour
@@ -20,7 +19,6 @@ public class Updater : MonoBehaviour
 
     public void AddAction (UnityAction action)
     {
-        Array.Resize(ref actions, actions.Length + 1);
-        actions[actions.Length - 1] = action;
+        actions = actions.Append(action);
     }
 }

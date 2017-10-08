@@ -21,6 +21,22 @@ public static class LinqUtils
         return ArrayEqualityComparer<T>.GetHashCode(array);
     }
 
+    public static T[] Append<T> (this T[] array, T item)
+    {
+        Array.Resize(ref array, array.Length + 1);
+        array[array.Length - 1] = item;
+        return array;
+    }
+
+    public static T[] AppendRange<T> (this T[] array, T[] items)
+    {
+        var itemsCount = items.Length;
+        Array.Resize(ref array, array.Length + itemsCount);
+        for (int i = 0; i < itemsCount; i++)
+            array[array.Length - (i + 1)] = items[i];
+        return array;
+    }
+
     public static IEnumerable<T> DistinctBy<T, TKey> (this IEnumerable<T> items, Func<T, TKey> property, IEqualityComparer<TKey> propertyComparer = null)
     {
         var comparer = new GeneralPropertyComparer<T, TKey>(property, propertyComparer);
