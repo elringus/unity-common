@@ -8,8 +8,8 @@ public class Timer : AsyncRunner
     public float Duration { get; private set; }
     public float ElapsedTime { get; private set; }
 
-    public Timer (MonoBehaviour coroutineContainer = null, UnityAction onResponse = null) :
-        base(coroutineContainer, onResponse) { }
+    public Timer (MonoBehaviour coroutineContainer = null, UnityAction onComplete = null) :
+        base(coroutineContainer, onComplete) { }
 
     public Timer Run (float duration, bool ignoreTimeScale = false)
     {

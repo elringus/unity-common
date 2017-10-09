@@ -8,8 +8,8 @@ public class Tweener<T> : AsyncRunner where T : struct, ITweenValue
     private float elapsedTime;
     private T tweenValue;
 
-    public Tweener (MonoBehaviour coroutineContainer = null, UnityAction onResponse = null) :
-        base(coroutineContainer, onResponse)
+    public Tweener (MonoBehaviour coroutineContainer = null, UnityAction onComplete = null) :
+        base(coroutineContainer, onComplete)
     {
         
     }
