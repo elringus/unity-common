@@ -27,7 +27,7 @@ public struct FloatTween : ITweenValue
     {
         if (!IsTargetValid) return;
 
-        var newValue = Mathf.SmoothStep(StartValue, TargetValue, tweenPercent);
+        var newValue = Mathf.Lerp(StartValue, TargetValue, tweenPercent);
         onFloatTween.Invoke(newValue);
     }
 }
