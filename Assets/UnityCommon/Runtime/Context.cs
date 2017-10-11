@@ -134,6 +134,13 @@ public class Context : MonoBehaviour
         else instance.references.Add(objType, new List<WeakReference>() { reference } );
     }
 
+    public static void Destroy ()
+    {
+        if (!AssertUsage()) return;
+
+        Destroy(instance.gameObject);
+    }
+
     [ContextMenu("Log Reference Count")]
     public void LogReferenceCount ()
     {
