@@ -2,11 +2,9 @@
 using UnityEngine.Events;
 using UnityEngine.Networking;
 
-public class OnWebResponse : UnityEvent<UnityWebRequest> { }
-
 public class WebRequestRunner : AsyncRunner
 {
-    public readonly OnWebResponse OnResponse = new OnWebResponse();
+    public event UnityAction<UnityWebRequest> OnResponse;
 
     public override bool CanBeInstantlyCompleted { get { return false; } }
 
@@ -15,8 +13,7 @@ public class WebRequestRunner : AsyncRunner
     public WebRequestRunner (MonoBehaviour coroutineContainer = null, UnityAction<UnityWebRequest> onResponse = null) :
         base(coroutineContainer, null)
     {
-        if (onResponse != null)
-            OnResponse.AddListener(onResponse);
+        OnResponse += onResponse;
     }
 
     public WebRequestRunner Run (UnityWebRequest webRequest)
@@ -30,6 +27,6 @@ public class WebRequestRunner : AsyncRunner
     protected override void OnComplete ()
     {
         base.OnComplete();
-        OnResponse.Invoke(webRequest);
+        OnResponse.SafeInvoke(webRequest);
     }
 }

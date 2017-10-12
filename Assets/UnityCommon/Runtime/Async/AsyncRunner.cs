@@ -6,7 +6,7 @@ public abstract class AsyncRunner
 {
     class AsyncRunnerContainer : MonoBehaviour { }
 
-    public readonly UnityEvent OnCompleteEvent = new UnityEvent();
+    public event UnityAction OnCompleted;
 
     public abstract bool CanBeInstantlyCompleted { get; }
     public bool IsComplete { get; private set; }
@@ -27,7 +27,12 @@ public abstract class AsyncRunner
         if (coroutineContainer) CoroutineContainer = coroutineContainer;
         else CoroutineContainer = CreateContainer();
         if (onComplete != null)
-            OnCompleteEvent.AddListener(onComplete);
+            OnCompleted += onComplete;
+    }
+
+    public virtual void RemoveAllOnCompletedListeners ()
+    {
+        OnCompleted = null;
     }
 
     public virtual void Stop ()
@@ -64,7 +69,7 @@ public abstract class AsyncRunner
     protected virtual void OnComplete ()
     {
         IsComplete = true;
-        OnCompleteEvent.Invoke();
+        OnCompleted.SafeInvoke();
         if (containerObject)
             UnityEngine.Object.Destroy(containerObject);
     }

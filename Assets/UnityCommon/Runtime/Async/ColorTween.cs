@@ -5,16 +5,14 @@ public enum ColorTweenMode { All, RGB, Alpha }
 
 public struct ColorTween : ITweenValue
 {
-    class OnColorTween : UnityEvent<Color> { }
+    public event UnityAction<Color> OnColorTween;
 
     public Color StartColor { get; set; }
     public Color TargetColor { get; set; }
     public ColorTweenMode TweenMode { get; set; }
     public float TweenDuration { get; set; }
     public bool IsTimeScaleIgnored { get; set; }
-    public bool IsTargetValid { get { return onColorTween != null; } }
-
-    private OnColorTween onColorTween;
+    public bool IsTargetValid { get { return OnColorTween != null; } }
 
     public ColorTween (Color from, Color to, ColorTweenMode mode, float time, UnityAction<Color> onTween, bool ignoreTimeScale = false)
     {
@@ -23,8 +21,7 @@ public struct ColorTween : ITweenValue
         TweenMode = mode;
         TweenDuration = time;
         IsTimeScaleIgnored = ignoreTimeScale;
-        onColorTween = new OnColorTween();
-        onColorTween.AddListener(onTween);
+        OnColorTween = onTween;
     }
 
     public void TweenValue (float tweenPercent)
@@ -44,6 +41,6 @@ public struct ColorTween : ITweenValue
             newColor.a = StartColor.a;
         }
 
-        onColorTween.Invoke(newColor);
+        OnColorTween.Invoke(newColor);
     }
 }

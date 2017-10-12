@@ -3,15 +3,13 @@ using UnityEngine.Events;
 
 public struct FloatTween : ITweenValue
 {
-    class OnFloatTween : UnityEvent<float> { }
+    public event UnityAction<float> OnFloatTween;
 
     public float StartValue { get; set; }
     public float TargetValue { get; set; }
     public float TweenDuration { get; set; }
     public bool IsTimeScaleIgnored { get; set; }
-    public bool IsTargetValid { get { return onFloatTween != null; } }
-
-    private OnFloatTween onFloatTween;
+    public bool IsTargetValid { get { return OnFloatTween != null; } }
 
     public FloatTween (float from, float to, float time, UnityAction<float> onTween, bool ignoreTimeScale = false)
     {
@@ -19,8 +17,7 @@ public struct FloatTween : ITweenValue
         TargetValue = to;
         TweenDuration = time;
         IsTimeScaleIgnored = ignoreTimeScale;
-        onFloatTween = new OnFloatTween();
-        onFloatTween.AddListener(onTween);
+        OnFloatTween = onTween;
     }
 
     public void TweenValue (float tweenPercent)
@@ -28,6 +25,6 @@ public struct FloatTween : ITweenValue
         if (!IsTargetValid) return;
 
         var newValue = Mathf.Lerp(StartValue, TargetValue, tweenPercent);
-        onFloatTween.Invoke(newValue);
+        OnFloatTween.Invoke(newValue);
     }
 }

@@ -10,7 +10,7 @@ public enum WaitFor
 
 public class UnityEventWaitHandle : IDisposable
 {
-    public readonly UnityEvent OnComplete = new UnityEvent();
+    public event UnityAction OnComplete;
 
     public WaitFor WaitFor { get; private set; }
     public bool IsCompleted { get { return GetIsCompleted(); } }
@@ -24,7 +24,7 @@ public class UnityEventWaitHandle : IDisposable
     {
         WaitFor = waitFor;
         if (onComplete != null)
-            OnComplete.AddListener(onComplete);
+            OnComplete += onComplete;
         completedEventIds = new List<Guid>();
     }
 
@@ -34,7 +34,7 @@ public class UnityEventWaitHandle : IDisposable
         if (pendingRunners.Count == 0) { onComplete.SafeInvoke(); return; }
 
         using (var waiter = new UnityEventWaitHandle(WaitFor.AllEvents, onComplete))
-            pendingRunners.ForEach(runner => runner.OnCompleteEvent.AddListener(waiter.Wait()));
+            pendingRunners.ForEach(runner => runner.OnCompleted += waiter.Wait());
     }
 
     public void Dispose ()
@@ -99,7 +99,7 @@ public class UnityEventWaitHandle : IDisposable
 
     private void Complete ()
     {
-        OnComplete.Invoke();
-        OnComplete.RemoveAllListeners();
+        OnComplete.SafeInvoke();
+        OnComplete = null;
     }
 }

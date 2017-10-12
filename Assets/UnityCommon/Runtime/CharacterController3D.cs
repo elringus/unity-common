@@ -4,10 +4,10 @@ using UnityEngine.Events;
 [RequireComponent(typeof(CharacterController))]
 public class CharacterController3D : MonoBehaviour
 {
-    public readonly UnityEvent OnStartedMoving = new UnityEvent();
-    public readonly UnityEvent OnStoppedMoving = new UnityEvent();
-    public readonly UnityEvent OnJumped = new UnityEvent();
-    public readonly UnityEvent OnLanded = new UnityEvent();
+    public event UnityAction OnStartedMoving;
+    public event UnityAction OnStoppedMoving;
+    public event UnityAction OnJumped;
+    public event UnityAction OnLanded;
 
     public bool IsMoving { get { return Velocity.magnitude > 0; } }
     public bool IsSprinting { get { return isSprinting; } }
@@ -66,7 +66,7 @@ public class CharacterController3D : MonoBehaviour
         if (!IsGrounded) return false;
 
         moveVelocity.y = jumpHeight;
-        OnJumped.Invoke();
+        OnJumped.SafeInvoke();
 
         return true;
     }
@@ -111,16 +111,16 @@ public class CharacterController3D : MonoBehaviour
     private void DetectLanding ()
     {
         if (IsGrounded && !wasGroundedLastFrame)
-            OnLanded.Invoke();
+            OnLanded.SafeInvoke();
         wasGroundedLastFrame = IsGrounded;
     }
 
     private void DetectMovement ()
     {
         if (!wasMovingLastFrame && IsMoving)
-            OnStartedMoving.Invoke();
+            OnStartedMoving.SafeInvoke();
         if (wasMovingLastFrame && !IsMoving)
-            OnStoppedMoving.Invoke();
+            OnStoppedMoving.SafeInvoke();
         wasMovingLastFrame = IsMoving;
     }
 

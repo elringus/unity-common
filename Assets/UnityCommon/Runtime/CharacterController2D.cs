@@ -34,28 +34,22 @@ public class CharacterController2D : MonoBehaviour
 {
     public enum MoveDirection2D { Idle, Left, Right }
 
-    public class OnMoveDirectionChangedEvent : UnityEvent<MoveDirection2D> { }
-    public class OnCollidedEvent : UnityEvent<RaycastHit2D> { }
-    public class OnTriggerEnterEvent : UnityEvent<Collider2D> { }
-    public class OnTriggerStayEvent : UnityEvent<Collider2D> { }
-    public class OnTriggerExitEvent : UnityEvent<Collider2D> { }
-
     private struct CharacterRaycastOrigins { public Vector3 TopLeft, BottomRight, BottomLeft; }
 
     #region Events, properties and fields
 
     private const float SKIN_WIDTH_FUDGE = 0.001f;
 
-    public readonly OnCollidedEvent OnControllerCollided = new OnCollidedEvent();
-    public readonly OnTriggerEnterEvent OnTriggerEnter = new OnTriggerEnterEvent();
-    public readonly OnTriggerStayEvent OnTriggerStay = new OnTriggerStayEvent();
-    public readonly OnTriggerExitEvent OnTriggerExit = new OnTriggerExitEvent();
+    public event UnityAction<RaycastHit2D> OnControllerCollided;
+    public event UnityAction<Collider2D> OnTriggerEnter;
+    public event UnityAction<Collider2D> OnTriggerStay;
+    public event UnityAction<Collider2D> OnTriggerExit;
 
-    public readonly UnityEvent OnJumped = new UnityEvent();
-    public readonly UnityEvent OnLanded = new UnityEvent();
-    public readonly UnityEvent OnStartedMoving = new UnityEvent();
-    public readonly UnityEvent OnStoppedMoving = new UnityEvent();
-    public readonly OnMoveDirectionChangedEvent OnMoveDirectionChanged = new OnMoveDirectionChangedEvent();
+    public event UnityAction OnJumped;
+    public event UnityAction OnLanded;
+    public event UnityAction OnStartedMoving;
+    public event UnityAction OnStoppedMoving;
+    public event UnityAction<MoveDirection2D> OnMoveDirectionChanged;
 
     /// <summary>
     /// Defines how far in from the edges of the collider rays are cast from. If cast with a 0 extent it will often result in ray hits that are
@@ -179,22 +173,19 @@ public class CharacterController2D : MonoBehaviour
 
     private void OnTriggerEnter2D (Collider2D col)
     {
-        if (OnTriggerEnter != null)
-            OnTriggerEnter.Invoke(col);
+        OnTriggerEnter.SafeInvoke(col);
     }
 
 
     private void OnTriggerStay2D (Collider2D col)
     {
-        if (OnTriggerStay != null)
-            OnTriggerStay.Invoke(col);
+        OnTriggerStay.SafeInvoke(col);
     }
 
 
     private void OnTriggerExit2D (Collider2D col)
     {
-        if (OnTriggerExit != null)
-            OnTriggerExit.Invoke(col);
+        OnTriggerExit.SafeInvoke(col);
     }
 
     #endregion
@@ -535,7 +526,7 @@ public class CharacterController2D : MonoBehaviour
         if (IsGrounded && Input.GetButtonDown(JumpButtonName))
         {
             inputVelocity.y = Mathf.Sqrt(2f * JumpHeight * -Gravity);
-            OnJumped.Invoke();
+            OnJumped.SafeInvoke();
         }
 
         // Apply horizontal speed smoothing it. 
@@ -562,23 +553,23 @@ public class CharacterController2D : MonoBehaviour
     private void DetectLanding ()
     {
         if (IsGrounded && !wasGroundedLastFrame)
-            OnLanded.Invoke();
+            OnLanded.SafeInvoke();
         wasGroundedLastFrame = IsGrounded;
     }
 
     private void DetectMoveDirection ()
     {
         if (moveDirectionLastFrame != MoveDirection)
-            OnMoveDirectionChanged.Invoke(MoveDirection);
+            OnMoveDirectionChanged.SafeInvoke(MoveDirection);
         moveDirectionLastFrame = MoveDirection;
     }
 
     private void DetectMovement ()
     {
         if (!wasMovingLastFrame && IsMoving)
-            OnStartedMoving.Invoke();
+            OnStartedMoving.SafeInvoke();
         if (wasMovingLastFrame && !IsMoving)
-            OnStoppedMoving.Invoke();
+            OnStoppedMoving.SafeInvoke();
         wasMovingLastFrame = IsMoving;
     }
     #endregion

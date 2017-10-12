@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 using UnityEngine.Events;
 
 public class Updater : MonoBehaviour
@@ -20,5 +21,10 @@ public class Updater : MonoBehaviour
     public void AddAction (UnityAction action)
     {
         actions = actions.Append(action);
+    }
+
+    public void RemoveAction (UnityAction action)
+    {
+        actions = actions.Except(new UnityAction[1] { action }).ToArray();
     }
 }
