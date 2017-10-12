@@ -1,34 +1,16 @@
-﻿// Copyright 2012-2017 Elringus (Artyom Sovetnikov). All Rights Reserved.
+﻿using UnityEngine.UI;
 
-namespace UnityCommon
+public abstract class ScriptableSlider : ScriptableUIControl<Slider>
 {
-    // Copyright 2014-2017 Artyom Sovetnikov. All Rights Reserved.
-    
-    namespace UnityCommon
+    protected override void BindUIEvents ()
     {
-    // Copyright 2014-2017 Artyom Sovetnikov. All Rights Reserved.
-    
-    namespace UnityCommon
+        UIComponent.onValueChanged.AddListener(OnValueChanged);
+    }
+
+    protected override void UnbindUIEvents ()
     {
-    using UnityEngine.UI;
-    
-    public abstract class ScriptableSlider : ScriptableUIControl<Slider>
-    {
-        protected override void BindUIEvents ()
-        {
-            UIComponent.onValueChanged.AddListener(OnValueChanged);
-        }
-    
-        protected override void UnbindUIEvents ()
-        {
-            UIComponent.onValueChanged.RemoveListener(OnValueChanged);
-        }
-    
-        protected abstract void OnValueChanged (float value);
+        UIComponent.onValueChanged.RemoveListener(OnValueChanged);
     }
-    
-    }
-    
-    }
-    
+
+    protected abstract void OnValueChanged (float value);
 }
