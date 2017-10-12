@@ -14,7 +14,7 @@ public class Updater : MonoBehaviour
 
     private void OnDestroy ()
     {
-        actions = null;
+        actions = new UnityAction[0];
     }
 
     public void AddAction (UnityAction action)
