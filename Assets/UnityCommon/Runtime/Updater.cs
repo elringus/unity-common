@@ -12,7 +12,7 @@ public class Updater : MonoBehaviour
             actions[i].Invoke();
     }
 
-    private void OnApplicationQuit ()
+    private void OnDestroy ()
     {
         actions = null;
     }
