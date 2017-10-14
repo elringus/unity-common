@@ -9,6 +9,7 @@ public class CharacterController3D : MonoBehaviour
     public event UnityAction OnJumped;
     public event UnityAction OnLanded;
 
+    public bool IsInputBlocked { get { return isInputBlocked; } set { isInputBlocked = value; } }
     public bool IsMoving { get { return Velocity.magnitude > 0; } }
     public bool IsSprinting { get { return isSprinting; } }
     public bool IsGrounded { get { return characterController.isGrounded; } }
@@ -43,6 +44,7 @@ public class CharacterController3D : MonoBehaviour
     private bool wasGroundedLastFrame;
     private bool wasMovingLastFrame;
     private bool wasMoveInputActiveLastFrame;
+    private bool isInputBlocked;
 
     private void Awake ()
     {
@@ -51,7 +53,7 @@ public class CharacterController3D : MonoBehaviour
 
     private void Update ()
     {
-        HandleInput();
+        if (!IsInputBlocked) HandleInput();
         HandleMovement();
         DetectLanding();
         DetectMovement();
