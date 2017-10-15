@@ -53,7 +53,7 @@ public class CharacterController3D : MonoBehaviour
 
     private void Update ()
     {
-        if (!IsInputBlocked) HandleInput();
+        HandleInput();
         HandleMovement();
         DetectLanding();
         DetectMovement();
@@ -85,6 +85,12 @@ public class CharacterController3D : MonoBehaviour
 
     private void HandleInput ()
     {
+        if (IsInputBlocked)
+        {
+            moveInputVelocity = Vector2.zero;
+            return;
+        }
+
         var inputHor = !string.IsNullOrEmpty(horizontalAxisName) ? Input.GetAxis(horizontalAxisName) : 0;
         var inputVer = !string.IsNullOrEmpty(verticalAxisName) ? Input.GetAxis(verticalAxisName) : 0;
         moveInputVelocity = new Vector2(inputHor, inputVer);
