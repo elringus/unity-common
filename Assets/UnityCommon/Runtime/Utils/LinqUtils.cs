@@ -28,6 +28,20 @@ public static class LinqUtils
         return array;
     }
 
+    public static T Random<T> (this List<T> list)
+    {
+        if (list == null || list.Count == 0) return default(T);
+        var randomIndex = UnityEngine.Random.Range(0, list.Count);
+        return list[randomIndex];
+    }
+
+    public static T Random<T> (this T[] array)
+    {
+        if (array == null || array.Length == 0) return default(T);
+        var randomIndex = UnityEngine.Random.Range(0, array.Length);
+        return array[randomIndex];
+    }
+
     public static T[] AppendRange<T> (this T[] array, T[] items)
     {
         var itemsCount = items.Length;
