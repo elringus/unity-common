@@ -5,9 +5,9 @@ public class CameraShaker : MonoBehaviour
 {
     public bool IsShaking { get { return Time.time < shakeEndTime; } }
 
-    [SerializeField] private float shakeAmount;
-    [SerializeField] private float shakeDuration;
-    [SerializeField] private bool smooth;
+    [SerializeField] private float shakeAmount = 10f;
+    [SerializeField] private float shakeDuration = .5f;
+    [SerializeField] private bool smooth = true;
     [SerializeField] private float smoothAmount = 1f;
 
     private float shakeStartTime;
