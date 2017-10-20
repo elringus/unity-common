@@ -93,6 +93,14 @@ public class CharacterController3D : MonoBehaviour
 
         var inputHor = !string.IsNullOrEmpty(horizontalAxisName) ? Input.GetAxis(horizontalAxisName) : 0;
         var inputVer = !string.IsNullOrEmpty(verticalAxisName) ? Input.GetAxis(verticalAxisName) : 0;
+
+        if (Input.touchCount > 0)
+        {
+            var touchDeltaPosition = Input.GetTouch(0).deltaPosition;
+            inputHor = -touchDeltaPosition.x;
+            inputVer = -touchDeltaPosition.y;
+        }
+
         moveInputVelocity = new Vector2(inputHor, inputVer);
         if (moveInputVelocity.magnitude > 1) moveInputVelocity.Normalize();
 
