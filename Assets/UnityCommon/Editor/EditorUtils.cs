@@ -42,7 +42,7 @@ public static class EditorUtils
         var alphaIsTransparency = texture.alphaIsTransparency;
         var maxSize = Mathf.Max(texture.width, texture.height);
 
-        path = string.Format("{0}/{1}.png", path.GetBefore("/", false), texture.name);
+        path = string.Format("{0}/{1}.png", path.GetBeforeLast("/"), texture.name);
         Debug.Assert(AssetDatabase.IsValidFolder(path.GetBefore("/")));
         var bytes = texture.EncodeToPNG();
         using (var fileStream = System.IO.File.Create(path)) 
