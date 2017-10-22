@@ -64,4 +64,18 @@ public static class EditorUtils
 
         return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
     }
+
+    public static void ToggleLeftGUI (Rect position, SerializedProperty property, GUIContent label)
+    {
+        var toggleValue = property.boolValue;
+        EditorGUI.showMixedValue = property.hasMultipleDifferentValues;
+        EditorGUI.BeginChangeCheck();
+        var oldIndent = EditorGUI.indentLevel;
+        EditorGUI.indentLevel = 0;
+        toggleValue = EditorGUI.ToggleLeft(position, label, toggleValue);
+        EditorGUI.indentLevel = oldIndent;
+        if (EditorGUI.EndChangeCheck())
+            property.boolValue = property.hasMultipleDifferentValues ? true : !property.boolValue;
+        EditorGUI.showMixedValue = false;
+    }
 }
