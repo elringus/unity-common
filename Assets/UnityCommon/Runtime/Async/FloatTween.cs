@@ -9,14 +9,16 @@ public struct FloatTween : ITweenValue
     public float TargetValue { get; set; }
     public float TweenDuration { get; set; }
     public bool IsTimeScaleIgnored { get; set; }
+    public bool SmoothStep { get; set; }
     public bool IsTargetValid { get { return OnFloatTween != null; } }
 
-    public FloatTween (float from, float to, float time, UnityAction<float> onTween, bool ignoreTimeScale = false)
+    public FloatTween (float from, float to, float time, UnityAction<float> onTween, bool ignoreTimeScale = false, bool smoothStep = false)
     {
         StartValue = from;
         TargetValue = to;
         TweenDuration = time;
         IsTimeScaleIgnored = ignoreTimeScale;
+        SmoothStep = smoothStep;
         OnFloatTween = onTween;
     }
 
@@ -24,7 +26,7 @@ public struct FloatTween : ITweenValue
     {
         if (!IsTargetValid) return;
 
-        var newValue = Mathf.Lerp(StartValue, TargetValue, tweenPercent);
+        var newValue = SmoothStep ? Mathf.SmoothStep(StartValue, TargetValue, tweenPercent) : Mathf.Lerp(StartValue, TargetValue, tweenPercent);
         OnFloatTween.Invoke(newValue);
     }
 }

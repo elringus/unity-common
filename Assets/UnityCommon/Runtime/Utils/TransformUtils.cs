@@ -37,12 +37,12 @@ public static class TransformUtils
     }
 
     public static Tweener<FloatTween> SlideX (this Transform trs, float x, float duration,
-        MonoBehaviour coroutineContainer = null, UnityAction onComplete = null)
+        MonoBehaviour coroutineContainer = null, UnityAction onComplete = null, bool smoothStep = false)
     {
         if (trs.position.x == x) { onComplete.SafeInvoke(); return null; }
         if (duration == 0f) { trs.SetPosX(x); onComplete.SafeInvoke(); return null; }
 
-        var tween = new FloatTween(trs.position.x, x, duration, newXValue => trs.SetPosX(newXValue));
+        var tween = new FloatTween(trs.position.x, x, duration, newXValue => trs.SetPosX(newXValue), smoothStep: smoothStep);
         return new Tweener<FloatTween>(coroutineContainer, onComplete).Run(tween);
     }
 }
