@@ -1,16 +1,17 @@
 ﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
-[RequireComponent(typeof(GUIText))]
+[RequireComponent(typeof(Text))]
 public class FpsDisplay : MonoBehaviour
 {
     [SerializeField] private float updateFrequency = 1f;
 
-    private GUIText cachedText;
+    private Text text;
 
     private void Awake ()
     {
-        cachedText = GetComponent<GUIText>();
+        text = GetComponent<Text>();
     }
 
     private void Start ()
@@ -32,7 +33,7 @@ public class FpsDisplay : MonoBehaviour
             var timeDelta = Time.realtimeSinceStartup - lastTime;
             var frameDelta = Time.frameCount - lastFrameCount;
 
-            cachedText.text = string.Format("{0:0.} FPS", frameDelta / timeDelta);
+            text.text = string.Format("{0:0.} FPS", frameDelta / timeDelta);
         }
     }
 }
