@@ -2,7 +2,7 @@
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-public abstract class ScriptableUIBehaviour : UIBehaviour
+public class ScriptableUIBehaviour : UIBehaviour
 {
     public event UnityAction OnFadeComplete;
     public event UnityAction<bool> OnVisibilityChanged;
