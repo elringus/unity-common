@@ -1,22 +1,22 @@
-﻿
+﻿using UnityEngine;
+
 /// <summary>
 /// Provides resources stored in 'Resources' folders of the project.
 /// </summary>
-public class ProjectResourceProvider : IResourceProvider
+[SpawnOnContextResolve(HideFlags.DontSave, true)]
+public class ProjectResourceProvider : MonoBehaviour, IResourceProvider
 {
-    // Register in context on initialize. Bind to a gameobject? Don'd destroy on load?
-
-    public T GetResource<T> (string path)
-    {
-        throw new System.NotImplementedException();
-    }
-
     public void LoadResource<T> (string path)
     {
         throw new System.NotImplementedException();
     }
 
     public void UnloadResource<T> (T resource)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public T GetResource<T> (string path)
     {
         throw new System.NotImplementedException();
     }
