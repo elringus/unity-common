@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEditor;
 
 /// <summary>
 /// Should be placed in scenes to proprely register objects with [RegisterInContext] attribute.
@@ -14,7 +13,7 @@ public class RegisterSceneInContext : MonoBehaviour
     }
 
     #if UNITY_EDITOR
-    [MenuItem("GameObject/Register In Context", false, 0)]
+    [UnityEditor.MenuItem("GameObject/Register In Context", false, 0)]
     public static void CreateRegisterSceneObject ()
     {
         new GameObject("RegisterInContext").AddComponent<RegisterSceneInContext>();
