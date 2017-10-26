@@ -19,10 +19,12 @@ public class RegisterInContext : Attribute { }
 public class SpawnOnContextResolve : Attribute
 {
     public readonly HideFlags HideFlags;
+    public readonly bool DontDestroyOnLoad;
 
-    public SpawnOnContextResolve (HideFlags hideFlags = HideFlags.None)
+    public SpawnOnContextResolve (HideFlags hideFlags = HideFlags.None, bool dontDestroyOnLoad = false)
     {
         HideFlags = hideFlags;
+        DontDestroyOnLoad = dontDestroyOnLoad;
     }
 }
 
@@ -31,11 +33,10 @@ public class SpawnOnContextResolve : Attribute
 /// </summary>
 public class Context : MonoBehaviour
 {
-    const float GC_INTERVAL = 60;
-
-    public static bool IsInitialized { get { return instance != null && instance; } }
+    private const float GC_INTERVAL = 60;
 
     private static Context instance;
+
     private Dictionary<Type, List<WeakReference>> references;
 
     private void Start ()
@@ -50,10 +51,28 @@ public class Context : MonoBehaviour
         instance = null;
     }
 
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    private static void Initialize ()
+    {
+        var gameobject = new GameObject("Context");
+        gameobject.hideFlags = HideFlags.HideAndDontSave;
+        DontDestroyOnLoad(gameobject);
+        instance = gameobject.AddComponent<Context>();
+        instance.references = new Dictionary<Type, List<WeakReference>>();
+    }
+
+    // [BeforeSceneAwakeCalls]
+    public static void RegisterSceneObjects ()
+    {
+        foreach (var monoBehaviour in FindObjectsOfType<MonoBehaviour>())
+        {
+            if (!IsRegistered(monoBehaviour) && monoBehaviour.GetType().IsDefined(typeof(RegisterInContext), true))
+                Register(monoBehaviour);
+        }
+    }
+
     public static T Resolve<T> (Predicate<T> predicate = null, bool strictType = true, bool assertResult = false) where T : class
     {
-        if (!AssertUsage()) return null;
-
         T result = null;
         var resolvingType = typeof(T);
         if (resolvingType.IsInterface || resolvingType.IsAbstract)
@@ -78,8 +97,6 @@ public class Context : MonoBehaviour
 
     public static List<T> ResolveAll<T> (Predicate<T> predicate = null, bool strictType = true, bool assertResult = false) where T : class
     {
-        if (!AssertUsage()) return null;
-
         var resolvingType = typeof(T);
         if (resolvingType.IsInterface || resolvingType.IsAbstract)
             strictType = false;
@@ -101,8 +118,6 @@ public class Context : MonoBehaviour
 
     public static bool IsRegistered (object obj, bool strictType = true)
     {
-        if (!AssertUsage()) return false;
-
         var refsOfType = GetReferencesOfType(obj.GetType(), strictType);
         if (refsOfType == null || refsOfType.Count == 0)
             return false;
@@ -112,8 +127,6 @@ public class Context : MonoBehaviour
 
     public static void Register (object obj)
     {
-        if (!AssertUsage()) return;
-
         if (obj == null)
         {
             Debug.LogWarning("Attempted to register a null object to Context.");
@@ -131,14 +144,7 @@ public class Context : MonoBehaviour
 
         if (instance.references.ContainsKey(objType))
             instance.references[objType].Add(reference);
-        else instance.references.Add(objType, new List<WeakReference>() { reference } );
-    }
-
-    public static void Destroy ()
-    {
-        if (!AssertUsage()) return;
-
-        Destroy(instance.gameObject);
+        else instance.references.Add(objType, new List<WeakReference>() { reference });
     }
 
     [ContextMenu("Log Reference Count")]
@@ -163,25 +169,7 @@ public class Context : MonoBehaviour
                 .ToList();
     }
 
-    private static void Initialize ()
-    {
-        var gameobject = new GameObject("Context");
-        gameobject.hideFlags = HideFlags.HideInHierarchy;
-        instance = gameobject.AddComponent<Context>();
-        instance.references = new Dictionary<Type, List<WeakReference>>();
-        RegisterSceneObjects();
-    }
-
-    private static void RegisterSceneObjects ()
-    {
-        foreach (var mb in FindObjectsOfType<MonoBehaviour>())
-        {
-            if (mb.GetType().IsDefined(typeof(RegisterInContext), true))
-                Register(mb);
-        }
-    }
-
-    private static object SpawnAndRegister (Type type, HideFlags hideFlags = HideFlags.None)
+    private static object SpawnAndRegister (Type type, HideFlags hideFlags = HideFlags.None, bool dontDestroyOnLoad = false)
     {
         if (!type.IsSubclassOf(typeof(Component))) return null;
 
@@ -193,11 +181,13 @@ public class Context : MonoBehaviour
             {
                 var attr = attrs[0];
                 hideFlags = attr.HideFlags;
+                dontDestroyOnLoad = attr.DontDestroyOnLoad;
             }
         }
 
         var containerObject = new GameObject(type.Name);
         containerObject.hideFlags = hideFlags;
+        if (dontDestroyOnLoad) DontDestroyOnLoad(containerObject);
         var component = containerObject.AddComponent(type);
         Register(component);
         return component;
@@ -205,26 +195,14 @@ public class Context : MonoBehaviour
 
     private static bool ShouldAutoSpawn (Type type)
     {
-        return type.IsSubclassOf(typeof(Component)) && 
+        return type.IsSubclassOf(typeof(Component)) &&
             type.IsDefined(typeof(SpawnOnContextResolve), true);
-    }
-
-    private static bool AssertUsage ()
-    {
-        if (!Application.isPlaying)
-        {
-            //Debug.LogError("Context is only avialable in play mode.");
-            return false;
-        }
-
-        if (!IsInitialized) Initialize();
-
-        return true;
     }
 
     private static bool IsWeakRefValid (WeakReference weakRef)
     {
-        if (weakRef == null) return false;
+        if (weakRef == null || !weakRef.IsAlive) return false;
+
         var targetCopy = weakRef.Target; // To prevent race conditions.
         if (targetCopy == null) return false;
 
@@ -245,8 +223,7 @@ public class Context : MonoBehaviour
         while (true)
         {
             references.Values.ToList()
-                .ForEach(refList => refList
-                .RemoveAll(r => !r.IsAlive));
+                .ForEach(refList => refList.RemoveAll(r => !IsWeakRefValid(r)));
 
             yield return waitForGcInterval;
         }
