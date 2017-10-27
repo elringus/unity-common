@@ -1,17 +1,17 @@
 ﻿
 public class RemoteResourceProvider : IResourceProvider
 {
-    public T GetResource<T> (string path)
+    public void LoadResourceAsync (string path)
     {
         throw new System.NotImplementedException();
     }
 
-    public void LoadResource<T> (string path)
+    public void UnloadResourceAsync (string path)
     {
         throw new System.NotImplementedException();
     }
 
-    public void UnloadResource<T> (T resource)
+    public T GetResource<T> (string path) where T : UnityEngine.Object
     {
         throw new System.NotImplementedException();
     }
