@@ -7,22 +7,26 @@ using UnityEngine;
 [SpawnOnContextResolve(HideFlags.DontSave, true)]
 public class ProjectResourceProvider : MonoBehaviour, IResourceProvider
 {
+    public float LoadProgress { get { return EvaluateLoadProgress(); } }
+
     private Dictionary<string, Object> resources = new Dictionary<string, Object>();
     private Dictionary<string, ResourceRequestRunner> loadingResources = new Dictionary<string, ResourceRequestRunner>();
 
-    public void LoadResourceAsync (string path)
+    public void LoadResourceAsync<T> (string path) where T : Object
     {
         if (resources.ContainsKey(path))
         {
             Debug.LogWarning(string.Format("Resource '{0}' won't load because it's already loaded.", path));
             return;
         }
+
         if (loadingResources.ContainsKey(path))
         {
             Debug.LogError(string.Format("Resource '{0}' won't load because it's already loading.", path));
             return;
         }
-        var loadRequest = Resources.LoadAsync(path);
+
+        var loadRequest = Resources.LoadAsync<T>(path);
         if (loadRequest == null)
         {
             Debug.LogError(string.Format("Resource '{0}' won't load because it's not found in the project resources.", path));
@@ -59,13 +63,13 @@ public class ProjectResourceProvider : MonoBehaviour, IResourceProvider
 
         if (loadingResources.ContainsKey(path))
         {
-            Debug.LogWarning(string.Format("Resource was required '{0}' while it was still loading. Loading will be canceled.", path));
+            Debug.LogWarning(string.Format("Resource '{0}' was required while it was still loading. Loading will be canceled.", path));
             CancelResourceLoading(path);
         }
 
         if (!resources.ContainsKey(path))
         {
-            asset = Resources.Load(path);
+            asset = Resources.Load<T>(path);
             if (!asset)
             {
                 Debug.LogError(string.Format("Resource '{0}' not found in the project resources.", path));
@@ -77,7 +81,7 @@ public class ProjectResourceProvider : MonoBehaviour, IResourceProvider
         var castedAsset = asset as T;
         if (!castedAsset)
         {
-            Debug.LogError(string.Format("Resource '{0}' is not of type '{1}.", path, typeof(T).Name));
+            Debug.LogError(string.Format("Resource '{0}' is not of type '{1}'.", path, typeof(T).Name));
             return default(T);
         }
 
@@ -91,6 +95,12 @@ public class ProjectResourceProvider : MonoBehaviour, IResourceProvider
         var loadingResource = loadingResources[path];
         loadingResource.Stop();
         loadingResources.Remove(path);
+    }
+
+    private float EvaluateLoadProgress ()
+    {
+        if (loadingResources.Count == 0) return 1f;
+        return Mathf.Min(1f / loadingResources.Count, .999f);
     }
 
     private void HandleResourceLoaded (ResourceRequestRunner resourceRequestRunner)

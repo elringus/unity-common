@@ -20,8 +20,6 @@ public abstract class AsyncRunner
 
     public AsyncRunner (MonoBehaviour coroutineContainer = null, UnityAction onComplete = null)
     {
-        Context.Register(this);
-
         IsComplete = false;
         RoutineTickCount = 0;
         if (coroutineContainer) CoroutineContainer = coroutineContainer;

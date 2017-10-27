@@ -1,7 +1,9 @@
 ﻿
 public class LocalResourceProvider : IResourceProvider
 {
-    public void LoadResourceAsync (string path)
+    public float LoadProgress { get { throw new System.NotImplementedException(); } }
+
+    public void LoadResourceAsync<T> (string path) where T : UnityEngine.Object
     {
         throw new System.NotImplementedException();
     }
