@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 /// <summary>
 /// Provides resources stored in 'Resources' folders of the project.
@@ -7,12 +8,16 @@ using UnityEngine;
 [SpawnOnContextResolve(HideFlags.DontSave, true)]
 public class ProjectResourceProvider : MonoBehaviour, IResourceProvider
 {
-    public float LoadProgress { get { return EvaluateLoadProgress(); } }
+    public event UnityAction<float> OnLoadProgress;
+
+    public bool IsLoading { get { return LoadProgress < 1f; } }
+    public float LoadProgress { get { return loadProgress; } }
 
     private Dictionary<string, Object> resources = new Dictionary<string, Object>();
-    private Dictionary<string, ResourceRequestRunner> loadingResources = new Dictionary<string, ResourceRequestRunner>();
+    private Dictionary<string, AsyncRunner> loadingResources = new Dictionary<string, AsyncRunner>();
+    private float loadProgress = 1f;
 
-    public void LoadResourceAsync<T> (string path) where T : Object
+    public void LoadResourceAsync<T> (string path, UnityAction<string, T> onLoaded = null) where T : Object
     {
         if (resources.ContainsKey(path))
         {
@@ -27,14 +32,12 @@ public class ProjectResourceProvider : MonoBehaviour, IResourceProvider
         }
 
         var loadRequest = Resources.LoadAsync<T>(path);
-        if (loadRequest == null)
-        {
-            Debug.LogError(string.Format("Resource '{0}' won't load because it's not found in the project resources.", path));
-            return;
-        }
-
-        var requestRunner = new ResourceRequestRunner(this, HandleResourceLoaded);
+        var requestRunner = new ResourceRequestRunner<T>(this, HandleResourceLoaded);
+        if (onLoaded != null) requestRunner.OnLoadComplete += onLoaded;
         loadingResources.Add(path, requestRunner);
+
+        UpdateLoadProgress();
+
         requestRunner.Run(loadRequest, path);
     }
 
@@ -52,14 +55,14 @@ public class ProjectResourceProvider : MonoBehaviour, IResourceProvider
             return;
         }
 
-        var assetToUnload = resources[path];
+        var resource = resources[path];
         resources.Remove(path);
-        Resources.UnloadAsset(assetToUnload);
+        Resources.UnloadAsset(resource);
     }
 
     public T GetResource<T> (string path) where T : Object
     {
-        Object asset = null;
+        Object resource = null;
 
         if (loadingResources.ContainsKey(path))
         {
@@ -69,16 +72,17 @@ public class ProjectResourceProvider : MonoBehaviour, IResourceProvider
 
         if (!resources.ContainsKey(path))
         {
-            asset = Resources.Load<T>(path);
-            if (!asset)
+            resource = Resources.Load<T>(path);
+            if (!resource)
             {
                 Debug.LogError(string.Format("Resource '{0}' not found in the project resources.", path));
                 return default(T);
             }
+            else resources.Add(path, resource);
         }
-        else asset = resources[path];
+        else resource = resources[path];
 
-        var castedAsset = asset as T;
+        var castedAsset = resource as T;
         if (!castedAsset)
         {
             Debug.LogError(string.Format("Resource '{0}' is not of type '{1}'.", path, typeof(T).Name));
@@ -92,28 +96,37 @@ public class ProjectResourceProvider : MonoBehaviour, IResourceProvider
     {
         if (!loadingResources.ContainsKey(path)) return;
 
-        var loadingResource = loadingResources[path];
-        loadingResource.Stop();
+        loadingResources[path].Cancel();
         loadingResources.Remove(path);
+
+        UpdateLoadProgress();
     }
 
-    private float EvaluateLoadProgress ()
+    private void HandleResourceLoaded<T> (string path, T resource) where T : Object
     {
-        if (loadingResources.Count == 0) return 1f;
-        return Mathf.Min(1f / loadingResources.Count, .999f);
-    }
-
-    private void HandleResourceLoaded (ResourceRequestRunner resourceRequestRunner)
-    {
-        if (resources.ContainsKey(resourceRequestRunner.ResourcePath))
+        if (resource)
         {
-            Debug.LogWarning("HandleResourceLoaded: Loaded resource already exists in resources. It will be replaced.");
-            resources[resourceRequestRunner.ResourcePath] = resourceRequestRunner.ResourceRequest.asset;
+            if (resources.ContainsKey(path))
+            {
+                Debug.LogWarning(string.Format("Loaded resource '{0}' already exists in resources. It will be replaced.", path));
+                resources[path] = resource;
+            }
+            else resources.Add(path, resource);
         }
-        else resources.Add(resourceRequestRunner.ResourcePath, resourceRequestRunner.ResourceRequest.asset);
+        else Debug.LogError(string.Format("Resource '{0}' wasn't loaded because it's not found in the project resources.", path));
 
-        if (!loadingResources.ContainsKey(resourceRequestRunner.ResourcePath))
-            Debug.LogWarning("HandleResourceLoaded: Loaded resource not found in loading resources map.");
-        else loadingResources.Remove(resourceRequestRunner.ResourcePath);
+        if (!loadingResources.ContainsKey(path))
+            Debug.LogWarning(string.Format("Loaded resource '{0}' not found in loading resources map.", path));
+        else loadingResources.Remove(path);
+
+        UpdateLoadProgress();
+    }
+
+    private void UpdateLoadProgress ()
+    {
+        var prevProgress = loadProgress;
+        if (loadingResources.Count == 0) loadProgress = 1f;
+        else loadProgress = Mathf.Min(1f / loadingResources.Count, .999f);
+        if (prevProgress != loadProgress) OnLoadProgress.SafeInvoke(loadProgress);
     }
 }

@@ -34,7 +34,7 @@ public class TestResourceProvider : MonoBehaviour
         foreach (var res in RESOURCES)
             provider.LoadResourceAsync<Sprite>(res);
 
-        while (provider.LoadProgress < 1) yield return null;
+        while (provider.IsLoading) yield return null;
 
         foreach (var res in RESOURCES)
             SpriteRenderer.sprite = provider.GetResource<Sprite>(res);
@@ -49,7 +49,7 @@ public class TestResourceProvider : MonoBehaviour
         foreach (var res in RESOURCES)
             provider.LoadResourceAsync<Sprite>(res);
 
-        while (provider.LoadProgress < 1) yield return null;
+        while (provider.IsLoading) yield return null;
 
         foreach (var res in RESOURCES)
             SpriteRenderer.sprite = provider.GetResource<Sprite>(res);

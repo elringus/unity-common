@@ -1,22 +1,21 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
 
-public class ResourceRequestRunner : AsyncRunner
+public class ResourceRequestRunner<T> : AsyncRunner where T : Object
 {
-    public event UnityAction<ResourceRequestRunner> OnResponse;
+    public event UnityAction<string, T> OnLoadComplete;
 
     public override bool CanBeInstantlyCompleted { get { return false; } }
-
     public ResourceRequest ResourceRequest { get; private set; }
     public string ResourcePath { get; private set; }
 
-    public ResourceRequestRunner (MonoBehaviour coroutineContainer = null, UnityAction<ResourceRequestRunner> onResponse = null) :
+    public ResourceRequestRunner (MonoBehaviour coroutineContainer = null, UnityAction<string, T> onLoadComplete = null) :
         base(coroutineContainer, null)
     {
-        OnResponse += onResponse;
+        OnLoadComplete += onLoadComplete;
     }
 
-    public ResourceRequestRunner Run (ResourceRequest resourceRequest, string path)
+    public ResourceRequestRunner<T> Run (ResourceRequest resourceRequest, string path)
     {
         ResourceRequest = resourceRequest;
         ResourcePath = path;
@@ -25,9 +24,18 @@ public class ResourceRequestRunner : AsyncRunner
         return this;
     }
 
+    public override void Cancel ()
+    {
+        base.Cancel();
+
+        ResourceRequest = null;
+        OnLoadComplete.SafeInvoke(ResourcePath, null);
+    }
+
     protected override void OnComplete ()
     {
         base.OnComplete();
-        OnResponse.SafeInvoke(this);
+
+        OnLoadComplete.SafeInvoke(ResourcePath, ResourceRequest.asset as T);
     }
 }

@@ -1,6 +1,6 @@
 ﻿using UnityEngine.Events;
 
-public class RemoteResourceProvider : IResourceProvider
+public class GDriveResourceProvider : IResourceProvider
 {
     #pragma warning disable 67
     public event UnityAction<float> OnLoadProgress;

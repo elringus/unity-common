@@ -43,6 +43,11 @@ public abstract class AsyncRunner
         }
     }
 
+    public virtual void Cancel ()
+    {
+        Stop();
+    }
+
     public virtual void CompleteInstantly ()
     {
         if (!CanBeInstantlyCompleted || IsComplete) return;
