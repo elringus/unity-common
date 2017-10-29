@@ -65,6 +65,8 @@ public class PackageExporter : EditorWindow
 
     private static void Export (bool wrapNamespace = false)
     {
+        modifiedScripts.Clear();
+
         if (!string.IsNullOrEmpty(NamespaceToWrap))
         {
             foreach (var path in AssetDatabase.GetAllAssetPaths())
