@@ -7,13 +7,6 @@ public class TestResourceProvider : MonoBehaviour
     public SpriteRenderer SpriteRenderer;
 
     private readonly List<string> RESOURCES = new List<string>() {
-        "Sprites/Kohaku/Kohaku01",
-        "Sprites/Kohaku/Kohaku02",
-        "Sprites/Kohaku/Kohaku03",
-        "Sprites/Kohaku/Kohaku04",
-        "Sprites/Kohaku/Kohaku05",
-        "Sprites/Kohaku/Kohaku06",
-
         "Sprites/Image01",
         "Sprites/Image02",
         "Sprites/Image03",
