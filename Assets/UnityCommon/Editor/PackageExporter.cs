@@ -42,7 +42,7 @@ public class PackageExporter : EditorWindow
     }
 
     [MenuItem("Assets/+ Export Package (Wrap)", priority = 20)]
-    private static void ExportPackageStore ()
+    private static void ExportPackageWrapped ()
     {
         if (IsReadyToExport)
             Export(true);
