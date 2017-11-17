@@ -82,3 +82,7 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+# Ignore sensitive data
+/Assets/ThirdParty/UnityGoogleDrive/Resources/*
+/Assets/ThirdParty/UnityGoogleDrive/Resources.meta
