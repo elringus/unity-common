@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using UnityEngine.Events;
+﻿using System;
+using UnityEngine;
 
 public static class TransformUtils
 {
@@ -37,7 +37,7 @@ public static class TransformUtils
     }
 
     public static Tweener<FloatTween> SlideX (this Transform trs, float x, float duration,
-        MonoBehaviour coroutineContainer = null, UnityAction onComplete = null, bool smoothStep = false)
+        MonoBehaviour coroutineContainer = null, Action onComplete = null, bool smoothStep = false)
     {
         if (trs.position.x == x) { onComplete.SafeInvoke(); return null; }
         if (duration == 0f) { trs.SetPosX(x); onComplete.SafeInvoke(); return null; }

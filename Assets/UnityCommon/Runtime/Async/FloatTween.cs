@@ -1,9 +1,9 @@
-﻿using UnityEngine;
-using UnityEngine.Events;
+﻿using System;
+using UnityEngine;
 
 public struct FloatTween : ITweenValue
 {
-    public event UnityAction<float> OnFloatTween;
+    public event Action<float> OnFloatTween;
 
     public float StartValue { get; set; }
     public float TargetValue { get; set; }
@@ -12,7 +12,7 @@ public struct FloatTween : ITweenValue
     public bool SmoothStep { get; set; }
     public bool IsTargetValid { get { return OnFloatTween != null; } }
 
-    public FloatTween (float from, float to, float time, UnityAction<float> onTween, bool ignoreTimeScale = false, bool smoothStep = false)
+    public FloatTween (float from, float to, float time, Action<float> onTween, bool ignoreTimeScale = false, bool smoothStep = false)
     {
         StartValue = from;
         TargetValue = to;

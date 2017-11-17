@@ -1,16 +1,16 @@
-﻿using UnityEngine;
-using UnityEngine.Events;
+﻿using System;
+using UnityEngine;
 using UnityEngine.Networking;
 
 public class WebRequestRunner : AsyncRunner
 {
-    public event UnityAction<UnityWebRequest> OnResponse;
+    public event Action<UnityWebRequest> OnResponse;
 
     public override bool CanBeInstantlyCompleted { get { return false; } }
 
     private UnityWebRequest webRequest;
 
-    public WebRequestRunner (MonoBehaviour coroutineContainer = null, UnityAction<UnityWebRequest> onResponse = null) :
+    public WebRequestRunner (MonoBehaviour coroutineContainer = null, Action<UnityWebRequest> onResponse = null) :
         base(coroutineContainer, null)
     {
         OnResponse += onResponse;

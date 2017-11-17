@@ -1,13 +1,13 @@
-﻿using UnityEngine;
-using UnityEngine.Events;
+﻿using System;
+using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
 public class CharacterController3D : MonoBehaviour
 {
-    public event UnityAction OnStartedMoving;
-    public event UnityAction OnStoppedMoving;
-    public event UnityAction OnJumped;
-    public event UnityAction OnLanded;
+    public event Action OnStartedMoving;
+    public event Action OnStoppedMoving;
+    public event Action OnJumped;
+    public event Action OnLanded;
 
     public bool IsInputBlocked { get { return isInputBlocked; } set { isInputBlocked = value; } }
     public bool IsMoving { get { return Velocity.magnitude > 0; } }

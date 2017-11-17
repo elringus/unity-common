@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Events;
 
 public enum SpriteGroupType
 {
@@ -41,7 +41,7 @@ public class SpriteGroup : MonoBehaviour
             selectedItemName = DefaultItem.name;
     }
 
-    public void SetIsHidden (bool isHidden, float fadeTime, UnityAction onComplete = null)
+    public void SetIsHidden (bool isHidden, float fadeTime, Action onComplete = null)
     {
         if (this.isHidden == isHidden) { onComplete.SafeInvoke(); return; }
 
@@ -49,7 +49,7 @@ public class SpriteGroup : MonoBehaviour
         FadeSprites(fadeTime, onComplete);
     }
 
-    public void SelectItem (string itemName, float fadeTime, UnityAction onComplete = null)
+    public void SelectItem (string itemName, float fadeTime, Action onComplete = null)
     {
         if (selectedItemName == itemName) { onComplete.SafeInvoke(); return; }
 
@@ -67,7 +67,7 @@ public class SpriteGroup : MonoBehaviour
         return items.Where(item => item.gameObject.name.ToLower() != exceptItemName.ToLower()).ToList();
     }
 
-    private void FadeSprites (float fadeTime, UnityAction onComplete = null)
+    private void FadeSprites (float fadeTime, Action onComplete = null)
     {
         if (isHidden || string.IsNullOrEmpty(selectedItemName) || selectedItemName.LEquals("none"))
         {

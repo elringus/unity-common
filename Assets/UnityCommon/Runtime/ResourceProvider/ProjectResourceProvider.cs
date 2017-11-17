@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
 /// <summary>
 /// Provides resources stored in 'Resources' folders of the project.
@@ -8,16 +8,16 @@ using UnityEngine.Events;
 [SpawnOnContextResolve(HideFlags.DontSave, true)]
 public class ProjectResourceProvider : MonoBehaviour, IResourceProvider
 {
-    public event UnityAction<float> OnLoadProgress;
+    public event Action<float> OnLoadProgress;
 
     public bool IsLoading { get { return LoadProgress < 1f; } }
     public float LoadProgress { get { return loadProgress; } }
 
-    private Dictionary<string, Object> resources = new Dictionary<string, Object>();
+    private Dictionary<string, UnityEngine.Object> resources = new Dictionary<string, UnityEngine.Object>();
     private Dictionary<string, AsyncRunner> loadingResources = new Dictionary<string, AsyncRunner>();
     private float loadProgress = 1f;
 
-    public void LoadResourceAsync<T> (string path, UnityAction<string, T> onLoaded = null) where T : Object
+    public void LoadResourceAsync<T> (string path, Action<string, T> onLoaded = null) where T : UnityEngine.Object
     {
         if (resources.ContainsKey(path))
         {
@@ -60,9 +60,9 @@ public class ProjectResourceProvider : MonoBehaviour, IResourceProvider
         Resources.UnloadAsset(resource);
     }
 
-    public T GetResource<T> (string path) where T : Object
+    public T GetResource<T> (string path) where T : UnityEngine.Object
     {
-        Object resource = null;
+        UnityEngine.Object resource = null;
 
         if (loadingResources.ContainsKey(path))
         {
@@ -102,7 +102,7 @@ public class ProjectResourceProvider : MonoBehaviour, IResourceProvider
         UpdateLoadProgress();
     }
 
-    private void HandleResourceLoaded<T> (string path, T resource) where T : Object
+    private void HandleResourceLoaded<T> (string path, T resource) where T : UnityEngine.Object
     {
         if (resource)
         {

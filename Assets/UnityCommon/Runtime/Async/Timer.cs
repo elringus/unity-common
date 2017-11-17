@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using UnityEngine.Events;
+﻿using System;
+using UnityEngine;
 
 public class Timer : AsyncRunner
 {
@@ -8,7 +8,7 @@ public class Timer : AsyncRunner
     public float Duration { get; private set; }
     public float ElapsedTime { get; private set; }
 
-    public Timer (MonoBehaviour coroutineContainer = null, UnityAction onComplete = null) :
+    public Timer (MonoBehaviour coroutineContainer = null, Action onComplete = null) :
         base(coroutineContainer, onComplete) { }
 
     public Timer Run (float duration, bool ignoreTimeScale = false)

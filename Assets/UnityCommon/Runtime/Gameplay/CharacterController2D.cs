@@ -1,8 +1,8 @@
 ﻿//#define DEBUG_CC2D_RAYS
 
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class CharacterCollisionState2D
 {
@@ -40,16 +40,16 @@ public class CharacterController2D : MonoBehaviour
 
     private const float SKIN_WIDTH_FUDGE = 0.001f;
 
-    public event UnityAction<RaycastHit2D> OnControllerCollided;
-    public event UnityAction<Collider2D> OnTriggerEnter;
-    public event UnityAction<Collider2D> OnTriggerStay;
-    public event UnityAction<Collider2D> OnTriggerExit;
+    public event Action<RaycastHit2D> OnControllerCollided;
+    public event Action<Collider2D> OnTriggerEnter;
+    public event Action<Collider2D> OnTriggerStay;
+    public event Action<Collider2D> OnTriggerExit;
 
-    public event UnityAction OnJumped;
-    public event UnityAction OnLanded;
-    public event UnityAction OnStartedMoving;
-    public event UnityAction OnStoppedMoving;
-    public event UnityAction<MoveDirection2D> OnMoveDirectionChanged;
+    public event Action OnJumped;
+    public event Action OnLanded;
+    public event Action OnStartedMoving;
+    public event Action OnStoppedMoving;
+    public event Action<MoveDirection2D> OnMoveDirectionChanged;
 
     /// <summary>
     /// Defines how far in from the edges of the collider rays are cast from. If cast with a 0 extent it will often result in ray hits that are

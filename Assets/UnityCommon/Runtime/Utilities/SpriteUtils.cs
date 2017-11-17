@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using UnityEngine.Events;
+﻿using System;
+using UnityEngine;
 
 public static class SpriteUtils
 {
@@ -23,7 +23,7 @@ public static class SpriteUtils
     }
 
     public static Tweener<FloatTween> FadeOut (this SpriteRenderer spriteRenderer, float fadeTime = .25f,
-        MonoBehaviour coroutineContainer = null, UnityAction onComplete = null)
+        MonoBehaviour coroutineContainer = null, Action onComplete = null)
     {
         Debug.Assert(spriteRenderer != null);
         if (spriteRenderer.IsTransparent()) { onComplete.SafeInvoke(); return null; }
@@ -35,7 +35,7 @@ public static class SpriteUtils
     }
 
     public static Tweener<FloatTween> FadeIn (this SpriteRenderer spriteRenderer, float fadeTime = .25f,
-        MonoBehaviour coroutineContainer = null, UnityAction onComplete = null)
+        MonoBehaviour coroutineContainer = null, Action onComplete = null)
     {
         Debug.Assert(spriteRenderer != null);
         if (spriteRenderer.IsOpaque()) { onComplete.SafeInvoke(); return null; }

@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.Events;
 
 public static class GraphicUtils
 {
@@ -24,7 +24,7 @@ public static class GraphicUtils
     }
 
     public static Tweener<FloatTween> FadeOut (this Graphic graphic, float fadeTime = .25f,
-        MonoBehaviour coroutineContainer = null, UnityAction onComplete = null)
+        MonoBehaviour coroutineContainer = null, Action onComplete = null)
     {
         Debug.Assert(graphic != null);
         if (graphic.IsTransparent()) { onComplete.SafeInvoke(); return null; }
@@ -36,7 +36,7 @@ public static class GraphicUtils
     }
 
     public static Tweener<FloatTween> FadeIn (this Graphic graphic, float fadeTime = .25f,
-        MonoBehaviour coroutineContainer = null, UnityAction onComplete = null)
+        MonoBehaviour coroutineContainer = null, Action onComplete = null)
     {
         Debug.Assert(graphic != null);
         if (graphic.IsOpaque()) { onComplete.SafeInvoke(); return null; }
@@ -48,7 +48,7 @@ public static class GraphicUtils
     }
 
     public static Tweener<FloatTween> Fade (this Graphic graphic, float targetOpacity, float fadeTime = .25f,
-        MonoBehaviour coroutineContainer = null, UnityAction onComplete = null)
+        MonoBehaviour coroutineContainer = null, Action onComplete = null)
     {
         Debug.Assert(graphic != null);
         if (graphic.color.a == targetOpacity) { onComplete.SafeInvoke(); return null; }

@@ -1,15 +1,15 @@
-﻿using UnityEngine;
-using UnityEngine.Events;
+﻿using System;
+using UnityEngine;
 
-public class ResourceRequestRunner<T> : AsyncRunner where T : Object
+public class ResourceRequestRunner<T> : AsyncRunner where T : UnityEngine.Object
 {
-    public event UnityAction<string, T> OnLoadComplete;
+    public event Action<string, T> OnLoadComplete;
 
     public override bool CanBeInstantlyCompleted { get { return false; } }
     public ResourceRequest ResourceRequest { get; private set; }
     public string ResourcePath { get; private set; }
 
-    public ResourceRequestRunner (MonoBehaviour coroutineContainer = null, UnityAction<string, T> onLoadComplete = null) :
+    public ResourceRequestRunner (MonoBehaviour coroutineContainer = null, Action<string, T> onLoadComplete = null) :
         base(coroutineContainer, null)
     {
         OnLoadComplete += onLoadComplete;

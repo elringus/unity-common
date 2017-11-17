@@ -1,11 +1,11 @@
-﻿using UnityEngine;
-using UnityEngine.Events;
+﻿using System;
+using UnityEngine;
 
 public enum ColorTweenMode { All, RGB, Alpha }
 
 public struct ColorTween : ITweenValue
 {
-    public event UnityAction<Color> OnColorTween;
+    public event Action<Color> OnColorTween;
 
     public Color StartColor { get; set; }
     public Color TargetColor { get; set; }
@@ -14,7 +14,7 @@ public struct ColorTween : ITweenValue
     public bool IsTimeScaleIgnored { get; set; }
     public bool IsTargetValid { get { return OnColorTween != null; } }
 
-    public ColorTween (Color from, Color to, ColorTweenMode mode, float time, UnityAction<Color> onTween, bool ignoreTimeScale = false)
+    public ColorTween (Color from, Color to, ColorTweenMode mode, float time, Action<Color> onTween, bool ignoreTimeScale = false)
     {
         StartColor = from;
         TargetColor = to;

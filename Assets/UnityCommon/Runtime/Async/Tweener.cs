@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using UnityEngine.Events;
+﻿using System;
+using UnityEngine;
 
 public class Tweener<T> : AsyncRunner where T : struct, ITweenValue
 {
@@ -8,7 +8,7 @@ public class Tweener<T> : AsyncRunner where T : struct, ITweenValue
     private float elapsedTime;
     private T tweenValue;
 
-    public Tweener (MonoBehaviour coroutineContainer = null, UnityAction onComplete = null) :
+    public Tweener (MonoBehaviour coroutineContainer = null, Action onComplete = null) :
         base(coroutineContainer, onComplete)
     {
         

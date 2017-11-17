@@ -1,6 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class Updater : MonoBehaviour
 {
@@ -8,7 +8,7 @@ public class Updater : MonoBehaviour
 
     [SerializeField] private float _updateDelay = 0f;
 
-    private UnityAction[] actions = new UnityAction[0];
+    private Action[] actions = new Action[0];
     private float lastUpdateTime = 0f;
 
     private void Update ()
@@ -25,16 +25,16 @@ public class Updater : MonoBehaviour
 
     private void OnDestroy ()
     {
-        actions = new UnityAction[0];
+        actions = new Action[0];
     }
 
-    public void AddAction (UnityAction action)
+    public void AddAction (Action action)
     {
         actions = actions.Append(action);
     }
 
-    public void RemoveAction (UnityAction action)
+    public void RemoveAction (Action action)
     {
-        actions = actions.Except(new UnityAction[1] { action }).ToArray();
+        actions = actions.Except(new Action[1] { action }).ToArray();
     }
 }

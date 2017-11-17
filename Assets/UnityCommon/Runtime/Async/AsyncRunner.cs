@@ -1,12 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
-using UnityEngine.Events;
 
 public abstract class AsyncRunner
 {
     class AsyncRunnerContainer : MonoBehaviour { }
 
-    public event UnityAction OnCompleted;
+    public event Action OnCompleted;
 
     public abstract bool CanBeInstantlyCompleted { get; }
     public bool IsComplete { get; private set; }
@@ -18,7 +18,7 @@ public abstract class AsyncRunner
 
     private GameObject containerObject;
 
-    public AsyncRunner (MonoBehaviour coroutineContainer = null, UnityAction onComplete = null)
+    public AsyncRunner (MonoBehaviour coroutineContainer = null, Action onComplete = null)
     {
         IsComplete = false;
         RoutineTickCount = 0;

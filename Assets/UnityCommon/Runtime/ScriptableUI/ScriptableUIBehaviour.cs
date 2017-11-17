@@ -1,11 +1,11 @@
-﻿using UnityEngine;
-using UnityEngine.Events;
+﻿using System;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class ScriptableUIBehaviour : UIBehaviour
 {
-    public event UnityAction OnFadeComplete;
-    public event UnityAction<bool> OnVisibilityChanged;
+    public event Action OnFadeComplete;
+    public event Action<bool> OnVisibilityChanged;
 
     public float FadeTime { get { return _fadeTime; } set { _fadeTime = value; } }
     public bool IsVisibleOnAwake { get { return _isVisibleOnAwake; } }
