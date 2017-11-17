@@ -71,7 +71,7 @@ public class SpriteGroup : MonoBehaviour
     {
         if (isHidden || string.IsNullOrEmpty(selectedItemName) || selectedItemName.LEquals("none"))
         {
-            using (var waitHandle = new UnityEventWaitHandle(WaitFor.AllEvents, onComplete))
+            using (var waitHandle = new ActionWaitHandle(ActionWaitHandle.WaitForEnum.AllActions, onComplete))
                 foreach (var item in items)
                     item.FadeOut(fadeTime, this, waitHandle.Wait());
         }
@@ -82,7 +82,7 @@ public class SpriteGroup : MonoBehaviour
 
             if (SpriteGroupType == SpriteGroupType.Independent)
             {
-                using (var waitHandle = new UnityEventWaitHandle(WaitFor.AllEvents, onComplete))
+                using (var waitHandle = new ActionWaitHandle(ActionWaitHandle.WaitForEnum.AllActions, onComplete))
                 {
                     foreach (var item in GetAllItemsExcept(selectedItemName))
                         item.FadeOut(fadeTime, this, waitHandle.Wait());

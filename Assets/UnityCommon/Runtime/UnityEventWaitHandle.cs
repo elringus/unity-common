@@ -1,30 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 
-public enum WaitFor
+public class ActionWaitHandle : IDisposable
 {
-    AnyEvent,
-    AllEvents
-}
+    public enum WaitForEnum { AnyAction, AllActions }
 
-public class UnityEventWaitHandle : IDisposable
-{
     public event Action OnComplete;
 
-    public WaitFor WaitFor { get; private set; }
+    public WaitForEnum WaitFor { get; private set; }
     public bool IsCompleted { get { return GetIsCompleted(); } }
 
-    private List<Guid> completedEventIds;
-    private int waitedEventCount = 0;
-    private int completedEventCount = 0;
+    private List<Guid> completedActionIds;
+    private int waitedActionsCount = 0;
+    private int completedActionsCount = 0;
     private bool isReady = false;
 
-    public UnityEventWaitHandle (WaitFor waitFor, Action onComplete = null)
+    public ActionWaitHandle (WaitForEnum waitFor, Action onComplete = null)
     {
         WaitFor = waitFor;
         if (onComplete != null)
             OnComplete += onComplete;
-        completedEventIds = new List<Guid>();
+        completedActionIds = new List<Guid>();
     }
 
     public static void WaitForAllAsyncRunners (Action onComplete)
@@ -32,7 +28,7 @@ public class UnityEventWaitHandle : IDisposable
         var pendingRunners = Context.ResolveAll<AsyncRunner>(runner => !runner.IsComplete);
         if (pendingRunners.Count == 0) { onComplete.SafeInvoke(); return; }
 
-        using (var waiter = new UnityEventWaitHandle(WaitFor.AllEvents, onComplete))
+        using (var waiter = new ActionWaitHandle(WaitForEnum.AllActions, onComplete))
             pendingRunners.ForEach(runner => runner.OnCompleted += waiter.Wait());
     }
 
@@ -44,31 +40,31 @@ public class UnityEventWaitHandle : IDisposable
 
     public Action Wait ()
     {
-        var waitedEventId = AddWaitedEvent();
-        return () => OnWaitedEventComplete(waitedEventId);
+        var waitedEventId = AddWaitedAction();
+        return () => OnWaitedActionComplete(waitedEventId);
     }
 
     public Action<T0> Wait<T0> (T0 arg0)
     {
-        var waitedEventId = AddWaitedEvent();
-        return (_) => { OnWaitedEventComplete(waitedEventId); };
+        var waitedEventId = AddWaitedAction();
+        return (_) => { OnWaitedActionComplete(waitedEventId); };
     }
 
     public Action<T0, T1> Wait<T0, T1> (T0 arg0, T1 arg1)
     {
-        var waitedEventId = AddWaitedEvent();
-        return (_, __) => { OnWaitedEventComplete(waitedEventId); };
+        var waitedEventId = AddWaitedAction();
+        return (_, __) => { OnWaitedActionComplete(waitedEventId); };
     }
 
     public Action<T0, T1, T2> Wait<T0, T1, T2> (T0 arg0, T1 arg1, T2 arg2)
     {
-        var waitedEventId = AddWaitedEvent();
-        return (_, __, ___) => { OnWaitedEventComplete(waitedEventId); };
+        var waitedEventId = AddWaitedAction();
+        return (_, __, ___) => { OnWaitedActionComplete(waitedEventId); };
     }
 
-    private Guid AddWaitedEvent ()
+    private Guid AddWaitedAction ()
     {
-        waitedEventCount++;
+        waitedActionsCount++;
         return Guid.NewGuid();
     }
 
@@ -78,21 +74,21 @@ public class UnityEventWaitHandle : IDisposable
 
         switch (WaitFor)
         {
-            case WaitFor.AnyEvent:
-                return completedEventCount > 0;
-            case WaitFor.AllEvents:
-                return completedEventCount == waitedEventCount;
+            case WaitForEnum.AnyAction:
+                return completedActionsCount > 0;
+            case WaitForEnum.AllActions:
+                return completedActionsCount == waitedActionsCount;
         }
 
         return false;
     }
 
-    private void OnWaitedEventComplete (Guid waitedEventId)
+    private void OnWaitedActionComplete (Guid waitedActionId)
     {
-        if (completedEventIds.Contains(waitedEventId))
+        if (completedActionIds.Contains(waitedActionId))
             return;
-        completedEventIds.Add(waitedEventId);
-        completedEventCount++;
+        completedActionIds.Add(waitedActionId);
+        completedActionsCount++;
         if (IsCompleted) Complete();
     }
 
