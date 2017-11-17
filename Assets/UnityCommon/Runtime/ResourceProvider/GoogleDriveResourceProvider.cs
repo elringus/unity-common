@@ -1,6 +1,10 @@
 ﻿using System;
+using UnityGoogleDrive;
 
-public class GDriveResourceProvider : IResourceProvider
+/// <summary>
+/// Provides resources stored in Google Drive using <see cref="UnityGoogleDrive"/> SDK.
+/// </summary>
+public class GoogleDriveResourceProvider : IResourceProvider
 {
     #pragma warning disable 67
     public event Action<float> OnLoadProgress;

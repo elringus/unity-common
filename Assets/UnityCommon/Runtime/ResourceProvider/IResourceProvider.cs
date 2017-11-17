@@ -1,7 +1,7 @@
 ﻿using System;
 
 /// <summary>
-/// Implementation is able to asynchronously load and unload Unity objects at runtime.
+/// Implementation is able to asynchronously load and unload <see cref="UnityEngine.Object"/> at runtime.
 /// </summary>
 public interface IResourceProvider
 {
@@ -17,7 +17,6 @@ public interface IResourceProvider
 
     /// <summary>
     /// Current resources loading progress, in 0.0 to 1.0 range.
-    /// Should return 1.0 when not loading anything.
     /// </summary>
     float LoadProgress { get; }
 

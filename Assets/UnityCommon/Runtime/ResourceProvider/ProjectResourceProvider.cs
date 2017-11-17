@@ -27,7 +27,7 @@ public class ProjectResourceProvider : MonoBehaviour, IResourceProvider
 
         if (loadingResources.ContainsKey(path))
         {
-            Debug.LogError(string.Format("Resource '{0}' won't load because it's already loading.", path));
+            Debug.LogWarning(string.Format("Resource '{0}' won't load because it's already loading.", path));
             return;
         }
 
@@ -76,7 +76,7 @@ public class ProjectResourceProvider : MonoBehaviour, IResourceProvider
             if (!resource)
             {
                 Debug.LogError(string.Format("Resource '{0}' not found in the project resources.", path));
-                return default(T);
+                return null;
             }
             else resources.Add(path, resource);
         }
@@ -86,7 +86,7 @@ public class ProjectResourceProvider : MonoBehaviour, IResourceProvider
         if (!castedAsset)
         {
             Debug.LogError(string.Format("Resource '{0}' is not of type '{1}'.", path, typeof(T).Name));
-            return default(T);
+            return null;
         }
 
         return castedAsset;
