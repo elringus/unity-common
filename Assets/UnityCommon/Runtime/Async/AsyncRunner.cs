@@ -22,8 +22,7 @@ public abstract class AsyncRunner
     {
         IsComplete = false;
         RoutineTickCount = 0;
-        if (coroutineContainer) CoroutineContainer = coroutineContainer;
-        else CoroutineContainer = CreateContainer();
+        CoroutineContainer = coroutineContainer;
         if (onComplete != null)
             OnCompleted += onComplete;
     }
@@ -80,11 +79,7 @@ public abstract class AsyncRunner
     private void StartCoroutine ()
     {
         if (!CoroutineContainer)
-        {
-            Debug.LogWarning("Attempted to start coroutine in a runner with null container.");
-            OnComplete();
-            return;
-        }
+            CoroutineContainer = CreateContainer();
 
         Stop();
 
