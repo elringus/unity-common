@@ -12,7 +12,8 @@ public class ResourceRequestRunner<T> : AsyncRunner where T : UnityEngine.Object
     public ResourceRequestRunner (MonoBehaviour coroutineContainer = null, Action<string, T> onLoadComplete = null) :
         base(coroutineContainer, null)
     {
-        OnLoadComplete += onLoadComplete;
+        if (onLoadComplete != null)
+            OnLoadComplete += onLoadComplete;
     }
 
     public ResourceRequestRunner<T> Run (ResourceRequest resourceRequest, string path)
