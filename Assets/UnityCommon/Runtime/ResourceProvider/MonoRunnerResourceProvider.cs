@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// <see cref="MonoBehaviour"/> based <see cref="IResourceProvider"/> implementation,
+/// <see cref="MonoBehaviour"/> based <see cref="IResourceProvider"/> implementation;
 /// using <see cref="AsyncRunner"/>-derived classes for resource loading operations.
 /// </summary>
 [SpawnOnContextResolve(HideFlags.DontSave, true)]
@@ -20,6 +20,7 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
 
     public abstract AsyncRunner CreateLoadRunner<T> (string path, Action<string, T> onLoaded = null) where T : UnityEngine.Object;
     public abstract T GetResourceBlocking<T> (string path) where T : UnityEngine.Object;
+    public abstract void UnloadResource (string path, UnityEngine.Object resource);
 
     public void LoadResourceAsync<T> (string path, Action<string, T> onLoaded = null) where T : UnityEngine.Object
     {
@@ -61,7 +62,7 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
 
         var resource = resources[path];
         resources.Remove(path);
-        Resources.UnloadAsset(resource);
+        UnloadResource(path, resource);
     }
 
     public T GetResource<T> (string path) where T : UnityEngine.Object

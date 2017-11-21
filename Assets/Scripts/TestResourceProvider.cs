@@ -14,7 +14,10 @@ public class TestResourceProvider : MonoBehaviour
 
     private void Awake ()
     {
-        Context.Resolve<ProjectResourceProvider>();
+        var provider = Context.Resolve<GoogleDriveResourceProvider>();
+        provider.DriveRootPath = "Resources";
+        provider.AddConverter(new PngToSpriteConverter());
+        //Context.Resolve<ProjectResourceProvider>();
     }
 
     private IEnumerator Start ()

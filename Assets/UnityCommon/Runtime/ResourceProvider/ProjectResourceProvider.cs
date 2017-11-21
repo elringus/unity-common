@@ -16,4 +16,9 @@ public class ProjectResourceProvider : MonoRunnerResourceProvider
     {
         return Resources.Load<T>(path);
     }
+
+    public override void UnloadResource (string path, UnityEngine.Object resource)
+    {
+        if (resource) Resources.UnloadAsset(resource);
+    }
 }
