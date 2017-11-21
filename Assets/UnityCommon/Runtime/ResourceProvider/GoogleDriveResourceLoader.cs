@@ -20,7 +20,7 @@ public class GoogleDriveResourceLoader<T> : AsyncRunner where T : UnityEngine.Ob
             OnLoadComplete += onLoadComplete;
     }
 
-    public void Load ()
+    public override void Run ()
     {
         if (IsLoading) return;
         IsLoading = true;

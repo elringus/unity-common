@@ -27,9 +27,9 @@ public abstract class AsyncRunner
             OnCompleted += onComplete;
     }
 
-    public virtual void RemoveAllOnCompletedListeners ()
+    public virtual void Run ()
     {
-        OnCompleted = null;
+        StartRunner(YieldInstruction);
     }
 
     public virtual void Stop ()
@@ -53,6 +53,11 @@ public abstract class AsyncRunner
 
         Stop();
         OnComplete();
+    }
+
+    public virtual void RemoveAllOnCompletedListeners ()
+    {
+        OnCompleted = null;
     }
 
     protected void StartRunner (YieldInstruction yieldInstruction = null)

@@ -9,20 +9,18 @@ public class ResourceRequestRunner<T> : AsyncRunner where T : UnityEngine.Object
     public ResourceRequest ResourceRequest { get; private set; }
     public string ResourcePath { get; private set; }
 
-    public ResourceRequestRunner (MonoBehaviour coroutineContainer = null, Action<string, T> onLoadComplete = null) :
-        base(coroutineContainer, null)
+    public ResourceRequestRunner (ResourceRequest resourceRequest, string path, MonoBehaviour coroutineContainer = null, 
+        Action<string, T> onLoadComplete = null) : base(coroutineContainer, null)
     {
+        ResourceRequest = resourceRequest;
+        ResourcePath = path;
         if (onLoadComplete != null)
             OnLoadComplete += onLoadComplete;
     }
 
-    public ResourceRequestRunner<T> Run (ResourceRequest resourceRequest, string path)
+    public override void Run ()
     {
-        ResourceRequest = resourceRequest;
-        ResourcePath = path;
         StartRunner(ResourceRequest);
-
-        return this;
     }
 
     public override void Cancel ()
