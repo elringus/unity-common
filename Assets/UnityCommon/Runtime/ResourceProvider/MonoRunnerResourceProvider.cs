@@ -18,10 +18,6 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
     private Dictionary<string, AsyncRunner> loadingResources = new Dictionary<string, AsyncRunner>();
     private float loadProgress = 1f;
 
-    public abstract AsyncRunner CreateLoadRunner<T> (string path, Action<string, T> onLoaded = null) where T : UnityEngine.Object;
-    public abstract T GetResourceBlocking<T> (string path) where T : UnityEngine.Object;
-    public abstract void UnloadResource (string path, UnityEngine.Object resource);
-
     public void LoadResourceAsync<T> (string path, Action<string, T> onLoaded = null) where T : UnityEngine.Object
     {
         if (resources.ContainsKey(path))
@@ -96,6 +92,10 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
 
         return castedResource;
     }
+
+    protected abstract AsyncRunner CreateLoadRunner<T> (string path, Action<string, T> onLoaded = null) where T : UnityEngine.Object;
+    protected abstract T GetResourceBlocking<T> (string path) where T : UnityEngine.Object;
+    protected abstract void UnloadResource (string path, UnityEngine.Object resource);
 
     private void CancelResourceLoading (string path)
     {

@@ -1,11 +1,15 @@
 ﻿using System;
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 using UnityGoogleDrive;
 
 public class GoogleDriveResourceLoader<TResource> : AsyncRunner where TResource : UnityEngine.Object
 {
+    [Serializable] struct CachedFileMeta { public string Id, ModifiedTime; }
+
     public event Action<string, TResource> OnLoadComplete;
 
     public override bool CanBeInstantlyCompleted { get { return false; } }
@@ -13,9 +17,12 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner where TResource 
     public string RootPath { get; private set; }
     public bool IsLoading { get; private set; }
 
+    private const string CACHE_PATH = "GoogleDriveResources";
+
     private GoogleDriveFiles.DownloadRequest downloadRequest;
     private GoogleDriveFiles.ListRequest listRequest;
     private IRawConverter<TResource> converter;
+    private UnityGoogleDrive.Data.File fileMeta;
     private byte[] rawData;
 
     public GoogleDriveResourceLoader (string rootPath, string resourcePath, IRawConverter<TResource> converter,
@@ -69,17 +76,47 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner where TResource 
 
     private IEnumerator DownloadFileRoutine ()
     {
-        var fullPath = string.Concat(RootPath, '/', ResourcePath);
-        var fileName = fullPath.GetAfter("/");
-        var parentNames = fullPath.GetBeforeLast("/").Split('/');
+        // 1. Load file metadata from Google Drive.
+        var filePath = string.Concat(RootPath, '/', ResourcePath);
+        yield return GetFileMetaRoutine(filePath);
+        if (fileMeta == null) yield break;
 
-        // Resolving folder ids one by one to find id of the file's parent folder.
+        // 2. Check if cached version of the file could be used.
+        yield return TryLoadFileCacheRoutine(fileMeta);
+
+        // 3. Cached version is not valid or doesn't exist; download the file.
+        if (rawData == null)
+        {
+            downloadRequest = new GoogleDriveFiles.DownloadRequest(fileMeta.Id);
+            yield return downloadRequest.Send();
+            if (downloadRequest.IsError || downloadRequest.ResponseData.Content == null)
+            {
+                Debug.LogError(string.Format("Failed to download {0} resource from Google Drive.", ResourcePath));
+                yield break;
+            }
+            rawData = downloadRequest.ResponseData.Content;
+
+            // 4. Cache the downloaded file.
+            yield return WriteFileCacheRoutine(fileMeta, rawData);
+        }
+
+        OnComplete();
+    }
+
+    private IEnumerator GetFileMetaRoutine (string filePath)
+    {
+        fileMeta = null;
+
+        var fileName = filePath.GetAfter("/");
+        var parentNames = filePath.GetBeforeLast("/").Split('/');
+
+        // 1. Resolving folder ids one by one to find id of the file's parent folder.
         var parendId = "root"; // 'root' is alias id for the root folder in Google Drive.
         for (int i = 0; i < parentNames.Length; i++)
         {
             listRequest = new GoogleDriveFiles.ListRequest();
             listRequest.Fields = new List<string> { "files(id)" };
-            listRequest.Q = string.Format("'{0}' in parents and name = '{1}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false", 
+            listRequest.Q = string.Format("'{0}' in parents and name = '{1}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
                 parendId, parentNames[i]);
 
             yield return listRequest.Send();
@@ -96,7 +133,7 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner where TResource 
             parendId = listRequest.ResponseData.Files[0].Id;
         }
 
-        // Resolving file id.
+        // 2. Searching the file and getting the metadata.
         listRequest = new GoogleDriveFiles.ListRequest();
         listRequest.Fields = new List<string> { "files(id, modifiedTime)" };
         listRequest.Q = string.Format("'{0}' in parents and name = '{1}.{2}'", parendId, fileName, converter.Extension);
@@ -112,24 +149,49 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner where TResource 
         if (listRequest.ResponseData.Files.Count > 1)
             Debug.LogWarning(string.Format("Multiple '{0}' files been found in Google Drive.", ResourcePath));
 
-        var fileId = listRequest.ResponseData.Files[0].Id;
+        fileMeta = listRequest.ResponseData.Files[0];
+    }
 
-        // TODO: Check if cached file has same modifiedTime.
+    private IEnumerator TryLoadFileCacheRoutine (UnityGoogleDrive.Data.File fileMeta)
+    {
+        rawData = null;
 
-        downloadRequest = new GoogleDriveFiles.DownloadRequest(fileId);
+        if (!PlayerPrefs.HasKey(fileMeta.Id)) yield break;
 
-        yield return downloadRequest.Send();
+        var cachedFileMetaString = PlayerPrefs.GetString(fileMeta.Id);
+        var cachedFileMeta = JsonUtility.FromJson<CachedFileMeta>(cachedFileMetaString);
+        var modifiedTime = DateTime.ParseExact(cachedFileMeta.ModifiedTime, "O",
+            CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
 
-        if (downloadRequest.IsError || downloadRequest.ResponseData.Content == null)
-        {
-            Debug.LogError(string.Format("Failed to download {0} resource from Google Drive.", ResourcePath));
-            yield break;
-        }
+        if (fileMeta.ModifiedTime > modifiedTime) yield break;
 
-        rawData = downloadRequest.ResponseData.Content;
+        var filePath = string.Concat(Application.persistentDataPath, "/", CACHE_PATH, "/", fileMeta.Id, ".", converter.Extension);
+        if (!File.Exists(filePath)) yield break;
 
-        // TODO: Cach the file.
+        var fileStream = File.OpenRead(filePath);
+        rawData = new byte[fileStream.Length];
+        var asyncRead = fileStream.BeginRead(rawData, 0, (int)fileStream.Length, asyncResult => {
+            fileStream.EndRead(asyncResult);
+            fileStream.Dispose();
+        }, null);
 
-        OnComplete();
+        yield return asyncRead;
+    }
+
+    private IEnumerator WriteFileCacheRoutine (UnityGoogleDrive.Data.File fileMeta, byte[] fileRawData)
+    {
+        var filePath = string.Concat(Application.persistentDataPath, "/", CACHE_PATH, "/", fileMeta.Id, ".", converter.Extension);
+        Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+        var fileStream = File.Create(filePath, fileRawData.Length);
+        var asyncWrite = fileStream.BeginWrite(fileRawData, 0, fileRawData.Length, asyncResult => {
+            fileStream.EndWrite(asyncResult);
+            fileStream.Dispose();
+        }, null);
+
+        yield return asyncWrite;
+
+        var cachedFileMeta = new CachedFileMeta() { Id = fileMeta.Id, ModifiedTime = fileMeta.ModifiedTime.Value.ToString("O") };
+        var cachedFileMetaString = JsonUtility.ToJson(cachedFileMeta);
+        PlayerPrefs.SetString(fileMeta.Id, cachedFileMetaString);
     }
 }

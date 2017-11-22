@@ -24,7 +24,7 @@ public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
         converters.Add(typeof(T), converter);
     }
 
-    public override AsyncRunner CreateLoadRunner<T> (string path, Action<string, T> onLoaded = null) 
+    protected override AsyncRunner CreateLoadRunner<T> (string path, Action<string, T> onLoaded = null) 
     {
         var resourceType = typeof(T);
         if (!converters.ContainsKey(resourceType))
@@ -36,13 +36,13 @@ public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
         return new GoogleDriveResourceLoader<T>(DriveRootPath, path, converter, this, onLoaded);
     }
 
-    public override T GetResourceBlocking<T> (string path)
+    protected override T GetResourceBlocking<T> (string path)
     {
         Debug.LogError("GoogleDriveResourceProvider doesn't support blocking resource loading.");
         return null;
     }
 
-    public override void UnloadResource (string path, UnityEngine.Object resource)
+    protected override void UnloadResource (string path, UnityEngine.Object resource)
     {
         if (resource) Destroy(resource);
     }
