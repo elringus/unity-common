@@ -172,10 +172,11 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner where TResource 
         rawData = new byte[fileStream.Length];
         var asyncRead = fileStream.BeginRead(rawData, 0, (int)fileStream.Length, asyncResult => {
             fileStream.EndRead(asyncResult);
-            fileStream.Dispose();
         }, null);
 
         yield return asyncRead;
+
+        fileStream.Dispose();
     }
 
     private IEnumerator WriteFileCacheRoutine (UnityGoogleDrive.Data.File fileMeta, byte[] fileRawData)
@@ -185,10 +186,17 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner where TResource 
         var fileStream = File.Create(filePath, fileRawData.Length);
         var asyncWrite = fileStream.BeginWrite(fileRawData, 0, fileRawData.Length, asyncResult => {
             fileStream.EndWrite(asyncResult);
-            fileStream.Dispose();
         }, null);
 
         yield return asyncWrite;
+
+        fileStream.Dispose();
+
+        // Flush cached file writes to IndexedDB on WebGL.
+        // https://forum.unity.com/threads/webgl-filesystem.294358/#post-1940712
+        #if UNITY_WEBGL && !UNITY_EDITOR
+        WebGLExtensions.SyncFs();
+        #endif
 
         var cachedFileMeta = new CachedFileMeta() { Id = fileMeta.Id, ModifiedTime = fileMeta.ModifiedTime.Value.ToString("O") };
         var cachedFileMetaString = JsonUtility.ToJson(cachedFileMeta);

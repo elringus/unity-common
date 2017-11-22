@@ -6,6 +6,8 @@ public class TestResourceProvider : MonoBehaviour
 {
     public SpriteRenderer SpriteRenderer;
 
+    private IResourceProvider provider;
+
     private readonly List<string> RESOURCES = new List<string>() {
         "Sprites/Image01",
         "Sprites/Image02",
@@ -22,7 +24,7 @@ public class TestResourceProvider : MonoBehaviour
 
     private IEnumerator Start ()
     {
-        var provider = Context.Resolve<IResourceProvider>();
+        provider = Context.Resolve<IResourceProvider>();
         var waitFordelay = new WaitForSeconds(3);
 
         yield return waitFordelay;
@@ -49,5 +51,11 @@ public class TestResourceProvider : MonoBehaviour
 
         foreach (var res in RESOURCES)
             SpriteRenderer.sprite = provider.GetResource<Sprite>(res);
+    }
+
+    private void OnGUI ()
+    {
+        if (provider != null && provider.IsLoading)
+            GUILayout.Label(provider.LoadProgress.ToString());
     }
 }
