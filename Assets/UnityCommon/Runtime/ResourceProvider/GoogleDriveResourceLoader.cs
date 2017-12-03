@@ -10,10 +10,8 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner where TResource 
 {
     [Serializable] struct CachedFileMeta { public string Id, ModifiedTime; }
 
-    public event Action<string, TResource> OnLoadComplete;
-
     public override bool CanBeInstantlyCompleted { get { return false; } }
-    public string ResourcePath { get; private set; }
+    public UnityResource<TResource> Resource { get; private set; }
     public string RootPath { get; private set; }
     public bool IsLoading { get; private set; }
 
@@ -25,14 +23,12 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner where TResource 
     private UnityGoogleDrive.Data.File fileMeta;
     private byte[] rawData;
 
-    public GoogleDriveResourceLoader (string rootPath, string resourcePath, IRawConverter<TResource> converter,
-        MonoBehaviour coroutineContainer, Action<string, TResource> onLoadComplete = null) : base(coroutineContainer, null)
+    public GoogleDriveResourceLoader (string rootPath, UnityResource<TResource> resource, 
+        IRawConverter<TResource> converter, MonoBehaviour coroutineContainer) : base(coroutineContainer, null)
     {
         RootPath = rootPath;
-        ResourcePath = resourcePath;
+        Resource = resource;
         this.converter = converter;
-        if (onLoadComplete != null)
-            OnLoadComplete += onLoadComplete;
     }
 
     public override void Run ()
@@ -58,8 +54,6 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner where TResource 
             listRequest.Abort();
             listRequest = null;
         }
-
-        OnLoadComplete.SafeInvoke(ResourcePath, null);
     }
 
     protected override void OnComplete ()
@@ -71,13 +65,13 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner where TResource 
         Debug.Assert(rawData != null);
 
         var resource = converter.Convert(rawData);
-        OnLoadComplete.SafeInvoke(ResourcePath, resource);
+        Resource.ProvideLoadedObject(resource);
     }
 
     private IEnumerator DownloadFileRoutine ()
     {
         // 1. Load file metadata from Google Drive.
-        var filePath = string.Concat(RootPath, '/', ResourcePath);
+        var filePath = string.Concat(RootPath, '/', Resource.Path);
         yield return GetFileMetaRoutine(filePath);
         if (fileMeta == null) yield break;
 
@@ -91,7 +85,7 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner where TResource 
             yield return downloadRequest.Send();
             if (downloadRequest.IsError || downloadRequest.ResponseData.Content == null)
             {
-                Debug.LogError(string.Format("Failed to download {0} resource from Google Drive.", ResourcePath));
+                Debug.LogError(string.Format("Failed to download {0} resource from Google Drive.", Resource.Path));
                 yield break;
             }
             rawData = downloadRequest.ResponseData.Content;
@@ -123,7 +117,7 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner where TResource 
 
             if (listRequest.IsError || listRequest.ResponseData.Files == null || listRequest.ResponseData.Files.Count == 0)
             {
-                Debug.LogError(string.Format("Failed to retrieve {0} part of {1} resource from Google Drive.", parentNames[i], ResourcePath));
+                Debug.LogError(string.Format("Failed to retrieve {0} part of {1} resource from Google Drive.", parentNames[i], Resource.Path));
                 yield break;
             }
 
@@ -142,12 +136,12 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner where TResource 
 
         if (listRequest.IsError || listRequest.ResponseData.Files == null || listRequest.ResponseData.Files.Count == 0)
         {
-            Debug.LogError(string.Format("Failed to retrieve {0} resource from Google Drive.", ResourcePath));
+            Debug.LogError(string.Format("Failed to retrieve {0} resource from Google Drive.", Resource.Path));
             yield break;
         }
 
         if (listRequest.ResponseData.Files.Count > 1)
-            Debug.LogWarning(string.Format("Multiple '{0}' files been found in Google Drive.", ResourcePath));
+            Debug.LogWarning(string.Format("Multiple '{0}' files been found in Google Drive.", Resource.Path));
 
         fileMeta = listRequest.ResponseData.Files[0];
     }

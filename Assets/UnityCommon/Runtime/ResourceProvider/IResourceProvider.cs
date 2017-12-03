@@ -1,7 +1,7 @@
 ﻿using System;
 
 /// <summary>
-/// Implementation is able to asynchronously load and unload <see cref="UnityEngine.Object"/> at runtime.
+/// Implementation is able to asynchronously load and unload <see cref="UnityResource"/> at runtime.
 /// </summary>
 public interface IResourceProvider
 {
@@ -21,25 +21,15 @@ public interface IResourceProvider
     float LoadProgress { get; }
 
     /// <summary>
-    /// Preloads resource asynchronously.
+    /// Loads resource asynchronously.
     /// </summary>
     /// <typeparam name="T">Type of the resource to load.</typeparam>
     /// <param name="path">Path to the resource location.</param>
-    /// <param name="onLoaded">Delegate to execute when the resource is loaded.</param>
-    void LoadResourceAsync<T> (string path, Action<string, T> onLoaded = null) where T : UnityEngine.Object;
+    UnityResource<T> LoadResource<T> (string path) where T : UnityEngine.Object;
 
     /// <summary>
     /// Unloads resource asynchronously.
     /// </summary>
     /// <param name="path">Path to the resource location.</param>
-    void UnloadResourceAsync (string path);
-
-    /// <summary>
-    /// Retrieves previously loaded resource. Should attempt to load the resource if it's not available. 
-    /// The implementation should be completely synchronous (blocking).
-    /// </summary>
-    /// <typeparam name="T">Type of the resource to retrieve.</typeparam>
-    /// <param name="path">Path to the resource location.</param>
-    /// <returns>The requested resource.</returns>
-    T GetResource<T> (string path) where T : UnityEngine.Object;
+    void UnloadResource (string path);
 }

@@ -30,27 +30,27 @@ public class TestResourceProvider : MonoBehaviour
         yield return waitFordelay;
 
         foreach (var res in RESOURCES)
-            provider.LoadResourceAsync<Sprite>(res);
+            provider.LoadResource<Sprite>(res);
 
         while (provider.IsLoading) yield return null;
 
         foreach (var res in RESOURCES)
-            SpriteRenderer.sprite = provider.GetResource<Sprite>(res);
+            SpriteRenderer.sprite = provider.LoadResource<Sprite>(res).Object;
 
         yield return waitFordelay;
 
         foreach (var res in RESOURCES)
-            provider.UnloadResourceAsync(res);
+            provider.UnloadResource(res);
 
         yield return waitFordelay;
 
         foreach (var res in RESOURCES)
-            provider.LoadResourceAsync<Sprite>(res);
+            provider.LoadResource<Sprite>(res);
 
         while (provider.IsLoading) yield return null;
 
         foreach (var res in RESOURCES)
-            SpriteRenderer.sprite = provider.GetResource<Sprite>(res);
+            SpriteRenderer.sprite = provider.LoadResource<Sprite>(res).Object;
     }
 
     private void OnGUI ()

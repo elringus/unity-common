@@ -9,17 +9,12 @@ public class RemoteResourceProvider : IResourceProvider
     public bool IsLoading { get { throw new System.NotImplementedException(); } }
     public float LoadProgress { get { throw new System.NotImplementedException(); } }
 
-    public void LoadResourceAsync<T> (string path, Action<string, T> onLoaded = null) where T : UnityEngine.Object
+    public UnityResource<T> LoadResource<T> (string path) where T : UnityEngine.Object
     {
         throw new System.NotImplementedException();
     }
 
-    public void UnloadResourceAsync (string path)
-    {
-        throw new System.NotImplementedException();
-    }
-
-    public T GetResource<T> (string path) where T : UnityEngine.Object
+    public void UnloadResource (string path)
     {
         throw new System.NotImplementedException();
     }

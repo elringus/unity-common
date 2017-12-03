@@ -1,24 +1,17 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 /// <summary>
 /// Provides resources stored in 'Resources' folders of the project.
 /// </summary>
 public class ProjectResourceProvider : MonoRunnerResourceProvider
 {
-    protected override AsyncRunner CreateLoadRunner<T> (string path, Action<string, T> onLoaded = null)
+    protected override AsyncRunner CreateLoadRunner<T> (UnityResource<T> resource)
     {
-        var loadRequest = Resources.LoadAsync<T>(path);
-        return new ResourceRequestRunner<T>(loadRequest, path, this, onLoaded);
+        return new ProjectResourceLoader<T>(resource, this);
     }
 
-    protected override T GetResourceBlocking<T> (string path)
+    protected override void UnloadResource (UnityResource resource)
     {
-        return Resources.Load<T>(path);
-    }
-
-    protected override void UnloadResource (string path, UnityEngine.Object resource)
-    {
-        if (resource) Resources.UnloadAsset(resource);
+        if (resource.IsLoaded) Resources.UnloadAsset(resource.Object);
     }
 }
