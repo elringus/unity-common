@@ -1,26 +1,33 @@
 ﻿using System;
 using UnityEngine;
 
-public class Tweener<T> : AsyncRunner where T : struct, ITweenValue
+/// <summary>
+/// Allows tweening a <see cref="ITweenValue"/> using coroutine.
+/// </summary>
+public class Tweener<TTweenValue> : AsyncRunner where TTweenValue : struct, ITweenValue
 {
-    public override bool CanBeInstantlyCompleted { get { return true; } }
-
     private float elapsedTime;
-    private T tweenValue;
+    private TTweenValue tweenValue;
 
-    public Tweener (MonoBehaviour coroutineContainer = null, Action onComplete = null) :
-        base(coroutineContainer, onComplete)
+    public Tweener (MonoBehaviour coroutineContainer = null,
+        Action onCompleted = null) : base(coroutineContainer, onCompleted) { }
+
+    public Tweener (TTweenValue tweenValue, MonoBehaviour coroutineContainer = null, 
+        Action onCompleted = null) : base(coroutineContainer, onCompleted)
     {
-        
+        this.tweenValue = tweenValue;
     }
 
-    public Tweener<T> Run (T tweenValue)
+    public override void Run ()
+    {
+        Run(tweenValue);
+    }
+
+    public Tweener<TTweenValue> Run (TTweenValue tweenValue)
     {
         elapsedTime = 0f;
         this.tweenValue = tweenValue;
-
-        StartRunner();
-
+        Run();
         return this;
     }
 
@@ -29,19 +36,18 @@ public class Tweener<T> : AsyncRunner where T : struct, ITweenValue
         return elapsedTime < tweenValue.TweenDuration;
     }
 
-    protected override void OnRoutineTick ()
+    protected override void OnCoroutineTick ()
     {
-        base.OnRoutineTick();
+        base.OnCoroutineTick();
 
         elapsedTime += tweenValue.IsTimeScaleIgnored ? Time.unscaledDeltaTime : Time.deltaTime;
         var tweenPercent = Mathf.Clamp01(elapsedTime / tweenValue.TweenDuration);
         tweenValue.TweenValue(tweenPercent);
     }
 
-    protected override void OnComplete ()
+    public override void CompleteInstantly ()
     {
-        base.OnComplete();
-
         tweenValue.TweenValue(1f);
+        base.CompleteInstantly();
     }
 }

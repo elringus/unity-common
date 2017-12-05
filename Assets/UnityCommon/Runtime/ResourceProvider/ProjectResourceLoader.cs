@@ -8,28 +8,27 @@ public class ProjectResourceLoader<TResource> : AsyncRunner where TResource : Ob
     private ResourceRequest resourceRequest;
 
     public ProjectResourceLoader (UnityResource<TResource> resource, MonoBehaviour coroutineContainer = null) 
-        : base(coroutineContainer, null)
+        : base(coroutineContainer)
     {
         Resource = resource;
     }
 
     public override void Run ()
     {
-        resourceRequest = Resources.LoadAsync<TResource>(Resource.Path);
-        StartRunner(resourceRequest);
+        YieldInstruction = Resources.LoadAsync<TResource>(Resource.Path);
+        base.Run();
     }
 
-    public override void Cancel ()
+    public override void Stop ()
     {
-        base.Cancel();
+        base.Stop();
 
         resourceRequest = null;
     }
 
-    protected override void OnComplete ()
+    protected override void HandleOnCompleted ()
     {
-        base.OnComplete();
-
         Resource.ProvideLoadedObject(resourceRequest.asset as TResource);
+        base.HandleOnCompleted();
     }
 }

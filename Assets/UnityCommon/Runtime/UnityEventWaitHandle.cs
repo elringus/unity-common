@@ -25,7 +25,7 @@ public class ActionWaitHandle : IDisposable
 
     public static void WaitForAllAsyncRunners (Action onComplete)
     {
-        var pendingRunners = Context.ResolveAll<AsyncRunner>(runner => !runner.IsComplete);
+        var pendingRunners = Context.ResolveAll<AsyncRunner>(runner => !runner.IsCompleted);
         if (pendingRunners.Count == 0) { onComplete.SafeInvoke(); return; }
 
         using (var waiter = new ActionWaitHandle(WaitForEnum.AllActions, onComplete))

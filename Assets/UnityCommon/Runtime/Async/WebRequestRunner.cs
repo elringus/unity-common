@@ -6,27 +6,26 @@ public class WebRequestRunner : AsyncRunner
 {
     public event Action<UnityWebRequest> OnResponse;
 
+    public UnityWebRequest WebRequest { get; private set; }
     public override bool CanBeInstantlyCompleted { get { return false; } }
 
-    private UnityWebRequest webRequest;
-
-    public WebRequestRunner (MonoBehaviour coroutineContainer = null, Action<UnityWebRequest> onResponse = null) :
-        base(coroutineContainer, null)
+    public WebRequestRunner (UnityWebRequest webRequest, Action<UnityWebRequest> onResponse = null,
+        MonoBehaviour coroutineContainer = null) : base(coroutineContainer, null)
     {
-        OnResponse += onResponse;
+        WebRequest = webRequest;
+        if (onResponse != null)
+            OnResponse += onResponse;
     }
 
-    public WebRequestRunner Run (UnityWebRequest webRequest)
+    public override void Run ()
     {
-        this.webRequest = webRequest;
-        StartRunner(webRequest.Send());
-
-        return this;
+        YieldInstruction = WebRequest.Send();
+        base.Run();
     }
 
-    protected override void OnComplete ()
+    protected override void HandleOnCompleted ()
     {
-        base.OnComplete();
-        OnResponse.SafeInvoke(webRequest);
+        base.HandleOnCompleted();
+        OnResponse.SafeInvoke(WebRequest);
     }
 }

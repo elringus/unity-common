@@ -13,7 +13,6 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner where TResource 
     public override bool CanBeInstantlyCompleted { get { return false; } }
     public UnityResource<TResource> Resource { get; private set; }
     public string RootPath { get; private set; }
-    public bool IsLoading { get; private set; }
 
     private const string CACHE_PATH = "GoogleDriveResources";
 
@@ -24,24 +23,16 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner where TResource 
     private byte[] rawData;
 
     public GoogleDriveResourceLoader (string rootPath, UnityResource<TResource> resource, 
-        IRawConverter<TResource> converter, MonoBehaviour coroutineContainer) : base(coroutineContainer, null)
+        IRawConverter<TResource> converter, MonoBehaviour coroutineContainer) : base(coroutineContainer)
     {
         RootPath = rootPath;
         Resource = resource;
         this.converter = converter;
     }
 
-    public override void Run ()
+    public override void Stop ()
     {
-        if (IsLoading) return;
-        IsLoading = true;
-
-        CoroutineContainer.StartCoroutine(DownloadFileRoutine());
-    }
-
-    public override void Cancel ()
-    {
-        base.Cancel();
+        base.Stop();
 
         if (downloadRequest != null)
         {
@@ -56,19 +47,17 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner where TResource 
         }
     }
 
-    protected override void OnComplete ()
+    protected override void HandleOnCompleted ()
     {
-        base.OnComplete();
-
-        IsLoading = false;
-
         Debug.Assert(rawData != null);
 
         var resource = converter.Convert(rawData);
         Resource.ProvideLoadedObject(resource);
+
+        base.HandleOnCompleted();
     }
 
-    private IEnumerator DownloadFileRoutine ()
+    protected override IEnumerator AsyncRoutine ()
     {
         // 1. Load file metadata from Google Drive.
         var filePath = string.Concat(RootPath, '/', Resource.Path);
@@ -94,7 +83,7 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner where TResource 
             yield return WriteFileCacheRoutine(fileMeta, rawData);
         }
 
-        OnComplete();
+        HandleOnCompleted();
     }
 
     private IEnumerator GetFileMetaRoutine (string filePath)

@@ -97,7 +97,7 @@ public class SpriteGroup : MonoBehaviour
 
                 // To prevent concurrency problems.
                 var selectedItemNameCopy = selectedItemName;
-                if (stackedSpriteTweener != null && !stackedSpriteTweener.IsComplete)
+                if (stackedSpriteTweener != null && !stackedSpriteTweener.IsCompleted)
                     stackedSpriteTweener.CompleteInstantly();
 
                 stackedSpriteTweener = selectedSprite.FadeIn(fadeTime, this, () => {

@@ -2,112 +2,79 @@
 using System.Collections;
 using UnityEngine;
 
-public abstract class AsyncRunner
+/// <summary>
+/// Allows running custom asynchronous logic via coroutine.
+/// </summary>
+public abstract class AsyncRunner : AsyncAction
 {
     class AsyncRunnerContainer : MonoBehaviour { }
 
-    public event Action OnCompleted;
+    public bool IsRunning { get { return coroutine != null; } }
 
-    public abstract bool CanBeInstantlyCompleted { get; }
-    public bool IsComplete { get; private set; }
-
-    protected MonoBehaviour CoroutineContainer { get; private set; }
-    protected YieldInstruction YieldInstruction { get; private set; }
-    protected IEnumerator Coroutine { get; private set; }
-    protected int RoutineTickCount { get; private set; }
+    protected YieldInstruction YieldInstruction { get; set; }
+    protected int CoroutineTickCount { get; private set; }
 
     private GameObject containerObject;
+    private MonoBehaviour coroutineContainer;
+    private IEnumerator coroutine;
 
-    public AsyncRunner (MonoBehaviour coroutineContainer = null, Action onComplete = null)
+    public AsyncRunner (MonoBehaviour coroutineContainer = null, Action onCompleted = null)
     {
-        IsComplete = false;
-        RoutineTickCount = 0;
-        CoroutineContainer = coroutineContainer;
-        if (onComplete != null)
-            OnCompleted += onComplete;
+        this.coroutineContainer = coroutineContainer ?? CreateContainer();
+        if (onCompleted != null)
+            OnCompleted += onCompleted;
     }
 
     public virtual void Run ()
     {
-        StartRunner(YieldInstruction);
+        Stop();
+
+        if (!coroutineContainer.gameObject.activeInHierarchy)
+        {
+            HandleOnCompleted();
+            return;
+        }
+
+        coroutine = AsyncRoutine();
+        coroutineContainer.StartCoroutine(coroutine);
     }
 
     public virtual void Stop ()
     {
-        if (Coroutine != null)
-        {
-            if (CoroutineContainer)
-                CoroutineContainer.StopCoroutine(Coroutine);
-            Coroutine = null;
-        }
-    }
+        if (!IsRunning) return;
 
-    public virtual void Cancel ()
-    {
-        Stop();
-    }
-
-    public virtual void CompleteInstantly ()
-    {
-        if (!CanBeInstantlyCompleted || IsComplete) return;
-
-        Stop();
-        OnComplete();
-    }
-
-    public virtual void RemoveAllOnCompletedListeners ()
-    {
-        OnCompleted = null;
-    }
-
-    protected void StartRunner (YieldInstruction yieldInstruction = null)
-    {
-        YieldInstruction = yieldInstruction;
-        StartCoroutine();
+        if (coroutineContainer)
+            coroutineContainer.StopCoroutine(coroutine);
+        coroutine = null;
     }
 
     protected virtual bool LoopCondition ()
     {
-        return RoutineTickCount == 0;
+        return CoroutineTickCount == 0;
     }
 
-    protected virtual void OnRoutineTick () { }
-
-    protected virtual void OnComplete ()
+    protected virtual void OnCoroutineTick ()
     {
-        IsComplete = true;
-        OnCompleted.SafeInvoke();
+        CoroutineTickCount++;
+    }
+
+    protected override void HandleOnCompleted ()
+    {
+        Stop();
         if (containerObject)
             UnityEngine.Object.Destroy(containerObject);
+        base.HandleOnCompleted();
     }
 
-    private void StartCoroutine ()
-    {
-        if (!CoroutineContainer)
-            CoroutineContainer = CreateContainer();
-
-        Stop();
-
-        if (!CoroutineContainer.gameObject.activeInHierarchy)
-        {
-            OnComplete();
-            return;
-        }
-
-        Coroutine = AsyncRoutine();
-        CoroutineContainer.StartCoroutine(Coroutine);
-    }
-
-    private IEnumerator AsyncRoutine ()
+    protected virtual IEnumerator AsyncRoutine ()
     {
         while (LoopCondition())
         {
-            OnRoutineTick();
+            OnCoroutineTick();
             yield return YieldInstruction;
-            RoutineTickCount++;
         }
 
-        OnComplete();
+        HandleOnCompleted();
     }
 
     private MonoBehaviour CreateContainer ()

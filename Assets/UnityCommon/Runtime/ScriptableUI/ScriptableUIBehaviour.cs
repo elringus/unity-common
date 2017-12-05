@@ -52,7 +52,7 @@ public class ScriptableUIBehaviour : UIBehaviour
         }
 
         var tween = new FloatTween(canvasGroup.alpha, targetOpacity, fadeDuration, alpha => canvasGroup.alpha = alpha);
-        new Tweener<FloatTween>(this, () => OnFadeComplete.SafeInvoke()).Run(tween);
+        new Tweener<FloatTween>(tween, this, () => OnFadeComplete.SafeInvoke()).Run();
     }
 
     public virtual void ToggleVisibility (float? fadeTime = null)

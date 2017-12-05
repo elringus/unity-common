@@ -59,7 +59,7 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
     {
         if (!runners.ContainsKey(path)) return;
 
-        runners[path].Cancel();
+        runners[path].Stop();
         runners.Remove(path);
 
         UpdateLoadProgress();

@@ -8,8 +8,12 @@ public class Timer : AsyncRunner
     public float Duration { get; private set; }
     public float ElapsedTime { get; private set; }
 
-    public Timer (MonoBehaviour coroutineContainer = null, Action onComplete = null) :
-        base(coroutineContainer, onComplete) { }
+    public Timer (float duration = 0f, bool ignoreTimeScale = false, 
+        MonoBehaviour coroutineContainer = null, Action onCompleted = null) : base(coroutineContainer, onCompleted)
+    {
+        Duration = duration;
+        IsTimeScaleIgnored = ignoreTimeScale;
+    }
 
     public Timer Run (float duration, bool ignoreTimeScale = false)
     {
@@ -17,7 +21,7 @@ public class Timer : AsyncRunner
         Duration = duration;
         IsTimeScaleIgnored = ignoreTimeScale;
 
-        StartRunner();
+        base.Run();
 
         return this;
     }
@@ -27,9 +31,9 @@ public class Timer : AsyncRunner
         return ElapsedTime < Duration;
     }
 
-    protected override void OnRoutineTick ()
+    protected override void OnCoroutineTick ()
     {
-        base.OnRoutineTick();
+        base.OnCoroutineTick();
 
         ElapsedTime += IsTimeScaleIgnored ? Time.unscaledDeltaTime : Time.deltaTime;
     }
