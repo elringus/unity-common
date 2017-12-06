@@ -36,10 +36,15 @@ public class AsyncAction : CustomYieldInstruction
     /// Adds a delegate to invoke when the action is completed execution.
     /// If the action is already completed, the delegate will be invoked immediately.
     /// </summary>
-    public virtual void Then (Action action)
+    public virtual AsyncAction Then (Action action)
     {
-        if (IsCompleted) action.SafeInvoke();
-        else OnCompleted += action;
+        var promise = new AsyncAction();
+        promise.OnCompleted += action;
+
+        if (IsCompleted) promise.CompleteInstantly();
+        else OnCompleted += promise.CompleteInstantly;
+
+        return promise;
     }
 
     protected virtual void HandleOnCompleted ()
@@ -85,10 +90,15 @@ public class AsyncAction<TState> : AsyncAction
     /// Adds a delegate to invoke when the action is completed execution.
     /// If the action is already completed, the delegate will be invoked immediately.
     /// </summary>
-    public virtual void Then (Action<TState> action)
+    public virtual AsyncAction<TState> Then (Action<TState> action)
     {
-        if (IsCompleted) action.SafeInvoke(State);
-        else OnCompleted += action;
+        var promise = new AsyncAction<TState>();
+        promise.OnCompleted += action;
+
+        if (IsCompleted) promise.CompleteInstantly();
+        else OnCompleted += promise.CompleteInstantly;
+
+        return promise;
     }
 
     protected override void HandleOnCompleted ()
