@@ -124,7 +124,8 @@ namespace UnityGoogleDrive
         /// </summary>
         public virtual void Abort ()
         {
-            webRequest.Abort();
+            if (webRequest != null && IsRunning)
+                webRequest.Abort();
         }
     
         /// <summary>
@@ -132,7 +133,8 @@ namespace UnityGoogleDrive
         /// </summary>
         public virtual void Dispose ()
         {
-            webRequest.Dispose();
+            if (webRequest != null)
+                webRequest.Dispose();
         }
     
         protected virtual UnityWebRequest CreateWebRequest ()
