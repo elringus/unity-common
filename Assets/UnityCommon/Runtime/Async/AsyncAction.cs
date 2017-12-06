@@ -50,27 +50,34 @@ public class AsyncAction : CustomYieldInstruction
 }
 
 /// <summary>
-/// Represents a <see cref="AsyncAction"/> with a strongly-typed result object.
+/// Represents a <see cref="AsyncAction"/> with a strongly-typed state object.
 /// </summary>
-public class AsyncAction<TResult> : AsyncAction 
+public class AsyncAction<TState> : AsyncAction 
 {
     /// <summary>
     /// Event invoked when action has completed execution.
     /// </summary>
-    public new event Action<TResult> OnCompleted;
+    public new event Action<TState> OnCompleted;
 
     /// <summary>
-    /// Result of the action execution.
+    /// Payload data describing action execution.
     /// </summary>
-    public TResult Result { get; protected set; }
+    public TState State { get; protected set; }
+
+    public AsyncAction () : base() { }
+
+    public AsyncAction (TState state) : base()
+    {
+        State = state;
+    }
 
     /// <summary>
-    /// Forces action to complete instantly by providing the <see cref="Result"/> object.
+    /// Forces action to complete instantly; allows modifying <see cref="State"/> object.
     /// Works only when <see cref="CanBeInstantlyCompleted"/>.
     /// </summary>
-    public virtual void CompleteInstantly (TResult result)
+    public virtual void CompleteInstantly (TState state)
     {
-        Result = result;
+        State = state;
         base.CompleteInstantly();
     }
 
@@ -78,15 +85,15 @@ public class AsyncAction<TResult> : AsyncAction
     /// Adds a delegate to invoke when the action is completed execution.
     /// If the action is already completed, the delegate will be invoked immediately.
     /// </summary>
-    public virtual void Then (Action<TResult> action)
+    public virtual void Then (Action<TState> action)
     {
-        if (IsCompleted) action.SafeInvoke(Result);
+        if (IsCompleted) action.SafeInvoke(State);
         else OnCompleted += action;
     }
 
     protected override void HandleOnCompleted ()
     {
         base.HandleOnCompleted();
-        OnCompleted.SafeInvoke(Result);
+        OnCompleted.SafeInvoke(State);
     }
 }
