@@ -58,9 +58,14 @@ public abstract class AsyncRunner : AsyncAction
         CoroutineTickCount++;
     }
 
-    protected override void HandleOnCompleted ()
+    public override void CompleteInstantly ()
     {
         Stop();
+        base.CompleteInstantly();
+    }
+
+    protected override void HandleOnCompleted ()
+    {
         if (containerObject)
             UnityEngine.Object.Destroy(containerObject);
         base.HandleOnCompleted();

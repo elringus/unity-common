@@ -38,13 +38,26 @@ public class AsyncAction : CustomYieldInstruction
     /// </summary>
     public virtual AsyncAction Then (Action action)
     {
-        var promise = new AsyncAction();
-        promise.OnCompleted += action;
+        if (IsCompleted) action.Invoke();
+        else OnCompleted += action;
 
-        if (IsCompleted) promise.CompleteInstantly();
-        else OnCompleted += promise.CompleteInstantly;
+        return this;
+    }
 
-        return promise;
+    /// <summary>
+    /// Adds an async function to invoke when the action is completed execution.
+    /// If the action is already completed, the function will be invoked immediately.
+    /// Returned <see cref="AsyncAction"/> will complete after async function execution.
+    /// </summary>
+    public virtual AsyncAction ThenAsync (Func<AsyncAction> func)
+    {
+        if (IsCompleted) return func.Invoke();
+        else
+        {
+            var promise = new AsyncAction();
+            OnCompleted += () => func.Invoke().Then(promise.CompleteInstantly);
+            return promise;
+        }
     }
 
     protected virtual void HandleOnCompleted ()
@@ -92,13 +105,26 @@ public class AsyncAction<TState> : AsyncAction
     /// </summary>
     public virtual AsyncAction<TState> Then (Action<TState> action)
     {
-        var promise = new AsyncAction<TState>();
-        promise.OnCompleted += action;
+        if (IsCompleted) action.Invoke(State);
+        else OnCompleted += action;
 
-        if (IsCompleted) promise.CompleteInstantly();
-        else OnCompleted += promise.CompleteInstantly;
+        return this;
+    }
 
-        return promise;
+    /// <summary>
+    /// Adds an async function to invoke when the action is completed execution.
+    /// If the action is already completed, the function will be invoked immediately.
+    /// Returned <see cref="AsyncAction{TFunc}"/> will complete after async function execution.
+    /// </summary>
+    public virtual AsyncAction<TFunc> ThenAsync<TFunc> (Func<TState, AsyncAction<TFunc>> func)
+    {
+        if (IsCompleted) return func.Invoke(State);
+        else
+        {
+            var promise = new AsyncAction<TFunc>();
+            OnCompleted += (state) => func.Invoke(state).Then(promise.CompleteInstantly);
+            return promise;
+        }
     }
 
     protected override void HandleOnCompleted ()

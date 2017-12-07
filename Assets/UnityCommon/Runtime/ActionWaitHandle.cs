@@ -1,6 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 
+/// <summary>
+/// Allows waiting for a set of <see cref="Action"/>.
+/// </summary>
+/// <example> 
+/// This sample shows how to wait for a set of 'runner' objects;
+/// 'onCompleted' delegate will be invoked when all runners complete execution.
+/// <code>
+/// using (var waiter = new ActionWaitHandle(WaitForEnum.AllActions, onCompleted)) 
+///     runners.ForEach(runner => runner.OnCompleted += waiter.Wait());
+/// </code>
+/// </example>
 public class ActionWaitHandle : IDisposable
 {
     public enum WaitForEnum { AnyAction, AllActions }
@@ -21,15 +32,6 @@ public class ActionWaitHandle : IDisposable
         if (onComplete != null)
             OnComplete += onComplete;
         completedActionIds = new List<Guid>();
-    }
-
-    public static void WaitForAllAsyncRunners (Action onComplete)
-    {
-        var pendingRunners = Context.ResolveAll<AsyncRunner>(runner => !runner.IsCompleted);
-        if (pendingRunners.Count == 0) { onComplete.SafeInvoke(); return; }
-
-        using (var waiter = new ActionWaitHandle(WaitForEnum.AllActions, onComplete))
-            pendingRunners.ForEach(runner => runner.OnCompleted += waiter.Wait());
     }
 
     public void Dispose ()
