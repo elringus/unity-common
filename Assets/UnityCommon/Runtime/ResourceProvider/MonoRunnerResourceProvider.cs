@@ -17,23 +17,27 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
     private Dictionary<string, UnityResource> resources = new Dictionary<string, UnityResource>();
     private Dictionary<string, AsyncRunner> runners = new Dictionary<string, AsyncRunner>();
 
-    public UnityResource<T> LoadResource<T> (string path) where T : UnityEngine.Object
+    public AsyncAction<UnityResource<T>> LoadResource<T> (string path) where T : UnityEngine.Object
     {
-        if (resources.ContainsKey(path))
-            return resources[path] as UnityResource<T>;
-
         var resource = new UnityResource<T>(path);
-        resource.OnLoaded += HandleResourceLoaded;
+        var loadAction = new AsyncAction<UnityResource<T>>(resource);
+
+        if (resources.ContainsKey(path))
+        {
+            loadAction.CompleteInstantly(resources[path] as UnityResource<T>);
+            return loadAction;
+        }
+
         resources.Add(path, resource);
+        loadAction.OnCompleted += HandleResourceLoaded;
 
         var loadRunner = CreateLoadRunner(resource);
+        loadRunner.OnCompleted += loadAction.CompleteInstantly;
         runners.Add(path, loadRunner);
-
         UpdateLoadProgress();
-
         loadRunner.Run();
 
-        return resource;
+        return loadAction;
     }
 
     public void UnloadResource (string path)
@@ -65,12 +69,12 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
         UpdateLoadProgress();
     }
 
-    private void HandleResourceLoaded<T> (string path, T resource) where T : UnityEngine.Object
+    private void HandleResourceLoaded<T> (UnityResource<T> resource) where T : UnityEngine.Object
     {
-        if (!resource) Debug.LogError(string.Format("Resource '{0}' failed to load.", path));
+        if (!resource.IsValid) Debug.LogError(string.Format("Resource '{0}' failed to load.", resource.Path));
 
-        if (runners.ContainsKey(path)) runners.Remove(path);
-        else Debug.LogWarning(string.Format("Load runner for resource '{0}' not found.", path));
+        if (runners.ContainsKey(resource.Path)) runners.Remove(resource.Path);
+        else Debug.LogWarning(string.Format("Load runner for resource '{0}' not found.", resource.Path));
 
         UpdateLoadProgress();
     }

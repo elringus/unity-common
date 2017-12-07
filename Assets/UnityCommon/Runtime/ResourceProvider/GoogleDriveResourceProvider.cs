@@ -38,6 +38,6 @@ public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
 
     protected override void UnloadResource (UnityResource resource)
     {
-        if (resource.IsLoaded) Destroy(resource.Object);
+        if (resource.IsValid) Destroy(resource.Object);
     }
 }

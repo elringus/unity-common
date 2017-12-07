@@ -50,10 +50,7 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner where TResource 
     protected override void HandleOnCompleted ()
     {
         Debug.Assert(rawData != null);
-
-        var resource = converter.Convert(rawData);
-        Resource.ProvideLoadedObject(resource);
-
+        Resource.Object = converter.Convert(rawData);
         base.HandleOnCompleted();
     }
 

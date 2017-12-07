@@ -35,7 +35,7 @@ public class TestResourceProvider : MonoBehaviour
         while (provider.IsLoading) yield return null;
 
         foreach (var res in RESOURCES)
-            SpriteRenderer.sprite = provider.LoadResource<Sprite>(res).Object;
+            SpriteRenderer.sprite = provider.LoadResource<Sprite>(res).State.Object;
 
         yield return waitFordelay;
 
@@ -50,7 +50,7 @@ public class TestResourceProvider : MonoBehaviour
         while (provider.IsLoading) yield return null;
 
         foreach (var res in RESOURCES)
-            SpriteRenderer.sprite = provider.LoadResource<Sprite>(res).Object;
+            SpriteRenderer.sprite = provider.LoadResource<Sprite>(res).State.Object;
     }
 
     private void OnGUI ()

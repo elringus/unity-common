@@ -25,7 +25,7 @@ public interface IResourceProvider
     /// </summary>
     /// <typeparam name="T">Type of the resource to load.</typeparam>
     /// <param name="path">Path to the resource location.</param>
-    UnityResource<T> LoadResource<T> (string path) where T : UnityEngine.Object;
+    AsyncAction<UnityResource<T>> LoadResource<T> (string path) where T : UnityEngine.Object;
 
     /// <summary>
     /// Unloads resource asynchronously.

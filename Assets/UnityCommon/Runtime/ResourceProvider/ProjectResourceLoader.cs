@@ -28,7 +28,7 @@ public class ProjectResourceLoader<TResource> : AsyncRunner where TResource : Ob
 
     protected override void HandleOnCompleted ()
     {
-        Resource.ProvideLoadedObject(resourceRequest.asset as TResource);
+        Resource.Object = resourceRequest.asset as TResource;
         base.HandleOnCompleted();
     }
 }

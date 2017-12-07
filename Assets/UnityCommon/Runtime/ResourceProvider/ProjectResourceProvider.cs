@@ -12,6 +12,6 @@ public class ProjectResourceProvider : MonoRunnerResourceProvider
 
     protected override void UnloadResource (UnityResource resource)
     {
-        if (resource.IsLoaded) Resources.UnloadAsset(resource.Object);
+        if (resource.IsValid) Resources.UnloadAsset(resource.Object);
     }
 }
