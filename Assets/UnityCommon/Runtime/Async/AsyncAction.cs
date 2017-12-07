@@ -114,6 +114,22 @@ public class AsyncAction<TState> : AsyncAction
     /// <summary>
     /// Adds an async function to invoke when the action is completed execution.
     /// If the action is already completed, the function will be invoked immediately.
+    /// Returned <see cref="AsyncAction"/> will complete after async function execution.
+    /// </summary>
+    public virtual AsyncAction ThenAsync (Func<TState, AsyncAction> func)
+    {
+        if (IsCompleted) return func.Invoke(State);
+        else
+        {
+            var promise = new AsyncAction();
+            OnCompleted += (state) => func.Invoke(state).Then(promise.CompleteInstantly);
+            return promise;
+        }
+    }
+
+    /// <summary>
+    /// Adds an async function to invoke when the action is completed execution.
+    /// If the action is already completed, the function will be invoked immediately.
     /// Returned <see cref="AsyncAction{TFunc}"/> will complete after async function execution.
     /// </summary>
     public virtual AsyncAction<TFunc> ThenAsync<TFunc> (Func<TState, AsyncAction<TFunc>> func)
