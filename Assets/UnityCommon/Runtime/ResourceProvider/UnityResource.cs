@@ -14,7 +14,7 @@ public class UnityResource
 
 public class UnityResource<T> : UnityResource where T : Object
 {
-    public new T Object { get { return CastObject(base.Object); } set { Object = value; } }
+    public new T Object { get { return CastObject(base.Object); } set { base.Object = value; } }
 
     public UnityResource (string path) : base(path) { }
 
