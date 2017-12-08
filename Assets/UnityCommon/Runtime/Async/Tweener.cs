@@ -4,10 +4,11 @@ using UnityEngine;
 /// <summary>
 /// Allows tweening a <see cref="ITweenValue"/> using coroutine.
 /// </summary>
-public class Tweener<TTweenValue> : AsyncRunner where TTweenValue : struct, ITweenValue
+public class Tweener<TTweenValue> : AsyncRunner<TTweenValue> where TTweenValue : struct, ITweenValue
 {
+    public TTweenValue TweenValue { get { return State; } private set { State = value; } }
+
     private float elapsedTime;
-    private TTweenValue tweenValue;
 
     public Tweener (MonoBehaviour coroutineContainer = null,
         Action onCompleted = null) : base(coroutineContainer, onCompleted) { }
@@ -15,39 +16,39 @@ public class Tweener<TTweenValue> : AsyncRunner where TTweenValue : struct, ITwe
     public Tweener (TTweenValue tweenValue, MonoBehaviour coroutineContainer = null, 
         Action onCompleted = null) : base(coroutineContainer, onCompleted)
     {
-        this.tweenValue = tweenValue;
+        TweenValue = tweenValue;
     }
 
-    public override void Run ()
+    public override AsyncRunner<TTweenValue> Run ()
     {
-        Run(tweenValue);
+        elapsedTime = 0f;
+        return base.Run();
     }
 
     public Tweener<TTweenValue> Run (TTweenValue tweenValue)
     {
-        elapsedTime = 0f;
-        this.tweenValue = tweenValue;
+        TweenValue = tweenValue;
         Run();
         return this;
     }
 
     protected override bool LoopCondition ()
     {
-        return elapsedTime < tweenValue.TweenDuration;
+        return elapsedTime < TweenValue.TweenDuration;
     }
 
     protected override void OnCoroutineTick ()
     {
         base.OnCoroutineTick();
 
-        elapsedTime += tweenValue.IsTimeScaleIgnored ? Time.unscaledDeltaTime : Time.deltaTime;
-        var tweenPercent = Mathf.Clamp01(elapsedTime / tweenValue.TweenDuration);
-        tweenValue.TweenValue(tweenPercent);
+        elapsedTime += TweenValue.IsTimeScaleIgnored ? Time.unscaledDeltaTime : Time.deltaTime;
+        var tweenPercent = Mathf.Clamp01(elapsedTime / TweenValue.TweenDuration);
+        TweenValue.TweenValue(tweenPercent);
     }
 
     public override void CompleteInstantly ()
     {
-        tweenValue.TweenValue(1f);
+        TweenValue.TweenValue(1f);
         base.CompleteInstantly();
     }
 }

@@ -5,7 +5,7 @@
 /// </summary>
 public class ProjectResourceProvider : MonoRunnerResourceProvider
 {
-    protected override AsyncRunner CreateLoadRunner<T> (UnityResource<T> resource)
+    protected override AsyncRunner<UnityResource<T>> CreateLoadRunner<T> (UnityResource<T> resource)
     {
         return new ProjectResourceLoader<T>(resource, this);
     }

@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-public class Timer : AsyncRunner
+public class Timer : AsyncRunner<object>
 {
     public override bool CanBeInstantlyCompleted { get { return true; } }
     public bool IsTimeScaleIgnored { get; private set; }

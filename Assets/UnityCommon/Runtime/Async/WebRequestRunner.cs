@@ -2,30 +2,20 @@
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class WebRequestRunner : AsyncRunner
+public class WebRequestRunner : AsyncRunner<UnityWebRequest>
 {
-    public event Action<UnityWebRequest> OnResponse;
-
-    public UnityWebRequest WebRequest { get; private set; }
+    public UnityWebRequest WebRequest { get { return State; } private set { State = value; } }
     public override bool CanBeInstantlyCompleted { get { return false; } }
 
     public WebRequestRunner (UnityWebRequest webRequest, Action<UnityWebRequest> onResponse = null,
-        MonoBehaviour coroutineContainer = null) : base(coroutineContainer, null)
+        MonoBehaviour coroutineContainer = null) : base(coroutineContainer, onResponse)
     {
         WebRequest = webRequest;
-        if (onResponse != null)
-            OnResponse += onResponse;
     }
 
-    public override void Run ()
+    public override AsyncRunner<UnityWebRequest> Run ()
     {
         YieldInstruction = WebRequest.Send();
-        base.Run();
-    }
-
-    protected override void HandleOnCompleted ()
-    {
-        base.HandleOnCompleted();
-        OnResponse.SafeInvoke(WebRequest);
+        return base.Run();
     }
 }

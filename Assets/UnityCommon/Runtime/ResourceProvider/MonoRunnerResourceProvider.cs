@@ -15,29 +15,23 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
     public float LoadProgress { get; private set; }
 
     private Dictionary<string, UnityResource> resources = new Dictionary<string, UnityResource>();
-    private Dictionary<string, AsyncRunner> runners = new Dictionary<string, AsyncRunner>();
+    private Dictionary<string, AsyncRunner<UnityResource>> runners = new Dictionary<string, AsyncRunner<UnityResource>>();
 
     public AsyncAction<UnityResource<T>> LoadResource<T> (string path) where T : UnityEngine.Object
     {
-        var resource = new UnityResource<T>(path);
-        var loadAction = new AsyncAction<UnityResource<T>>(resource);
-
         if (resources.ContainsKey(path))
-        {
-            loadAction.CompleteInstantly(resources[path] as UnityResource<T>);
-            return loadAction;
-        }
+            return new AsyncAction<UnityResource<T>>().CompleteInstantly<UnityResource<T>>(resources[path] as UnityResource<T>);
 
+        var resource = new UnityResource<T>(path);
         resources.Add(path, resource);
-        loadAction.OnCompleted += HandleResourceLoaded;
 
         var loadRunner = CreateLoadRunner(resource);
-        loadRunner.OnCompleted += loadAction.CompleteInstantly;
-        runners.Add(path, loadRunner);
+        loadRunner.OnCompleted += HandleResourceLoaded;
+        runners.Add(path, loadRunner as AsyncRunner<UnityResource>);
         UpdateLoadProgress();
         loadRunner.Run();
 
-        return loadAction;
+        return loadRunner;
     }
 
     public void UnloadResource (string path)
@@ -56,7 +50,7 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
         UnloadResource(resource);
     }
 
-    protected abstract AsyncRunner CreateLoadRunner<T> (UnityResource<T> resource) where T : UnityEngine.Object;
+    protected abstract AsyncRunner<UnityResource<T>> CreateLoadRunner<T> (UnityResource<T> resource) where T : UnityEngine.Object;
     protected abstract void UnloadResource (UnityResource resource);
 
     private void CancelResourceLoading (string path)

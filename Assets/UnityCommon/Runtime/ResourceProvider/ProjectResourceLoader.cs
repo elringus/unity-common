@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 
-public class ProjectResourceLoader<TResource> : AsyncRunner where TResource : Object
+public class ProjectResourceLoader<TResource> : AsyncRunner<UnityResource<TResource>> where TResource : Object
 {
     public override bool CanBeInstantlyCompleted { get { return false; } }
-    public UnityResource<TResource> Resource { get; private set; }
+    public UnityResource<TResource> Resource { get { return State; } private set { State = value; } }
 
     private ResourceRequest resourceRequest;
 
@@ -13,10 +13,10 @@ public class ProjectResourceLoader<TResource> : AsyncRunner where TResource : Ob
         Resource = resource;
     }
 
-    public override void Run ()
+    public override AsyncRunner<UnityResource<TResource>> Run ()
     {
         YieldInstruction = Resources.LoadAsync<TResource>(Resource.Path);
-        base.Run();
+        return base.Run();
     }
 
     public override void Stop ()

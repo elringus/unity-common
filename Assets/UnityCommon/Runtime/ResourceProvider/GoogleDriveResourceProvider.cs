@@ -24,7 +24,7 @@ public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
         converters.Add(typeof(T), converter);
     }
 
-    protected override AsyncRunner CreateLoadRunner<T> (UnityResource<T> resource) 
+    protected override AsyncRunner<UnityResource<T>> CreateLoadRunner<T> (UnityResource<T> resource) 
     {
         var resourceType = typeof(T);
         if (!converters.ContainsKey(resourceType))

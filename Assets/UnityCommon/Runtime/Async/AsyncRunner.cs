@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 /// Allows running custom asynchronous logic via coroutine.
 /// </summary>
-public abstract class AsyncRunner : AsyncAction
+public abstract class AsyncRunner<TState> : AsyncAction<TState>
 {
     class AsyncRunnerContainer : MonoBehaviour { }
 
@@ -18,25 +18,39 @@ public abstract class AsyncRunner : AsyncAction
     private MonoBehaviour coroutineContainer;
     private IEnumerator coroutine;
 
-    public AsyncRunner (MonoBehaviour coroutineContainer = null, Action onCompleted = null)
+    public AsyncRunner (MonoBehaviour coroutineContainer = null)
     {
         this.coroutineContainer = coroutineContainer ?? CreateContainer();
-        if (onCompleted != null)
-            OnCompleted += onCompleted;
     }
 
-    public virtual void Run ()
+    public AsyncRunner (MonoBehaviour coroutineContainer = null, Action onCompleted = null)
+        : this (coroutineContainer)
+    {
+        if (onCompleted != null) Then(onCompleted);
+    }
+
+    public AsyncRunner (MonoBehaviour coroutineContainer = null, Action<TState> onCompleted = null)
+        : this(coroutineContainer)
+    {
+        if (onCompleted != null) Then(onCompleted);
+    }
+
+    public virtual AsyncRunner<TState> Run ()
     {
         Stop();
+
+        IsCompleted = false;
 
         if (!coroutineContainer.gameObject.activeInHierarchy)
         {
             HandleOnCompleted();
-            return;
+            return this;
         }
 
         coroutine = AsyncRoutine();
         coroutineContainer.StartCoroutine(coroutine);
+
+        return this;
     }
 
     public virtual void Stop ()
