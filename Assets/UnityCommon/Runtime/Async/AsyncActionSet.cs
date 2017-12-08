@@ -1,23 +1,36 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
 /// Represents a set of <see cref="AsyncAction"/>.
 /// <see cref="OnCompleted"/> event will be envoked when all tracked actions complete.
 /// </summary>
-public class AsyncActionSet : AsyncAction
+public class AsyncActionSet : AsyncAction, IDisposable
 {
     public float Progress { get { return completedActionCount / actions.Count; } }
     public override bool CanBeInstantlyCompleted { get { return actions.All(a => a.CanBeInstantlyCompleted); } }
 
     private HashSet<AsyncAction> actions;
     private int completedActionCount;
+    private bool isAllActionsAdded;
+
+    public AsyncActionSet ()
+    {
+        isAllActionsAdded = false;
+    }
 
     public AsyncActionSet (params AsyncAction[] asyncActions)
     {
         actions = new HashSet<AsyncAction>(asyncActions);
+        isAllActionsAdded = true; 
         foreach (var action in actions)
             action.Then(HandleOnCompleted);
+    }
+
+    public void AddAction (AsyncAction action)
+    {
+        actions.Add(action);
     }
 
     public override void CompleteInstantly ()
@@ -28,10 +41,15 @@ public class AsyncActionSet : AsyncAction
             action.CompleteInstantly();
     }
 
+    public void Dispose ()
+    {
+        isAllActionsAdded = true;
+    }
+
     protected override void HandleOnCompleted ()
     {
         completedActionCount++;
-        if (completedActionCount == actions.Count)
+        if (isAllActionsAdded && completedActionCount == actions.Count)
             base.HandleOnCompleted();
     }
 }
