@@ -9,6 +9,7 @@ using System.Linq;
 public class AsyncActionSet : AsyncAction, IDisposable
 {
     public float Progress { get { return completedActionCount / actions.Count; } }
+    public bool IsReadyToComplete { get { return isAllActionsAdded && completedActionCount == actions.Count; } }
     public override bool CanBeInstantlyCompleted { get { return actions.All(a => a.CanBeInstantlyCompleted); } }
 
     private HashSet<AsyncAction> actions;
@@ -44,12 +45,14 @@ public class AsyncActionSet : AsyncAction, IDisposable
     public void Dispose ()
     {
         isAllActionsAdded = true;
+        if (IsReadyToComplete)
+            base.HandleOnCompleted();
     }
 
     protected override void HandleOnCompleted ()
     {
         completedActionCount++;
-        if (isAllActionsAdded && completedActionCount == actions.Count)
+        if (IsReadyToComplete)
             base.HandleOnCompleted();
     }
 }
