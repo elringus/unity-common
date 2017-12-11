@@ -1,5 +1,6 @@
 ﻿using System;
 
+// StreamingAssets
 public class LocalResourceProvider : IResourceProvider
 {
     #pragma warning disable 67

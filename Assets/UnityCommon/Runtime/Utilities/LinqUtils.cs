@@ -21,6 +21,20 @@ public static class LinqUtils
         return ArrayEqualityComparer<T>.GetHashCode(array);
     }
 
+    public static bool IsIndexValid<T> (this T[] array, int index)
+    {
+        return array.Length > 0 && index >= 0 && index < array.Length;
+    }
+
+    /// <summary>
+    /// Gets element at the provided index.
+    /// Will return <see cref="default(T)"/> if index is not valid.
+    /// </summary>
+    public static T At<T> (this T[] array, int index)
+    {
+        return array.IsIndexValid(index) ? array[index] : default(T);
+    }
+
     public static T[] Append<T> (this T[] array, T item)
     {
         Array.Resize(ref array, array.Length + 1);

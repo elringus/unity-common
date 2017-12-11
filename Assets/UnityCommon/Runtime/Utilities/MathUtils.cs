@@ -60,11 +60,6 @@ public static class MathUtils
         return new Rect(rect.position - Vector2.one * cropAmount, rect.size + Vector2.one * cropAmount * 2f);
     }
 
-    public static bool IsIndexValid<T> (this T[] array, int index)
-    {
-        return array.Length > 0 && index >= 0 && index < array.Length;
-    }
-
     public static int ToNearestEven (this int value, int upperLimit = int.MaxValue)
     {
         return (value % 2 == 0) ? value : Mathf.Min(value + 1, upperLimit);
