@@ -22,6 +22,13 @@ public class AsyncAction : CustomYieldInstruction
     public virtual bool CanBeInstantlyCompleted { get { return true; } }
     public override bool keepWaiting { get { return !IsCompleted; } }
 
+    public AsyncAction () : base() { }
+
+    public AsyncAction (bool isInitiallyCompleted = false) : base()
+    {
+        IsCompleted = isInitiallyCompleted;
+    }
+
     /// <summary>
     /// Forces the action to complete instantly.
     /// Works only when <see cref="CanBeInstantlyCompleted"/>.
@@ -84,7 +91,8 @@ public class AsyncAction<TState> : AsyncAction
 
     public AsyncAction () : base() { }
 
-    public AsyncAction (TState state) : base()
+    public AsyncAction (TState state, bool isInitiallyCompleted = false) 
+        : base(isInitiallyCompleted)
     {
         State = state;
     }
