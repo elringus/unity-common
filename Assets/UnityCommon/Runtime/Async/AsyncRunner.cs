@@ -78,6 +78,12 @@ public abstract class AsyncRunner<TState> : AsyncAction<TState>
         base.CompleteInstantly();
     }
 
+    public override void CompleteInstantly (TState state)
+    {
+        Stop();
+        base.CompleteInstantly(state);
+    }
+
     protected override void HandleOnCompleted ()
     {
         if (containerObject)

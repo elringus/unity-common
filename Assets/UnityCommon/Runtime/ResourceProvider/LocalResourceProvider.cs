@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 // StreamingAssets
 public class LocalResourceProvider : IResourceProvider
@@ -11,6 +13,11 @@ public class LocalResourceProvider : IResourceProvider
     public float LoadProgress { get { throw new System.NotImplementedException(); } }
 
     public AsyncAction<UnityResource<T>> LoadResource<T> (string path) where T : UnityEngine.Object
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public AsyncAction<List<UnityResource<T>>> LoadResources<T> (string path) where T : UnityEngine.Object
     {
         throw new System.NotImplementedException();
     }

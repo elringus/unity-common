@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 /// <summary>
@@ -19,8 +20,11 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
 
     public AsyncAction<UnityResource<T>> LoadResource<T> (string path) where T : UnityEngine.Object
     {
+        if (runners.ContainsKey(path))
+            return runners[path] as AsyncAction<UnityResource<T>>;
+
         if (resources.ContainsKey(path))
-            return new AsyncAction<UnityResource<T>>().CompleteInstantly<UnityResource<T>>(resources[path] as UnityResource<T>);
+            return new AsyncAction<UnityResource<T>>(resources[path] as UnityResource<T>, true);
 
         var resource = new UnityResource<T>(path);
         resources.Add(path, resource);
@@ -32,6 +36,11 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
         loadRunner.Run();
 
         return loadRunner;
+    }
+
+    public AsyncAction<List<UnityResource<T>>> LoadResources<T> (string path) where T : UnityEngine.Object
+    {
+        return LocateResourcesAtPath<T>(path).ThenAsync(HandleResourcesLocated);
     }
 
     public void UnloadResource (string path)
@@ -51,6 +60,7 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
     }
 
     protected abstract AsyncRunner<UnityResource<T>> CreateLoadRunner<T> (UnityResource<T> resource) where T : UnityEngine.Object;
+    protected abstract AsyncAction<List<UnityResource<T>>> LocateResourcesAtPath<T> (string path) where T : UnityEngine.Object;
     protected abstract void UnloadResource (UnityResource resource);
 
     private void CancelResourceLoading (string path)
@@ -71,6 +81,20 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
         else Debug.LogWarning(string.Format("Load runner for resource '{0}' not found.", resource.Path));
 
         UpdateLoadProgress();
+    }
+
+    private AsyncAction<List<UnityResource<T>>> HandleResourcesLocated<T> (List<UnityResource<T>> locatedResources) where T : UnityEngine.Object
+    {
+        // Handle corner case when resources got loaded while locating.
+        foreach (var locatedResource in locatedResources)
+            if (!resources.ContainsKey(locatedResource.Path) && locatedResource.IsValid)
+                resources.Add(locatedResource.Path, locatedResource);
+
+        var loadRunners = locatedResources.Select(r => LoadResource<T>(r.Path)).ToArray();
+        var loadAction = new AsyncAction<List<UnityResource<T>>>(loadRunners.Select(r => r.State).ToList());
+        new AsyncActionSet(loadRunners).Then(loadAction.CompleteInstantly);
+
+        return loadAction;
     }
 
     private void UpdateLoadProgress ()

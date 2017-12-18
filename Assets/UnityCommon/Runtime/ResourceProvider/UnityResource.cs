@@ -6,9 +6,10 @@ public class UnityResource
     public Object Object { get; set; }
     public bool IsValid { get { return Object; } }
 
-    public UnityResource (string path)
+    public UnityResource (string path, Object obj = null)
     {
         Path = path;
+        Object = obj;
     }
 }
 
@@ -16,7 +17,7 @@ public class UnityResource<T> : UnityResource where T : Object
 {
     public new T Object { get { return CastObject(base.Object); } set { base.Object = value; } }
 
-    public UnityResource (string path) : base(path) { }
+    public UnityResource (string path, T obj = null) : base(path, obj) { }
 
     private T CastObject (Object resourceObject)
     {

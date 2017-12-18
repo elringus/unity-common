@@ -24,6 +24,31 @@ public class TestResourceProvider : MonoBehaviour
 
     private IEnumerator Start ()
     {
+        yield return ResolveByPath();
+        yield return ResolveByPath();
+    }
+
+    private IEnumerator ResolveByPath ()
+    {
+        provider = Context.Resolve<IResourceProvider>();
+        var loadAllAction = provider.LoadResources<Sprite>("Sprites");
+
+        yield return loadAllAction;
+
+        foreach (var spriteResource in loadAllAction.State)
+        {
+            SpriteRenderer.sprite = spriteResource.Object;
+            yield return new WaitForSeconds(1);
+        }
+
+        foreach (var spriteResource in loadAllAction.State)
+            provider.UnloadResource(spriteResource.Path);
+
+        yield return new WaitForSeconds(3);
+    }
+
+    private IEnumerator ResolveByFullPath ()
+    {
         provider = Context.Resolve<IResourceProvider>();
         var waitFordelay = new WaitForSeconds(3);
 
