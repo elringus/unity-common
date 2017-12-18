@@ -7,6 +7,7 @@ public class TestResourceProvider : MonoBehaviour
     public SpriteRenderer SpriteRenderer;
 
     private IResourceProvider provider;
+    private string text = "empty";
 
     private readonly List<string> RESOURCES = new List<string>() {
         "Sprites/Image01",
@@ -24,11 +25,19 @@ public class TestResourceProvider : MonoBehaviour
 
     private IEnumerator Start ()
     {
-        yield return ResolveByPath();
-        yield return ResolveByPath();
+        yield return ResolveTextByPath();
+        yield return ResolveTextByPath();
     }
 
-    private IEnumerator ResolveByPath ()
+    private void OnGUI ()
+    {
+        GUILayout.TextArea(text);
+
+        if (provider != null && provider.IsLoading)
+            GUILayout.Label(provider.LoadProgress.ToString());
+    }
+
+    private IEnumerator ResolveSpritesByPath ()
     {
         provider = Context.Resolve<IResourceProvider>();
         var loadAllAction = provider.LoadResources<Sprite>("Sprites");
@@ -43,6 +52,25 @@ public class TestResourceProvider : MonoBehaviour
 
         foreach (var spriteResource in loadAllAction.State)
             provider.UnloadResource(spriteResource.Path);
+
+        yield return new WaitForSeconds(3);
+    }
+
+    private IEnumerator ResolveTextByPath ()
+    {
+        provider = Context.Resolve<IResourceProvider>();
+        var loadAllAction = provider.LoadResources<TextAsset>("Text");
+
+        yield return loadAllAction;
+
+        foreach (var textResource in loadAllAction.State)
+        {
+            text = textResource.Object.text;
+            yield return new WaitForSeconds(1);
+        }
+
+        foreach (var textResource in loadAllAction.State)
+            provider.UnloadResource(textResource.Path);
 
         yield return new WaitForSeconds(3);
     }
@@ -76,11 +104,5 @@ public class TestResourceProvider : MonoBehaviour
 
         foreach (var res in RESOURCES)
             SpriteRenderer.sprite = provider.LoadResource<Sprite>(res).State.Object;
-    }
-
-    private void OnGUI ()
-    {
-        if (provider != null && provider.IsLoading)
-            GUILayout.Label(provider.LoadProgress.ToString());
     }
 }
