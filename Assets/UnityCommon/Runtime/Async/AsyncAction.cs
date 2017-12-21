@@ -40,7 +40,7 @@ public class AsyncAction : CustomYieldInstruction
     }
 
     /// <summary>
-    /// Adds a delegate to invoke when the action is completed execution.
+    /// Adds a delegate to invoke when the action has completed execution.
     /// If the action is already completed, the delegate will be invoked immediately.
     /// </summary>
     public virtual AsyncAction Then (Action action)
@@ -52,7 +52,7 @@ public class AsyncAction : CustomYieldInstruction
     }
 
     /// <summary>
-    /// Adds an async function to invoke when the action is completed execution.
+    /// Adds an async function to invoke when the action has completed execution.
     /// If the action is already completed, the function will be invoked immediately.
     /// Returned <see cref="AsyncAction"/> will complete after async function execution.
     /// </summary>
@@ -108,7 +108,7 @@ public class AsyncAction<TState> : AsyncAction
     }
 
     /// <summary>
-    /// Adds a delegate to invoke when the action is completed execution.
+    /// Adds a delegate to invoke when the action has completed execution.
     /// If the action is already completed, the delegate will be invoked immediately.
     /// </summary>
     public virtual AsyncAction<TState> Then (Action<TState> action)
@@ -120,9 +120,9 @@ public class AsyncAction<TState> : AsyncAction
     }
 
     /// <summary>
-    /// Adds an async function to invoke when the action is completed execution.
+    /// Adds an async function to invoke when the action has completed execution.
     /// If the action is already completed, the function will be invoked immediately.
-    /// Returned <see cref="AsyncAction"/> will complete after async function execution.
+    /// Returned <see cref="AsyncAction"/> will complete after async function completion.
     /// </summary>
     public virtual AsyncAction ThenAsync (Func<TState, AsyncAction> func)
     {
@@ -136,9 +136,9 @@ public class AsyncAction<TState> : AsyncAction
     }
 
     /// <summary>
-    /// Adds an async function to invoke when the action is completed execution.
+    /// Adds an async function to invoke when the action has completed execution.
     /// If the action is already completed, the function will be invoked immediately.
-    /// Returned <see cref="AsyncAction{TFunc}"/> will complete after async function execution.
+    /// Returned <see cref="AsyncAction{TFunc}"/> will complete after async function completion.
     /// </summary>
     public virtual AsyncAction<TFunc> ThenAsync<TFunc> (Func<TState, AsyncAction<TFunc>> func)
     {

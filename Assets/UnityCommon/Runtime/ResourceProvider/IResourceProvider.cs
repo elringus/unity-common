@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 /// <summary>
-/// Implementation is able to asynchronously load and unload <see cref="UnityResource"/> at runtime.
+/// Implementation is able to asynchronously load and unload <see cref="Resource"/> at runtime.
 /// </summary>
 public interface IResourceProvider
 {
@@ -26,14 +26,14 @@ public interface IResourceProvider
     /// </summary>
     /// <typeparam name="T">Type of the resource to load.</typeparam>
     /// <param name="path">Path to the resource location.</param>
-    AsyncAction<UnityResource<T>> LoadResource<T> (string path) where T : UnityEngine.Object;
+    AsyncAction<Resource<T>> LoadResource<T> (string path) where T : class;
 
     /// <summary>
     /// Loads all available resources at the provided path asynchronously.
     /// </summary>
     /// <typeparam name="T">Type of the resources to load.</typeparam>
     /// <param name="path">Path to the resources location.</param>
-    AsyncAction<List<UnityResource<T>>> LoadResources<T> (string path) where T : UnityEngine.Object;
+    AsyncAction<List<Resource<T>>> LoadResources<T> (string path) where T : class;
 
     /// <summary>
     /// Unloads resource asynchronously.

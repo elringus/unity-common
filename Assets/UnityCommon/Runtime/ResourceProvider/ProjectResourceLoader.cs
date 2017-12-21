@@ -1,21 +1,24 @@
 ﻿using UnityEngine;
 
-public class ProjectResourceLoader<TResource> : AsyncRunner<UnityResource<TResource>> where TResource : Object
+public class ProjectResourceLoader<TResource> : AsyncRunner<Resource<TResource>> where TResource : class
 {
     public override bool CanBeInstantlyCompleted { get { return false; } }
-    public UnityResource<TResource> Resource { get { return State; } private set { State = value; } }
+    public Resource<TResource> Resource { get { return State; } private set { State = value; } }
 
     private ResourceRequest resourceRequest;
+    private ProjectResourceProvider.TypeRedirector redirector;
 
-    public ProjectResourceLoader (UnityResource<TResource> resource, MonoBehaviour coroutineContainer = null) 
-        : base(coroutineContainer)
+    public ProjectResourceLoader (Resource<TResource> resource, ProjectResourceProvider.TypeRedirector redirector = null,
+        MonoBehaviour coroutineContainer = null) : base(coroutineContainer)
     {
         Resource = resource;
+        this.redirector = redirector;
     }
 
-    public override AsyncRunner<UnityResource<TResource>> Run ()
+    public override AsyncRunner<Resource<TResource>> Run ()
     {
-        YieldInstruction = Resources.LoadAsync<TResource>(Resource.Path);
+        var resourceType = redirector != null ? redirector.RedirectType : typeof(TResource);
+        YieldInstruction = Resources.LoadAsync(Resource.Path, resourceType); 
         return base.Run();
     }
 
@@ -28,7 +31,7 @@ public class ProjectResourceLoader<TResource> : AsyncRunner<UnityResource<TResou
 
     protected override void HandleOnCompleted ()
     {
-        Resource.Object = resourceRequest.asset as TResource;
+        Resource.Object = redirector != null ? redirector.ToSource<TResource>(resourceRequest.asset) : resourceRequest.asset as TResource;
         base.HandleOnCompleted();
     }
 }

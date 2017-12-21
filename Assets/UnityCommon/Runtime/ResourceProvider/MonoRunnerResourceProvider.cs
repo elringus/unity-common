@@ -15,30 +15,30 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
     public bool IsLoading { get { return LoadProgress < 1f; } }
     public float LoadProgress { get; private set; }
 
-    private Dictionary<string, UnityResource> resources = new Dictionary<string, UnityResource>();
-    private Dictionary<string, AsyncRunner<UnityResource>> runners = new Dictionary<string, AsyncRunner<UnityResource>>();
+    private Dictionary<string, Resource> resources = new Dictionary<string, Resource>();
+    private Dictionary<string, AsyncRunner<Resource>> runners = new Dictionary<string, AsyncRunner<Resource>>();
 
-    public AsyncAction<UnityResource<T>> LoadResource<T> (string path) where T : UnityEngine.Object
+    public AsyncAction<Resource<T>> LoadResource<T> (string path) where T : class
     {
         if (runners.ContainsKey(path))
-            return runners[path] as AsyncAction<UnityResource<T>>;
+            return runners[path] as AsyncAction<Resource<T>>;
 
         if (resources.ContainsKey(path))
-            return new AsyncAction<UnityResource<T>>(resources[path] as UnityResource<T>, true);
+            return new AsyncAction<Resource<T>>(resources[path] as Resource<T>, true);
 
-        var resource = new UnityResource<T>(path);
+        var resource = new Resource<T>(path);
         resources.Add(path, resource);
 
         var loadRunner = CreateLoadRunner(resource);
         loadRunner.OnCompleted += HandleResourceLoaded;
-        runners.Add(path, loadRunner as AsyncRunner<UnityResource>);
+        runners.Add(path, loadRunner as AsyncRunner<Resource>);
         UpdateLoadProgress();
         loadRunner.Run();
 
         return loadRunner;
     }
 
-    public AsyncAction<List<UnityResource<T>>> LoadResources<T> (string path) where T : UnityEngine.Object
+    public AsyncAction<List<Resource<T>>> LoadResources<T> (string path) where T : class
     {
         return LocateResourcesAtPath<T>(path).ThenAsync(HandleResourcesLocated);
     }
@@ -59,9 +59,9 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
         UnloadResource(resource);
     }
 
-    protected abstract AsyncRunner<UnityResource<T>> CreateLoadRunner<T> (UnityResource<T> resource) where T : UnityEngine.Object;
-    protected abstract AsyncAction<List<UnityResource<T>>> LocateResourcesAtPath<T> (string path) where T : UnityEngine.Object;
-    protected abstract void UnloadResource (UnityResource resource);
+    protected abstract AsyncRunner<Resource<T>> CreateLoadRunner<T> (Resource<T> resource) where T : class;
+    protected abstract AsyncAction<List<Resource<T>>> LocateResourcesAtPath<T> (string path) where T : class;
+    protected abstract void UnloadResource (Resource resource);
 
     private void CancelResourceLoading (string path)
     {
@@ -73,7 +73,7 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
         UpdateLoadProgress();
     }
 
-    private void HandleResourceLoaded<T> (UnityResource<T> resource) where T : UnityEngine.Object
+    private void HandleResourceLoaded<T> (Resource<T> resource) where T : class
     {
         if (!resource.IsValid) Debug.LogError(string.Format("Resource '{0}' failed to load.", resource.Path));
 
@@ -83,7 +83,7 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
         UpdateLoadProgress();
     }
 
-    private AsyncAction<List<UnityResource<T>>> HandleResourcesLocated<T> (List<UnityResource<T>> locatedResources) where T : UnityEngine.Object
+    private AsyncAction<List<Resource<T>>> HandleResourcesLocated<T> (List<Resource<T>> locatedResources) where T : class
     {
         // Handle corner case when resources got loaded while locating.
         foreach (var locatedResource in locatedResources)
@@ -91,7 +91,7 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
                 resources.Add(locatedResource.Path, locatedResource);
 
         var loadRunners = locatedResources.Select(r => LoadResource<T>(r.Path)).ToArray();
-        var loadAction = new AsyncAction<List<UnityResource<T>>>(loadRunners.Select(r => r.State).ToList());
+        var loadAction = new AsyncAction<List<Resource<T>>>(loadRunners.Select(r => r.State).ToList());
         new AsyncActionSet(loadRunners).Then(loadAction.CompleteInstantly);
 
         return loadAction;

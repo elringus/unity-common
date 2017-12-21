@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class PngToTextureConverter : IRawConverter<Texture2D>
+public class TxtToTextureConverter : IRawConverter<Texture2D>
 {
     public string Extension { get { return "png"; } }
     public string MimeType { get { return "image/png"; } }

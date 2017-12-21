@@ -19,24 +19,25 @@ public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
     /// <summary>
     /// Adds a resource type converter.
     /// </summary>
-    public void AddConverter<T> (IRawConverter<T> converter) where T : UnityEngine.Object
+    public void AddConverter<T> (IRawConverter<T> converter) where T : class
     {
         converters.Add(typeof(T), converter);
     }
 
-    protected override AsyncRunner<UnityResource<T>> CreateLoadRunner<T> (UnityResource<T> resource) 
+    protected override AsyncRunner<Resource<T>> CreateLoadRunner<T> (Resource<T> resource) 
     {
         return new GoogleDriveResourceLoader<T>(DriveRootPath, resource, ResolveConverter<T>(), this);
     }
 
-    protected override AsyncAction<List<UnityResource<T>>> LocateResourcesAtPath<T> (string path)
+    protected override AsyncAction<List<Resource<T>>> LocateResourcesAtPath<T> (string path)
     {
         return new GoogleDriveResourceLocator<T>(DriveRootPath, path, ResolveConverter<T>(), this).Run();
     }
 
-    protected override void UnloadResource (UnityResource resource)
+    protected override void UnloadResource (Resource resource)
     {
-        if (resource.IsValid) Destroy(resource.Object);
+        if (resource.IsValid && resource.IsUnityObject)
+            Destroy(resource.AsUnityObject);
     }
 
     private IRawConverter<T> ResolveConverter<T> ()

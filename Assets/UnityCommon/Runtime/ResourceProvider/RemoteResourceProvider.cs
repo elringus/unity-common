@@ -11,12 +11,12 @@ public class RemoteResourceProvider : IResourceProvider
     public bool IsLoading { get { throw new System.NotImplementedException(); } }
     public float LoadProgress { get { throw new System.NotImplementedException(); } }
 
-    public AsyncAction<UnityResource<T>> LoadResource<T> (string path) where T : UnityEngine.Object
+    public AsyncAction<Resource<T>> LoadResource<T> (string path) where T : class
     {
         throw new System.NotImplementedException();
     }
 
-    public AsyncAction<List<UnityResource<T>>> LoadResources<T> (string path) where T : UnityEngine.Object
+    public AsyncAction<List<Resource<T>>> LoadResources<T> (string path) where T : class
     {
         throw new System.NotImplementedException();
     }

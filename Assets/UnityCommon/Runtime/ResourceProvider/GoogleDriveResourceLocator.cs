@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityGoogleDrive;
 
-public class GoogleDriveResourceLocator<TResource> : AsyncRunner<List<UnityResource<TResource>>> where TResource : Object
+public class GoogleDriveResourceLocator<TResource> : AsyncRunner<List<Resource<TResource>>> where TResource : class
 {
     public override bool CanBeInstantlyCompleted { get { return false; } }
-    public List<UnityResource<TResource>> LocatedResources { get { return State; } private set { State = value; } }
+    public List<Resource<TResource>> LocatedResources { get { return State; } private set { State = value; } }
     public string RootPath { get; private set; }
     public string ResourcesPath { get; private set; }
 
@@ -74,11 +74,11 @@ public class GoogleDriveResourceLocator<TResource> : AsyncRunner<List<UnityResou
         }
 
         // 3. Create resources using located files.
-        LocatedResources = new List<UnityResource<TResource>>();
+        LocatedResources = new List<Resource<TResource>>();
         foreach (var file in listRequest.ResponseData.Files)
         {
             var filePath = string.Concat(ResourcesPath, '/', file.Name.GetBeforeLast("."));
-            var fileResource = new UnityResource<TResource>(filePath);
+            var fileResource = new Resource<TResource>(filePath);
             LocatedResources.Add(fileResource);
         }
 

@@ -6,12 +6,12 @@ using System.Globalization;
 using UnityEngine;
 using UnityGoogleDrive;
 
-public class GoogleDriveResourceLoader<TResource> : AsyncRunner<UnityResource<TResource>> where TResource : UnityEngine.Object
+public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResource>> where TResource : class
 {
     [Serializable] struct CachedFileMeta { public string Id, ModifiedTime; }
 
     public override bool CanBeInstantlyCompleted { get { return false; } }
-    public UnityResource<TResource> Resource { get { return State; } private set { State = value; } }
+    public Resource<TResource> Resource { get { return State; } private set { State = value; } }
     public string RootPath { get; private set; }
 
     private const string CACHE_PATH = "GoogleDriveResources";
@@ -22,7 +22,7 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<UnityResource<TR
     private UnityGoogleDrive.Data.File fileMeta;
     private byte[] rawData;
 
-    public GoogleDriveResourceLoader (string rootPath, UnityResource<TResource> resource, 
+    public GoogleDriveResourceLoader (string rootPath, Resource<TResource> resource, 
         IRawConverter<TResource> converter, MonoBehaviour coroutineContainer) : base(coroutineContainer)
     {
         RootPath = rootPath;

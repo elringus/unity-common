@@ -17,10 +17,8 @@ public class TestResourceProvider : MonoBehaviour
 
     private void Awake ()
     {
-        var provider = Context.Resolve<GoogleDriveResourceProvider>();
-        provider.DriveRootPath = "Resources";
-        provider.AddConverter(new PngToSpriteConverter());
-        //Context.Resolve<ProjectResourceProvider>();
+        //InitializeProjectResourceProvider();
+        InitializeGoogleDriveResourceProvider();
     }
 
     private IEnumerator Start ()
@@ -35,6 +33,20 @@ public class TestResourceProvider : MonoBehaviour
 
         if (provider != null && provider.IsLoading)
             GUILayout.Label(provider.LoadProgress.ToString());
+    }
+
+    private void InitializeProjectResourceProvider ()
+    {
+        var provider = Context.Resolve<ProjectResourceProvider>();
+        provider.AddRedirector(new TextAssetToStringConverter());
+    }
+
+    private void InitializeGoogleDriveResourceProvider ()
+    {
+        var provider = Context.Resolve<GoogleDriveResourceProvider>();
+        provider.DriveRootPath = "Resources";
+        provider.AddConverter(new PngToSpriteConverter());
+        provider.AddConverter(new TxtToStringConverter());
     }
 
     private IEnumerator ResolveSpritesByPath ()
@@ -59,13 +71,13 @@ public class TestResourceProvider : MonoBehaviour
     private IEnumerator ResolveTextByPath ()
     {
         provider = Context.Resolve<IResourceProvider>();
-        var loadAllAction = provider.LoadResources<TextAsset>("Text");
+        var loadAllAction = provider.LoadResources<string>("Text");
 
         yield return loadAllAction;
 
         foreach (var textResource in loadAllAction.State)
         {
-            text = textResource.Object.text;
+            text = textResource.Object;
             yield return new WaitForSeconds(1);
         }
 

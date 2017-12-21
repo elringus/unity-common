@@ -15,4 +15,9 @@ public class PngToSpriteConverter : IRawConverter<Sprite>
         var rect = new Rect(0, 0, texture.width, texture.height);
         return Sprite.Create(texture, rect, Vector2.one * .5f);
     }
+
+    public object Convert (object obj)
+    {
+        return Convert(obj as byte[]);
+    }
 }
