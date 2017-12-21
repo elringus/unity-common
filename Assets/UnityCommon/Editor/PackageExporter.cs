@@ -16,6 +16,7 @@ public class PackageExporter : EditorWindow
     protected static string NamespaceToWrap { get { return PackageName; } }
     protected static bool IsReadyToExport { get { return !string.IsNullOrEmpty(OutputPath) && !string.IsNullOrEmpty(OutputFileName); } }
 
+    private const string SKIP_WRAP_TERM = "PackageExporter: SkipWrap";
     private const string PREFS_PREFIX = "PackageExporter.";
     private const string TAB_CHARS = "    ";
 
@@ -76,6 +77,8 @@ public class PackageExporter : EditorWindow
 
                 var fullpath = Application.dataPath.Replace("Assets", "") + path;
                 var originalScriptText = File.ReadAllText(fullpath, Encoding.UTF8);
+
+                if (originalScriptText.Contains(SKIP_WRAP_TERM)) continue;
 
                 string scriptText = string.Empty;
                 var isImportedScript = path.Contains("ThirdParty");
