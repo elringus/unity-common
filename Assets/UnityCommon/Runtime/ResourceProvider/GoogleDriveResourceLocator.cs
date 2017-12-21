@@ -6,7 +6,7 @@ using UnityGoogleDrive;
 public class GoogleDriveResourceLocator<TResource> : AsyncRunner<List<Resource<TResource>>> where TResource : class
 {
     public override bool CanBeInstantlyCompleted { get { return false; } }
-    public List<Resource<TResource>> LocatedResources { get { return State; } private set { State = value; } }
+    public List<Resource<TResource>> LocatedResources { get { return Result; } private set { Result = value; } }
     public string RootPath { get; private set; }
     public string ResourcesPath { get; private set; }
 

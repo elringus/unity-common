@@ -4,7 +4,7 @@ using UnityEngine.Networking;
 
 public class WebRequestRunner : AsyncRunner<UnityWebRequest>
 {
-    public UnityWebRequest WebRequest { get { return State; } private set { State = value; } }
+    public UnityWebRequest WebRequest { get { return Result; } private set { Result = value; } }
     public override bool CanBeInstantlyCompleted { get { return false; } }
 
     public WebRequestRunner (UnityWebRequest webRequest, Action<UnityWebRequest> onResponse = null,

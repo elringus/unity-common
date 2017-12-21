@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 /// Allows running custom asynchronous logic via coroutine.
 /// </summary>
-public abstract class AsyncRunner<TState> : AsyncAction<TState>
+public abstract class AsyncRunner<TResult> : AsyncAction<TResult>
 {
     class AsyncRunnerContainer : MonoBehaviour { }
 
@@ -29,13 +29,13 @@ public abstract class AsyncRunner<TState> : AsyncAction<TState>
         if (onCompleted != null) Then(onCompleted);
     }
 
-    public AsyncRunner (MonoBehaviour coroutineContainer = null, Action<TState> onCompleted = null)
+    public AsyncRunner (MonoBehaviour coroutineContainer = null, Action<TResult> onCompleted = null)
         : this(coroutineContainer)
     {
         if (onCompleted != null) Then(onCompleted);
     }
 
-    public virtual AsyncRunner<TState> Run ()
+    public virtual AsyncRunner<TResult> Run ()
     {
         Stop();
 
@@ -78,7 +78,7 @@ public abstract class AsyncRunner<TState> : AsyncAction<TState>
         base.CompleteInstantly();
     }
 
-    public override void CompleteInstantly (TState state)
+    public override void CompleteInstantly (TResult state)
     {
         Stop();
         base.CompleteInstantly(state);

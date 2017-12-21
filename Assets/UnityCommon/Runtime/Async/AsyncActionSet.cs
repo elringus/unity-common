@@ -61,14 +61,14 @@ public class AsyncActionSet : AsyncAction, IDisposable
 /// Represents a set of <see cref="AsyncAction{TState}"/>.
 /// <see cref="OnCompleted"/> event will be envoked when all tracked actions complete.
 /// </summary>
-public class AsyncActionSet<TState> : AsyncAction<TState>, IDisposable
+public class AsyncActionSet<TResult> : AsyncAction<TResult>, IDisposable
 {
     public float Progress { get { return completedActionCount / actions.Count; } }
     public bool IsReadyToComplete { get { return isAllActionsAdded && completedActionCount == actions.Count; } }
     public override bool CanBeInstantlyCompleted { get { return actions.All(a => a.CanBeInstantlyCompleted); } }
-    public new List<TState> State { get { return actions.Select(a => a.State).ToList(); } }
+    public new List<TResult> Result { get { return actions.Select(a => a.Result).ToList(); } }
 
-    private HashSet<AsyncAction<TState>> actions;
+    private HashSet<AsyncAction<TResult>> actions;
     private int completedActionCount;
     private bool isAllActionsAdded;
 
@@ -77,15 +77,15 @@ public class AsyncActionSet<TState> : AsyncAction<TState>, IDisposable
         isAllActionsAdded = false;
     }
 
-    public AsyncActionSet (params AsyncAction<TState>[] asyncActions)
+    public AsyncActionSet (params AsyncAction<TResult>[] asyncActions)
     {
-        actions = new HashSet<AsyncAction<TState>>(asyncActions);
+        actions = new HashSet<AsyncAction<TResult>>(asyncActions);
         isAllActionsAdded = true;
         foreach (var action in actions)
             action.Then(HandleOnCompleted);
     }
 
-    public void AddAction (AsyncAction<TState> action)
+    public void AddAction (AsyncAction<TResult> action)
     {
         actions.Add(action);
     }
@@ -98,12 +98,12 @@ public class AsyncActionSet<TState> : AsyncAction<TState>, IDisposable
             action.CompleteInstantly();
     }
 
-    public override void CompleteInstantly (TState state)
+    public override void CompleteInstantly (TResult result)
     {
         if (!CanBeInstantlyCompleted || IsCompleted) return;
 
         foreach (var action in actions)
-            action.CompleteInstantly(state);
+            action.CompleteInstantly(result);
     }
 
     public void Dispose ()

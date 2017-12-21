@@ -3,7 +3,7 @@
 public class ProjectResourceLoader<TResource> : AsyncRunner<Resource<TResource>> where TResource : class
 {
     public override bool CanBeInstantlyCompleted { get { return false; } }
-    public Resource<TResource> Resource { get { return State; } private set { State = value; } }
+    public Resource<TResource> Resource { get { return Result; } private set { Result = value; } }
 
     private ResourceRequest resourceRequest;
     private ProjectResourceProvider.TypeRedirector redirector;

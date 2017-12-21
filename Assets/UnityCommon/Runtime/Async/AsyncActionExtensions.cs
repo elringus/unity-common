@@ -1,12 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
+﻿
 public static class AsyncActionExtensions
 {
-    public static AsyncAction<T> CompleteInstantly<T> (this AsyncAction<T> action, T state)
+    public static AsyncAction<T> CompleteInstantly<T> (this AsyncAction<T> action, T result)
     {
-        action.CompleteInstantly(state);
+        action.CompleteInstantly(result);
         return action;
     }
     

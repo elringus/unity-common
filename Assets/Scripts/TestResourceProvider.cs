@@ -56,13 +56,13 @@ public class TestResourceProvider : MonoBehaviour
 
         yield return loadAllAction;
 
-        foreach (var spriteResource in loadAllAction.State)
+        foreach (var spriteResource in loadAllAction.Result)
         {
             SpriteRenderer.sprite = spriteResource.Object;
             yield return new WaitForSeconds(1);
         }
 
-        foreach (var spriteResource in loadAllAction.State)
+        foreach (var spriteResource in loadAllAction.Result)
             provider.UnloadResource(spriteResource.Path);
 
         yield return new WaitForSeconds(3);
@@ -75,13 +75,13 @@ public class TestResourceProvider : MonoBehaviour
 
         yield return loadAllAction;
 
-        foreach (var textResource in loadAllAction.State)
+        foreach (var textResource in loadAllAction.Result)
         {
             text = textResource.Object;
             yield return new WaitForSeconds(1);
         }
 
-        foreach (var textResource in loadAllAction.State)
+        foreach (var textResource in loadAllAction.Result)
             provider.UnloadResource(textResource.Path);
 
         yield return new WaitForSeconds(3);
@@ -100,7 +100,7 @@ public class TestResourceProvider : MonoBehaviour
         while (provider.IsLoading) yield return null;
 
         foreach (var res in RESOURCES)
-            SpriteRenderer.sprite = provider.LoadResource<Sprite>(res).State.Object;
+            SpriteRenderer.sprite = provider.LoadResource<Sprite>(res).Result.Object;
 
         yield return waitFordelay;
 
@@ -115,6 +115,6 @@ public class TestResourceProvider : MonoBehaviour
         while (provider.IsLoading) yield return null;
 
         foreach (var res in RESOURCES)
-            SpriteRenderer.sprite = provider.LoadResource<Sprite>(res).State.Object;
+            SpriteRenderer.sprite = provider.LoadResource<Sprite>(res).Result.Object;
     }
 }

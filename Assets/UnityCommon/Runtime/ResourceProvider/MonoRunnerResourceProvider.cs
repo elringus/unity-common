@@ -91,7 +91,7 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
                 resources.Add(locatedResource.Path, locatedResource);
 
         var loadRunners = locatedResources.Select(r => LoadResource<T>(r.Path)).ToArray();
-        var loadAction = new AsyncAction<List<Resource<T>>>(loadRunners.Select(r => r.State).ToList());
+        var loadAction = new AsyncAction<List<Resource<T>>>(loadRunners.Select(r => r.Result).ToList());
         new AsyncActionSet(loadRunners).Then(loadAction.CompleteInstantly);
 
         return loadAction;

@@ -6,7 +6,7 @@ using UnityEngine;
 /// </summary>
 public class Tweener<TTweenValue> : AsyncRunner<TTweenValue> where TTweenValue : struct, ITweenValue
 {
-    public TTweenValue TweenValue { get { return State; } private set { State = value; } }
+    public TTweenValue TweenValue { get { return Result; } private set { Result = value; } }
 
     private float elapsedTime;
 
