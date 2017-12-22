@@ -40,4 +40,9 @@ public interface IResourceProvider
     /// </summary>
     /// <param name="path">Path to the resource location.</param>
     void UnloadResource (string path);
+
+    /// <summary>
+    /// Checks whether resource with provided path has been previously requested.
+    /// </summary>
+    bool ResourceExists (string path);
 }

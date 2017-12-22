@@ -59,6 +59,11 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
         UnloadResource(resource);
     }
 
+    public bool ResourceExists (string path)
+    {
+        return resources.ContainsKey(path);
+    }
+
     protected abstract AsyncRunner<Resource<T>> CreateLoadRunner<T> (Resource<T> resource) where T : class;
     protected abstract AsyncAction<List<Resource<T>>> LocateResourcesAtPath<T> (string path) where T : class;
     protected abstract void UnloadResource (Resource resource);
