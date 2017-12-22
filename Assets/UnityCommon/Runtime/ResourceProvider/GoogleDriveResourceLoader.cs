@@ -16,7 +16,7 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
 
     private const string CACHE_PATH = "GoogleDriveResources";
 
-    private GoogleDriveFiles.DownloadRequest downloadRequest;
+    private GoogleDriveRequest<UnityGoogleDrive.Data.File> downloadRequest;
     private GoogleDriveFiles.ListRequest listRequest;
     private IRawConverter<TResource> converter;
     private UnityGoogleDrive.Data.File fileMeta;
@@ -64,17 +64,11 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
         // 2. Check if cached version of the file could be used.
         yield return TryLoadFileCacheRoutine(fileMeta);
 
-        // 3. Cached version is not valid or doesn't exist; download the file.
+        // 3. Cached version is not valid or doesn't exist; download or export the file.
         if (rawData == null)
         {
-            downloadRequest = new GoogleDriveFiles.DownloadRequest(fileMeta.Id);
-            yield return downloadRequest.Send();
-            if (downloadRequest.IsError || downloadRequest.ResponseData.Content == null)
-            {
-                Debug.LogError(string.Format("Failed to download {0} resource from Google Drive.", Resource.Path));
-                yield break;
-            }
-            rawData = downloadRequest.ResponseData.Content;
+            if (converter is IGoogleDriveConverter<TResource>) yield return ExportFile();
+            else yield return DownloadFile();
 
             // 4. Cache the downloaded file.
             yield return WriteFileCacheRoutine(fileMeta, rawData);
@@ -116,7 +110,7 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
         // 2. Searching the file and getting the metadata.
         listRequest = new GoogleDriveFiles.ListRequest();
         listRequest.Fields = new List<string> { "files(id, modifiedTime)" };
-        listRequest.Q = string.Format("'{0}' in parents and name = '{1}.{2}'", parendId, fileName, converter.Extension);
+        listRequest.Q = string.Format("'{0}' in parents and name contains '{1}' and mimeType = '{2}'", parendId, fileName, converter.MimeType);
 
         yield return listRequest.Send();
 
@@ -130,6 +124,36 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
             Debug.LogWarning(string.Format("Multiple '{0}' files been found in Google Drive.", Resource.Path));
 
         fileMeta = listRequest.ResponseData.Files[0];
+    }
+
+    private IEnumerator DownloadFile ()
+    {
+        Debug.Assert(fileMeta != null);
+
+        downloadRequest = new GoogleDriveFiles.DownloadRequest(fileMeta.Id);
+        yield return downloadRequest.Send();
+        if (downloadRequest.IsError || downloadRequest.ResponseData.Content == null)
+        {
+            Debug.LogError(string.Format("Failed to download {0} resource from Google Drive.", Resource.Path));
+            yield break;
+        }
+        rawData = downloadRequest.ResponseData.Content;
+    }
+
+    private IEnumerator ExportFile ()
+    {
+        Debug.Assert(fileMeta != null && converter is IGoogleDriveConverter<TResource>);
+
+        var gDriveConverter = converter as IGoogleDriveConverter<TResource>;
+
+        downloadRequest = new GoogleDriveFiles.ExportRequest(fileMeta.Id, gDriveConverter.ExportMimeType);
+        yield return downloadRequest.Send();
+        if (downloadRequest.IsError || downloadRequest.ResponseData.Content == null)
+        {
+            Debug.LogError(string.Format("Failed to export {0} resource from Google Drive.", Resource.Path));
+            yield break;
+        }
+        rawData = downloadRequest.ResponseData.Content;
     }
 
     private IEnumerator TryLoadFileCacheRoutine (UnityGoogleDrive.Data.File fileMeta)

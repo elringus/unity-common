@@ -77,7 +77,8 @@ public class GoogleDriveResourceLocator<TResource> : AsyncRunner<List<Resource<T
         LocatedResources = new List<Resource<TResource>>();
         foreach (var file in listRequest.ResponseData.Files)
         {
-            var filePath = string.Concat(ResourcesPath, '/', file.Name.GetBeforeLast("."));
+            var fileName = string.IsNullOrEmpty(converter.Extension) ? file.Name : file.Name.GetBeforeLast(".");
+            var filePath = string.Concat(ResourcesPath, '/', fileName);
             var fileResource = new Resource<TResource>(filePath);
             LocatedResources.Add(fileResource);
         }

@@ -17,13 +17,13 @@ public class TestResourceProvider : MonoBehaviour
 
     private void Awake ()
     {
-        //InitializeProjectResourceProvider();
-        InitializeGoogleDriveResourceProvider();
+        InitializeProjectResourceProvider();
+        //InitializeGoogleDriveResourceProvider();
     }
 
     private IEnumerator Start ()
     {
-        yield return ResolveTextByPath();
+        yield return ResolveByFullPath();
         yield return ResolveTextByPath();
     }
 
@@ -46,7 +46,7 @@ public class TestResourceProvider : MonoBehaviour
         var provider = Context.Resolve<GoogleDriveResourceProvider>();
         provider.DriveRootPath = "Resources";
         provider.AddConverter(new PngToSpriteConverter());
-        provider.AddConverter(new TxtToStringConverter());
+        provider.AddConverter(new GDocToStringConverter());
     }
 
     private IEnumerator ResolveSpritesByPath ()

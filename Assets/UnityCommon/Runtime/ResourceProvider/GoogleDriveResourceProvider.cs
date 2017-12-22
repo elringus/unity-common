@@ -14,7 +14,7 @@ public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
     /// </summary>
     public string DriveRootPath { get; set; }
 
-    private Dictionary<Type, object> converters = new Dictionary<Type, object>();
+    private Dictionary<Type, IConverter> converters = new Dictionary<Type, IConverter>();
 
     /// <summary>
     /// Adds a resource type converter.

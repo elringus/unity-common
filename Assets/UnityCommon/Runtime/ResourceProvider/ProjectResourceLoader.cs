@@ -18,15 +18,8 @@ public class ProjectResourceLoader<TResource> : AsyncRunner<Resource<TResource>>
     public override AsyncRunner<Resource<TResource>> Run ()
     {
         var resourceType = redirector != null ? redirector.RedirectType : typeof(TResource);
-        YieldInstruction = Resources.LoadAsync(Resource.Path, resourceType); 
+        YieldInstruction = resourceRequest = Resources.LoadAsync(Resource.Path, resourceType); 
         return base.Run();
-    }
-
-    public override void Stop ()
-    {
-        base.Stop();
-
-        resourceRequest = null;
     }
 
     protected override void HandleOnCompleted ()
