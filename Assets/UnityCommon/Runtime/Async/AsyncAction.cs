@@ -30,6 +30,14 @@ public class AsyncAction : CustomYieldInstruction
     }
 
     /// <summary>
+    /// Returns new instance of <see cref="AsyncAction"/> with <see cref="IsCompleted"/> set to true.
+    /// </summary>
+    public static AsyncAction CreateCompleted ()
+    {
+        return new AsyncAction(true);
+    }
+
+    /// <summary>
     /// Forces the action to complete instantly.
     /// Works only when <see cref="CanBeInstantlyCompleted"/>.
     /// </summary>
@@ -95,6 +103,14 @@ public class AsyncAction<TResult> : AsyncAction
         : base(isInitiallyCompleted)
     {
         Result = result;
+    }
+
+    /// <summary>
+    /// Returns new instance of <see cref="AsyncAction{TResult}"/> with <see cref="IsCompleted"/> set to true.
+    /// </summary>
+    public static AsyncAction<TResult> CreateCompleted (TResult result)
+    {
+        return new AsyncAction<TResult>(result, true);
     }
 
     /// <summary>
