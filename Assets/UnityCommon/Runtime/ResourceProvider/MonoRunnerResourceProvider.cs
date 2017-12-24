@@ -18,6 +18,11 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
     private Dictionary<string, Resource> resources = new Dictionary<string, Resource>();
     private Dictionary<string, AsyncRunner<Resource>> runners = new Dictionary<string, AsyncRunner<Resource>>();
 
+    private void Awake ()
+    {
+        LoadProgress = 1f;
+    }
+
     public AsyncAction<Resource<T>> LoadResource<T> (string path) where T : class
     {
         if (runners.ContainsKey(path))
