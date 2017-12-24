@@ -2,13 +2,13 @@
 using System.Collections;
 using UnityEngine;
 
+class AsyncRunnerContainer : MonoBehaviour { }
+
 /// <summary>
 /// Allows running custom asynchronous logic via coroutine.
 /// </summary>
 public abstract class AsyncRunner<TResult> : AsyncAction<TResult>
 {
-    class AsyncRunnerContainer : MonoBehaviour { }
-
     public bool IsRunning { get { return coroutine != null; } }
 
     protected YieldInstruction YieldInstruction { get; set; }
