@@ -34,7 +34,7 @@ public class Tweener<TTweenValue> : AsyncRunner<TTweenValue> where TTweenValue :
 
     protected override bool LoopCondition ()
     {
-        return elapsedTime < TweenValue.TweenDuration;
+        return elapsedTime <= TweenValue.TweenDuration;
     }
 
     protected override void OnCoroutineTick ()
