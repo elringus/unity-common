@@ -12,7 +12,7 @@ public class AsyncActionSet : AsyncAction, IDisposable
     public bool IsReadyToComplete { get { return isAllActionsAdded && completedActionCount == actions.Count; } }
     public override bool CanBeInstantlyCompleted { get { return actions.All(a => a.CanBeInstantlyCompleted); } }
 
-    private HashSet<AsyncAction> actions;
+    private HashSet<AsyncAction> actions = new HashSet<AsyncAction>();
     private int completedActionCount;
     private bool isAllActionsAdded;
 
