@@ -13,7 +13,7 @@ public class PackageExporter : EditorWindow
     protected static string AssetsPath { get { return "Assets/" + PackageName; } }
     protected static string OutputPath { get { return PlayerPrefs.GetString(PREFS_PREFIX + "OutputPath"); } set { PlayerPrefs.SetString(PREFS_PREFIX + "OutputPath", value); } }
     protected static string OutputFileName { get { return PackageName; } }
-    protected static string NamespaceToWrap { get { return PackageName; } }
+    protected static string NamespaceToWrap { get { return PlayerPrefs.GetString(PREFS_PREFIX + "NamespaceToWrap"); } set { PlayerPrefs.SetString(PREFS_PREFIX + "NamespaceToWrap", value); } }
     protected static bool IsReadyToExport { get { return !string.IsNullOrEmpty(OutputPath) && !string.IsNullOrEmpty(OutputFileName); } }
 
     private const string SKIP_WRAP_TERM = "PackageExporter: SkipWrap";
@@ -56,6 +56,7 @@ public class PackageExporter : EditorWindow
         EditorGUILayout.Space();
         PackageName = EditorGUILayout.TextField("Package Name", PackageName);
         Copyright = EditorGUILayout.TextField("Copyright Notice", Copyright);
+        NamespaceToWrap = EditorGUILayout.TextField("Namespace", NamespaceToWrap);
         using (new EditorGUILayout.HorizontalScope())
         {
             OutputPath = EditorGUILayout.TextField("Output Path", OutputPath);
