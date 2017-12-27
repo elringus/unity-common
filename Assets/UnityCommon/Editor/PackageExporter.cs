@@ -68,7 +68,7 @@ public class PackageExporter : EditorWindow
     {
         modifiedScripts.Clear();
 
-        if (!string.IsNullOrEmpty(NamespaceToWrap))
+        if (!string.IsNullOrEmpty(NamespaceToWrap) || !string.IsNullOrEmpty(Copyright))
         {
             foreach (var path in AssetDatabase.GetAllAssetPaths())
             {
@@ -82,10 +82,19 @@ public class PackageExporter : EditorWindow
 
                 string scriptText = string.Empty;
                 var isImportedScript = path.Contains("ThirdParty");
+
                 var copyright = isImportedScript || string.IsNullOrEmpty(Copyright) ? string.Empty : "// " + Copyright;
-                if (!isImportedScript || wrapNamespace) scriptText += copyright + Environment.NewLine + Environment.NewLine + "namespace " + NamespaceToWrap + Environment.NewLine + "{" + Environment.NewLine;
-                scriptText += isImportedScript ? originalScriptText : TAB_CHARS + originalScriptText.Replace(Environment.NewLine, Environment.NewLine + TAB_CHARS);
-                if (!isImportedScript || wrapNamespace) scriptText += Environment.NewLine + "}" + Environment.NewLine;
+                if (!string.IsNullOrEmpty(copyright) && (!isImportedScript || wrapNamespace))
+                    scriptText += copyright + Environment.NewLine + Environment.NewLine;
+
+                if (!string.IsNullOrEmpty(NamespaceToWrap))
+                {
+                    if (!isImportedScript || wrapNamespace) scriptText += "namespace " + NamespaceToWrap + Environment.NewLine + "{" + Environment.NewLine;
+                    scriptText += isImportedScript ? originalScriptText : TAB_CHARS + originalScriptText.Replace(Environment.NewLine, Environment.NewLine + TAB_CHARS);
+                    if (!isImportedScript || wrapNamespace) scriptText += Environment.NewLine + "}" + Environment.NewLine;
+                }
+                else scriptText += originalScriptText;
+
                 File.WriteAllText(fullpath, scriptText, Encoding.UTF8);
 
                 modifiedScripts.Add(fullpath, originalScriptText);
