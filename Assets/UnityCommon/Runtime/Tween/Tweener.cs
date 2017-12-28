@@ -19,17 +19,24 @@ public class Tweener<TTweenValue> : AsyncRunner<TTweenValue> where TTweenValue :
         TweenValue = tweenValue;
     }
 
-    public override AsyncRunner<TTweenValue> Run ()
-    {
-        elapsedTime = 0f;
-        return base.Run();
-    }
-
     public Tweener<TTweenValue> Run (TTweenValue tweenValue)
     {
         TweenValue = tweenValue;
         Run();
         return this;
+    }
+
+    public override AsyncRunner<TTweenValue> Run ()
+    {
+        elapsedTime = 0f;
+
+        if (TweenValue.TweenDuration <= 0f)
+        {
+            CompleteInstantly();
+            return this;
+        }
+
+        return base.Run();
     }
 
     protected override bool LoopCondition ()
