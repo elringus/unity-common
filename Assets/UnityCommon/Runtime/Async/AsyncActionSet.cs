@@ -31,6 +31,13 @@ public class AsyncActionSet : AsyncAction, IDisposable
 
     public void AddAction (AsyncAction action)
     {
+        if (isAllActionsAdded)
+        {
+            UnityEngine.Debug.LogError("Use default AsyncActionSet ctor to be able to add actions.");
+            return;
+        }
+
+        action.Then(HandleOnCompleted);
         actions.Add(action);
     }
 
@@ -87,6 +94,13 @@ public class AsyncActionSet<TResult> : AsyncAction<TResult>, IDisposable
 
     public void AddAction (AsyncAction<TResult> action)
     {
+        if (isAllActionsAdded)
+        {
+            UnityEngine.Debug.LogError("Use default AsyncActionSet ctor to be able to add actions.");
+            return;
+        }
+
+        action.Then(HandleOnCompleted);
         actions.Add(action);
     }
 
