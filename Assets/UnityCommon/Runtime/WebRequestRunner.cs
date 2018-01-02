@@ -15,7 +15,11 @@ public class WebRequestRunner : AsyncRunner<UnityWebRequest>
 
     public override AsyncRunner<UnityWebRequest> Run ()
     {
+        #if UNITY_2017_3_OR_NEWER
+        YieldInstruction = WebRequest.SendWebRequest();
+        #else
         YieldInstruction = WebRequest.Send();
+        #endif
         return base.Run();
     }
 }
