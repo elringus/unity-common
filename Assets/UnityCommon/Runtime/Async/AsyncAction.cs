@@ -75,6 +75,14 @@ public class AsyncAction : CustomYieldInstruction
         }
     }
 
+    /// <summary>
+    /// Clears <see cref="OnCompleted"/> event invocation list.
+    /// </summary>
+    public virtual void RemoveAllOnCompleteListeners ()
+    {
+        OnCompleted = null;
+    }
+
     protected virtual void HandleOnCompleted ()
     {
         IsCompleted = true;
@@ -165,6 +173,15 @@ public class AsyncAction<TResult> : AsyncAction
             OnCompleted += (result) => func.Invoke(result).Then(promise.CompleteInstantly);
             return promise;
         }
+    }
+
+    /// <summary>
+    /// Clears <see cref="OnCompleted"/> event invocation list.
+    /// </summary>
+    public override void RemoveAllOnCompleteListeners ()
+    {
+        base.RemoveAllOnCompleteListeners();
+        OnCompleted = null;
     }
 
     protected override void HandleOnCompleted ()
