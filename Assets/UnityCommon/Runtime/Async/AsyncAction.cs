@@ -83,6 +83,15 @@ public class AsyncAction : CustomYieldInstruction
         OnCompleted = null;
     }
 
+    /// <summary>
+    /// Resets completed state of the action.
+    /// </summary>
+    public virtual new void Reset ()
+    {
+        IsCompleted = false;
+        base.Reset();
+    }
+
     protected virtual void HandleOnCompleted ()
     {
         IsCompleted = true;
