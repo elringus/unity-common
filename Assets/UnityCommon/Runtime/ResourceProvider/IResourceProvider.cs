@@ -36,10 +36,15 @@ public interface IResourceProvider
     AsyncAction<List<Resource<T>>> LoadResources<T> (string path) where T : class;
 
     /// <summary>
-    /// Unloads resource asynchronously.
+    /// Unloads resource at the provided path.
     /// </summary>
     /// <param name="path">Path to the resource location.</param>
     void UnloadResource (string path);
+
+    /// <summary>
+    /// Unloads all loaded resources.
+    /// </summary>
+    void UnloadResources ();
 
     /// <summary>
     /// Checks whether resource with provided path has been previously requested.

@@ -64,6 +64,14 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
         UnloadResource(resource);
     }
 
+    public void UnloadResources ()
+    {
+        foreach (var runner in runners)
+            CancelResourceLoading(runner.Key);
+        foreach (var resource in resources)
+            UnloadResource(resource.Key);
+    }
+
     public bool ResourceExists (string path)
     {
         return resources.ContainsKey(path);
