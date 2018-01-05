@@ -57,7 +57,7 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
     protected override IEnumerator AsyncRoutine ()
     {
         // 1. Load file metadata from Google Drive.
-        var filePath = string.Concat(RootPath, '/', Resource.Path);
+        var filePath = string.IsNullOrEmpty(RootPath) ? Resource.Path : string.Concat(RootPath, '/', Resource.Path);
         yield return GetFileMetaRoutine(filePath);
         if (fileMeta == null) yield break;
 

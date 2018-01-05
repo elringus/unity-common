@@ -34,7 +34,7 @@ public class GoogleDriveResourceLocator<TResource> : AsyncRunner<List<Resource<T
 
     protected override IEnumerator AsyncRoutine ()
     {
-        var folderPath = string.Concat(RootPath, '/', ResourcesPath);
+        var folderPath = string.IsNullOrEmpty(RootPath) ? ResourcesPath : string.Concat(RootPath, '/', ResourcesPath);
         var parentNames = folderPath.Split('/');
 
         // 1. Resolving folder ids one by one to find id of the last one.
