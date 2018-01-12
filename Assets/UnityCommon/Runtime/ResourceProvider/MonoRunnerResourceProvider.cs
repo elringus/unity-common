@@ -66,8 +66,8 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
 
     public void UnloadResources ()
     {
-        foreach (var path in resources.Values.ToList())
-            UnloadResource(path);
+        foreach (var resource in resources.Values.ToList())
+            UnloadResource(resource.Path);
     }
 
     public bool ResourceExists (string path)
