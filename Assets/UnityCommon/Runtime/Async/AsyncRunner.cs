@@ -41,7 +41,7 @@ public abstract class AsyncRunner<TResult> : AsyncAction<TResult>
 
         IsCompleted = false;
 
-        if (!coroutineContainer.gameObject.activeInHierarchy)
+        if (!coroutineContainer || !coroutineContainer.gameObject || !coroutineContainer.gameObject.activeInHierarchy)
         {
             HandleOnCompleted();
             return this;
