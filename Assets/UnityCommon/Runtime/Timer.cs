@@ -26,6 +26,11 @@ public class Timer : AsyncRunner<object>
         return this;
     }
 
+    public override AsyncRunner<object> Run ()
+    {
+        return Run(Duration, IsTimeScaleIgnored);
+    }
+
     protected override bool LoopCondition ()
     {
         return ElapsedTime < Duration;
