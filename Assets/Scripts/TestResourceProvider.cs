@@ -45,7 +45,7 @@ public class TestResourceProvider : MonoBehaviour
     {
         var provider = Context.Resolve<GoogleDriveResourceProvider>();
         provider.DriveRootPath = "Resources";
-        provider.AddConverter(new PngToSpriteConverter());
+        provider.AddConverter(new JpgOrPngToSpriteConverter());
         provider.AddConverter(new GDocToStringConverter());
     }
 

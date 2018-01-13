@@ -1,12 +1,14 @@
 ﻿using UnityEngine;
 
 /// <summary>
-/// Converts <see cref="byte[]"/> raw data of a .png image to <see cref="Texture2D"/>.
+/// Converts <see cref="byte[]"/> raw data of a .png or .jpg image to <see cref="Texture2D"/>.
 /// </summary>
-public class PngToTextureConverter : IRawConverter<Texture2D>
+public class JpgOrPngToTextureConverter : IRawConverter<Texture2D>
 {
     public RawDataRepresentation[] Representations { get { return new RawDataRepresentation[] {
-        new RawDataRepresentation("png", "image/png")
+        new RawDataRepresentation("png", "image/png"),
+        new RawDataRepresentation("jpg", "image/jpeg"),
+        new RawDataRepresentation("jpeg", "image/jpeg"),
     }; } }
 
     public Texture2D Convert (byte[] obj)

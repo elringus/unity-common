@@ -19,6 +19,7 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
     private GoogleDriveRequest<UnityGoogleDrive.Data.File> downloadRequest;
     private GoogleDriveFiles.ListRequest listRequest;
     private IRawConverter<TResource> converter;
+    private RawDataRepresentation usedRepresentation;
     private UnityGoogleDrive.Data.File fileMeta;
     private byte[] rawData;
 
@@ -28,6 +29,7 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
         RootPath = rootPath;
         Resource = resource;
         this.converter = converter;
+        usedRepresentation = new RawDataRepresentation();
     }
 
     public override void Stop ()
@@ -95,7 +97,7 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
 
             yield return listRequest.Send();
 
-            if (listRequest.IsError || listRequest.ResponseData.Files == null || listRequest.ResponseData.Files.Count == 0)
+            if (!IsResultFound(listRequest))
             {
                 Debug.LogError(string.Format("Failed to retrieve {0} part of {1} resource from Google Drive.", parentNames[i], Resource.Path));
                 yield break;
@@ -108,20 +110,30 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
         }
 
         // 2. Searching the file and getting the metadata.
-        listRequest = new GoogleDriveFiles.ListRequest();
-        listRequest.Fields = new List<string> { "files(id, modifiedTime)" };
-        listRequest.Q = string.Format("'{0}' in parents and name contains '{1}' and mimeType = '{2}'", parendId, fileName, converter.MimeType);
-
-        yield return listRequest.Send();
-
-        if (listRequest.IsError || listRequest.ResponseData.Files == null || listRequest.ResponseData.Files.Count == 0)
+        var usedRepresentation = new RawDataRepresentation();
+        foreach (var representation in converter.Representations)
         {
-            Debug.LogError(string.Format("Failed to retrieve {0}.{1} resource from Google Drive.", Resource.Path, converter.Extension));
+            listRequest = new GoogleDriveFiles.ListRequest();
+            listRequest.Fields = new List<string> { "files(id, modifiedTime)" };
+            listRequest.Q = string.Format("'{0}' in parents and name contains '{1}' and mimeType = '{2}'", parendId, fileName, representation.MimeType);
+
+            yield return listRequest.Send();
+
+            if (IsResultFound(listRequest))
+            {
+                usedRepresentation = representation;
+                break;
+            }
+        }
+
+        if (!IsResultFound(listRequest))
+        {
+            Debug.LogError(string.Format("Failed to retrieve {0}.{1} resource from Google Drive.", Resource.Path, usedRepresentation.Extension));
             yield break;
         }
 
         if (listRequest.ResponseData.Files.Count > 1)
-            Debug.LogWarning(string.Format("Multiple '{0}.{1}' files been found in Google Drive.", Resource.Path, converter.Extension));
+            Debug.LogWarning(string.Format("Multiple '{0}.{1}' files been found in Google Drive.", Resource.Path, usedRepresentation.Extension));
 
         fileMeta = listRequest.ResponseData.Files[0];
     }
@@ -134,7 +146,7 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
         yield return downloadRequest.Send();
         if (downloadRequest.IsError || downloadRequest.ResponseData.Content == null)
         {
-            Debug.LogError(string.Format("Failed to download {0}.{1} resource from Google Drive.", Resource.Path, converter.Extension));
+            Debug.LogError(string.Format("Failed to download {0}.{1} resource from Google Drive.", Resource.Path, usedRepresentation.Extension));
             yield break;
         }
         rawData = downloadRequest.ResponseData.Content;
@@ -169,7 +181,7 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
 
         if (fileMeta.ModifiedTime > modifiedTime) yield break;
 
-        var filePath = string.Concat(Application.persistentDataPath, "/", CACHE_PATH, "/", fileMeta.Id, ".", converter.Extension);
+        var filePath = string.Concat(Application.persistentDataPath, "/", CACHE_PATH, "/", fileMeta.Id, ".", usedRepresentation.Extension);
         if (!File.Exists(filePath)) yield break;
 
         var fileStream = File.OpenRead(filePath);
@@ -185,7 +197,7 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
 
     private IEnumerator WriteFileCacheRoutine (UnityGoogleDrive.Data.File fileMeta, byte[] fileRawData)
     {
-        var filePath = string.Concat(Application.persistentDataPath, "/", CACHE_PATH, "/", fileMeta.Id, ".", converter.Extension);
+        var filePath = string.Concat(Application.persistentDataPath, "/", CACHE_PATH, "/", fileMeta.Id, ".", usedRepresentation.Extension);
         Directory.CreateDirectory(Path.GetDirectoryName(filePath));
         var fileStream = File.Create(filePath, fileRawData.Length);
         var asyncWrite = fileStream.BeginWrite(fileRawData, 0, fileRawData.Length, asyncResult => {
@@ -205,5 +217,10 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
         var cachedFileMeta = new CachedFileMeta() { Id = fileMeta.Id, ModifiedTime = fileMeta.ModifiedTime.Value.ToString("O") };
         var cachedFileMetaString = JsonUtility.ToJson(cachedFileMeta);
         PlayerPrefs.SetString(fileMeta.Id, cachedFileMetaString);
+    }
+
+    private bool IsResultFound (GoogleDriveFiles.ListRequest request)
+    {
+        return !listRequest.IsError && listRequest.ResponseData.Files != null && listRequest.ResponseData.Files.Count > 0;
     }
 }

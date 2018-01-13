@@ -1,12 +1,13 @@
 ﻿using UnityEngine;
 
 /// <summary>
-/// Converts <see cref="byte[]"/> raw data of a .png image to <see cref="Sprite"/>.
+/// Converts <see cref="byte[]"/> raw data of a .jpg image to <see cref="Sprite"/>.
 /// </summary>
-public class PngToSpriteConverter : IRawConverter<Sprite>
+public class JpgToSpriteConverter : IRawConverter<Sprite>
 {
     public RawDataRepresentation[] Representations { get { return new RawDataRepresentation[] {
-        new RawDataRepresentation("png", "image/png")
+        new RawDataRepresentation("jpg", "image/jpeg"),
+        new RawDataRepresentation("jpeg", "image/jpeg"),
     }; } }
 
     public Sprite Convert (byte[] obj)

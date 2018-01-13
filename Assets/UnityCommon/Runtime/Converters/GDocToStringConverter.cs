@@ -2,8 +2,10 @@
 
 public class GDocToStringConverter : IGoogleDriveConverter<string>
 {
-    public string Extension { get { return null; } }
-    public string MimeType { get { return "application/vnd.google-apps.document"; } }
+    public RawDataRepresentation[] Representations { get { return new RawDataRepresentation[] {
+        new RawDataRepresentation(null, "application/vnd.google-apps.document")
+    }; } }
+
     public string ExportMimeType { get { return "text/plain"; } }
 
     public string Convert (byte[] obj)

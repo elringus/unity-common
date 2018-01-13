@@ -48,7 +48,7 @@ public class GoogleDriveResourceLocator<TResource> : AsyncRunner<List<Resource<T
 
             yield return listRequest.Send();
 
-            if (listRequest.IsError || listRequest.ResponseData.Files == null || listRequest.ResponseData.Files.Count == 0)
+            if (!IsResultFound(listRequest))
             {
                 Debug.LogError(string.Format("Failed to retrieve {0} part of {1} resource from Google Drive.", parentNames[i], folderPath));
                 yield break;
@@ -61,13 +61,23 @@ public class GoogleDriveResourceLocator<TResource> : AsyncRunner<List<Resource<T
         }
 
         // 2. Searching for the files in the folder.
-        listRequest = new GoogleDriveFiles.ListRequest();
-        listRequest.Fields = new List<string> { "files(name)" };
-        listRequest.Q = string.Format("'{0}' in parents and mimeType = '{1}'", parendId, converter.MimeType);
+        var usedRepresentation = new RawDataRepresentation(); 
+        foreach (var representation in converter.Representations)
+        {
+            listRequest = new GoogleDriveFiles.ListRequest();
+            listRequest.Fields = new List<string> { "files(name)" };
+            listRequest.Q = string.Format("'{0}' in parents and mimeType = '{1}'", parendId, representation.MimeType);
 
-        yield return listRequest.Send();
+            yield return listRequest.Send();
 
-        if (listRequest.IsError || listRequest.ResponseData.Files == null || listRequest.ResponseData.Files.Count == 0)
+            if (IsResultFound(listRequest))
+            {
+                usedRepresentation = representation;
+                break;
+            }
+        }
+
+        if (!IsResultFound(listRequest))
         {
             Debug.LogError(string.Format("Failed to locate files at '{0}' in Google Drive.", folderPath));
             yield break;
@@ -77,12 +87,17 @@ public class GoogleDriveResourceLocator<TResource> : AsyncRunner<List<Resource<T
         LocatedResources = new List<Resource<TResource>>();
         foreach (var file in listRequest.ResponseData.Files)
         {
-            var fileName = string.IsNullOrEmpty(converter.Extension) ? file.Name : file.Name.GetBeforeLast(".");
+            var fileName = string.IsNullOrEmpty(usedRepresentation.Extension) ? file.Name : file.Name.GetBeforeLast(".");
             var filePath = string.Concat(ResourcesPath, '/', fileName);
             var fileResource = new Resource<TResource>(filePath);
             LocatedResources.Add(fileResource);
         }
 
         HandleOnCompleted();
+    }
+
+    private bool IsResultFound (GoogleDriveFiles.ListRequest request)
+    {
+        return !listRequest.IsError && listRequest.ResponseData.Files != null && listRequest.ResponseData.Files.Count > 0;
     }
 }

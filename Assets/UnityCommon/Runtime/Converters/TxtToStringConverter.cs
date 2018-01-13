@@ -2,8 +2,9 @@
 
 public class TxtToStringConverter : IRawConverter<string>
 {
-    public string Extension { get { return "txt"; } }
-    public string MimeType { get { return "text/plain"; } }
+    public RawDataRepresentation[] Representations { get { return new RawDataRepresentation[] {
+        new RawDataRepresentation("txt", "text/plain")
+    }; } }
 
     public string Convert (byte[] obj)
     {
