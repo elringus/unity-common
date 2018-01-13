@@ -116,12 +116,12 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
 
         if (listRequest.IsError || listRequest.ResponseData.Files == null || listRequest.ResponseData.Files.Count == 0)
         {
-            Debug.LogError(string.Format("Failed to retrieve {0} resource from Google Drive.", Resource.Path));
+            Debug.LogError(string.Format("Failed to retrieve {0}.{1} resource from Google Drive.", Resource.Path, converter.Extension));
             yield break;
         }
 
         if (listRequest.ResponseData.Files.Count > 1)
-            Debug.LogWarning(string.Format("Multiple '{0}' files been found in Google Drive.", Resource.Path));
+            Debug.LogWarning(string.Format("Multiple '{0}.{1}' files been found in Google Drive.", Resource.Path, converter.Extension));
 
         fileMeta = listRequest.ResponseData.Files[0];
     }
@@ -134,7 +134,7 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
         yield return downloadRequest.Send();
         if (downloadRequest.IsError || downloadRequest.ResponseData.Content == null)
         {
-            Debug.LogError(string.Format("Failed to download {0} resource from Google Drive.", Resource.Path));
+            Debug.LogError(string.Format("Failed to download {0}.{1} resource from Google Drive.", Resource.Path, converter.Extension));
             yield break;
         }
         rawData = downloadRequest.ResponseData.Content;

@@ -12,19 +12,19 @@ public class TestResourceProvider : MonoBehaviour
     private readonly List<string> RESOURCES = new List<string>() {
         "Sprites/Image01",
         "Sprites/Image02",
-        "Sprites/Image03",
+        "Sprites/Image04",
     };
 
     private void Awake ()
     {
-        InitializeProjectResourceProvider();
-        //InitializeGoogleDriveResourceProvider();
+        //InitializeProjectResourceProvider();
+        InitializeGoogleDriveResourceProvider();
     }
 
     private IEnumerator Start ()
     {
         yield return ResolveByFullPath();
-        yield return ResolveTextByPath();
+        //yield return ResolveTextByPath();
     }
 
     private void OnGUI ()
