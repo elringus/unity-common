@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 /// <summary>
-/// Converts <see cref="byte[]"/> to <see cref="Sprite"/>.
+/// Converts <see cref="byte[]"/> raw data of a .png image to <see cref="Sprite"/>.
 /// </summary>
 public class PngToSpriteConverter : IRawConverter<Sprite>
 {

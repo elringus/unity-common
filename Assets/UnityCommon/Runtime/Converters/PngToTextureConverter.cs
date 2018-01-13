@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
 
+/// <summary>
+/// Converts <see cref="byte[]"/> raw data of a .png image to <see cref="Texture2D"/>.
+/// </summary>
 public class PngToTextureConverter : IRawConverter<Texture2D>
 {
     public string Extension { get { return "png"; } }
