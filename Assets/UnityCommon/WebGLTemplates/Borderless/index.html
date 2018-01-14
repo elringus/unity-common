@@ -141,7 +141,7 @@
         document.getElementById("loadingInfo").style.display = "none";
         document.getElementById("box").style.display = "none";
         return;
-      } else if (progress == 1) {
+      } else if (progress >= 0.9) { // On recent versions it's stopping at 0.9
         document.getElementById("loadingInfo").innerHTML = "PROCESSING...";
         document.getElementById("spinner").style.display = "inherit";
         document.getElementById("bgBar").style.display = "none";
