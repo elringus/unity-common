@@ -23,7 +23,7 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
     private UnityGoogleDrive.Data.File fileMeta;
     private byte[] rawData;
 
-    public GoogleDriveResourceLoader (string rootPath, Resource<TResource> resource, 
+    public GoogleDriveResourceLoader (string rootPath, Resource<TResource> resource,
         IRawConverter<TResource> converter, MonoBehaviour coroutineContainer) : base(coroutineContainer)
     {
         RootPath = rootPath;
@@ -64,7 +64,7 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
         if (fileMeta == null) yield break;
 
         // 2. Check if cached version of the file could be used.
-        yield return TryLoadFileCacheRoutine(fileMeta);
+        TryLoadFileCacheRoutine(fileMeta);
 
         // 3. Cached version is not valid or doesn't exist; download or export the file.
         if (rawData == null)
@@ -73,7 +73,7 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
             else yield return DownloadFile();
 
             // 4. Cache the downloaded file.
-            yield return WriteFileCacheRoutine(fileMeta, rawData);
+            WriteFileCacheRoutine(fileMeta, rawData);
         }
 
         HandleOnCompleted();
@@ -169,45 +169,36 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
         rawData = downloadRequest.ResponseData.Content;
     }
 
-    private IEnumerator TryLoadFileCacheRoutine (UnityGoogleDrive.Data.File fileMeta)
+    private void TryLoadFileCacheRoutine (UnityGoogleDrive.Data.File fileMeta)
     {
         rawData = null;
 
-        if (!PlayerPrefs.HasKey(fileMeta.Id)) yield break;
+        if (!PlayerPrefs.HasKey(fileMeta.Id)) return;
 
         var cachedFileMetaString = PlayerPrefs.GetString(fileMeta.Id);
         var cachedFileMeta = JsonUtility.FromJson<CachedFileMeta>(cachedFileMetaString);
         var modifiedTime = DateTime.ParseExact(cachedFileMeta.ModifiedTime, "O",
             CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
 
-        if (fileMeta.ModifiedTime > modifiedTime) yield break;
+        if (fileMeta.ModifiedTime > modifiedTime) return;
 
-        var filePath = string.Concat(Application.persistentDataPath, "/", CACHE_PATH, "/", fileMeta.Id, ".", usedRepresentation.Extension);
-        if (!File.Exists(filePath)) yield break;
+        var filePath = string.Concat(Application.persistentDataPath, "/", CACHE_PATH, "/", fileMeta.Id);
+        if (!string.IsNullOrEmpty(usedRepresentation.Extension))
+            filePath += string.Concat(".", usedRepresentation.Extension);
+        if (!File.Exists(filePath)) return;
 
-        var fileStream = File.OpenRead(filePath);
-        rawData = new byte[fileStream.Length];
-        var asyncRead = fileStream.BeginRead(rawData, 0, (int)fileStream.Length, asyncResult => {
-            fileStream.EndRead(asyncResult);
-        }, null);
-
-        yield return asyncRead;
-
-        fileStream.Dispose();
+        rawData = File.ReadAllBytes(filePath);
     }
 
-    private IEnumerator WriteFileCacheRoutine (UnityGoogleDrive.Data.File fileMeta, byte[] fileRawData)
+    private void WriteFileCacheRoutine (UnityGoogleDrive.Data.File fileMeta, byte[] fileRawData)
     {
-        var filePath = string.Concat(Application.persistentDataPath, "/", CACHE_PATH, "/", fileMeta.Id, ".", usedRepresentation.Extension);
+        var filePath = string.Concat(Application.persistentDataPath, "/", CACHE_PATH, "/", fileMeta.Id);
+        if (!string.IsNullOrEmpty(usedRepresentation.Extension))
+            filePath += string.Concat(".", usedRepresentation.Extension);
+
         Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-        var fileStream = File.Create(filePath, fileRawData.Length);
-        var asyncWrite = fileStream.BeginWrite(fileRawData, 0, fileRawData.Length, asyncResult => {
-            fileStream.EndWrite(asyncResult);
-        }, null);
 
-        yield return asyncWrite;
-
-        fileStream.Dispose();
+        File.WriteAllBytes(filePath, fileRawData);
 
         // Flush cached file writes to IndexedDB on WebGL.
         // https://forum.unity.com/threads/webgl-filesystem.294358/#post-1940712
