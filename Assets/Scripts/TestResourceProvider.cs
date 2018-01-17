@@ -12,7 +12,7 @@ public class TestResourceProvider : MonoBehaviour
     private readonly List<string> RESOURCES = new List<string>() {
         "Sprites/Image01",
         "Sprites/Image02",
-        "Sprites/Image04",
+        "Sprites/Image01",
     };
 
     private void Awake ()
@@ -91,12 +91,14 @@ public class TestResourceProvider : MonoBehaviour
     private IEnumerator ResolveByFullPath ()
     {
         provider = Context.Resolve<IResourceProvider>();
-        var waitFordelay = new WaitForSeconds(3);
-
-        yield return waitFordelay;
+        var waitFordelay = new WaitForSeconds(1.5f);
 
         foreach (var res in RESOURCES)
+        {
             provider.LoadResource<Sprite>(res);
+            provider.UnloadResource(res);
+            provider.LoadResource<Sprite>(res);
+        }
 
         while (provider.IsLoading) yield return null;
 

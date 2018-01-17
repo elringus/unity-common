@@ -53,6 +53,12 @@ public abstract class AsyncRunner<TResult> : AsyncAction<TResult>
         return this;
     }
 
+    public override void Reset ()
+    {
+        Stop();
+        base.Reset();
+    }
+
     public virtual void Stop ()
     {
         if (!IsRunning) return;

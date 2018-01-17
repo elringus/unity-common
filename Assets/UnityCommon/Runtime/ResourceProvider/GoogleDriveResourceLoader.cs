@@ -213,6 +213,6 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
 
     private bool IsResultFound (GoogleDriveFiles.ListRequest request)
     {
-        return !listRequest.IsError && listRequest.ResponseData.Files != null && listRequest.ResponseData.Files.Count > 0;
+        return listRequest != null && !listRequest.IsError && listRequest.ResponseData.Files != null && listRequest.ResponseData.Files.Count > 0;
     }
 }

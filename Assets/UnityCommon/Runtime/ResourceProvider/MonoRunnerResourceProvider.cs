@@ -16,7 +16,7 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
     public float LoadProgress { get; private set; }
 
     protected Dictionary<string, Resource> Resources = new Dictionary<string, Resource>();
-    protected Dictionary<string, AsyncRunner<Resource>> Runners = new Dictionary<string, AsyncRunner<Resource>>();
+    protected Dictionary<string, AsyncAction> Runners = new Dictionary<string, AsyncAction>();
 
     protected virtual void Awake ()
     {
@@ -29,14 +29,14 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
             return Runners[path] as AsyncAction<Resource<T>>;
 
         if (Resources.ContainsKey(path))
-            return new AsyncAction<Resource<T>>(Resources[path] as Resource<T>, true);
+            return AsyncAction<Resource<T>>.CreateCompleted(Resources[path] as Resource<T>);
 
         var resource = new Resource<T>(path);
         Resources.Add(path, resource);
 
         var loadRunner = CreateLoadRunner(resource);
         loadRunner.OnCompleted += HandleResourceLoaded;
-        Runners.Add(path, loadRunner as AsyncRunner<Resource>);
+        Runners.Add(path, loadRunner);
         UpdateLoadProgress();
         loadRunner.Run();
 
@@ -79,7 +79,8 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
     {
         if (!Runners.ContainsKey(path)) return;
 
-        Runners[path].Stop();
+        //Runners[path].Stop(); Unity .NET4.6 won't allow AsyncRunner<Resource<T>> cast to AsyncRunner<Resource>; waiting for fix.
+        Runners[path].Reset();
         Runners.Remove(path);
 
         UpdateLoadProgress();
