@@ -61,7 +61,7 @@ public class GoogleDriveResourceLocator<TResource> : AsyncRunner<List<Resource<T
         }
 
         // 2. Searching for the files in the folder.
-        var usedRepresentation = new RawDataRepresentation(); 
+        var results = new Dictionary<RawDataRepresentation, List<UnityGoogleDrive.Data.File>>(); 
         foreach (var representation in converter.Representations)
         {
             listRequest = new GoogleDriveFiles.ListRequest();
@@ -71,13 +71,10 @@ public class GoogleDriveResourceLocator<TResource> : AsyncRunner<List<Resource<T
             yield return listRequest.Send();
 
             if (IsResultFound(listRequest))
-            {
-                usedRepresentation = representation;
-                break;
-            }
+                results.Add(representation, listRequest.ResponseData.Files);
         }
 
-        if (!IsResultFound(listRequest))
+        if (results.Count == 0)
         {
             Debug.LogError(string.Format("Failed to locate files at '{0}' in Google Drive.", folderPath));
             yield break;
@@ -85,12 +82,15 @@ public class GoogleDriveResourceLocator<TResource> : AsyncRunner<List<Resource<T
 
         // 3. Create resources using located files.
         LocatedResources = new List<Resource<TResource>>();
-        foreach (var file in listRequest.ResponseData.Files)
+        foreach (var result in results)
         {
-            var fileName = string.IsNullOrEmpty(usedRepresentation.Extension) ? file.Name : file.Name.GetBeforeLast(".");
-            var filePath = string.Concat(ResourcesPath, '/', fileName);
-            var fileResource = new Resource<TResource>(filePath);
-            LocatedResources.Add(fileResource);
+            foreach (var file in result.Value)
+            {
+                var fileName = string.IsNullOrEmpty(result.Key.Extension) ? file.Name : file.Name.GetBeforeLast(".");
+                var filePath = string.Concat(ResourcesPath, '/', fileName);
+                var fileResource = new Resource<TResource>(filePath);
+                LocatedResources.Add(fileResource);
+            }
         }
 
         HandleOnCompleted();

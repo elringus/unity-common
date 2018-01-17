@@ -7,8 +7,7 @@ public class JpgOrPngToSpriteConverter : IRawConverter<Sprite>
 {
     public RawDataRepresentation[] Representations { get { return new RawDataRepresentation[] {
         new RawDataRepresentation("png", "image/png"),
-        new RawDataRepresentation("jpg", "image/jpeg"),
-        new RawDataRepresentation("jpeg", "image/jpeg"),
+        new RawDataRepresentation("jpg", "image/jpeg")
     }; } }
 
     public Sprite Convert (byte[] obj)

@@ -38,7 +38,8 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
         loadRunner.OnCompleted += HandleResourceLoaded;
         Runners.Add(path, loadRunner);
         UpdateLoadProgress();
-        loadRunner.Run();
+
+        RunLoader(loadRunner);
 
         return loadRunner;
     }
@@ -74,6 +75,11 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
     protected abstract AsyncRunner<Resource<T>> CreateLoadRunner<T> (Resource<T> resource) where T : class;
     protected abstract AsyncAction<List<Resource<T>>> LocateResourcesAtPath<T> (string path) where T : class;
     protected abstract void UnloadResource (Resource resource);
+
+    protected virtual void RunLoader<T> (AsyncRunner<Resource<T>> loader) where T : class
+    {
+        loader.Run();
+    }
 
     protected virtual void CancelResourceLoading (string path)
     {

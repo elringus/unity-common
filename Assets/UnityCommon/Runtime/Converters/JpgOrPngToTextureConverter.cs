@@ -7,8 +7,7 @@ public class JpgOrPngToTextureConverter : IRawConverter<Texture2D>
 {
     public RawDataRepresentation[] Representations { get { return new RawDataRepresentation[] {
         new RawDataRepresentation("png", "image/png"),
-        new RawDataRepresentation("jpg", "image/jpeg"),
-        new RawDataRepresentation("jpeg", "image/jpeg"),
+        new RawDataRepresentation("jpg", "image/jpeg")
     }; } }
 
     public Texture2D Convert (byte[] obj)

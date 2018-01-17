@@ -9,34 +9,17 @@ using UnityEngine;
 /// </summary>
 public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
 {
-    private struct LoadRequest { public AsyncAction Action; public Type ResourceType; public string Path; }
-
     /// <summary>
     /// Path to the drive folder where resources are located.
     /// </summary>
     public string DriveRootPath { get; set; } 
     /// <summary>
-    /// Limits the request rate per second using queueing.
+    /// Limits concurrent requests count using queueing.
     /// </summary>
-    public int RequestPerSecondLimit { get; set; }
+    public int ConcurrentRequestsLimit { get; set; }
 
     private Dictionary<Type, IConverter> converters = new Dictionary<Type, IConverter>();
-    private Queue<LoadRequest> loadQueue = new Queue<LoadRequest>();
-
-    public override AsyncAction<Resource<T>> LoadResource<T> (string path)
-    {
-        if (ResourceExists(path))
-            return base.LoadResource<T>(path);
-
-        if (RequestPerSecondLimit > 0 && Runners.Count >= RequestPerSecondLimit)
-        {
-            var action = new AsyncAction<Resource<T>>();
-            var request = new LoadRequest() { Action = action, Path = path, ResourceType = typeof(T) };
-            loadQueue.Enqueue(request);
-            return action;
-        }
-        else return base.LoadResource<T>(path);
-    }
+    private Queue<Action> loadQueue = new Queue<Action>();
 
     /// <summary>
     /// Adds a resource type converter.
@@ -44,6 +27,13 @@ public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
     public void AddConverter<T> (IRawConverter<T> converter) where T : class
     {
         converters.Add(typeof(T), converter);
+    }
+
+    protected override void RunLoader<T> (AsyncRunner<Resource<T>> loader)
+    {
+        if (ConcurrentRequestsLimit > 0 && Runners.Count > ConcurrentRequestsLimit)
+            loadQueue.Enqueue(() => loader.Run());
+        else loader.Run();
     }
 
     protected override AsyncRunner<Resource<T>> CreateLoadRunner<T> (Resource<T> resource) 
@@ -83,10 +73,6 @@ public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
     {
         if (loadQueue.Count == 0) return;
 
-        var request = loadQueue.Dequeue();
-        var method = typeof(GoogleDriveResourceProvider).GetMethod("LoadResource");
-        var generic = method.MakeGenericMethod(request.ResourceType);
-        var action = generic.Invoke(this, new object[] { request.Path }) as AsyncAction;
-        action.Then(request.Action.CompleteInstantly);
+        loadQueue.Dequeue()();
     }
 }

@@ -10,9 +10,10 @@ public class TestResourceProvider : MonoBehaviour
     private string text = "empty";
 
     private readonly List<string> RESOURCES = new List<string>() {
-        "Sprites/Image01",
-        "Sprites/Image02",
-        "Sprites/Image01",
+        "Sprites/Image001",
+        "Sprites/Image002",
+        "Sprites/Image003",
+        "Sprites/Image004",
     };
 
     private void Awake ()
@@ -23,8 +24,9 @@ public class TestResourceProvider : MonoBehaviour
 
     private IEnumerator Start ()
     {
-        yield return ResolveByFullPath();
+        //yield return ResolveByFullPath();
         //yield return ResolveTextByPath();
+        yield return ResolveSpritesByPath();
     }
 
     private void OnGUI ()
@@ -45,7 +47,7 @@ public class TestResourceProvider : MonoBehaviour
     {
         var provider = Context.Resolve<GoogleDriveResourceProvider>();
         provider.DriveRootPath = "Resources";
-        provider.RequestPerSecondLimit = 2;
+        provider.ConcurrentRequestsLimit = 2;
         provider.AddConverter(new JpgOrPngToSpriteConverter());
         provider.AddConverter(new GDocToStringConverter());
     }
@@ -60,13 +62,11 @@ public class TestResourceProvider : MonoBehaviour
         foreach (var spriteResource in loadAllAction.Result)
         {
             SpriteRenderer.sprite = spriteResource.Object;
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSeconds(.5f);
         }
 
         foreach (var spriteResource in loadAllAction.Result)
             provider.UnloadResource(spriteResource.Path);
-
-        yield return new WaitForSeconds(3);
     }
 
     private IEnumerator ResolveTextByPath ()
@@ -94,11 +94,7 @@ public class TestResourceProvider : MonoBehaviour
         var waitFordelay = new WaitForSeconds(1.5f);
 
         foreach (var res in RESOURCES)
-        {
             provider.LoadResource<Sprite>(res);
-            provider.UnloadResource(res);
-            provider.LoadResource<Sprite>(res);
-        }
 
         while (provider.IsLoading) yield return null;
 
