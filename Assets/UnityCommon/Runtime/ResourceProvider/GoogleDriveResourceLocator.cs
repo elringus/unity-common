@@ -66,7 +66,7 @@ public class GoogleDriveResourceLocator<TResource> : AsyncRunner<List<Resource<T
         {
             listRequest = new GoogleDriveFiles.ListRequest();
             listRequest.Fields = new List<string> { "files(name)" };
-            listRequest.Q = string.Format("'{0}' in parents and mimeType = '{1}'", parendId, representation.MimeType);
+            listRequest.Q = string.Format("'{0}' in parents and mimeType = '{1}' and trashed = false", parendId, representation.MimeType);
 
             yield return listRequest.Send();
 

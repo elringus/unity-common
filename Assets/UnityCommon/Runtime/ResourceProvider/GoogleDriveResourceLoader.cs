@@ -116,7 +116,7 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
             listRequest = new GoogleDriveFiles.ListRequest();
             listRequest.Fields = new List<string> { "files(id, modifiedTime)" };
             var fullName = string.IsNullOrEmpty(representation.Extension) ? fileName : string.Concat(fileName, ".", representation.Extension);
-            listRequest.Q = string.Format("'{0}' in parents and name = '{1}' and mimeType = '{2}'", parendId, fullName, representation.MimeType);
+            listRequest.Q = string.Format("'{0}' in parents and name = '{1}' and mimeType = '{2}' and trashed = false", parendId, fullName, representation.MimeType);
 
             yield return listRequest.Send();
 

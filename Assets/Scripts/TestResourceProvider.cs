@@ -47,7 +47,7 @@ public class TestResourceProvider : MonoBehaviour
     {
         var provider = Context.Resolve<GoogleDriveResourceProvider>();
         provider.DriveRootPath = "Resources";
-        provider.ConcurrentRequestsLimit = 2;
+        provider.ConcurrentRequestsLimit = 3;
         provider.AddConverter(new JpgOrPngToSpriteConverter());
         provider.AddConverter(new GDocToStringConverter());
     }
