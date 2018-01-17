@@ -49,7 +49,7 @@ public class ProjectResourceProvider : MonoRunnerResourceProvider
         var sourceType = typeof(T);
         var redirectType = redirectors.ContainsKey(sourceType) ? redirectors[sourceType].RedirectType : sourceType;
         // TODO: Make this async (if possible, LoadAllAsync doesn't exist).
-        var objects = Resources.LoadAll(path, redirectType); 
+        var objects = UnityEngine.Resources.LoadAll(path, redirectType); 
         var resources = objects.Select(r => new Resource<T>(string.Concat(path, "/", r.name), 
             redirectors.ContainsKey(sourceType) ? redirectors[sourceType].ToSource<T>(r) : r as T));
         return new AsyncAction<List<Resource<T>>>(resources.ToList(), true);
@@ -58,6 +58,6 @@ public class ProjectResourceProvider : MonoRunnerResourceProvider
     protected override void UnloadResource (Resource resource)
     {
         if (resource.IsValid && resource.IsUnityObject)
-            Resources.UnloadAsset(resource.AsUnityObject);
+            UnityEngine.Resources.UnloadAsset(resource.AsUnityObject);
     }
 }

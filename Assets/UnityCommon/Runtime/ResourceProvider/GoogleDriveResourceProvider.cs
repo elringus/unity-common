@@ -9,12 +9,34 @@ using UnityEngine;
 /// </summary>
 public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
 {
+    private struct LoadRequest { public AsyncAction Action; public Type ResourceType; public string Path; }
+
     /// <summary>
     /// Path to the drive folder where resources are located.
     /// </summary>
-    public string DriveRootPath { get; set; }
+    public string DriveRootPath { get; set; } 
+    /// <summary>
+    /// Limits the request rate per second using queueing.
+    /// </summary>
+    public int RequestPerSecondLimit { get; set; }
 
     private Dictionary<Type, IConverter> converters = new Dictionary<Type, IConverter>();
+    private Queue<LoadRequest> loadQueue = new Queue<LoadRequest>();
+
+    public override AsyncAction<Resource<T>> LoadResource<T> (string path)
+    {
+        if (ResourceExists(path))
+            return base.LoadResource<T>(path);
+
+        if (RequestPerSecondLimit > 0 && Runners.Count >= RequestPerSecondLimit)
+        {
+            var action = new AsyncAction<Resource<T>>();
+            var request = new LoadRequest() { Action = action, Path = path, ResourceType = typeof(T) };
+            loadQueue.Enqueue(request);
+            return action;
+        }
+        else return base.LoadResource<T>(path);
+    }
 
     /// <summary>
     /// Adds a resource type converter.
@@ -40,6 +62,12 @@ public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
             Destroy(resource.AsUnityObject);
     }
 
+    protected override void HandleResourceLoaded<T> (Resource<T> resource)
+    {
+        base.HandleResourceLoaded(resource);
+        ProcessLoadQueue();
+    }
+
     private IRawConverter<T> ResolveConverter<T> ()
     {
         var resourceType = typeof(T);
@@ -49,5 +77,16 @@ public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
             return null;
         }
         return converters[resourceType] as IRawConverter<T>;
+    }
+
+    private void ProcessLoadQueue ()
+    {
+        if (loadQueue.Count == 0) return;
+
+        var request = loadQueue.Dequeue();
+        var method = typeof(GoogleDriveResourceProvider).GetMethod("LoadResource");
+        var generic = method.MakeGenericMethod(request.ResourceType);
+        var action = generic.Invoke(this, new object[] { request.Path }) as AsyncAction;
+        action.Then(request.Action.CompleteInstantly);
     }
 }

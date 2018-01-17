@@ -45,6 +45,7 @@ public class TestResourceProvider : MonoBehaviour
     {
         var provider = Context.Resolve<GoogleDriveResourceProvider>();
         provider.DriveRootPath = "Resources";
+        provider.RequestPerSecondLimit = 2;
         provider.AddConverter(new JpgOrPngToSpriteConverter());
         provider.AddConverter(new GDocToStringConverter());
     }
@@ -100,7 +101,10 @@ public class TestResourceProvider : MonoBehaviour
         while (provider.IsLoading) yield return null;
 
         foreach (var res in RESOURCES)
+        {
             SpriteRenderer.sprite = provider.LoadResource<Sprite>(res).Result.Object;
+            yield return new WaitForSeconds(.5f);
+        }
 
         yield return waitFordelay;
 
@@ -115,6 +119,9 @@ public class TestResourceProvider : MonoBehaviour
         while (provider.IsLoading) yield return null;
 
         foreach (var res in RESOURCES)
+        {
             SpriteRenderer.sprite = provider.LoadResource<Sprite>(res).Result.Object;
+            yield return new WaitForSeconds(.5f);
+        }
     }
 }
