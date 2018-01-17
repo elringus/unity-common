@@ -76,6 +76,22 @@ public class AsyncAction : CustomYieldInstruction
     }
 
     /// <summary>
+    /// Adds an async function to invoke when the action has completed execution.
+    /// If the action is already completed, the function will be invoked immediately.
+    /// Returned <see cref="AsyncAction{TFunc}"/> will complete after async function completion.
+    /// </summary>
+    public virtual AsyncAction<TFunc> ThenAsync<TFunc> (Func<AsyncAction<TFunc>> func)
+    {
+        if (IsCompleted) return func.Invoke();
+        else
+        {
+            var promise = new AsyncAction<TFunc>();
+            OnCompleted += () => func.Invoke().Then(promise.CompleteInstantly);
+            return promise;
+        }
+    }
+
+    /// <summary>
     /// Clears <see cref="OnCompleted"/> event invocation list.
     /// </summary>
     public virtual void RemoveAllOnCompleteListeners ()
