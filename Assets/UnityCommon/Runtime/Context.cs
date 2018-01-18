@@ -5,8 +5,8 @@ using System.Linq;
 using UnityEngine;
 
 /// <summary>
-/// The object of class will be auto-registered in Context on scene load (before Awake calls).
-/// Only works for MonoBehaviours already placed on scene.
+/// The object of class will be auto-registered in <see cref="Context"/> on scene load (before Awake calls).
+/// Only works for <see cref="MonoBehaviour"/> objects already placed on scene.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
 public class RegisterInContext : Attribute
@@ -21,7 +21,7 @@ public class RegisterInContext : Attribute
 
 /// <summary>
 /// When resolving in context, if not registered, an instance of component object will 
-/// be auto-spawned (attached to a new empty gameobject) and registered. Only works for MonoBehaviours.
+/// be auto-spawned (attached to a new <see cref="GameObject"/>) and registered. Only works for <see cref="MonoBehaviour"/> objects.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
 public class SpawnOnContextResolve : Attribute
