@@ -9,7 +9,15 @@ using UnityEngine;
 /// Only works for MonoBehaviours already placed on scene.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class RegisterInContext : Attribute { }
+public class RegisterInContext : Attribute
+{
+    public readonly bool AssertSingleInstance;
+
+    public RegisterInContext (bool assertSingleInstance = false)
+    {
+        AssertSingleInstance = assertSingleInstance;
+    }
+}
 
 /// <summary>
 /// When resolving in context, if not registered, an instance of component object will 
@@ -66,8 +74,12 @@ public class Context : MonoBehaviour
     {
         foreach (var monoBehaviour in FindObjectsOfType<MonoBehaviour>())
         {
-            if (!IsRegistered(monoBehaviour) && monoBehaviour.GetType().IsDefined(typeof(RegisterInContext), true))
-                Register(monoBehaviour);
+            if (IsRegistered(monoBehaviour)) continue;
+
+            var attribute = monoBehaviour.GetType().GetCustomAttributes(typeof(RegisterInContext), true).FirstOrDefault() as RegisterInContext;
+            if (attribute == null) continue;
+
+            Register(monoBehaviour, attribute.AssertSingleInstance);
         }
     }
 
@@ -125,7 +137,7 @@ public class Context : MonoBehaviour
         return refsOfType.Exists(r => IsWeakRefValid(r) && r.Target == obj);
     }
 
-    public static void Register (object obj)
+    public static void Register (object obj, bool assertSingleInstance = false)
     {
         if (obj == null)
         {
@@ -143,7 +155,10 @@ public class Context : MonoBehaviour
         var reference = new WeakReference(obj);
 
         if (instance.references.ContainsKey(objType))
+        {
+            Debug.Assert(!assertSingleInstance, string.Format("Attempted to register multiple objects with type '{0}' while asserting single instance.", objType.Name));
             instance.references[objType].Add(reference);
+        }
         else instance.references.Add(objType, new List<WeakReference>() { reference });
     }
 
