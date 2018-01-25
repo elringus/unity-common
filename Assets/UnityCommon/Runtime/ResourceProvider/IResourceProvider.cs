@@ -36,6 +36,13 @@ public interface IResourceProvider
     AsyncAction<List<Resource<T>>> LoadResources<T> (string path) where T : class;
 
     /// <summary>
+    /// Locates all available resources at the provided path asynchronously.
+    /// </summary>
+    /// <typeparam name="T">Type of the resources to locate.</typeparam>
+    /// <param name="path">Path to the resources location.</param>
+    AsyncAction<List<Resource<T>>> LocateResources<T> (string path) where T : class;
+
+    /// <summary>
     /// Unloads resource at the provided path.
     /// </summary>
     /// <param name="path">Path to the resource location.</param>

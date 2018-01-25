@@ -21,6 +21,11 @@ public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
     private Dictionary<Type, IConverter> converters = new Dictionary<Type, IConverter>();
     private Queue<Action> loadQueue = new Queue<Action>();
 
+    public override AsyncAction<List<Resource<T>>> LocateResources<T> (string path)
+    {
+        return new GoogleDriveResourceLocator<T>(DriveRootPath, path, ResolveConverter<T>(), this).Run();
+    }
+
     /// <summary>
     /// Adds a resource type converter.
     /// </summary>
@@ -39,11 +44,6 @@ public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
     protected override AsyncRunner<Resource<T>> CreateLoadRunner<T> (Resource<T> resource) 
     {
         return new GoogleDriveResourceLoader<T>(DriveRootPath, resource, ResolveConverter<T>(), this);
-    }
-
-    protected override AsyncAction<List<Resource<T>>> LocateResourcesAtPath<T> (string path)
-    {
-        return new GoogleDriveResourceLocator<T>(DriveRootPath, path, ResolveConverter<T>(), this).Run();
     }
 
     protected override void UnloadResource (Resource resource)

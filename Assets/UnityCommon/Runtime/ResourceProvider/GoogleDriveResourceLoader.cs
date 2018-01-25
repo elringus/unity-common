@@ -32,6 +32,20 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
         usedRepresentation = new RawDataRepresentation();
     }
 
+    public override AsyncRunner<Resource<TResource>> Run ()
+    {
+        // Corner case when loading folders.
+        if (typeof(TResource) == typeof(Folder))
+        {
+            var folderName = Folder.ExtractNameFromPath(Resource.Path);
+            (Resource as Resource<Folder>).Object = new Folder(folderName);
+            base.HandleOnCompleted();
+            return this;
+        }
+
+        return base.Run();
+    }
+
     public override void Stop ()
     {
         base.Stop();

@@ -22,6 +22,11 @@ public class LocalResourceProvider : IResourceProvider
         throw new System.NotImplementedException();
     }
 
+    public AsyncAction<List<Resource<T>>> LocateResources<T> (string path) where T : class
+    {
+        throw new NotImplementedException();
+    }
+
     public void UnloadResource (string path)
     {
         throw new System.NotImplementedException();

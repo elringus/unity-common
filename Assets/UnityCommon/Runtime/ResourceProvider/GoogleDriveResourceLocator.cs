@@ -34,30 +34,38 @@ public class GoogleDriveResourceLocator<TResource> : AsyncRunner<List<Resource<T
 
     protected override IEnumerator AsyncRoutine ()
     {
-        var folderPath = string.IsNullOrEmpty(RootPath) ? ResourcesPath : string.Concat(RootPath, '/', ResourcesPath);
-        var parentNames = folderPath.Split('/');
-
         // 1. Resolving folder ids one by one to find id of the last one.
         var parendId = "root"; // 'root' is alias id for the root folder in Google Drive.
-        for (int i = 0; i < parentNames.Length; i++)
+        if (!string.IsNullOrEmpty(RootPath) || !string.IsNullOrEmpty(ResourcesPath))
         {
-            listRequest = new GoogleDriveFiles.ListRequest();
-            listRequest.Fields = new List<string> { "files(id)" };
-            listRequest.Q = string.Format("'{0}' in parents and name = '{1}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
-                parendId, parentNames[i]);
+            var folderPath = string.Empty;
+            if (!string.IsNullOrEmpty(RootPath) && !string.IsNullOrEmpty(ResourcesPath))
+                folderPath = string.Concat(RootPath, '/', ResourcesPath);
+            else if (string.IsNullOrEmpty(RootPath)) folderPath = ResourcesPath;
+            else folderPath = RootPath;
 
-            yield return listRequest.Send();
+            var parentNames = folderPath.Split('/');
 
-            if (!IsResultFound(listRequest))
+            for (int i = 0; i < parentNames.Length; i++)
             {
-                Debug.LogError(string.Format("Failed to retrieve {0} part of {1} resource from Google Drive.", parentNames[i], folderPath));
-                yield break;
+                listRequest = new GoogleDriveFiles.ListRequest();
+                listRequest.Fields = new List<string> { "files(id)" };
+                listRequest.Q = string.Format("'{0}' in parents and name = '{1}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
+                    parendId, parentNames[i]);
+
+                yield return listRequest.Send();
+
+                if (!IsResultFound(listRequest))
+                {
+                    Debug.LogError(string.Format("Failed to retrieve {0} part of {1} resource from Google Drive.", parentNames[i], folderPath));
+                    yield break;
+                }
+
+                if (listRequest.ResponseData.Files.Count > 1)
+                    Debug.LogWarning(string.Format("Multiple '{0}' folders been found in Google Drive.", parentNames[i]));
+
+                parendId = listRequest.ResponseData.Files[0].Id;
             }
-
-            if (listRequest.ResponseData.Files.Count > 1)
-                Debug.LogWarning(string.Format("Multiple '{0}' folders been found in Google Drive.", parentNames[i]));
-
-            parendId = listRequest.ResponseData.Files[0].Id;
         }
 
         // 2. Searching for the files in the folder.
@@ -76,7 +84,7 @@ public class GoogleDriveResourceLocator<TResource> : AsyncRunner<List<Resource<T
 
         if (results.Count == 0)
         {
-            Debug.LogError(string.Format("Failed to locate files at '{0}' in Google Drive.", folderPath));
+            Debug.LogError(string.Format("Failed to locate files at '{0}/{1}' in Google Drive.", RootPath, ResourcesPath));
             yield break;
         }
 
@@ -87,7 +95,7 @@ public class GoogleDriveResourceLocator<TResource> : AsyncRunner<List<Resource<T
             foreach (var file in result.Value)
             {
                 var fileName = string.IsNullOrEmpty(result.Key.Extension) ? file.Name : file.Name.GetBeforeLast(".");
-                var filePath = string.Concat(ResourcesPath, '/', fileName);
+                var filePath = string.IsNullOrEmpty(ResourcesPath) ? fileName : string.Concat(ResourcesPath, '/', fileName);
                 var fileResource = new Resource<TResource>(filePath);
                 LocatedResources.Add(fileResource);
             }

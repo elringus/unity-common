@@ -26,7 +26,8 @@ public class TestResourceProvider : MonoBehaviour
     {
         //yield return ResolveByFullPath();
         //yield return ResolveTextByPath();
-        yield return ResolveSpritesByPath();
+        //yield return ResolveSpritesByPath();
+        yield return ResolveFolders();
     }
 
     private void OnGUI ()
@@ -47,9 +48,29 @@ public class TestResourceProvider : MonoBehaviour
     {
         var provider = Context.Resolve<GoogleDriveResourceProvider>();
         provider.DriveRootPath = "Resources";
-        provider.ConcurrentRequestsLimit = 3;
+        provider.ConcurrentRequestsLimit = 2;
         provider.AddConverter(new JpgOrPngToSpriteConverter());
         provider.AddConverter(new GDocToStringConverter());
+        provider.AddConverter(new GFolderToFolderConverter());
+    }
+
+    private IEnumerator ResolveFolders ()
+    {
+        provider = Context.Resolve<IResourceProvider>();
+        var loadAllAction = provider.LoadResources<Folder>(null);
+
+        yield return loadAllAction;
+
+        foreach (var folderResource in loadAllAction.Result)
+        {
+            print(folderResource.Object.Name);
+            yield return new WaitForSeconds(1);
+        }
+
+        foreach (var textResource in loadAllAction.Result)
+            provider.UnloadResource(textResource.Path);
+
+        yield return new WaitForSeconds(3);
     }
 
     private IEnumerator ResolveSpritesByPath ()

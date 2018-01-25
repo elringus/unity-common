@@ -29,6 +29,17 @@ public class ProjectResourceProvider : MonoRunnerResourceProvider
 
     private Dictionary<Type, TypeRedirector> redirectors = new Dictionary<Type, TypeRedirector>();
 
+    public override AsyncAction<List<Resource<T>>> LocateResources<T> (string path)
+    {
+        var sourceType = typeof(T);
+        var redirectType = redirectors.ContainsKey(sourceType) ? redirectors[sourceType].RedirectType : sourceType;
+        // TODO: Make this async (if possible, LoadAllAsync doesn't exist).
+        var objects = UnityEngine.Resources.LoadAll(path, redirectType);
+        var resources = objects.Select(r => new Resource<T>(string.Concat(path, "/", r.name),
+            redirectors.ContainsKey(sourceType) ? redirectors[sourceType].ToSource<T>(r) : r as T));
+        return new AsyncAction<List<Resource<T>>>(resources.ToList(), true);
+    }
+
     public void AddRedirector<TSource, TRedirect> (IConverter<TRedirect, TSource> redirectToSourceConverter)
     {
         var sourceType = typeof(TSource);
@@ -42,17 +53,6 @@ public class ProjectResourceProvider : MonoRunnerResourceProvider
     protected override AsyncRunner<Resource<T>> CreateLoadRunner<T> (Resource<T> resource)
     {
         return new ProjectResourceLoader<T>(resource, redirectors.ContainsKey(typeof(T)) ? redirectors[typeof(T)] : null, this);
-    }
-
-    protected override AsyncAction<List<Resource<T>>> LocateResourcesAtPath<T> (string path)
-    {
-        var sourceType = typeof(T);
-        var redirectType = redirectors.ContainsKey(sourceType) ? redirectors[sourceType].RedirectType : sourceType;
-        // TODO: Make this async (if possible, LoadAllAsync doesn't exist).
-        var objects = UnityEngine.Resources.LoadAll(path, redirectType); 
-        var resources = objects.Select(r => new Resource<T>(string.Concat(path, "/", r.name), 
-            redirectors.ContainsKey(sourceType) ? redirectors[sourceType].ToSource<T>(r) : r as T));
-        return new AsyncAction<List<Resource<T>>>(resources.ToList(), true);
     }
 
     protected override void UnloadResource (Resource resource)

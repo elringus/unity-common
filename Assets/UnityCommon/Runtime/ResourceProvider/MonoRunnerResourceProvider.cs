@@ -46,7 +46,7 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
 
     public virtual AsyncAction<List<Resource<T>>> LoadResources<T> (string path) where T : class
     {
-        return LocateResourcesAtPath<T>(path).ThenAsync(HandleResourcesLocated);
+        return LocateResources<T>(path).ThenAsync(LoadLocatedResources);
     }
 
     public virtual void UnloadResource (string path)
@@ -72,8 +72,8 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
         return Resources.ContainsKey(path);
     }
 
+    public abstract AsyncAction<List<Resource<T>>> LocateResources<T> (string path) where T : class;
     protected abstract AsyncRunner<Resource<T>> CreateLoadRunner<T> (Resource<T> resource) where T : class;
-    protected abstract AsyncAction<List<Resource<T>>> LocateResourcesAtPath<T> (string path) where T : class;
     protected abstract void UnloadResource (Resource resource);
 
     protected virtual void RunLoader<T> (AsyncRunner<Resource<T>> loader) where T : class
@@ -102,7 +102,7 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
         UpdateLoadProgress();
     }
 
-    protected virtual AsyncAction<List<Resource<T>>> HandleResourcesLocated<T> (List<Resource<T>> locatedResources) where T : class
+    protected virtual AsyncAction<List<Resource<T>>> LoadLocatedResources<T> (List<Resource<T>> locatedResources) where T : class
     {
         // Handle corner case when resources got loaded while locating.
         foreach (var locatedResource in locatedResources)
