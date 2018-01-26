@@ -25,6 +25,13 @@ public class AsyncActionSet : AsyncAction, IDisposable
     {
         actions = new HashSet<AsyncAction>(asyncActions);
         isAllActionsAdded = true; 
+
+        if (actions.Count == 0)
+        {
+            base.HandleOnCompleted();
+            return;
+        }
+
         foreach (var action in actions)
             action.Then(HandleOnCompleted);
     }

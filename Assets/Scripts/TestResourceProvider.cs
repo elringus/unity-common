@@ -18,8 +18,8 @@ public class TestResourceProvider : MonoBehaviour
 
     private void Awake ()
     {
-        InitializeProjectResourceProvider();
-        //InitializeGoogleDriveResourceProvider();
+        //InitializeProjectResourceProvider();
+        InitializeGoogleDriveResourceProvider();
     }
 
     private IEnumerator Start ()
@@ -57,9 +57,11 @@ public class TestResourceProvider : MonoBehaviour
     private IEnumerator ResolveFolders ()
     {
         provider = Context.Resolve<IResourceProvider>();
-        var loadAllAction = provider.LoadResources<Folder>(null);
+        var loadAllAction = provider.LoadResources<Folder>("Empty");
 
         yield return loadAllAction;
+
+        text = "completed";
 
         foreach (var folderResource in loadAllAction.Result)
         {

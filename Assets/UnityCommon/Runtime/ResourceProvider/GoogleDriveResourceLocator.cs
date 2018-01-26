@@ -82,12 +82,6 @@ public class GoogleDriveResourceLocator<TResource> : AsyncRunner<List<Resource<T
                 results.Add(representation, listRequest.ResponseData.Files);
         }
 
-        if (results.Count == 0)
-        {
-            Debug.LogError(string.Format("Failed to locate files at '{0}/{1}' in Google Drive.", RootPath, ResourcesPath));
-            yield break;
-        }
-
         // 3. Create resources using located files.
         LocatedResources = new List<Resource<TResource>>();
         foreach (var result in results)
