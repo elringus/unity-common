@@ -66,6 +66,13 @@ public static class LinqUtils
     {
         return list.IndexOf(currentItem) / (float)list.Count;
     }
+
+    public static IEnumerable<Folder> FindAllAtPath (this IEnumerable<Folder> folders, string path)
+    {
+        if (string.IsNullOrEmpty(path))
+            return folders.Where(f => !f.Path.Contains("/") || string.IsNullOrEmpty(f.Path.GetBeforeLast("/")));
+        return folders.Where(f => f.Path.GetBeforeLast("/").Equals(path) || f.Path.GetBeforeLast("/").Equals("/" + path));
+    }
 }
 
 public class GeneralPropertyComparer<T, TKey> : IEqualityComparer<T>

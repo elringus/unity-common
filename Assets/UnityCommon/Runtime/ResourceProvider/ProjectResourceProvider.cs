@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
 
 /// <summary>
 /// Provides resources stored in the 'Resources' folders of the project.
@@ -31,13 +29,7 @@ public class ProjectResourceProvider : MonoRunnerResourceProvider
 
     public override AsyncAction<List<Resource<T>>> LocateResources<T> (string path)
     {
-        var sourceType = typeof(T);
-        var redirectType = redirectors.ContainsKey(sourceType) ? redirectors[sourceType].RedirectType : sourceType;
-        // TODO: Make this async (if possible, LoadAllAsync doesn't exist).
-        var objects = UnityEngine.Resources.LoadAll(path, redirectType);
-        var resources = objects.Select(r => new Resource<T>(string.Concat(path, "/", r.name),
-            redirectors.ContainsKey(sourceType) ? redirectors[sourceType].ToSource<T>(r) : r as T));
-        return new AsyncAction<List<Resource<T>>>(resources.ToList(), true);
+        return new ProjectResourceLocator<T>(path, redirectors.ContainsKey(typeof(T)) ? redirectors[typeof(T)] : null, this).Run();
     }
 
     public void AddRedirector<TSource, TRedirect> (IConverter<TRedirect, TSource> redirectToSourceConverter)

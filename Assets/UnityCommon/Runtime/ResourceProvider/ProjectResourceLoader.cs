@@ -17,6 +17,14 @@ public class ProjectResourceLoader<TResource> : AsyncRunner<Resource<TResource>>
 
     public override AsyncRunner<Resource<TResource>> Run ()
     {
+        // Corner case when loading folders.
+        if (typeof(TResource) == typeof(Folder))
+        {
+            (Resource as Resource<Folder>).Object = new Folder(Resource.Path);
+            base.HandleOnCompleted();
+            return this;
+        }
+
         var resourceType = redirector != null ? redirector.RedirectType : typeof(TResource);
         YieldInstruction = resourceRequest = Resources.LoadAsync(Resource.Path, resourceType); 
         return base.Run();

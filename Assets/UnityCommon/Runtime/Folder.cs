@@ -1,18 +1,18 @@
-﻿
+﻿using UnityEngine;
+
 /// <summary>
 /// Represents a directory in file systems.
 /// </summary>
+[System.Serializable]
 public class Folder 
 {
-    public string Name { get; private set; }
+    public string Path { get { return _path; } private set { _path = value; } }
+    public string Name { get { return Path.Contains("/") ? Path.GetAfter("/") : Path; } }
 
-    public Folder (string name)
-    {
-        Name = name;
-    }
+    [SerializeField] string _path = null;
 
-    public static string ExtractNameFromPath (string path)
+    public Folder (string path)
     {
-        return path.Contains("/") ? path.GetAfter("/") : path;
+        Path = path;
     }
 }
