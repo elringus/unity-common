@@ -10,11 +10,13 @@ public class ProjectResourceLocator<TResource> : AsyncRunner<List<Resource<TReso
     public string ResourcesPath { get; private set; }
 
     private ProjectResourceProvider.TypeRedirector redirector;
+    private ProjectResources resources;
 
-    public ProjectResourceLocator (string resourcesPath, ProjectResourceProvider.TypeRedirector redirector = null, 
+    public ProjectResourceLocator (string resourcesPath, ProjectResources resources, ProjectResourceProvider.TypeRedirector redirector = null, 
         MonoBehaviour coroutineContainer = null) : base(coroutineContainer)
     {
         ResourcesPath = resourcesPath ?? string.Empty;
+        this.resources = resources;
         this.redirector = redirector;
     }
 
@@ -23,7 +25,7 @@ public class ProjectResourceLocator<TResource> : AsyncRunner<List<Resource<TReso
         // Corner case when locating folders (unity doesn't see folder as a resource).
         if (typeof(TResource) == typeof(Folder))
         {
-            LocatedResources = LocateAllResourceFolders().FindAllAtPath(ResourcesPath)
+            LocatedResources = resources.LocateAllResourceFolders().FindAllAtPath(ResourcesPath)
                 .Select(f => new Resource<Folder>(f.Path, f) as Resource<TResource>).ToList();
             HandleOnCompleted();
             yield break;
@@ -39,30 +41,4 @@ public class ProjectResourceLocator<TResource> : AsyncRunner<List<Resource<TReso
 
         yield break;
     }
-
-    #if UNITY_EDITOR
-    private static List<Folder> LocateAllResourceFolders ()
-    {
-        var folders = new List<Folder>();
-        WalkDirectoryTree(new System.IO.DirectoryInfo(Application.dataPath), ref folders, false);
-        return folders;
-    }
-
-    private static void WalkDirectoryTree (System.IO.DirectoryInfo directory, ref List<Folder> outFolders, bool isInsideResources)
-    {
-        var subDirs = directory.GetDirectories();
-        foreach (var dirInfo in subDirs)
-        {
-            if (!isInsideResources && dirInfo.Name != "Resources") continue;
-            if (!isInsideResources && dirInfo.Name == "Resources") WalkDirectoryTree(dirInfo, ref outFolders, true);
-
-            if (isInsideResources)
-            {
-                var folder = new Folder(dirInfo.FullName.Replace("\\", "/").GetAfterFirst("/Resources"));
-                outFolders.Add(folder);
-                WalkDirectoryTree(dirInfo, ref outFolders, true);
-            }
-        }
-    }
-    #endif
 }

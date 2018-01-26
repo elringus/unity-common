@@ -25,11 +25,18 @@ public class ProjectResourceProvider : MonoRunnerResourceProvider
         }
     }
 
+    private ProjectResources projectResources;
     private Dictionary<Type, TypeRedirector> redirectors = new Dictionary<Type, TypeRedirector>();
+
+    protected override void Awake ()
+    {
+        base.Awake();
+        projectResources = ProjectResources.Get();
+    }
 
     public override AsyncAction<List<Resource<T>>> LocateResources<T> (string path)
     {
-        return new ProjectResourceLocator<T>(path, redirectors.ContainsKey(typeof(T)) ? redirectors[typeof(T)] : null, this).Run();
+        return new ProjectResourceLocator<T>(path, projectResources, redirectors.ContainsKey(typeof(T)) ? redirectors[typeof(T)] : null, this).Run();
     }
 
     public void AddRedirector<TSource, TRedirect> (IConverter<TRedirect, TSource> redirectToSourceConverter)

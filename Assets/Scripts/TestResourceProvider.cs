@@ -18,8 +18,8 @@ public class TestResourceProvider : MonoBehaviour
 
     private void Awake ()
     {
-        //InitializeProjectResourceProvider();
-        InitializeGoogleDriveResourceProvider();
+        InitializeProjectResourceProvider();
+        //InitializeGoogleDriveResourceProvider();
     }
 
     private IEnumerator Start ()
@@ -63,7 +63,7 @@ public class TestResourceProvider : MonoBehaviour
 
         foreach (var folderResource in loadAllAction.Result)
         {
-            print(folderResource.Object.Name);
+            text = folderResource.Object.Name;
             yield return new WaitForSeconds(1);
         }
 
