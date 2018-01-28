@@ -26,6 +26,11 @@ public class RemoteResourceProvider : IResourceProvider
         throw new NotImplementedException();
     }
 
+    public AsyncAction<bool> ResourceExists<T> (string path) where T : class
+    {
+        throw new System.NotImplementedException();
+    }
+
     public void UnloadResource (string path)
     {
         throw new System.NotImplementedException();

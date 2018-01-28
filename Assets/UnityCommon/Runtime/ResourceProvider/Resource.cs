@@ -30,6 +30,12 @@ public class Resource<T> : Resource where T : class
 
     private T CastObject (object resourceObject)
     {
+        if (resourceObject == null)
+        {
+            Debug.LogError(string.Format("Resource '{0}' is null.", Path, typeof(T).Name));
+            return null;
+        }
+
         var castedResource = resourceObject as T;
         if (castedResource == null)
         {

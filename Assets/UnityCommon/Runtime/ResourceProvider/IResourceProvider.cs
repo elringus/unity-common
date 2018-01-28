@@ -43,6 +43,13 @@ public interface IResourceProvider
     AsyncAction<List<Resource<T>>> LocateResources<T> (string path) where T : class;
 
     /// <summary>
+    /// Checks whether resource with the provided type and path is available.
+    /// </summary>
+    /// <typeparam name="T">Type of the resource to look for.</typeparam>
+    /// <param name="path">Path to the resource location.</param>
+    AsyncAction<bool> ResourceExists<T> (string path) where T : class;
+
+    /// <summary>
     /// Unloads resource at the provided path.
     /// </summary>
     /// <param name="path">Path to the resource location.</param>

@@ -72,6 +72,15 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
         return Resources.ContainsKey(path);
     }
 
+    public virtual AsyncAction<bool> ResourceExists<T> (string path) where T : class
+    {
+        // TODO: Check for resource type.
+        if (ResourceLoaded(path)) return AsyncAction<bool>.CreateCompleted(true);
+        var folderPath = path.Contains("/") ? path.GetBeforeLast("/") : string.Empty;
+        return LocateResources<T>(folderPath).ThenAsync(resources => 
+            AsyncAction<bool>.CreateCompleted(resources.Exists(r => r.Path.Equals(path))));
+    }
+
     public abstract AsyncAction<List<Resource<T>>> LocateResources<T> (string path) where T : class;
     protected abstract AsyncRunner<Resource<T>> CreateLoadRunner<T> (Resource<T> resource) where T : class;
     protected abstract void UnloadResource (Resource resource);

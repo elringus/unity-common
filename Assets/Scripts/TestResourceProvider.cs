@@ -10,16 +10,16 @@ public class TestResourceProvider : MonoBehaviour
     private string text = "empty";
 
     private readonly List<string> RESOURCES = new List<string>() {
-        "Sprites/Image001",
-        "Sprites/Image002",
-        "Sprites/Image003",
-        "Sprites/Image004",
+        "Sprites/Image01",
+        "Sprites/Image02",
+        "Sprites/Image03",
+        "Sprites/Image04",
     };
 
     private void Awake ()
     {
-        //InitializeProjectResourceProvider();
-        InitializeGoogleDriveResourceProvider();
+        InitializeProjectResourceProvider();
+        //InitializeGoogleDriveResourceProvider();
     }
 
     private IEnumerator Start ()
@@ -27,7 +27,8 @@ public class TestResourceProvider : MonoBehaviour
         //yield return ResolveByFullPath();
         //yield return ResolveTextByPath();
         //yield return ResolveSpritesByPath();
-        yield return ResolveFolders();
+        //yield return ResolveFolders();
+        yield return TestResourcExists();
     }
 
     private void OnGUI ()
@@ -109,6 +110,15 @@ public class TestResourceProvider : MonoBehaviour
             provider.UnloadResource(textResource.Path);
 
         yield return new WaitForSeconds(3);
+    }
+
+    private IEnumerator TestResourcExists ()
+    {
+        provider = Context.Resolve<IResourceProvider>();
+
+        foreach (var res in RESOURCES)
+            yield return provider.ResourceExists<Sprite>(res).Then(b => print(res + ": " + b.ToString()));
+
     }
 
     private IEnumerator ResolveByFullPath ()
