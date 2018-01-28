@@ -148,11 +148,7 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
             if (!Resources.ContainsKey(locatedResource.Path) && locatedResource.IsValid)
                 Resources.Add(locatedResource.Path, locatedResource);
 
-        var loadRunners = locatedResources.Select(r => LoadResource<T>(r.Path)).ToArray();
-        var loadAction = new AsyncAction<List<Resource<T>>>(loadRunners.Select(r => r.Result).ToList());
-        new AsyncActionSet(loadRunners).Then(loadAction.CompleteInstantly);
-
-        return loadAction;
+        return new AsyncActionSet<Resource<T>>(locatedResources.Select(r => LoadResource<T>(r.Path)).ToArray());
     }
 
     protected virtual void UpdateLoadProgress ()
