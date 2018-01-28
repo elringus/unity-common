@@ -34,6 +34,8 @@ public class GoogleDriveResourceLocator<TResource> : AsyncRunner<List<Resource<T
 
     protected override IEnumerator AsyncRoutine ()
     {
+        LocatedResources = new List<Resource<TResource>>();
+
         // 1. Resolving folder ids one by one to find id of the last one.
         var parendId = "root"; // 'root' is alias id for the root folder in Google Drive.
         if (!string.IsNullOrEmpty(RootPath) || !string.IsNullOrEmpty(ResourcesPath))
@@ -57,7 +59,8 @@ public class GoogleDriveResourceLocator<TResource> : AsyncRunner<List<Resource<T
 
                 if (!IsResultFound(listRequest))
                 {
-                    Debug.LogError(string.Format("Failed to retrieve {0} part of {1} resource from Google Drive.", parentNames[i], folderPath));
+                    //Debug.LogError(string.Format("Failed to retrieve {0} part of {1} resource from Google Drive.", parentNames[i], folderPath));
+                    HandleOnCompleted();
                     yield break;
                 }
 
@@ -83,7 +86,6 @@ public class GoogleDriveResourceLocator<TResource> : AsyncRunner<List<Resource<T
         }
 
         // 3. Create resources using located files.
-        LocatedResources = new List<Resource<TResource>>();
         foreach (var result in results)
         {
             foreach (var file in result.Value)
