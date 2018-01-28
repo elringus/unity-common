@@ -34,11 +34,6 @@ public class ProjectResourceProvider : MonoRunnerResourceProvider
         projectResources = ProjectResources.Get();
     }
 
-    public override AsyncAction<List<Resource<T>>> LocateResources<T> (string path)
-    {
-        return new ProjectResourceLocator<T>(path, projectResources, redirectors.ContainsKey(typeof(T)) ? redirectors[typeof(T)] : null, this).Run();
-    }
-
     public void AddRedirector<TSource, TRedirect> (IConverter<TRedirect, TSource> redirectToSourceConverter)
     {
         var sourceType = typeof(TSource);
@@ -52,6 +47,11 @@ public class ProjectResourceProvider : MonoRunnerResourceProvider
     protected override AsyncRunner<Resource<T>> CreateLoadRunner<T> (Resource<T> resource)
     {
         return new ProjectResourceLoader<T>(resource, redirectors.ContainsKey(typeof(T)) ? redirectors[typeof(T)] : null, this);
+    }
+
+    protected override AsyncRunner<List<Resource<T>>> CreateLocateRunner<T> (string path)
+    {
+        return new ProjectResourceLocator<T>(path, projectResources, redirectors.ContainsKey(typeof(T)) ? redirectors[typeof(T)] : null, this);
     }
 
     protected override void UnloadResource (Resource resource)

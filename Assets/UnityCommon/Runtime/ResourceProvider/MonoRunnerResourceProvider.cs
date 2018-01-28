@@ -77,17 +77,39 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
         // TODO: Check for resource type.
         if (ResourceLoaded(path)) return AsyncAction<bool>.CreateCompleted(true);
         var folderPath = path.Contains("/") ? path.GetBeforeLast("/") : string.Empty;
-        return LocateResources<T>(folderPath).ThenAsync(resources => 
+        return LocateResources<T>(folderPath).ThenAsync(resources =>
             AsyncAction<bool>.CreateCompleted(resources.Exists(r => r.Path.Equals(path))));
     }
 
-    public abstract AsyncAction<List<Resource<T>>> LocateResources<T> (string path) where T : class;
+    public virtual AsyncAction<List<Resource<T>>> LocateResources<T> (string path) where T : class
+    {
+        if (path == null) path = string.Empty;
+
+        if (Runners.ContainsKey(path))
+            return Runners[path] as AsyncAction<List<Resource<T>>>;
+
+        var locateRunner = CreateLocateRunner<T>(path);
+        locateRunner.OnCompleted += locatedResources => HandleResourcesLocated(locatedResources, path);
+        Runners.Add(path, locateRunner);
+        UpdateLoadProgress();
+
+        RunLocator(locateRunner);
+
+        return locateRunner;
+    }
+
     protected abstract AsyncRunner<Resource<T>> CreateLoadRunner<T> (Resource<T> resource) where T : class;
+    protected abstract AsyncRunner<List<Resource<T>>> CreateLocateRunner<T> (string path) where T : class;
     protected abstract void UnloadResource (Resource resource);
 
     protected virtual void RunLoader<T> (AsyncRunner<Resource<T>> loader) where T : class
     {
         loader.Run();
+    }
+
+    protected virtual void RunLocator<T> (AsyncRunner<List<Resource<T>>> locator) where T : class
+    {
+        locator.Run();
     }
 
     protected virtual void CancelResourceLoading (string path)
@@ -107,6 +129,14 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
 
         if (Runners.ContainsKey(resource.Path)) Runners.Remove(resource.Path);
         else Debug.LogWarning(string.Format("Load runner for resource '{0}' not found.", resource.Path));
+
+        UpdateLoadProgress();
+    }
+
+    protected virtual void HandleResourcesLocated<T> (List<Resource<T>> locatedResources, string path) where T : class
+    {
+        if (Runners.ContainsKey(path)) Runners.Remove(path);
+        else Debug.LogWarning(string.Format("Locate runner for path '{0}' not found.", path));
 
         UpdateLoadProgress();
     }

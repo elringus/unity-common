@@ -17,14 +17,13 @@ public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
     /// Limits concurrent requests count using queueing.
     /// </summary>
     public int ConcurrentRequestsLimit { get; set; }
+    /// <summary>
+    /// Current pending concurrent requests count.
+    /// </summary>
+    public int RequestsCount { get { return Runners.Count; } }
 
     private Dictionary<Type, IConverter> converters = new Dictionary<Type, IConverter>();
-    private Queue<Action> loadQueue = new Queue<Action>();
-
-    public override AsyncAction<List<Resource<T>>> LocateResources<T> (string path)
-    {
-        return new GoogleDriveResourceLocator<T>(DriveRootPath, path, ResolveConverter<T>(), this).Run();
-    }
+    private Queue<Action> requestQueue = new Queue<Action>();
 
     /// <summary>
     /// Adds a resource type converter.
@@ -36,14 +35,26 @@ public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
 
     protected override void RunLoader<T> (AsyncRunner<Resource<T>> loader)
     {
-        if (ConcurrentRequestsLimit > 0 && Runners.Count > ConcurrentRequestsLimit)
-            loadQueue.Enqueue(() => loader.Run());
+        if (ConcurrentRequestsLimit > 0 && RequestsCount > ConcurrentRequestsLimit)
+            requestQueue.Enqueue(() => loader.Run());
         else loader.Run();
+    }
+
+    protected override void RunLocator<T> (AsyncRunner<List<Resource<T>>> locator)
+    {
+        if (ConcurrentRequestsLimit > 0 && RequestsCount > ConcurrentRequestsLimit)
+            requestQueue.Enqueue(() => locator.Run());
+        else locator.Run();
     }
 
     protected override AsyncRunner<Resource<T>> CreateLoadRunner<T> (Resource<T> resource) 
     {
         return new GoogleDriveResourceLoader<T>(DriveRootPath, resource, ResolveConverter<T>(), this);
+    }
+
+    protected override AsyncRunner<List<Resource<T>>> CreateLocateRunner<T> (string path)
+    {
+        return new GoogleDriveResourceLocator<T>(DriveRootPath, path, ResolveConverter<T>(), this);
     }
 
     protected override void UnloadResource (Resource resource)
@@ -55,6 +66,12 @@ public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
     protected override void HandleResourceLoaded<T> (Resource<T> resource)
     {
         base.HandleResourceLoaded(resource);
+        ProcessLoadQueue();
+    }
+
+    protected override void HandleResourcesLocated<T> (List<Resource<T>> locatedResources, string path)
+    {
+        base.HandleResourcesLocated(locatedResources, path);
         ProcessLoadQueue();
     }
 
@@ -71,8 +88,8 @@ public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
 
     private void ProcessLoadQueue ()
     {
-        if (loadQueue.Count == 0) return;
+        if (requestQueue.Count == 0) return;
 
-        loadQueue.Dequeue()();
+        requestQueue.Dequeue()();
     }
 }
