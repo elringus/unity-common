@@ -128,7 +128,7 @@ public class AsyncAction<TResult> : AsyncAction
     /// <summary>
     /// Object representing the result of the action execution.
     /// </summary>
-    public TResult Result { get; protected set; }
+    public virtual TResult Result { get; protected set; }
 
     public AsyncAction () : base() { }
 

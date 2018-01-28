@@ -75,14 +75,14 @@ public class AsyncActionSet : AsyncAction, IDisposable
 /// Represents a set of <see cref="AsyncAction{TState}"/>.
 /// <see cref="OnCompleted"/> event will be envoked when all tracked actions complete.
 /// </summary>
-public class AsyncActionSet<TResult> : AsyncAction<TResult>, IDisposable
+public class AsyncActionSet<TResult> : AsyncAction<List<TResult>>, IDisposable
 {
     public float Progress { get { return completedActionCount / actions.Count; } }
     public bool IsReadyToComplete { get { return isAllActionsAdded && completedActionCount == actions.Count; } }
     public override bool CanBeInstantlyCompleted { get { return actions.All(a => a.CanBeInstantlyCompleted); } }
-    public new List<TResult> Result { get { return actions.Select(a => a.Result).ToList(); } }
+    public override List<TResult> Result { get { return actions.Select(a => a.Result).ToList(); } }
 
-    private HashSet<AsyncAction<TResult>> actions;
+    private List<AsyncAction<TResult>> actions;
     private int completedActionCount;
     private bool isAllActionsAdded;
 
@@ -93,7 +93,7 @@ public class AsyncActionSet<TResult> : AsyncAction<TResult>, IDisposable
 
     public AsyncActionSet (params AsyncAction<TResult>[] asyncActions)
     {
-        actions = new HashSet<AsyncAction<TResult>>(asyncActions);
+        actions = new List<AsyncAction<TResult>>(asyncActions);
         isAllActionsAdded = true;
         foreach (var action in actions)
             action.Then(HandleOnCompleted);
@@ -119,12 +119,12 @@ public class AsyncActionSet<TResult> : AsyncAction<TResult>, IDisposable
             action.CompleteInstantly();
     }
 
-    public override void CompleteInstantly (TResult result)
+    public override void CompleteInstantly (List<TResult> result)
     {
         if (!CanBeInstantlyCompleted || IsCompleted) return;
 
-        foreach (var action in actions)
-            action.CompleteInstantly(result);
+        for (int i = 0; i < result.Count; i++)
+            actions[i].CompleteInstantly(result[i]);
     }
 
     public void Dispose ()
