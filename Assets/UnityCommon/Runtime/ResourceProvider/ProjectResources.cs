@@ -44,19 +44,31 @@ public class ProjectResourcesPreprocessor : UnityEditor.Build.IPreprocessBuild, 
 {
     public int callbackOrder { get { return 0; } }
 
-    private const string PATH = "Assets/Resources/ProjectResources.asset";
+    protected string DIR_PATH { get { return "Assets/Resources"; } }
+    protected string ASSET_PATH { get { return DIR_PATH + "/ProjectResources.asset"; } }
+
+    private bool folderCreated;
 
     public void OnPreprocessBuild (UnityEditor.BuildTarget target, string path)
     {
         var asset = ScriptableObject.CreateInstance<ProjectResources>();
         asset.LocateAllResourceFolders();
-        UnityEditor.AssetDatabase.CreateAsset(asset, PATH);
+
+        if (!System.IO.Directory.Exists(DIR_PATH))
+        {
+            System.IO.Directory.CreateDirectory(DIR_PATH);
+            folderCreated = true;
+        }
+        else folderCreated = false;
+
+        UnityEditor.AssetDatabase.CreateAsset(asset, ASSET_PATH);
         UnityEditor.AssetDatabase.SaveAssets();
     }
 
     public void OnPostprocessBuild (UnityEditor.BuildTarget target, string path)
     {
-        UnityEditor.AssetDatabase.DeleteAsset(PATH);
+        UnityEditor.AssetDatabase.DeleteAsset(ASSET_PATH);
+        if (folderCreated) UnityEditor.AssetDatabase.DeleteAsset(DIR_PATH);
         UnityEditor.AssetDatabase.SaveAssets();
     }
 }

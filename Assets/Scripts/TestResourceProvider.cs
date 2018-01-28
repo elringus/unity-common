@@ -18,16 +18,16 @@ public class TestResourceProvider : MonoBehaviour
 
     private void Awake ()
     {
-        //InitializeProjectResourceProvider();
-        InitializeGoogleDriveResourceProvider();
+        InitializeProjectResourceProvider();
+        //InitializeGoogleDriveResourceProvider();
     }
 
     private IEnumerator Start ()
     {
-        yield return ResolveByFullPath();
+        //yield return ResolveByFullPath();
         //yield return ResolveTextByPath();
         //yield return ResolveSpritesByPath();
-        //yield return ResolveFolders();
+        yield return ResolveFolders();
         //yield return TestResourcExists();
     }
 
