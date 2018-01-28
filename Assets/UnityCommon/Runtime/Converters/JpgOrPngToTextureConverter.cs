@@ -13,7 +13,7 @@ public class JpgOrPngToTextureConverter : IRawConverter<Texture2D>
     public Texture2D Convert (byte[] obj)
     {
         var texture = new Texture2D(2, 2);
-        texture.LoadImage(obj);
+        texture.LoadImage(obj, true);
         return texture;
     }
 

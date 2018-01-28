@@ -24,11 +24,11 @@ public class TestResourceProvider : MonoBehaviour
 
     private IEnumerator Start ()
     {
-        //yield return ResolveByFullPath();
+        yield return ResolveByFullPath();
         //yield return ResolveTextByPath();
         //yield return ResolveSpritesByPath();
         //yield return ResolveFolders();
-        yield return TestResourcExists();
+        //yield return TestResourcExists();
     }
 
     private void OnGUI ()

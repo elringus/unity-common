@@ -12,7 +12,7 @@ public class PngToSpriteConverter : IRawConverter<Sprite>
     public Sprite Convert (byte[] obj)
     {
         var texture = new Texture2D(2, 2);
-        texture.LoadImage(obj);
+        texture.LoadImage(obj, true);
         var rect = new Rect(0, 0, texture.width, texture.height);
         return Sprite.Create(texture, rect, Vector2.one * .5f);
     }
