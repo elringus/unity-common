@@ -13,8 +13,9 @@ public class ScriptableUIBehaviour : UIBehaviour
     public virtual float CurrentOpacity { get { return GetCurrentOpacity(); } }
     public RectTransform RectTransform { get { return GetRectTransform(); } }
 
-    private RectTransform _rectTransform;
+    private Tweener<FloatTween> fadeTweener;
     private CanvasGroup canvasGroup;
+    private RectTransform _rectTransform;
     private bool _isVisible;
 
     [Tooltip("Whether UI element should be visible or hidden on awake.")]
@@ -26,6 +27,7 @@ public class ScriptableUIBehaviour : UIBehaviour
     {
         base.Awake();
 
+        fadeTweener = new Tweener<FloatTween>(this, OnFadeComplete);
         canvasGroup = GetComponent<CanvasGroup>();
         SetIsVisible(IsVisibleOnAwake, 0f);
     }
@@ -52,7 +54,7 @@ public class ScriptableUIBehaviour : UIBehaviour
         }
 
         var tween = new FloatTween(canvasGroup.alpha, targetOpacity, fadeDuration, alpha => canvasGroup.alpha = alpha);
-        new Tweener<FloatTween>(tween, this, OnFadeComplete).Run();
+        fadeTweener.Run(tween);
     }
 
     public virtual void ToggleVisibility (float? fadeTime = null)
