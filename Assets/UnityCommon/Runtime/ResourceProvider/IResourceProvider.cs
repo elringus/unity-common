@@ -54,7 +54,7 @@ public interface IResourceProvider
     void UnloadResources ();
 
     /// <summary>
-    /// Checks whether resource with provided path has been previously requested.
+    /// Checks whether resource with the provided path is loaded.
     /// </summary>
-    bool ResourceExists (string path);
+    bool ResourceLoaded (string path);
 }

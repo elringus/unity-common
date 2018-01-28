@@ -37,7 +37,7 @@ public class LocalResourceProvider : IResourceProvider
         throw new NotImplementedException();
     }
 
-    public bool ResourceExists (string path)
+    public bool ResourceLoaded (string path)
     {
         throw new System.NotImplementedException();
     }

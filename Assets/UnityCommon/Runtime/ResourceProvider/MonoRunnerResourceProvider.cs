@@ -51,7 +51,7 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
 
     public virtual void UnloadResource (string path)
     {
-        if (!ResourceExists(path)) return;
+        if (!ResourceLoaded(path)) return;
 
         if (Runners.ContainsKey(path))
             CancelResourceLoading(path);
@@ -67,7 +67,7 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
             UnloadResource(resource.Path);
     }
 
-    public virtual bool ResourceExists (string path)
+    public virtual bool ResourceLoaded (string path)
     {
         return Resources.ContainsKey(path);
     }
