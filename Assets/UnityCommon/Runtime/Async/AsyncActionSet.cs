@@ -12,7 +12,7 @@ public class AsyncActionSet : AsyncAction, IDisposable
     public bool IsReadyToComplete { get { return isAllActionsAdded && completedActionCount == actions.Count; } }
     public override bool CanBeInstantlyCompleted { get { return actions.All(a => a.CanBeInstantlyCompleted); } }
 
-    private HashSet<AsyncAction> actions = new HashSet<AsyncAction>();
+    private List<AsyncAction> actions = new List<AsyncAction>();
     private int completedActionCount;
     private bool isAllActionsAdded;
 
@@ -23,7 +23,7 @@ public class AsyncActionSet : AsyncAction, IDisposable
 
     public AsyncActionSet (params AsyncAction[] asyncActions)
     {
-        actions = new HashSet<AsyncAction>(asyncActions);
+        actions = new List<AsyncAction>(asyncActions);
         isAllActionsAdded = true; 
 
         if (actions.Count == 0)
@@ -95,6 +95,13 @@ public class AsyncActionSet<TResult> : AsyncAction<List<TResult>>, IDisposable
     {
         actions = new List<AsyncAction<TResult>>(asyncActions);
         isAllActionsAdded = true;
+
+        if (actions.Count == 0)
+        {
+            base.HandleOnCompleted();
+            return;
+        }
+
         foreach (var action in actions)
             action.Then(HandleOnCompleted);
     }
