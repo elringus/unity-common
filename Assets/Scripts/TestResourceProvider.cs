@@ -39,20 +39,51 @@ public class TestResourceProvider : MonoBehaviour
             GUILayout.Label(provider.LoadProgress.ToString());
     }
 
-    private void InitializeProjectResourceProvider ()
+    [ContextMenu("Test In Editor")]
+    private void TestEditor ()
     {
-        var provider = Context.Resolve<ProjectResourceProvider>();
-        provider.AddRedirector(new TextAssetToStringConverter());
+        var provider = InitializeGoogleDriveResourceProvider();
+        provider.LoadResources<string>("Text").Then(result => {
+            foreach (var textResource in result) Debug.Log(textResource.Object);
+        });
     }
 
-    private void InitializeGoogleDriveResourceProvider ()
+    private static ProjectResourceProvider InitializeProjectResourceProvider ()
     {
-        var provider = Context.Resolve<GoogleDriveResourceProvider>();
+        ProjectResourceProvider provider;
+
+        if (Application.isPlaying) provider = Context.Resolve<ProjectResourceProvider>();
+        else
+        {
+            var go = new GameObject();
+            go.hideFlags = HideFlags.DontSave;
+            provider = go.AddComponent<ProjectResourceProvider>();
+        }
+
+        provider.AddRedirector(new TextAssetToStringConverter());
+
+        return provider;
+    }
+
+    private static GoogleDriveResourceProvider InitializeGoogleDriveResourceProvider ()
+    {
+        GoogleDriveResourceProvider provider;
+
+        if (Application.isPlaying) provider = Context.Resolve<GoogleDriveResourceProvider>();
+        else
+        {
+            var go = new GameObject();
+            go.hideFlags = HideFlags.DontSave;
+            provider = go.AddComponent<GoogleDriveResourceProvider>();
+        }
+
         provider.DriveRootPath = "Resources";
         provider.ConcurrentRequestsLimit = 2;
         provider.AddConverter(new JpgOrPngToSpriteConverter());
         provider.AddConverter(new GDocToStringConverter());
         provider.AddConverter(new GFolderToFolderConverter());
+
+        return provider;
     }
 
     private IEnumerator ResolveFolders ()
