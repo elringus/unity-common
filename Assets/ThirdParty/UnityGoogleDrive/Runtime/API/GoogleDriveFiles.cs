@@ -1,9 +1,9 @@
-﻿// Copyright 2017 Elringus (Artyom Sovetnikov). All Rights Reserved.
+﻿// Copyright 2017-2018 Elringus (Artyom Sovetnikov). All Rights Reserved.
+
+using UnityEngine.Networking;
 
 namespace UnityGoogleDrive
 {
-    using UnityEngine.Networking;
-    
     /// <summary>
     /// The <see cref="Data.File"/> resource collection of methods.
     /// Prototype: https://developers.google.com/drive/v3/reference/files.
@@ -36,15 +36,15 @@ namespace UnityGoogleDrive
             /// Whether the requesting application supports Team Drives.
             /// </summary>
             [QueryParameter] public bool? SupportsTeamDrives { get; set; }
-    
-            public CopyRequest (Data.File file) : base(string.Format(@"https://www.googleapis.com/drive/v3/files/{0}/copy", file.Id), 
+
+            public CopyRequest (Data.File file) : base(string.Format(@"https://www.googleapis.com/drive/v3/files/{0}/copy", file.Id),
                 UnityWebRequest.kHttpVerbPOST, file)
             {
                 // API don't like receiving ID in the request body.
                 file.Id = null;
             }
         }
-    
+
         /// <summary>
         /// Creates a new file.
         /// </summary>
@@ -74,11 +74,11 @@ namespace UnityGoogleDrive
             /// Whether to use the uploaded content as indexable text.
             /// </summary>
             [QueryParameter] public bool? UseContentAsIndexableText { get; set; }
-    
-            public CreateRequest (Data.File file) : base(file.Content != null ? @"https://www.googleapis.com/upload/drive/v3/files" : 
+
+            public CreateRequest (Data.File file) : base(file.Content != null ? @"https://www.googleapis.com/upload/drive/v3/files" :
                 @"https://www.googleapis.com/drive/v3/files", UnityWebRequest.kHttpVerbPOST, file, file.Content, file.MimeType) { }
         }
-    
+
         /// <summary>
         /// Permanently deletes a file owned by the user without moving it to the trash.
         /// If the file belongs to a Team Drive the user must be an organizer on the parent.
@@ -90,11 +90,11 @@ namespace UnityGoogleDrive
             /// Whether the requesting application supports Team Drives. (Default: false) 
             /// </summary>
             [QueryParameter] public bool? SupportsTeamDrives { get; set; }
-    
+
             public DeleteRequest (string fileId)
                 : base(string.Concat(@"https://www.googleapis.com/drive/v3/files/", fileId), UnityWebRequest.kHttpVerbDELETE) { }
         }
-    
+
         /// <summary>
         /// Permanently deletes all of the user's trashed files.
         /// </summary>
@@ -103,7 +103,7 @@ namespace UnityGoogleDrive
             public EmptyTrashRequest ()
                 : base(@"https://www.googleapis.com/drive/v3/files/trash", UnityWebRequest.kHttpVerbDELETE) { }
         }
-    
+
         /// <summary>
         /// Exports a Google Doc to the requested MIME type and returns the exported content.
         /// Please note that the exported content is limited to 10MB.
@@ -114,20 +114,20 @@ namespace UnityGoogleDrive
             /// The MIME type of the format requested for this export.
             /// </summary>
             [QueryParameter] public string MimeType { get; private set; }
-    
+
             public ExportRequest (string fileId, string mimeType)
                 : base(string.Format(@"https://www.googleapis.com/drive/v3/files/{0}/export", fileId), UnityWebRequest.kHttpVerbGET)
             {
                 MimeType = mimeType;
                 ResponseData = new Data.File() { Id = fileId };
             }
-    
+
             protected override void HandleResponseData (DownloadHandler downloadHandler)
             {
                 ResponseData.Content = downloadHandler.data;
             }
         }
-    
+
         /// <summary>
         /// Generates a set of file IDs which can be provided in create requests.
         /// </summary>
@@ -142,7 +142,7 @@ namespace UnityGoogleDrive
             /// Supported values are 'drive' and 'appDataFolder'.
             /// </summary>
             [QueryParameter] public string Space { get; private set; }
-    
+
             public GenerateIdsRequest (int? count = null, string space = null)
                 : base(@"https://www.googleapis.com/drive/v3/files/generateIds", UnityWebRequest.kHttpVerbGET)
             {
@@ -150,7 +150,7 @@ namespace UnityGoogleDrive
                 Space = space;
             }
         }
-    
+
         /// <summary>
         /// Gets a file's metadata by ID.
         /// </summary>
@@ -160,11 +160,11 @@ namespace UnityGoogleDrive
             /// Whether the requesting application supports Team Drives. (Default: false) 
             /// </summary>
             [QueryParameter] public bool? SupportsTeamDrives { get; set; }
-    
+
             public GetRequest (string fileId)
                 : base(string.Concat(@"https://www.googleapis.com/drive/v3/files/", fileId), UnityWebRequest.kHttpVerbGET) { }
         }
-    
+
         /// <summary>
         /// Downloads a file's content by ID.
         /// </summary>
@@ -174,24 +174,24 @@ namespace UnityGoogleDrive
             /// Whether the user is acknowledging the risk of downloading known malware or other abusive files. 
             /// </summary>
             [QueryParameter] public bool? AcknowledgeAbuse { get; set; }
-    
+
             public DownloadRequest (string fileId) : base(fileId)
             {
                 Alt = "media";
                 ResponseData = new Data.File() { Id = fileId };
             }
-    
+
             public DownloadRequest (Data.File file) : this(file.Id)
             {
                 ResponseData = file;
             }
-    
+
             protected override void HandleResponseData (DownloadHandler downloadHandler)
             {
                 ResponseData.Content = downloadHandler.data;
             }
         }
-    
+
         /// <summary>
         /// Lists or searches files.
         /// </summary>
@@ -246,11 +246,11 @@ namespace UnityGoogleDrive
             /// ID of Team Drive to search.
             /// </summary>
             [QueryParameter] public string TeamDriveId { get; set; }
-    
+
             public ListRequest ()
                 : base(@"https://www.googleapis.com/drive/v3/files", UnityWebRequest.kHttpVerbGET) { }
         }
-    
+
         /// <summary>
         /// Subscribes to changes to a file.
         /// </summary>
@@ -265,11 +265,11 @@ namespace UnityGoogleDrive
             /// Whether the requesting application supports Team Drives.
             /// </summary>
             [QueryParameter] public bool? SupportsTeamDrives { get; set; }
-    
-            public WatchRequest (string fileId, Data.Channel channel) : base(string.Format(@"https://www.googleapis.com/drive/v3/files/{0}/watch", fileId), 
+
+            public WatchRequest (string fileId, Data.Channel channel) : base(string.Format(@"https://www.googleapis.com/drive/v3/files/{0}/watch", fileId),
                 UnityWebRequest.kHttpVerbPOST, channel) { }
         }
-    
+
         /// <summary>
         /// Updates a file's metadata and/or content with patch semantics.
         /// </summary>
@@ -300,11 +300,11 @@ namespace UnityGoogleDrive
             /// Whether to use the uploaded content as indexable text.
             /// </summary>
             [QueryParameter] public bool? UseContentAsIndexableText { get; set; }
-    
+
             public UpdateRequest (string fileId, Data.File file) : base(file.Content != null ? string.Concat(@"https://www.googleapis.com/upload/drive/v3/files/", fileId) :
                 string.Concat(@"https://www.googleapis.com/drive/v3/files/", fileId), "PATCH", file, file.Content, file.MimeType) { }
         }
-    
+
         /// <summary>
         /// Creates a copy of a file and applies any requested updates with patch semantics.
         /// Response data will contain copied <see cref="Data.File"/>.
@@ -314,7 +314,7 @@ namespace UnityGoogleDrive
         {
             return new CopyRequest(file);
         }
-    
+
         /// <summary>
         /// Creates a new file.
         /// </summary>
@@ -326,7 +326,7 @@ namespace UnityGoogleDrive
         {
             return new CreateRequest(file);
         }
-    
+
         /// <summary>
         /// Permanently deletes a file owned by the user without moving it to the trash.
         /// If the file belongs to a Team Drive the user must be an organizer on the parent.
@@ -337,7 +337,7 @@ namespace UnityGoogleDrive
         {
             return new DeleteRequest(fileId);
         }
-    
+
         /// <summary>
         /// Permanently deletes all of the user's trashed files.
         /// </summary>
@@ -345,7 +345,7 @@ namespace UnityGoogleDrive
         {
             return new EmptyTrashRequest();
         }
-    
+
         /// <summary>
         /// Exports a Google Doc to the requested MIME type and returns the exported content.
         /// Please note that the exported content is limited to 10MB.
@@ -356,7 +356,7 @@ namespace UnityGoogleDrive
         {
             return new ExportRequest(fileId, mimeType);
         }
-    
+
         /// <summary>
         /// Generates a set of file IDs which can be provided in create requests.
         /// </summary>
@@ -369,7 +369,7 @@ namespace UnityGoogleDrive
         {
             return new GenerateIdsRequest(count, space);
         }
-    
+
         /// <summary>
         /// Gets a file's metadata by ID.
         /// </summary>
@@ -378,7 +378,7 @@ namespace UnityGoogleDrive
         {
             return new GetRequest(fileId);
         }
-    
+
         /// <summary>
         /// Downloads a file's content by ID.
         /// Only <see cref="Data.File.Id"/> and <see cref="Data.File.Content"/> fields will be returned on success.
@@ -388,7 +388,7 @@ namespace UnityGoogleDrive
         {
             return new DownloadRequest(fileId);
         }
-    
+
         /// <summary>
         /// Downloads a file's content by ID of the provided file.
         /// </summary>
@@ -397,7 +397,7 @@ namespace UnityGoogleDrive
         {
             return new DownloadRequest(file);
         }
-    
+
         /// <summary>
         /// Lists or searches files.
         /// </summary>
@@ -405,7 +405,7 @@ namespace UnityGoogleDrive
         {
             return new ListRequest();
         }
-    
+
         /// <summary>
         /// Updates a file's metadata and/or content with patch semantics.
         /// </summary>
@@ -418,7 +418,7 @@ namespace UnityGoogleDrive
         {
             return new UpdateRequest(fileId, file);
         }
-    
+
         /// <summary>
         /// Subscribes to changes to a file.
         /// </summary>
@@ -430,5 +430,4 @@ namespace UnityGoogleDrive
             return new WatchRequest(fileId, channel);
         }
     }
-    
 }

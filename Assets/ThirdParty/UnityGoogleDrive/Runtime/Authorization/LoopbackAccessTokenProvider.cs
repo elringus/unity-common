@@ -1,12 +1,12 @@
-﻿// Copyright 2017 Elringus (Artyom Sovetnikov). All Rights Reserved.
+﻿// Copyright 2017-2018 Elringus (Artyom Sovetnikov). All Rights Reserved.
+
+using System;
+using System.Net;
+using System.Net.Sockets;
+using UnityEngine;
 
 namespace UnityGoogleDrive
 {
-    using System;
-    using System.Net;
-    using System.Net.Sockets;
-    using UnityEngine;
-    
     /// <summary>
     /// Provides access token using local loopback method to read authorization response.
     /// Implementation based on: https://github.com/googlesamples/oauth-apps-for-windows.
@@ -14,16 +14,16 @@ namespace UnityGoogleDrive
     public class LoopbackAccessTokenProvider : IAccessTokenProvider
     {
         public event Action<IAccessTokenProvider> OnDone;
-    
+
         public bool IsDone { get; private set; }
         public bool IsError { get; private set; }
         public string AccessToken { get { return PlayerPrefs.GetString(ACCESS_TOKEN_KEY); } private set { PlayerPrefs.SetString(ACCESS_TOKEN_KEY, value); } }
         public string RefreshToken { get { return PlayerPrefs.GetString(REFRESH_TOKEN_KEY); } private set { PlayerPrefs.SetString(REFRESH_TOKEN_KEY, value); } }
-    
+
         private const string ACCESS_TOKEN_KEY = "GoogleDriveAccessToken";
         private const string REFRESH_TOKEN_KEY = "GoogleDriveRefreshToken";
         private const string LOOPBACK_URI = @"http://localhost";
-    
+
         private GoogleDriveSettings settings;
         private AccessTokenRefresher accessTokenRefresher;
         private AuthCodeExchanger authCodeExchanger;
@@ -31,18 +31,18 @@ namespace UnityGoogleDrive
         private string codeVerifier;
         private string redirectUri;
         private string authorizationCode;
-    
+
         public LoopbackAccessTokenProvider (GoogleDriveSettings googleDriveSettings)
         {
             settings = googleDriveSettings;
-    
+
             accessTokenRefresher = new AccessTokenRefresher(settings);
             accessTokenRefresher.OnDone += HandleAccessTokenRefreshed;
-    
+
             authCodeExchanger = new AuthCodeExchanger(settings);
             authCodeExchanger.OnDone += HandleAuthCodeExchanged;
         }
-    
+
         public void ProvideAccessToken ()
         {
             if (!settings.AuthCredentials.ContainsSensitiveData())
@@ -50,13 +50,13 @@ namespace UnityGoogleDrive
                 HandleProvideAccessTokenComplete(true);
                 return;
             }
-    
+
             // Refresh token isn't available; executing full auth procedure.
             if (string.IsNullOrEmpty(RefreshToken)) ExecuteFullAuth();
             // Using refresh token to issue a new access token.
             else accessTokenRefresher.RefreshAccessToken(RefreshToken);
         }
-    
+
         private void HandleProvideAccessTokenComplete (bool error = false)
         {
             IsError = error;
@@ -64,7 +64,7 @@ namespace UnityGoogleDrive
             if (OnDone != null)
                 OnDone.Invoke(this);
         }
-    
+
         private void HandleAccessTokenRefreshed (AccessTokenRefresher refresher)
         {
             if (refresher.IsError)
@@ -84,7 +84,7 @@ namespace UnityGoogleDrive
                 HandleProvideAccessTokenComplete();
             }
         }
-    
+
         private void HandleAuthCodeExchanged (AuthCodeExchanger exchanger)
         {
             if (authCodeExchanger.IsError)
@@ -99,7 +99,7 @@ namespace UnityGoogleDrive
                 HandleProvideAccessTokenComplete();
             }
         }
-    
+
         private void ExecuteFullAuth ()
         {
             // Generate state and PKCE values.
@@ -107,15 +107,15 @@ namespace UnityGoogleDrive
             codeVerifier = CryptoUtils.RandomDataBase64Uri(32);
             var codeVerifierHash = CryptoUtils.Sha256(codeVerifier);
             var codeChallenge = CryptoUtils.Base64UriEncodeNoPadding(codeVerifierHash);
-    
+
             // Creates a redirect URI using an available port on the loopback address.
             redirectUri = string.Format("{0}:{1}", LOOPBACK_URI, GetRandomUnusedPort());
-    
+
             // Listen for requests on the redirect URI.
             var httpListener = new HttpListener();
             httpListener.Prefixes.Add(redirectUri + '/');
             httpListener.Start();
-    
+
             // Create the OAuth 2.0 authorization request.
             // https://developers.google.com/identity/protocols/OAuth2WebServer#creatingclient
             var authRequest = string.Format("{0}?response_type=code&scope={1}&redirect_uri={2}&client_id={3}&state={4}&code_challenge={5}&code_challenge_method={6}" +
@@ -128,13 +128,13 @@ namespace UnityGoogleDrive
                 expectedState,
                 codeChallenge,
                 GoogleDriveSettings.CODE_CHALLENGE_METHOD);
-    
+
             // Open request in the browser.
             Application.OpenURL(authRequest);
-    
+
             // Wait for the authorization response.
             var context = httpListener.GetContext();
-    
+
             // Send an HTTP response to the browser to notify the user to close the browser.
             var response = context.Response;
             var responseString = settings.LoopbackResponseHtml;
@@ -144,7 +144,7 @@ namespace UnityGoogleDrive
             responseOutput.Write(buffer, 0, buffer.Length);
             responseOutput.Close();
             httpListener.Stop();
-    
+
             // Check for errors.
             if (context.Request.QueryString.Get("error") != null)
             {
@@ -158,11 +158,11 @@ namespace UnityGoogleDrive
                 HandleProvideAccessTokenComplete(true);
                 return;
             }
-    
+
             // Extract the authorization code.
             authorizationCode = context.Request.QueryString.Get("code");
             var incomingState = context.Request.QueryString.Get("state");
-    
+
             // Compare the receieved state to the expected value, to ensure that
             // this app made the request which resulted in authorization.
             if (incomingState != expectedState)
@@ -171,11 +171,11 @@ namespace UnityGoogleDrive
                 HandleProvideAccessTokenComplete(true);
                 return;
             }
-    
+
             // Exchange the authorization code for tokens.
             authCodeExchanger.ExchangeAuthCode(authorizationCode, codeVerifier, redirectUri);
         }
-    
+
         private int GetRandomUnusedPort ()
         {
             // Based on: http://stackoverflow.com/a/3978040.
@@ -186,5 +186,4 @@ namespace UnityGoogleDrive
             return port;
         }
     }
-    
 }

@@ -1,10 +1,10 @@
-﻿// Copyright 2017 Elringus (Artyom Sovetnikov). All Rights Reserved.
+﻿// Copyright 2017-2018 Elringus (Artyom Sovetnikov). All Rights Reserved.
+
+using System;
+using UnityEngine;
 
 namespace UnityGoogleDrive
 {
-    using System;
-    using UnityEngine;
-    
     /// <summary>
     /// Yield instruction to suspend coroutines while <see cref="GoogleDriveRequest{TData}"/> is running.
     /// </summary>
@@ -16,17 +16,17 @@ namespace UnityGoogleDrive
         /// Make sure to check for <see cref="GoogleDriveRequest.IsError"/> before using the response data.
         /// </summary>
         public event Action<TResponse> OnDone;
-    
+
         public override bool keepWaiting { get { return !GoogleDriveRequest.IsDone; } }
         public float Progress { get { return GoogleDriveRequest.Progress; } }
         public GoogleDriveRequest<TResponse> GoogleDriveRequest { get; private set; }
-    
+
         public GoogleDriveRequestYeildInstruction (GoogleDriveRequest<TResponse> googleDriveRequest)
         {
             GoogleDriveRequest = googleDriveRequest;
             GoogleDriveRequest.OnDone += HandleRequestDone;
         }
-    
+
         private void HandleRequestDone (TResponse responseData)
         {
             GoogleDriveRequest.OnDone -= HandleRequestDone;
@@ -34,5 +34,4 @@ namespace UnityGoogleDrive
                 OnDone.Invoke(responseData);
         }
     }
-    
 }

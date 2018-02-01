@@ -1,9 +1,9 @@
-﻿// Copyright 2017 Elringus (Artyom Sovetnikov). All Rights Reserved.
+﻿// Copyright 2017-2018 Elringus (Artyom Sovetnikov). All Rights Reserved.
+
+using UnityEngine;
 
 namespace UnityGoogleDrive
 {
-    using UnityEngine;
-    
     /// <summary>
     /// Project-specific Google Drive settings resource.
     /// </summary>
@@ -14,7 +14,7 @@ namespace UnityGoogleDrive
         public const string REQUEST_CONTENT_TYPE = "application/x-www-form-urlencoded";
         public const string CODE_CHALLENGE_METHOD = "S256";
         public const int UNAUTHORIZED_RESPONSE_CODE = 401;
-    
+
         /// <summary>
         /// Google Drive API application credentials used to authorize requests.
         /// </summary>
@@ -27,11 +27,11 @@ namespace UnityGoogleDrive
         /// HTML page shown to the user when loopback response is received.
         /// </summary>
         public string LoopbackResponseHtml { get { return loopbackResponseHtml; } }
-    
+
         [SerializeField] private AuthCredentials authCredentials = null;
         [SerializeField] private string accessScope = FULL_ACCESS_SCOPE;
         [SerializeField] private string loopbackResponseHtml = "<html><h1>Please return to the app.</h1></html>";
-    
+
         /// <summary>
         /// Retrieves settings from the project resources.
         /// </summary>
@@ -39,15 +39,14 @@ namespace UnityGoogleDrive
         public static GoogleDriveSettings LoadFromResources (bool silent = false)
         {
             var settings = Resources.Load<GoogleDriveSettings>("GoogleDriveSettings");
-    
+
             if (!settings && !silent)
             {
                 Debug.LogError("UnityGoogleDrive: Settings file not found. " +
                     "Use 'Edit > Project Settings > Google Drive Settings' to create a new one.");
             }
-    
+
             return settings;
         }
     }
-    
 }

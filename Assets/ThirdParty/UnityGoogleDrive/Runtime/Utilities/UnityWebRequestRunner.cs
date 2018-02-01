@@ -1,12 +1,12 @@
-﻿// Copyright 2017 Elringus (Artyom Sovetnikov). All Rights Reserved.
+﻿// Copyright 2017-2018 Elringus (Artyom Sovetnikov). All Rights Reserved.
+
+using System;
+using System.Collections;
+using UnityEngine;
+using UnityEngine.Networking;
 
 namespace UnityGoogleDrive
 {
-    using System;
-    using System.Collections;
-    using UnityEngine;
-    using UnityEngine.Networking;
-    
     #if !UNITY_2017_2_OR_NEWER
     /// <summary>
     /// Wrapper to use <see cref="UnityEngine.Networking.UnityWebRequest"/> in event-driven manner.
@@ -15,25 +15,23 @@ namespace UnityGoogleDrive
     public class UnityWebRequestRunner : AsyncOperation
     {
         class CoroutineContainer : MonoBehaviour { }
-    
-        #pragma warning disable IDE1006 
+
         public event Action<AsyncOperation> completed;
-        #pragma warning restore IDE1006 
-    
+
         public UnityWebRequest UnityWebRequest { get; private set; }
         public AsyncOperation RequestYield { get; private set; }
-    
+
         private MonoBehaviour coroutineContainer;
         private GameObject containerObject;
         private Coroutine coroutine;
-    
+
         public UnityWebRequestRunner (UnityWebRequest unityWebRequest, MonoBehaviour coroutineContainer = null)
         {
             UnityWebRequest = unityWebRequest;
             if (coroutineContainer) this.coroutineContainer = coroutineContainer;
             else this.coroutineContainer = CreateContainer();
         }
-    
+
         public void Run ()
         {
             if (UnityWebRequest == null)
@@ -42,18 +40,18 @@ namespace UnityGoogleDrive
                 OnComplete();
                 return;
             }
-    
+
             if (!coroutineContainer || !coroutineContainer.gameObject.activeInHierarchy)
             {
                 Debug.LogWarning("UnityGoogleDrive: Attempted to start UnityWebRequestRunner with non-valid container.");
                 OnComplete();
                 return;
             }
-    
+
             coroutine = coroutineContainer.StartCoroutine(RequestRoutine());
             RequestYield = UnityWebRequest.Send();
         }
-    
+
         public void Abort ()
         {
             if (coroutine != null)
@@ -62,37 +60,40 @@ namespace UnityGoogleDrive
                     coroutineContainer.StopCoroutine(coroutine);
                 coroutine = null;
             }
-    
+
             UnityWebRequest.Abort();
-    
+
             OnComplete();
         }
-    
+
         private IEnumerator RequestRoutine ()
         {
             while (UnityWebRequest != null && !UnityWebRequest.isDone)
                 yield return null;
             OnComplete();
         }
-    
+
         private void OnComplete ()
         {
             if (completed != null)
                 completed.Invoke(RequestYield);
             if (containerObject)
-                UnityEngine.Object.Destroy(containerObject);
+            {
+                if (Application.isPlaying) UnityEngine.Object.Destroy(containerObject);
+                else UnityEngine.Object.DestroyImmediate(containerObject);
+            }
         }
-    
+
         private MonoBehaviour CreateContainer ()
         {
             containerObject = new GameObject("UnityWebRequest");
             containerObject.hideFlags = HideFlags.DontSave;
-            UnityEngine.Object.DontDestroyOnLoad(containerObject);
+            if (Application.isPlaying) UnityEngine.Object.DontDestroyOnLoad(containerObject);
             return containerObject.AddComponent<CoroutineContainer>();
         }
     }
     #endif
-    
+
     public static class UnityWebRequestExtensions
     {
         #if UNITY_2017_2_OR_NEWER
@@ -121,5 +122,4 @@ namespace UnityGoogleDrive
         }
         #endif
     }
-    
 }

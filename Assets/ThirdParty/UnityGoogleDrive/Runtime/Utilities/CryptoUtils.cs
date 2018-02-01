@@ -1,11 +1,11 @@
-﻿// Copyright 2017 Elringus (Artyom Sovetnikov). All Rights Reserved.
+﻿// Copyright 2017-2018 Elringus (Artyom Sovetnikov). All Rights Reserved.
+
+using System;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace UnityGoogleDrive
 {
-    using System;
-    using System.Security.Cryptography;
-    using System.Text;
-    
     public static class CryptoUtils
     {
         /// <summary>
@@ -17,7 +17,7 @@ namespace UnityGoogleDrive
             var sha256 = new SHA256Managed();
             return sha256.ComputeHash(bytes);
         }
-    
+
         /// <summary>
         /// Returns URI-safe data with a given input length.
         /// </summary>
@@ -29,22 +29,21 @@ namespace UnityGoogleDrive
             cryptoProvider.GetBytes(bytes);
             return Base64UriEncodeNoPadding(bytes);
         }
-    
+
         /// <summary>
         /// Base64Uri no-padding encodes the given input buffer.
         /// </summary>
         public static string Base64UriEncodeNoPadding (byte[] buffer)
         {
             var base64 = Convert.ToBase64String(buffer);
-    
+
             // Converts base64 to Base64Uri.
             base64 = base64.Replace("+", "-");
             base64 = base64.Replace("/", "_");
             // Strips padding.
             base64 = base64.Replace("=", "");
-    
+
             return base64;
         }
     }
-    
 }

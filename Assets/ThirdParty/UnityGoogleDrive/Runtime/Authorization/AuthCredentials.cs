@@ -1,10 +1,10 @@
-﻿// Copyright 2017 Elringus (Artyom Sovetnikov). All Rights Reserved.
+﻿// Copyright 2017-2018 Elringus (Artyom Sovetnikov). All Rights Reserved.
+
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace UnityGoogleDrive
 {
-    using System.Collections.Generic;
-    using UnityEngine;
-    
     [System.Serializable]
     public class AuthCredentials
     {
@@ -15,7 +15,7 @@ namespace UnityGoogleDrive
         public string AuthProviderX509CertUrl { get { return auth_provider_x509_cert_url; } }
         public string ClientSecret { get { return client_secret; } }
         public List<string> RedirectUris { get { return redirect_uris; } }
-    
+
         [SerializeField] private string client_id = null;
         [SerializeField] private string project_id = null;
         [SerializeField] private string auth_uri = null;
@@ -23,26 +23,25 @@ namespace UnityGoogleDrive
         [SerializeField] private string auth_provider_x509_cert_url = null;
         [SerializeField] private string client_secret = null;
         [SerializeField] private List<string> redirect_uris = null;
-    
+
         public static AuthCredentials FromJson (string json)
         {
             return JsonUtility.FromJson<AuthCredentials>(json);
         }
-    
+
         public void OverwriteFromJson (string json)
         {
             JsonUtility.FromJsonOverwrite(json, this);
         }
-    
+
         public string ToJson (bool prettyPrint = false)
         {
             return JsonUtility.ToJson(this, prettyPrint);
         }
-    
+
         public bool ContainsSensitiveData ()
         {
             return !string.IsNullOrEmpty(ClientId + ProjectId + ClientSecret);
         }
     }
-    
 }

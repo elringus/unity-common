@@ -1,9 +1,9 @@
-﻿// Copyright 2017 Elringus (Artyom Sovetnikov). All Rights Reserved.
+﻿// Copyright 2017-2018 Elringus (Artyom Sovetnikov). All Rights Reserved.
+
+using UnityEngine.Networking;
 
 namespace UnityGoogleDrive
 {
-    using UnityEngine.Networking;
-    
     /// <summary>
     /// The <see cref="Data.About"/> resource collection of methods.
     /// Prototype: https://developers.google.com/drive/v3/reference/about.
@@ -18,7 +18,7 @@ namespace UnityGoogleDrive
             public GetRequest ()
                 : base(@"https://www.googleapis.com/drive/v3/about", UnityWebRequest.kHttpVerbGET) { }
         }
-    
+
         /// <summary>
         /// Gets information about the user, the user's Drive, and system capabilities.
         /// </summary>
@@ -27,5 +27,4 @@ namespace UnityGoogleDrive
             return new GetRequest();
         }
     }
-    
 }

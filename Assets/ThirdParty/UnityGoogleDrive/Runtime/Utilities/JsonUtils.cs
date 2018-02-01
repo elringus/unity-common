@@ -1,11 +1,11 @@
-﻿// Copyright 2017 Elringus (Artyom Sovetnikov). All Rights Reserved.
+﻿// Copyright 2017-2018 Elringus (Artyom Sovetnikov). All Rights Reserved.
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using System.Reflection;
 
 namespace UnityGoogleDrive
 {
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Serialization;
-    using System.Reflection;
-    
     public static class JsonUtils
     {
         /// <summary>
@@ -16,7 +16,7 @@ namespace UnityGoogleDrive
             protected override JsonProperty CreateProperty (MemberInfo member, MemberSerialization memberSerialization)
             {
                 var prop = base.CreateProperty(member, memberSerialization);
-    
+
                 if (!prop.Writable)
                 {
                     var property = member as PropertyInfo;
@@ -26,11 +26,11 @@ namespace UnityGoogleDrive
                         prop.Writable = hasPrivateSetter;
                     }
                 }
-    
+
                 return prop;
             }
         }
-    
+
         /// <summary>
         /// Invokes <see cref="JsonConvert.DeserializeObject"/> configured with <see cref="PrivateCamelResolver"/>.
         /// </summary>
@@ -39,7 +39,7 @@ namespace UnityGoogleDrive
             var serializerSettings = new JsonSerializerSettings { ContractResolver = new PrivateCamelResolver() };
             return JsonConvert.DeserializeObject<T>(json, serializerSettings);
         }
-    
+
         /// <summary>
         /// Invokes <see cref="JsonConvert.SerializeObject"/> configured with <see cref="PrivateCamelResolver"/>.
         /// </summary>
@@ -49,5 +49,4 @@ namespace UnityGoogleDrive
             return JsonConvert.SerializeObject(obj, serializerSettings);
         }
     }
-    
 }
