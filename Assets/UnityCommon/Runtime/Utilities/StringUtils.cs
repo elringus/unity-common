@@ -165,6 +165,6 @@ public static class StringUtils
     /// </summary>
     public static string TrimFull (this string source)
     {
-        return source.Trim(new char[] { '\uFEFF', '\u200B' });
+        return source.Trim().Trim(new char[] { '\uFEFF', '\u200B' });
     }
 }
