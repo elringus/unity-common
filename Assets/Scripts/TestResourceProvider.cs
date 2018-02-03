@@ -5,6 +5,7 @@ using UnityEngine;
 public class TestResourceProvider : MonoBehaviour
 {
     public SpriteRenderer SpriteRenderer;
+    public AudioSource AudioSource;
 
     private IResourceProvider provider;
     private string text = "empty";
@@ -18,8 +19,8 @@ public class TestResourceProvider : MonoBehaviour
 
     private void Awake ()
     {
-        InitializeProjectResourceProvider();
-        //InitializeGoogleDriveResourceProvider();
+        //InitializeProjectResourceProvider();
+        InitializeGoogleDriveResourceProvider();
     }
 
     private IEnumerator Start ()
@@ -27,8 +28,9 @@ public class TestResourceProvider : MonoBehaviour
         //yield return ResolveByFullPath();
         //yield return ResolveTextByPath();
         //yield return ResolveSpritesByPath();
-        yield return ResolveFolders();
+        //yield return ResolveFolders();
         //yield return TestResourcExists();
+        yield return TestAudio();
     }
 
     private void OnGUI ()
@@ -82,6 +84,7 @@ public class TestResourceProvider : MonoBehaviour
         provider.AddConverter(new JpgOrPngToSpriteConverter());
         provider.AddConverter(new GDocToStringConverter());
         provider.AddConverter(new GFolderToFolderConverter());
+        provider.AddConverter(new WavToAudioClipConverter());
 
         return provider;
     }
@@ -122,6 +125,23 @@ public class TestResourceProvider : MonoBehaviour
 
         foreach (var spriteResource in loadAllAction.Result)
             provider.UnloadResource(spriteResource.Path);
+    }
+
+    private IEnumerator TestAudio ()
+    {
+        provider = Context.Resolve<IResourceProvider>();
+        var loadAllAction = provider.LoadResources<AudioClip>("Audio");
+
+        yield return loadAllAction;
+
+        foreach (var audioResource in loadAllAction.Result)
+        {
+            AudioSource.PlayOneShot(audioResource.Object);
+            yield return new WaitForSeconds(audioResource.Object.length);
+        }
+
+        foreach (var audioResource in loadAllAction.Result)
+            provider.UnloadResource(audioResource.Path);
     }
 
     private IEnumerator ResolveTextByPath ()
