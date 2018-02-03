@@ -5,6 +5,8 @@ using UnityEngine;
 [RequireComponent(typeof(AudioListener), typeof(AudioSource)), RegisterInContext, SpawnOnContextResolve]
 public class AudioController : MonoBehaviour
 {
+    public AudioListener Listener { get { return audioListener; } }
+    public AudioSource MainSource { get { return audioSource; } }
     public bool IsMuted { get { return isMuted; } set { SetIsMuted(value); } }
     public float Volume { get { return lastSetVolume; } set { SetVolume(value); } }
 
@@ -93,9 +95,45 @@ public class AudioController : MonoBehaviour
         return track;
     }
 
+    public void RemoveTrack (AudioClip clip)
+    {
+        if (MainSource.clip == clip)
+            MainSource.clip = null;
+
+        if (audioTracks.ContainsKey(clip))
+        {
+            var track = GetTrack(clip);
+            if (track.Source.isPlaying)
+                track.Source.Stop();
+            Destroy(track.Source);
+            audioTracks.Remove(clip);
+        }
+    }
+
+    public void RemoveTrack (string clipName)
+    {
+        var track = GetTrack(clipName);
+        if (track != null) RemoveTrack(track.Clip);
+    }
+
+    public void RemoveAllTracks ()
+    {
+        audioSource.clip = null;
+        var clips = audioTracks.Keys.ToList();
+        foreach (var clip in clips)
+            RemoveTrack(clip);
+    }
+
     public AudioTrack GetTrack (AudioClip clip)
     {
         return audioTracks.ContainsKey(clip) ? audioTracks[clip] : null;
+    }
+
+    public AudioTrack GetTrack (string clipName)
+    {
+        var clip = audioTracks.Keys.ToList().FirstOrDefault(c => c.name == clipName);
+        if (!clip) return null;
+        return audioTracks[clip];
     }
 
     public AsyncAction FadeIn (AudioClip clip, float time, bool loop = false)
