@@ -29,4 +29,9 @@ public struct FloatTween : ITweenValue
         var newValue = SmoothStep ? Mathf.SmoothStep(StartValue, TargetValue, tweenPercent) : Mathf.Lerp(StartValue, TargetValue, tweenPercent);
         OnFloatTween.Invoke(newValue);
     }
+
+    public void Reset ()
+    {
+        OnFloatTween = null;
+    }
 }

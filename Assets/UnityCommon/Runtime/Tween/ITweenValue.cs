@@ -5,4 +5,5 @@ public interface ITweenValue
     bool IsTargetValid { get; }
     float TweenDuration { get; }
     void TweenValue (float tweenPercent);
+    void Reset ();
 }

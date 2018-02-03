@@ -143,7 +143,7 @@ public class AudioController : MonoBehaviour
         if (!track.Source.isPlaying) track.Source.Play();
         var tweener = new Tweener<FloatTween>(this);
         var tween = new FloatTween(track.Source.volume, 1, time, volume => track.Source.volume = volume, true);
-        return tweener.Run(tween);
+        return tweener.Run(tween).Then(tweener.TweenValue.Reset);
     }
 
     public AsyncAction FadeOut (AudioClip clip, float time)
@@ -156,7 +156,7 @@ public class AudioController : MonoBehaviour
         var track = audioTracks[clip];
         var tweener = new Tweener<FloatTween>(this);
         var tween = new FloatTween(track.Source.volume, 0, time, volume => track.Source.volume = volume, true);
-        return tweener.Run(tween).Then(t => track.Source.Stop());
+        return tweener.Run(tween).Then(t => { track.Source.Stop(); tweener.TweenValue.Reset(); });
     }
 
     /// <summary>

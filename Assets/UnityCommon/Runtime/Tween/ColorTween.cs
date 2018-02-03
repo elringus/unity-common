@@ -43,4 +43,9 @@ public struct ColorTween : ITweenValue
 
         OnColorTween.Invoke(newColor);
     }
+
+    public void Reset ()
+    {
+        OnColorTween = null;
+    }
 }
