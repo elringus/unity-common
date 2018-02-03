@@ -34,6 +34,9 @@ public class ScriptableUIBehaviour : UIBehaviour
 
     public virtual void SetIsVisible (bool isVisible, float? fadeTime = null)
     {
+        if (fadeTweener.IsRunning)
+            fadeTweener.Stop();
+
         _isVisible = isVisible;
 
         OnVisibilityChanged.SafeInvoke(isVisible);
