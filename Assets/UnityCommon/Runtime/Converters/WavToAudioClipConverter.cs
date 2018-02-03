@@ -28,7 +28,7 @@ public class WavToAudioClipConverter : IRawConverter<AudioClip>
     {
         // PCM16 wav usually has 44 byte headers, though not always. 
         // https://stackoverflow.com/questions/19991405/how-can-i-detect-whether-a-wav-file-has-a-44-or-46-byte-header
-        const int HEADER_SIZE = 44;
+        const int HEADER_SIZE = 444;
         var inputSamples = input.Length / 2; // 16 bit input, so 2 bytes per sample.
         var output = new float[inputSamples];
         var outputIndex = 0;
