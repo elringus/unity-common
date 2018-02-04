@@ -30,8 +30,4 @@ public struct FloatTween : ITweenValue
         OnFloatTween.Invoke(newValue);
     }
 
-    public void Reset ()
-    {
-        OnFloatTween = null;
-    }
 }

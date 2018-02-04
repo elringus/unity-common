@@ -40,8 +40,4 @@ public struct VectorTween : ITweenValue
         return SmoothStep ? Mathf.SmoothStep(startValue, targetValue, tweenPercent) : Mathf.Lerp(startValue, targetValue, tweenPercent);
     }
 
-    public void Reset ()
-    {
-        OnTween = null;
-    }
 }
