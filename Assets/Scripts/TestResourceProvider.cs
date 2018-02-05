@@ -30,7 +30,8 @@ public class TestResourceProvider : MonoBehaviour
         //yield return ResolveSpritesByPath();
         //yield return ResolveFolders();
         //yield return TestResourcExists();
-        yield return TestAudio();
+        //yield return TestAudio();
+        yield return TestUnload();
     }
 
     private void OnGUI ()
@@ -108,6 +109,25 @@ public class TestResourceProvider : MonoBehaviour
             provider.UnloadResource(textResource.Path);
 
         yield return new WaitForSeconds(3);
+    }
+
+    private IEnumerator TestUnload ()
+    {
+        provider = Context.Resolve<IResourceProvider>();
+
+        for (int i = 0; i < 10; i++)
+        {
+            var loadAllAction = provider.LoadResources<AudioClip>("Unload");
+            yield return loadAllAction;
+
+            text = "Total memory used: " + Mathf.CeilToInt(System.GC.GetTotalMemory(true) * .000001f) + "Mb";
+            yield return new WaitForSeconds(1.5f);
+
+            foreach (var resource in loadAllAction.Result)
+                provider.UnloadResource(resource.Path);
+
+            text = "Total memory used: " + Mathf.CeilToInt(System.GC.GetTotalMemory(true) * .000001f) + "Mb";
+        }
     }
 
     private IEnumerator ResolveSpritesByPath ()
