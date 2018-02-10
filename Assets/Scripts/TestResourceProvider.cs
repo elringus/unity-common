@@ -20,7 +20,8 @@ public class TestResourceProvider : MonoBehaviour
     private void Awake ()
     {
         //InitializeProjectResourceProvider();
-        InitializeGoogleDriveResourceProvider();
+        //InitializeGoogleDriveResourceProvider();
+        InitializeLocalResourceProvider();
     }
 
     private IEnumerator Start ()
@@ -29,9 +30,9 @@ public class TestResourceProvider : MonoBehaviour
         //yield return ResolveTextByPath();
         //yield return ResolveSpritesByPath();
         //yield return ResolveFolders();
-        //yield return TestResourcExists();
-        //yield return TestAudio();
-        yield return TestUnload();
+        //yield return TestResourceExists();
+        yield return TestAudio();
+        //yield return TestUnload();
     }
 
     private void OnGUI ()
@@ -85,6 +86,27 @@ public class TestResourceProvider : MonoBehaviour
         provider.AddConverter(new JpgOrPngToSpriteConverter());
         provider.AddConverter(new GDocToStringConverter());
         provider.AddConverter(new GFolderToFolderConverter());
+        provider.AddConverter(new WavToAudioClipConverter());
+
+        return provider;
+    }
+
+    private static LocalResourceProvider InitializeLocalResourceProvider ()
+    {
+        LocalResourceProvider provider;
+
+        if (Application.isPlaying) provider = Context.Resolve<LocalResourceProvider>();
+        else
+        {
+            var go = new GameObject();
+            go.hideFlags = HideFlags.DontSave;
+            provider = go.AddComponent<LocalResourceProvider>();
+        }
+
+        provider.RootPath = "Resources";
+        provider.AddConverter(new DirectoryToFolderConverter());
+        provider.AddConverter(new JpgOrPngToSpriteConverter());
+        provider.AddConverter(new TxtToStringConverter());
         provider.AddConverter(new WavToAudioClipConverter());
 
         return provider;
@@ -183,7 +205,7 @@ public class TestResourceProvider : MonoBehaviour
         yield return new WaitForSeconds(3);
     }
 
-    private IEnumerator TestResourcExists ()
+    private IEnumerator TestResourceExists ()
     {
         provider = Context.Resolve<IResourceProvider>();
 

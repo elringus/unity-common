@@ -2,48 +2,47 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-// StreamingAssets
-public class LocalResourceProvider : IResourceProvider
+public class LocalResourceProvider : MonoRunnerResourceProvider
 {
-    #pragma warning disable 67
-    public event Action<float> OnLoadProgress;
-    #pragma warning restore 67
+    /// <summary>
+    /// Path to the folder where resources are located (realtive to <see cref="Application.dataPath"/>).
+    /// </summary>
+    public string RootPath { get; set; }
 
-    public bool IsLoading { get { throw new System.NotImplementedException(); } }
-    public float LoadProgress { get { throw new System.NotImplementedException(); } }
+    private Dictionary<Type, IConverter> converters = new Dictionary<Type, IConverter>();
 
-    public AsyncAction<Resource<T>> LoadResource<T> (string path) where T : class
+    /// <summary>
+    /// Adds a resource type converter.
+    /// </summary>
+    public void AddConverter<T> (IRawConverter<T> converter) where T : class
     {
-        throw new System.NotImplementedException();
+        converters.Add(typeof(T), converter);
     }
 
-    public AsyncAction<List<Resource<T>>> LoadResources<T> (string path) where T : class
+    protected override AsyncRunner<Resource<T>> CreateLoadRunner<T> (Resource<T> resource)
     {
-        throw new System.NotImplementedException();
+        return new LocalResourceLoader<T>(RootPath, resource, ResolveConverter<T>(), this);
     }
 
-    public AsyncAction<List<Resource<T>>> LocateResources<T> (string path) where T : class
+    protected override AsyncRunner<List<Resource<T>>> CreateLocateRunner<T> (string path)
     {
-        throw new NotImplementedException();
+        return new LocalResourceLocator<T>(RootPath, path, ResolveConverter<T>(), this);
     }
 
-    public AsyncAction<bool> ResourceExists<T> (string path) where T : class
+    protected override void UnloadResource (Resource resource)
     {
-        throw new System.NotImplementedException();
+        if (resource.IsValid && resource.IsUnityObject)
+            Destroy(resource.AsUnityObject);
     }
 
-    public void UnloadResource (string path)
+    private IRawConverter<T> ResolveConverter<T> ()
     {
-        throw new System.NotImplementedException();
-    }
-
-    public void UnloadResources ()
-    {
-        throw new NotImplementedException();
-    }
-
-    public bool ResourceLoaded (string path)
-    {
-        throw new System.NotImplementedException();
+        var resourceType = typeof(T);
+        if (!converters.ContainsKey(resourceType))
+        {
+            Debug.LogError(string.Format("Converter for resource of type '{0}' is not available.", resourceType.Name));
+            return null;
+        }
+        return converters[resourceType] as IRawConverter<T>;
     }
 }
