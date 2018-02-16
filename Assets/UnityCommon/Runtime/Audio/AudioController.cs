@@ -86,11 +86,11 @@ public class AudioController : MonoBehaviour
         Play3D(clip, source, loop);
     }
 
-    public AudioTrack AddTrack (AudioClip clip, AudioSource source = null, float volume = 1f, bool loop = false)
+    public AudioTrack AddTrack (AudioClip clip, float volume = 1f, bool loop = false)
     {
         if (audioTracks.ContainsKey(clip)) return audioTracks[clip];
-        if (source == null) source = gameObject.AddComponent<AudioSource>();
-        var track = new AudioTrack(clip, source, volume, loop);
+        var source = gameObject.AddComponent<AudioSource>();
+        var track = new AudioTrack(clip, source, this, volume, loop);
         audioTracks.Add(clip, track);
         return track;
     }
@@ -139,11 +139,8 @@ public class AudioController : MonoBehaviour
     public AsyncAction FadeIn (AudioClip clip, float time, bool loop = false)
     {
         var track = audioTracks.ContainsKey(clip) ? audioTracks[clip] : AddTrack(clip);
-        track.Source.loop = loop;
-        if (!track.Source.isPlaying) track.Source.Play();
-        var tweener = new Tweener<FloatTween>(this);
-        var tween = new FloatTween(track.Source.volume, 1, time, volume => track.Source.volume = volume, true);
-        return tweener.Run(tween);
+        track.IsLooped = loop;
+        return track.FadeIn(time);
     }
 
     public AsyncAction FadeOut (AudioClip clip, float time)
@@ -154,9 +151,7 @@ public class AudioController : MonoBehaviour
             return AsyncAction.CreateCompleted();
         }
         var track = audioTracks[clip];
-        var tweener = new Tweener<FloatTween>(this);
-        var tween = new FloatTween(track.Source.volume, 0, time, volume => track.Source.volume = volume, true);
-        return tweener.Run(tween).Then(track.Source.Stop);
+        return track.FadeOut(time);
     }
 
     /// <summary>
