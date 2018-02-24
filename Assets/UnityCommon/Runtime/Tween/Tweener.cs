@@ -22,8 +22,7 @@ public class Tweener<TTweenValue> : AsyncRunner<TTweenValue> where TTweenValue :
     public Tweener<TTweenValue> Run (TTweenValue tweenValue)
     {
         TweenValue = tweenValue;
-        Run();
-        return this;
+        return Run() as Tweener<TTweenValue>;
     }
 
     public override AsyncRunner<TTweenValue> Run ()
