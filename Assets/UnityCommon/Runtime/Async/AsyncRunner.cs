@@ -26,13 +26,13 @@ public abstract class AsyncRunner<TResult> : AsyncAction<TResult>
     public AsyncRunner (MonoBehaviour coroutineContainer = null, Action onCompleted = null)
         : this (coroutineContainer)
     {
-        if (onCompleted != null) Then(onCompleted);
+        if (onCompleted != null) OnCompleted += (_) => onCompleted.SafeInvoke();
     }
 
     public AsyncRunner (MonoBehaviour coroutineContainer = null, Action<TResult> onCompleted = null)
         : this(coroutineContainer)
     {
-        if (onCompleted != null) Then(onCompleted);
+        if (onCompleted != null) OnCompleted += onCompleted;
     }
 
     public virtual AsyncRunner<TResult> Run ()
