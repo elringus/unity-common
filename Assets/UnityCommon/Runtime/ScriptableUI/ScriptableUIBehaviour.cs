@@ -4,7 +4,6 @@ using UnityEngine.EventSystems;
 
 public class ScriptableUIBehaviour : UIBehaviour
 {
-    public event Action OnFadeComplete;
     public event Action<bool> OnVisibilityChanged;
 
     public float FadeTime { get { return _fadeTime; } set { _fadeTime = value; } }
@@ -27,12 +26,12 @@ public class ScriptableUIBehaviour : UIBehaviour
     {
         base.Awake();
 
-        fadeTweener = new Tweener<FloatTween>(this, OnFadeComplete);
+        fadeTweener = new Tweener<FloatTween>(this);
         canvasGroup = GetComponent<CanvasGroup>();
         SetIsVisible(IsVisibleOnAwake, 0f);
     }
 
-    public virtual void SetIsVisible (bool isVisible, float? fadeTime = null)
+    public virtual AsyncAction SetIsVisible (bool isVisible, float? fadeTime = null)
     {
         if (fadeTweener.IsRunning)
             fadeTweener.Stop();
@@ -41,7 +40,7 @@ public class ScriptableUIBehaviour : UIBehaviour
 
         OnVisibilityChanged.SafeInvoke(isVisible);
 
-        if (!canvasGroup) { OnFadeComplete.SafeInvoke(); return; }
+        if (!canvasGroup) return AsyncAction.CreateCompleted();
 
         canvasGroup.interactable = isVisible;
         canvasGroup.blocksRaycasts = isVisible;
@@ -52,12 +51,11 @@ public class ScriptableUIBehaviour : UIBehaviour
         if (fadeDuration == 0f)
         {
             canvasGroup.alpha = targetOpacity;
-            OnFadeComplete.SafeInvoke();
-            return;
+            return AsyncAction.CreateCompleted();
         }
 
         var tween = new FloatTween(canvasGroup.alpha, targetOpacity, fadeDuration, alpha => canvasGroup.alpha = alpha);
-        fadeTweener.Run(tween);
+        return fadeTweener.Run(tween);
     }
 
     public virtual void ToggleVisibility (float? fadeTime = null)
