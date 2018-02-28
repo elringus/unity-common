@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 /// <summary>
 /// Provides resources stored in the 'Resources' folders of the project.
@@ -56,7 +57,7 @@ public class ProjectResourceProvider : MonoRunnerResourceProvider
 
     protected override void UnloadResource (Resource resource)
     {
-        if (resource.IsValid && resource.IsUnityObject)
+        if (resource.IsValid && resource.IsUnloadable)
             UnityEngine.Resources.UnloadAsset(resource.AsUnityObject);
     }
 }
