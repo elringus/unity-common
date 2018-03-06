@@ -37,7 +37,7 @@ public abstract class AsyncRunner<TResult> : AsyncAction<TResult>
 
     public virtual AsyncRunner<TResult> Run ()
     {
-        Stop();
+        if (IsRunning) Stop();
 
         IsCompleted = false;
 

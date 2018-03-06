@@ -32,6 +32,13 @@ public class AsyncAction : CustomYieldInstruction
         IsCompleted = isInitiallyCompleted;
     }
 
+    public static implicit operator AsyncAction (AsyncOperation asyncOperation)
+    {
+        var asyncAction = new AsyncAction(asyncOperation.isDone);
+        asyncOperation.completed += _ => asyncAction.CompleteInstantly();
+        return asyncAction;
+    }
+
     /// <summary>
     /// Returns new instance of <see cref="AsyncAction"/> with <see cref="IsCompleted"/> set to true.
     /// </summary>
