@@ -10,6 +10,10 @@ public interface IResourceProvider
     /// Event executed when load progress is changed.
     /// </summary>
     event Action<float> OnLoadProgress;
+    /// <summary>
+    /// Event executed when an information message is sent by the provider.
+    /// </summary>
+    event Action<string> OnMessage;
 
     /// <summary>
     /// Whether any resource loading operations are currently active.

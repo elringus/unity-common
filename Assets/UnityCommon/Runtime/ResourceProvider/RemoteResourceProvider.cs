@@ -6,6 +6,7 @@ public class RemoteResourceProvider : IResourceProvider
 {
     #pragma warning disable 67
     public event Action<float> OnLoadProgress;
+    public event Action<string> OnMessage;
     #pragma warning restore 67
 
     public bool IsLoading { get { throw new System.NotImplementedException(); } }

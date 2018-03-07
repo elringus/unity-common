@@ -7,10 +7,11 @@ using UnityEngine;
 /// <see cref="MonoBehaviour"/> based <see cref="IResourceProvider"/> implementation;
 /// using <see cref="AsyncRunner"/>-derived classes for resource loading operations.
 /// </summary>
-[SpawnOnContextResolve(HideFlags.DontSave, true)]
+[ConstructOnContextResolve(HideFlags.DontSave, true)]
 public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvider
 {
     public event Action<float> OnLoadProgress;
+    public event Action<string> OnMessage;
 
     public bool IsLoading { get { return LoadProgress < 1f; } }
     public float LoadProgress { get; private set; }
@@ -41,6 +42,8 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
 
         RunLoader(loadRunner);
 
+        LogMessage(string.Format("Resource '{0}' started loading.", path));
+
         return loadRunner;
     }
 
@@ -59,6 +62,8 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
         var resource = Resources[path];
         Resources.Remove(path);
         UnloadResource(resource);
+
+        LogMessage(string.Format("Resource '{0}' unloaded.", path));
     }
 
     public virtual void UnloadResources ()
@@ -98,6 +103,11 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
         return locateRunner;
     }
 
+    public void LogMessage (string message)
+    {
+        OnMessage.SafeInvoke(message);
+    }
+
     protected abstract AsyncRunner<Resource<T>> CreateLoadRunner<T> (Resource<T> resource) where T : class;
     protected abstract AsyncRunner<List<Resource<T>>> CreateLocateRunner<T> (string path) where T : class;
     protected abstract void UnloadResource (Resource resource);
@@ -129,6 +139,8 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
 
         if (Runners.ContainsKey(resource.Path)) Runners.Remove(resource.Path);
         else Debug.LogWarning(string.Format("Load runner for resource '{0}' not found.", resource.Path));
+
+        LogMessage(string.Format("Resource '{0}' finished loading.", resource.Path));
 
         UpdateLoadProgress();
     }
