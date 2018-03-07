@@ -20,16 +20,17 @@ public class RegisterInContext : Attribute
 }
 
 /// <summary>
-/// When resolving in context, if not registered, an instance of component object will 
-/// be auto-spawned (attached to a new <see cref="GameObject"/>) and registered. Only works for <see cref="MonoBehaviour"/> objects.
+/// When resolving in context, if not registered, an instance of class object will be constructed and registered. 
+/// Only works for classes with a default contructor and classes derived from <see cref="Component"/>. 
+/// When used with <see cref="Component"/>, component will be added to a new <see cref="GameObject"/> instantiated on the active scene.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class SpawnOnContextResolve : Attribute
+public class ConstructOnContextResolve : Attribute
 {
     public readonly HideFlags HideFlags;
     public readonly bool DontDestroyOnLoad;
 
-    public SpawnOnContextResolve (HideFlags hideFlags = HideFlags.None, bool dontDestroyOnLoad = false)
+    public ConstructOnContextResolve (HideFlags hideFlags = HideFlags.None, bool dontDestroyOnLoad = false)
     {
         HideFlags = hideFlags;
         DontDestroyOnLoad = dontDestroyOnLoad;
@@ -98,8 +99,8 @@ public class Context : MonoBehaviour
             if (weakRef != null) result = weakRef.Target as T;
         }
 
-        if (result == null && ShouldAutoSpawn(resolvingType))
-            return SpawnAndRegister(resolvingType) as T;
+        if (result == null && ShouldAutoConstruct(resolvingType))
+            return ConstructAndRegister(resolvingType) as T;
 
         if (result == null && assertResult)
             Debug.LogError(string.Format("Failed to resolve object of type '{0}'", resolvingType.Name));
@@ -184,14 +185,19 @@ public class Context : MonoBehaviour
                 .ToList();
     }
 
-    private static object SpawnAndRegister (Type type, HideFlags hideFlags = HideFlags.None, bool dontDestroyOnLoad = false)
+    private static object ConstructAndRegister (Type type, HideFlags hideFlags = HideFlags.None, bool dontDestroyOnLoad = false)
     {
-        if (!type.IsSubclassOf(typeof(Component))) return null;
-
-        if (type.IsDefined(typeof(SpawnOnContextResolve), true))
+        if (!type.IsSubclassOf(typeof(Component)))
         {
-            var attrs = (SpawnOnContextResolve[])type
-                .GetCustomAttributes(typeof(SpawnOnContextResolve), true);
+            var obj = Activator.CreateInstance(type);
+            Register(obj);
+            return obj;
+        }
+
+        if (type.IsDefined(typeof(ConstructOnContextResolve), true))
+        {
+            var attrs = (ConstructOnContextResolve[])type
+                .GetCustomAttributes(typeof(ConstructOnContextResolve), true);
             if (attrs.Length > 0)
             {
                 var attr = attrs[0];
@@ -208,10 +214,10 @@ public class Context : MonoBehaviour
         return component;
     }
 
-    private static bool ShouldAutoSpawn (Type type)
+    private static bool ShouldAutoConstruct (Type type)
     {
-        return type.IsSubclassOf(typeof(Component)) &&
-            type.IsDefined(typeof(SpawnOnContextResolve), true);
+        return type.IsDefined(typeof(ConstructOnContextResolve), true) &&
+            (type.GetConstructor(Type.EmptyTypes) != null || type.IsSubclassOf(typeof(Component)));
     }
 
     private static bool IsWeakRefValid (WeakReference weakRef)
