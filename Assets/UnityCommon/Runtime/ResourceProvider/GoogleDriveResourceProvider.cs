@@ -30,6 +30,7 @@ public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
     /// </summary>
     public void AddConverter<T> (IRawConverter<T> converter) where T : class
     {
+        if (converters.ContainsKey(typeof(T))) return;
         converters.Add(typeof(T), converter);
     }
 
