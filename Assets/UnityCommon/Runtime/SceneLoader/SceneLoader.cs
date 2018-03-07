@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
 /// Allows asynchronously loading scenes and masking the process with a transition scene.
 /// </summary>
+[ConstructOnContextResolve]
 public class SceneLoader 
 {
     /// <summary>
@@ -34,6 +36,10 @@ public class SceneLoader
     /// </summary>
     public bool UnloadScenes { get; protected set; }
     /// <summary>
+    /// Whether the new scene is loaded and ready to be activated.
+    /// </summary>
+    public List<string> UnloadedScenesPath { get; protected set; }
+    /// <summary>
     /// Whether to wait for the user to invoke <see cref="ActivateLoadedScene"/> before activating loaded scene.
     /// </summary>
     public bool ManualActivation { get; protected set; }
@@ -41,44 +47,53 @@ public class SceneLoader
     /// Whether the new scene is loaded and ready to be activated.
     /// </summary>
     public bool IsReadyToActivate { get { return newSceneLoadOperation != null && newSceneLoadOperation.progress >= .9f;  } }
+    /// <summary>
+    /// Whether the loading operation is currently in progress.
+    /// </summary>
+    public bool IsLoading { get; protected set; }
 
     private AsyncOperation newSceneLoadOperation;
     private Timer manualActivationLoopTimer;
     private bool manualActivationInvoked;
     private bool onReadyToActivateInvoked;
 
-    /// <summary>
-    /// Creates a new instance of the class.
-    /// </summary>
-    /// <param name="transitionScenePath">Relative scene file path (e.g: "Assets/Scenes/Scene1.unity").</param>
-    /// <param name="unloadScenes">Whether to unload currently loaded scenes.</param>
-    /// <param name="manualActivation">Whether to wait for manual scene activation.</param>
-    public SceneLoader (string transitionScenePath, bool unloadScenes = true, bool manualActivation = false)
+    public SceneLoader ()
     {
-        TransitionScenePath = transitionScenePath;
-        UnloadScenes = unloadScenes;
-        ManualActivation = manualActivation;
-
-        // Brilliant design decision Unity, bravo!
-        // https://docs.unity3d.com/ScriptReference/AsyncOperation-allowSceneActivation.html
-        manualActivationLoopTimer = new Timer(.5f, true, true, onLoop: ManualActivationLoop);
-
-        Context.Register(this);
+        UnloadedScenesPath = new List<string>();
     }
 
     /// <summary>
     /// Loads scene with the provided path.
     /// </summary>
     /// <param name="sceneToLoadPath">Relative scene file path (e.g: "Assets/Scenes/Scene1.unity").</param>
-    public virtual AsyncAction LoadScene (string sceneToLoadPath)
+    /// <param name="transitionScenePath">Relative scene file path (e.g: "Assets/Scenes/Scene1.unity").</param>
+    /// <param name="unloadScenes">Whether to unload currently loaded scenes.</param>
+    /// <param name="manualActivation">Whether to wait for manual scene activation.</param>
+    public virtual AsyncAction LoadScene (string sceneToLoadPath, string transitionScenePath, bool unloadScenes = true, bool manualActivation = false)
     {
+        if (IsLoading)
+        {
+            Debug.LogError(string.Format("Can't load scene '{0}': another scene ('{1}') is being loaded.", sceneToLoadPath, SceneToLoadPath));
+            return AsyncAction.CreateCompleted();
+        }
+
+        IsLoading = true;
+        TransitionScenePath = transitionScenePath;
+        UnloadScenes = unloadScenes;
+        ManualActivation = manualActivation;
         SceneToLoadPath = sceneToLoadPath;
         manualActivationInvoked = false;
         onReadyToActivateInvoked = false;
 
-        if (ManualActivation) manualActivationLoopTimer.Run();
+        if (ManualActivation)
+        {
+            // Brilliant design decision Unity, bravo!
+            // https://docs.unity3d.com/ScriptReference/AsyncOperation-allowSceneActivation.html
+            manualActivationLoopTimer = new Timer(.5f, true, true, onLoop: ManualActivationLoop);
+            manualActivationLoopTimer.Run();
+        }
 
-        return LoadTransitionScene().ThenAsync(UnloadAllScenesExceptTransition).ThenAsync(LoadNewScene).ThenAsync(UnloadTransitionScene);
+        return LoadTransitionScene().ThenAsync(UnloadAllScenesExceptTransition).ThenAsync(LoadNewScene).ThenAsync(UnloadTransitionScene).Then(FinishLoading);
     }
 
     /// <summary>
@@ -96,11 +111,13 @@ public class SceneLoader
 
     protected virtual AsyncAction UnloadAllScenesExceptTransition ()
     {
+        UnloadedScenesPath.Clear();
         var actions = new AsyncActionSet();
         for (int i = 0; i < SceneManager.sceneCount; i++)
         {
             var scenePath = SceneManager.GetSceneAt(i).path;
             if (scenePath == TransitionScenePath) continue;
+            UnloadedScenesPath.Add(scenePath);
             actions.AddAction(SceneManager.UnloadSceneAsync(scenePath));
         }
         actions.Dispose();
@@ -111,12 +128,18 @@ public class SceneLoader
     {
         newSceneLoadOperation = SceneManager.LoadSceneAsync(SceneToLoadPath, LoadSceneMode.Additive);
         newSceneLoadOperation.allowSceneActivation = !ManualActivation;
-        return ((AsyncAction)newSceneLoadOperation).Then(InvokeOnSceneLoaded);
+        return newSceneLoadOperation;
     }
 
     protected virtual AsyncAction UnloadTransitionScene ()
     {
         return SceneManager.UnloadSceneAsync(TransitionScenePath);
+    }
+
+    protected virtual void FinishLoading ()
+    {
+        IsLoading = false;
+        InvokeOnSceneLoaded();
     }
 
     protected void InvokeOnScenesUnloaded ()
