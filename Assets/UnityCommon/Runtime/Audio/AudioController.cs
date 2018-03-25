@@ -2,7 +2,7 @@
 using System.Linq;
 using UnityEngine;
 
-[RequireComponent(typeof(AudioListener), typeof(AudioSource)), RegisterInContext, ConstructOnContextResolve]
+[RequireComponent(typeof(AudioListener), typeof(AudioSource))]
 public class AudioController : MonoBehaviour
 {
     public AudioListener Listener { get { return audioListener; } }

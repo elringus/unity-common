@@ -15,7 +15,6 @@ public class StartupPool
     public GameObject Prefab;
 }
 
-[RegisterInContext, ConstructOnContextResolve(HideFlags.HideInHierarchy)]
 public class ObjectPool : MonoBehaviour
 {
     public StartupPoolMode StartupPoolMode { get { return _startupPoolMode; } private set { _startupPoolMode = value; } }

@@ -6,7 +6,6 @@ using UnityEngine.SceneManagement;
 /// <summary>
 /// Allows asynchronously loading scenes and masking the process with a transition scene.
 /// </summary>
-[ConstructOnContextResolve]
 public class SceneLoader 
 {
     /// <summary>

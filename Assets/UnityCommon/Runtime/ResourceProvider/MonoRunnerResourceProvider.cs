@@ -7,7 +7,6 @@ using UnityEngine;
 /// <see cref="MonoBehaviour"/> based <see cref="IResourceProvider"/> implementation;
 /// using <see cref="AsyncRunner"/>-derived classes for resource loading operations.
 /// </summary>
-[ConstructOnContextResolve(HideFlags.DontSave, true)]
 public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvider
 {
     public event Action<float> OnLoadProgress;
