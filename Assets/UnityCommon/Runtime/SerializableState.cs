@@ -15,6 +15,9 @@ public abstract class SerializableState
     public event Action OnBeforeLoad;
     public event Action OnLoaded;
 
+    public bool IsLoading { get; private set; }
+    public bool IsSaving { get; private set; }
+
     protected virtual bool IsIoSupported { get { return Application.isEditor || (!Application.isMobilePlatform && Application.platform != RuntimePlatform.WebGLPlayer); } }
     protected abstract string SaveDataPath { get; }
     protected abstract string DefaultSlotId { get; }
@@ -58,10 +61,10 @@ public abstract class SerializableState
         return SerializeState(slotId).Then(InvokeOnSaved);
     }
 
-    protected void InvokeOnBeforeSave () { OnBeforeSave.SafeInvoke(); }
-    protected void InvokeOnSaved () { OnSaved.SafeInvoke(); }
-    protected void InvokeOnBeforeLoad () { OnBeforeLoad.SafeInvoke(); }
-    protected void InvokeOnLoaded () { OnLoaded.SafeInvoke(); }
+    protected void InvokeOnBeforeSave () { IsSaving = true; OnBeforeSave.SafeInvoke(); }
+    protected void InvokeOnSaved () { IsSaving = false; OnSaved.SafeInvoke(); }
+    protected void InvokeOnBeforeLoad () { IsLoading = true; OnBeforeLoad.SafeInvoke(); }
+    protected void InvokeOnLoaded () { IsLoading = false; OnLoaded.SafeInvoke(); }
 
     protected virtual AsyncAction SerializeState (string slotId)
     {
