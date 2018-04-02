@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -23,7 +22,7 @@ public class AsyncAction : CustomYieldInstruction
     public virtual bool CanBeInstantlyCompleted { get { return true; } }
     public override bool keepWaiting { get { return !IsCompleted; } }
 
-    private Action thenDelegate;
+    protected Action ThenDelegate { get; set; }
 
     public AsyncAction () : base() { }
 
@@ -64,7 +63,7 @@ public class AsyncAction : CustomYieldInstruction
     public virtual AsyncAction Then (Action action)
     {
         if (IsCompleted) action.Invoke();
-        else thenDelegate += action;
+        else ThenDelegate += action;
 
         return this;
     }
@@ -80,7 +79,7 @@ public class AsyncAction : CustomYieldInstruction
         else
         {
             var promise = new AsyncAction();
-            thenDelegate += () => func.Invoke().Then(promise.CompleteInstantly);
+            ThenDelegate += () => func.Invoke().Then(promise.CompleteInstantly);
             return promise;
         }
     }
@@ -96,7 +95,7 @@ public class AsyncAction : CustomYieldInstruction
         else
         {
             var promise = new AsyncAction<TFunc>();
-            thenDelegate += () => func.Invoke().Then(promise.CompleteInstantly);
+            ThenDelegate += () => func.Invoke().Then(promise.CompleteInstantly);
             return promise;
         }
     }
@@ -123,10 +122,10 @@ public class AsyncAction : CustomYieldInstruction
         IsCompleted = true;
         OnCompleted.SafeInvoke();
 
-        if (thenDelegate != null)
+        if (ThenDelegate != null)
         {
-            var thenDelegateCopy = thenDelegate;
-            thenDelegate = null;
+            var thenDelegateCopy = ThenDelegate;
+            ThenDelegate = null;
             thenDelegateCopy.Invoke();
         }
     }
@@ -146,8 +145,6 @@ public class AsyncAction<TResult> : AsyncAction
     /// Object representing the result of the action execution.
     /// </summary>
     public virtual TResult Result { get; protected set; }
-
-    private Action<TResult> thenDelegate;
 
     public AsyncAction () : base() { }
 
@@ -182,7 +179,7 @@ public class AsyncAction<TResult> : AsyncAction
     public virtual AsyncAction<TResult> Then (Action<TResult> action)
     {
         if (IsCompleted) action.Invoke(Result);
-        else thenDelegate += action;
+        else ThenDelegate += () => action.Invoke(Result);
 
         return this;
     }
@@ -198,7 +195,7 @@ public class AsyncAction<TResult> : AsyncAction
         else
         {
             var promise = new AsyncAction();
-            thenDelegate += (result) => func.Invoke(result).Then(promise.CompleteInstantly);
+            ThenDelegate += () => func.Invoke(Result).Then(promise.CompleteInstantly);
             return promise;
         }
     }
@@ -214,7 +211,7 @@ public class AsyncAction<TResult> : AsyncAction
         else
         {
             var promise = new AsyncAction<TFunc>();
-            thenDelegate += (result) => func.Invoke(result).Then(promise.CompleteInstantly);
+            ThenDelegate += () => func.Invoke(Result).Then(promise.CompleteInstantly);
             return promise;
         }
     }
@@ -233,12 +230,5 @@ public class AsyncAction<TResult> : AsyncAction
         IsCompleted = true;
         OnCompleted.SafeInvoke(Result);
         base.HandleOnCompleted();
-
-        if (thenDelegate != null)
-        {
-            var thenDelegateCopy = thenDelegate;
-            thenDelegate = null;
-            thenDelegateCopy.Invoke(Result);
-        }
     }
 }

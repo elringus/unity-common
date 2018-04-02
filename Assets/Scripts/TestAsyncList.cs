@@ -16,8 +16,10 @@ public class TestAsyncList : MonoBehaviour
 
         public AsyncAction RunTimer ()
         {
+            //return new Timer(waitTime, onCompleted: () => print(string.Format("Order: {0} Waited for: {1}", order, waitTime))).Run()
+            //    .ThenAsync(() => { print(string.Format("Then after order {0}", order)); return AsyncAction.CreateCompleted(); });
             return new Timer(waitTime, onCompleted: () => print(string.Format("Order: {0} Waited for: {1}", order, waitTime))).Run()
-                .Then(() => print(string.Format("Then after order {0}", order)));
+                .Then((r) => print(string.Format("Then after order {0}", order)));
         }
     }
 
@@ -25,11 +27,11 @@ public class TestAsyncList : MonoBehaviour
     {
         new List<TimerObject> {
             new TimerObject(0, 1.5f),
-            new TimerObject(1, 0.1f),
+            new TimerObject(1, 0),
             new TimerObject(2, 1),
             new TimerObject(3, 0),
             new TimerObject(4, 1.1f),
-            new TimerObject(5, 1),
+            new TimerObject(5, 0),
             new TimerObject(6, 0.5f),
         }.InvokeAsyncList(o => o.RunTimer());
     }
