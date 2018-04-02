@@ -31,6 +31,14 @@ public class ScriptableUIBehaviour : UIBehaviour
         SetIsVisible(IsVisibleOnAwake, 0f);
     }
 
+    public Canvas GetTopmostCanvas ()
+    {
+        var parentCanvases = gameObject.GetComponentsInParent<Canvas>();
+        if (parentCanvases != null && parentCanvases.Length > 0)
+            return parentCanvases[parentCanvases.Length - 1];
+        return null;
+    }
+
     public virtual AsyncAction SetIsVisible (bool isVisible, float? fadeTime = null)
     {
         if (fadeTweener.IsRunning)
