@@ -23,7 +23,7 @@ public class AsyncAction : CustomYieldInstruction
     public virtual bool CanBeInstantlyCompleted { get { return true; } }
     public override bool keepWaiting { get { return !IsCompleted; } }
 
-    private List<Action> thenDelegates = new List<Action>();
+    private Action thenDelegate;
 
     public AsyncAction () : base() { }
 
@@ -64,7 +64,7 @@ public class AsyncAction : CustomYieldInstruction
     public virtual AsyncAction Then (Action action)
     {
         if (IsCompleted) action.Invoke();
-        else thenDelegates.Add(action);
+        else thenDelegate += action;
 
         return this;
     }
@@ -80,7 +80,7 @@ public class AsyncAction : CustomYieldInstruction
         else
         {
             var promise = new AsyncAction();
-            thenDelegates.Add(() => func.Invoke().Then(promise.CompleteInstantly));
+            thenDelegate += () => func.Invoke().Then(promise.CompleteInstantly);
             return promise;
         }
     }
@@ -96,7 +96,7 @@ public class AsyncAction : CustomYieldInstruction
         else
         {
             var promise = new AsyncAction<TFunc>();
-            thenDelegates.Add(() => func.Invoke().Then(promise.CompleteInstantly));
+            thenDelegate += () => func.Invoke().Then(promise.CompleteInstantly);
             return promise;
         }
     }
@@ -123,12 +123,11 @@ public class AsyncAction : CustomYieldInstruction
         IsCompleted = true;
         OnCompleted.SafeInvoke();
 
-        if (thenDelegates.Count > 0)
+        if (thenDelegate != null)
         {
-            var invocationList = new List<Action>(thenDelegates);
-            thenDelegates.Clear();
-            foreach (var listener in invocationList)
-                listener.SafeInvoke();
+            var thenDelegateCopy = thenDelegate;
+            thenDelegate = null;
+            thenDelegateCopy.Invoke();
         }
     }
 }
@@ -148,7 +147,7 @@ public class AsyncAction<TResult> : AsyncAction
     /// </summary>
     public virtual TResult Result { get; protected set; }
 
-    private List<Action<TResult>> thenDelegates = new List<Action<TResult>>();
+    private Action<TResult> thenDelegate;
 
     public AsyncAction () : base() { }
 
@@ -183,7 +182,7 @@ public class AsyncAction<TResult> : AsyncAction
     public virtual AsyncAction<TResult> Then (Action<TResult> action)
     {
         if (IsCompleted) action.Invoke(Result);
-        else thenDelegates.Add(action);
+        else thenDelegate += action;
 
         return this;
     }
@@ -199,7 +198,7 @@ public class AsyncAction<TResult> : AsyncAction
         else
         {
             var promise = new AsyncAction();
-            thenDelegates.Add((result) => func.Invoke(result).Then(promise.CompleteInstantly));
+            thenDelegate += (result) => func.Invoke(result).Then(promise.CompleteInstantly);
             return promise;
         }
     }
@@ -215,7 +214,7 @@ public class AsyncAction<TResult> : AsyncAction
         else
         {
             var promise = new AsyncAction<TFunc>();
-            thenDelegates.Add((result) => func.Invoke(result).Then(promise.CompleteInstantly));
+            thenDelegate += (result) => func.Invoke(result).Then(promise.CompleteInstantly);
             return promise;
         }
     }
@@ -235,12 +234,11 @@ public class AsyncAction<TResult> : AsyncAction
         OnCompleted.SafeInvoke(Result);
         base.HandleOnCompleted();
 
-        if (thenDelegates.Count > 0)
+        if (thenDelegate != null)
         {
-            var invocationList = new List<Action<TResult>>(thenDelegates);
-            thenDelegates.Clear();
-            foreach (var listener in invocationList)
-                listener.SafeInvoke(Result);
+            var thenDelegateCopy = thenDelegate;
+            thenDelegate = null;
+            thenDelegateCopy.Invoke(Result);
         }
     }
 }

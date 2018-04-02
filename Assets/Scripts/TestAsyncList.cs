@@ -16,7 +16,8 @@ public class TestAsyncList : MonoBehaviour
 
         public AsyncAction RunTimer ()
         {
-            return new Timer(waitTime, onCompleted: () => print(string.Format("Order: {0} Waited for: {1}", order, waitTime))).Run();
+            return new Timer(waitTime, onCompleted: () => print(string.Format("Order: {0} Waited for: {1}", order, waitTime))).Run()
+                .Then(() => print(string.Format("Then after order {0}", order)));
         }
     }
 
