@@ -41,8 +41,6 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
 
         RunLoader(loadRunner);
 
-        LogMessage(string.Format("Resource '{0}' started loading.", path));
-
         return loadRunner;
     }
 
