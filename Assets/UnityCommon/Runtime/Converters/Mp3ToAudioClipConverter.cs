@@ -1,4 +1,5 @@
 ﻿using NLayer;
+using System;
 using System.IO;
 using UnityEngine;
 
@@ -14,11 +15,18 @@ public class Mp3ToAudioClipConverter : IRawConverter<AudioClip>
     public AudioClip Convert (byte[] obj)
     {
         var mpegFile = new MpegFile(new MemoryStream(obj));
-        var samplesCount = (int)mpegFile.SampleCount * mpegFile.Channels;
-        var samples = new float[samplesCount];
+        var bufferLength = mpegFile.SampleRate;
+        var samplesBuffer = new float[bufferLength];
         var audioClip = AudioClip.Create("Generated MP3 Audio", (int)mpegFile.SampleCount, mpegFile.Channels, mpegFile.SampleRate, false);
-        mpegFile.ReadSamples(samples, 0, samplesCount);
-        audioClip.SetData(samples, 0);
+        var sampleOffset = 0;
+        while (mpegFile.Position < mpegFile.Length)
+        {
+            var samplesRead = mpegFile.ReadSamples(samplesBuffer, 0, bufferLength);
+            if (samplesRead < bufferLength) Array.Resize(ref samplesBuffer, samplesRead);
+            audioClip.SetData(samplesBuffer, (sampleOffset / sizeof(float)) * mpegFile.Channels);
+            if (samplesRead < bufferLength) break;
+            sampleOffset += samplesRead;
+        }
         mpegFile.Dispose();
         return audioClip;
     }
