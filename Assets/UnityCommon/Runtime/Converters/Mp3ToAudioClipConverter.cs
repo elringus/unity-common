@@ -15,9 +15,18 @@ public class Mp3ToAudioClipConverter : IRawConverter<AudioClip>
     public AudioClip Convert (byte[] obj)
     {
         var mpegFile = new MpegFile(new MemoryStream(obj));
+        var audioClip = AudioClip.Create("Generated MP3 Audio", (int)mpegFile.SampleCount, mpegFile.Channels, mpegFile.SampleRate, false);
+
+        // AudioClip.SetData with offset is not supported on WebGL, thus we can't use buffering while encoding.
+        // Issue: https://trello.com/c/iWL6eBrV/82-webgl-audio-resources-limitation
+        #if UNITY_WEBGL && !UNITY_EDITOR
+        var samplesCount = (int)mpegFile.SampleCount * mpegFile.Channels;
+        var samples = new float[samplesCount];
+        mpegFile.ReadSamples(samples, 0, samplesCount);
+        audioClip.SetData(samples, 0);
+        #else
         var bufferLength = mpegFile.SampleRate;
         var samplesBuffer = new float[bufferLength];
-        var audioClip = AudioClip.Create("Generated MP3 Audio", (int)mpegFile.SampleCount, mpegFile.Channels, mpegFile.SampleRate, false);
         var sampleOffset = 0;
         while (mpegFile.Position < mpegFile.Length)
         {
@@ -27,7 +36,10 @@ public class Mp3ToAudioClipConverter : IRawConverter<AudioClip>
             if (samplesRead < bufferLength) break;
             sampleOffset += samplesRead;
         }
+        #endif
+
         mpegFile.Dispose();
+
         return audioClip;
     }
 
