@@ -20,8 +20,8 @@ public class TestResourceProvider : MonoBehaviour
     private void Awake ()
     {
         //InitializeProjectResourceProvider();
-        //InitializeGoogleDriveResourceProvider();
-        InitializeLocalResourceProvider();
+        provider = InitializeGoogleDriveResourceProvider();
+        //InitializeLocalResourceProvider();
     }
 
     private IEnumerator Start ()
@@ -69,17 +69,13 @@ public class TestResourceProvider : MonoBehaviour
         return provider;
     }
 
-    private static GoogleDriveResourceProvider InitializeGoogleDriveResourceProvider ()
+    private GoogleDriveResourceProvider InitializeGoogleDriveResourceProvider ()
     {
         GoogleDriveResourceProvider provider;
 
-        if (Application.isPlaying) provider = Context.Resolve<GoogleDriveResourceProvider>();
-        else
-        {
-            var go = new GameObject();
-            go.hideFlags = HideFlags.DontSave;
-            provider = go.AddComponent<GoogleDriveResourceProvider>();
-        }
+        var go = new GameObject();
+        go.hideFlags = HideFlags.DontSave;
+        provider = go.AddComponent<GoogleDriveResourceProvider>();
 
         provider.DriveRootPath = "Resources";
         provider.ConcurrentRequestsLimit = 2;
@@ -87,6 +83,7 @@ public class TestResourceProvider : MonoBehaviour
         provider.AddConverter(new GDocToStringConverter());
         provider.AddConverter(new GFolderToFolderConverter());
         provider.AddConverter(new WavToAudioClipConverter());
+        provider.AddConverter(new Mp3ToAudioClipConverter());
 
         return provider;
     }
@@ -108,6 +105,7 @@ public class TestResourceProvider : MonoBehaviour
         provider.AddConverter(new JpgOrPngToSpriteConverter());
         provider.AddConverter(new TxtToStringConverter());
         provider.AddConverter(new WavToAudioClipConverter());
+        provider.AddConverter(new Mp3ToAudioClipConverter());
 
         return provider;
     }
@@ -171,7 +169,6 @@ public class TestResourceProvider : MonoBehaviour
 
     private IEnumerator TestAudio ()
     {
-        provider = Context.Resolve<IResourceProvider>();
         var loadAllAction = provider.LoadResources<AudioClip>("Audio");
 
         yield return loadAllAction;
