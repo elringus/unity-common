@@ -29,6 +29,13 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
         RootPath = rootPath;
         Resource = resource;
         useNativeRequests = NATIVE_REQUEST_TYPES.Contains(typeof(TResource));
+
+        // MP3 is not supported in native requests on the standalone platforms. Fallback to raw converters.
+        #if UNITY_STANDALONE || UNITY_EDITOR
+        foreach (var r in converter.Representations)
+            if (EvaluateAudioTypeFromMime(r.MimeType) == AudioType.MPEG) useNativeRequests = false;
+        #endif
+
         this.converter = converter;
         usedRepresentation = new RawDataRepresentation();
     }
@@ -158,11 +165,6 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
             Debug.LogWarning(string.Format("Multiple '{0}.{1}' files been found in Google Drive.", Resource.Path, usedRepresentation.Extension));
 
         fileMeta = listRequest.ResponseData.Files[0];
-
-        // MP3 is not supported in native requests on the standalone platforms. Fallback to raw converters.
-        #if UNITY_STANDALONE || UNITY_EDITOR
-        if (EvaluateAudioTypeFromMime(fileMeta.MimeType) == AudioType.MPEG) useNativeRequests = false;
-        #endif
     }
 
     private IEnumerator DownloadFile ()
