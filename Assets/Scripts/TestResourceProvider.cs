@@ -82,8 +82,8 @@ public class TestResourceProvider : MonoBehaviour
         provider.AddConverter(new JpgOrPngToSpriteConverter());
         provider.AddConverter(new GDocToStringConverter());
         provider.AddConverter(new GFolderToFolderConverter());
-        provider.AddConverter(new WavToAudioClipConverter());
-        //provider.AddConverter(new Mp3ToAudioClipConverter());
+        //provider.AddConverter(new WavToAudioClipConverter());
+        provider.AddConverter(new Mp3ToAudioClipConverter());
 
         return provider;
     }

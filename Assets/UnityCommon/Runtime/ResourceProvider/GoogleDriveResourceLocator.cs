@@ -97,6 +97,8 @@ public class GoogleDriveResourceLocator<TResource> : AsyncRunner<List<Resource<T
             }
         }
 
+        if (listRequest != null) listRequest.Dispose();
+
         HandleOnCompleted();
     }
 
