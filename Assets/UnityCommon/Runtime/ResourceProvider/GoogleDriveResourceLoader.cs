@@ -237,14 +237,18 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
             else if (typeof(TResource) == typeof(Texture2D)) request = UnityWebRequestTexture.GetTexture(filePath, true);
 
             yield return request.SendWebRequest();
-            yield return null; // Give a little breathing for visual loading stuff.
 
             if (typeof(TResource) == typeof(AudioClip)) (Resource as Resource<AudioClip>).Object = DownloadHandlerAudioClip.GetContent(request);
             else if (typeof(TResource) == typeof(Texture2D)) (Resource as Resource<Texture2D>).Object = DownloadHandlerTexture.GetContent(request);
             rawData = request.downloadHandler.data;
             request.Dispose();
         }
-        else rawData = File.ReadAllBytes(filePath);
+        else
+        {
+            yield return new WaitForSecondsRealtime(.15f); // Give a little breathing for visual loading stuff.
+            // TODO: Make this async.
+            rawData = File.ReadAllBytes(filePath);
+        }
     }
 
     private void WriteFileCacheRoutine (string resourcePath, byte[] fileRawData)
