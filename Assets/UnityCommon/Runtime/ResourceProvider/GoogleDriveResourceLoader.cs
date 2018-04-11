@@ -1,22 +1,19 @@
 ﻿using System;
-using System.IO;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
+using System.IO;
 using UnityEngine;
-using UnityGoogleDrive;
 using UnityEngine.Networking;
+using UnityGoogleDrive;
 
 public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResource>> where TResource : class
 {
-    [Serializable] struct CachedFileMeta { public string Id, ModifiedTime; }
-
     public override bool CanBeInstantlyCompleted { get { return false; } }
     public Resource<TResource> Resource { get { return Result; } private set { Result = value; } }
     public string RootPath { get; private set; }
 
-    private const string CACHE_PATH = "GoogleDriveResources";
     private readonly List<Type> NATIVE_REQUEST_TYPES = new List<Type> { typeof(AudioClip), typeof(Texture2D) };
+    private const string SLASH_REPLACE = "@@";
 
     private bool useNativeRequests;
     private GoogleDriveRequest downloadRequest;
@@ -82,22 +79,22 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
 
     protected override IEnumerator AsyncRoutine ()
     {
-        // 1. Load file metadata from Google Drive.
-        var filePath = string.IsNullOrEmpty(RootPath) ? Resource.Path : string.Concat(RootPath, '/', Resource.Path);
-        yield return GetFileMetaRoutine(filePath);
-        if (fileMeta == null) { HandleOnCompleted(); yield break; }
+        // 1. Check if cached version of the file could be used.
+        yield return TryLoadFileCacheRoutine(Resource.Path);
 
-        // 2. Check if cached version of the file could be used.
-        yield return TryLoadFileCacheRoutine(fileMeta);
-
-        // 3. Cached version is not valid or doesn't exist; download or export the file.
+        // 2. Cached version is not valid or doesn't exist; download or export the file.
         if (rawData == null)
         {
+            // 3. Load file metadata from Google Drive.
+            var filePath = string.IsNullOrEmpty(RootPath) ? Resource.Path : string.Concat(RootPath, '/', Resource.Path);
+            yield return GetFileMetaRoutine(filePath);
+            if (fileMeta == null) { HandleOnCompleted(); yield break; }
+
             if (converter is IGoogleDriveConverter<TResource>) yield return ExportFile();
             else yield return DownloadFile();
 
             // 4. Cache the downloaded file.
-            WriteFileCacheRoutine(fileMeta, rawData);
+            WriteFileCacheRoutine(Resource.Path, rawData);
         }
 
         HandleOnCompleted();
@@ -211,22 +208,14 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
         rawData = downloadRequest.GetResourceData<UnityGoogleDrive.Data.File>().Content;
     }
 
-    private IEnumerator TryLoadFileCacheRoutine (UnityGoogleDrive.Data.File fileMeta)
+    private IEnumerator TryLoadFileCacheRoutine (string resourcePath)
     {
         rawData = null;
 
-        if (!PlayerPrefs.HasKey(fileMeta.Id)) yield break;
-
-        var cachedFileMetaString = PlayerPrefs.GetString(fileMeta.Id);
-        var cachedFileMeta = JsonUtility.FromJson<CachedFileMeta>(cachedFileMetaString);
-        var modifiedTime = DateTime.ParseExact(cachedFileMeta.ModifiedTime, "O",
-            CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
-
-        if (fileMeta.ModifiedTime > modifiedTime) yield break;
-
-        var filePath = string.Concat(Application.persistentDataPath, "/", CACHE_PATH, "/", fileMeta.Id);
-        if (!string.IsNullOrEmpty(usedRepresentation.Extension))
-            filePath += string.Concat(".", usedRepresentation.Extension);
+        resourcePath = resourcePath.Replace("/", SLASH_REPLACE);
+        var filePath = string.Concat(GoogleDriveResourceProvider.CACHE_DIR_PATH, "/", resourcePath);
+        //if (!string.IsNullOrEmpty(usedRepresentation.Extension))
+        //    filePath += string.Concat(".", usedRepresentation.Extension);
         if (!File.Exists(filePath)) yield break;
 
         if (useNativeRequests)
@@ -255,13 +244,12 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
         else rawData = File.ReadAllBytes(filePath);
     }
 
-    private void WriteFileCacheRoutine (UnityGoogleDrive.Data.File fileMeta, byte[] fileRawData)
+    private void WriteFileCacheRoutine (string resourcePath, byte[] fileRawData)
     {
-        var filePath = string.Concat(Application.persistentDataPath, "/", CACHE_PATH, "/", fileMeta.Id);
-        if (!string.IsNullOrEmpty(usedRepresentation.Extension))
-            filePath += string.Concat(".", usedRepresentation.Extension);
-
-        Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+        resourcePath = resourcePath.Replace("/", SLASH_REPLACE);
+        var filePath = string.Concat(GoogleDriveResourceProvider.CACHE_DIR_PATH, "/", resourcePath);
+        //if (!string.IsNullOrEmpty(usedRepresentation.Extension))
+        //    filePath += string.Concat(".", usedRepresentation.Extension);
 
         File.WriteAllBytes(filePath, fileRawData);
 
@@ -270,10 +258,6 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
         #if UNITY_WEBGL && !UNITY_EDITOR
         WebGLExtensions.SyncFs();
         #endif
-
-        var cachedFileMeta = new CachedFileMeta() { Id = fileMeta.Id, ModifiedTime = fileMeta.ModifiedTime.Value.ToString("O") };
-        var cachedFileMetaString = JsonUtility.ToJson(cachedFileMeta);
-        PlayerPrefs.SetString(fileMeta.Id, cachedFileMetaString);
     }
 
     private bool IsResultFound (GoogleDriveFiles.ListRequest request)

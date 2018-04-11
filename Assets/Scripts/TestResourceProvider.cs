@@ -24,7 +24,17 @@ public class TestResourceProvider : MonoBehaviour
         //InitializeLocalResourceProvider();
     }
 
-    private IEnumerator Start ()
+    private void OnEnable ()
+    {
+        StartCoroutine("Test");
+    }
+
+    private void OnDisable ()
+    {
+        StopAllCoroutines();
+    }
+
+    private IEnumerator Test ()
     {
         //yield return ResolveByFullPath();
         //yield return ResolveTextByPath();
@@ -82,8 +92,8 @@ public class TestResourceProvider : MonoBehaviour
         provider.AddConverter(new JpgOrPngToSpriteConverter());
         provider.AddConverter(new GDocToStringConverter());
         provider.AddConverter(new GFolderToFolderConverter());
-        //provider.AddConverter(new WavToAudioClipConverter());
-        provider.AddConverter(new Mp3ToAudioClipConverter());
+        provider.AddConverter(new WavToAudioClipConverter());
+        //provider.AddConverter(new Mp3ToAudioClipConverter());
 
         return provider;
     }
@@ -104,8 +114,8 @@ public class TestResourceProvider : MonoBehaviour
         provider.AddConverter(new DirectoryToFolderConverter());
         provider.AddConverter(new JpgOrPngToSpriteConverter());
         provider.AddConverter(new TxtToStringConverter());
-        //provider.AddConverter(new WavToAudioClipConverter());
-        provider.AddConverter(new Mp3ToAudioClipConverter());
+        provider.AddConverter(new WavToAudioClipConverter());
+        //provider.AddConverter(new Mp3ToAudioClipConverter());
 
         return provider;
     }

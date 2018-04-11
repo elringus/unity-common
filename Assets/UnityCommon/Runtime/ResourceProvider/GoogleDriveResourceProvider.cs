@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,6 +10,8 @@ using UnityEngine;
 /// </summary>
 public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
 {
+    public static string CACHE_DIR_PATH { get { return string.Concat(Application.persistentDataPath, "/GoogleDriveResourceProviderCache"); } }
+
     /// <summary>
     /// Path to the drive folder where resources are located.
     /// </summary>
@@ -32,6 +35,25 @@ public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
     {
         if (converters.ContainsKey(typeof(T))) return;
         converters.Add(typeof(T), converter);
+    }
+
+    public void PurgeCache ()
+    {
+        if (Directory.Exists(CACHE_DIR_PATH))
+            Directory.Delete(CACHE_DIR_PATH, true);
+        // Flush cached file writes to IndexedDB on WebGL.
+        // https://forum.unity.com/threads/webgl-filesystem.294358/#post-1940712
+        #if UNITY_WEBGL && !UNITY_EDITOR
+        WebGLExtensions.SyncFs();
+        #endif
+    }
+
+    protected override void Awake ()
+    {
+        base.Awake();
+
+        PurgeCache();
+        Directory.CreateDirectory(CACHE_DIR_PATH);
     }
 
     protected override void RunLoader<T> (AsyncRunner<Resource<T>> loader)
