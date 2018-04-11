@@ -47,7 +47,7 @@ namespace UnityGoogleDrive
             exchangeRequest = UnityWebRequest.Post(tokenRequestURI, tokenRequestForm);
             exchangeRequest.SetRequestHeader("Content-Type", GoogleDriveSettings.REQUEST_CONTENT_TYPE);
             exchangeRequest.SetRequestHeader("Accept", "Accept=text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-            exchangeRequest.RunWebRequest().completed += HandleRequestComplete;
+            exchangeRequest.SendWebRequest().completed += HandleRequestComplete;
         }
 
         private void HandleExchangeComplete (bool error = false)
@@ -60,8 +60,15 @@ namespace UnityGoogleDrive
 
         private void HandleRequestComplete (AsyncOperation requestYeild)
         {
-            if (exchangeRequest == null || !string.IsNullOrEmpty(exchangeRequest.error))
+            if (exchangeRequest == null)
             {
+                HandleExchangeComplete(true);
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(exchangeRequest.error))
+            {
+                Debug.LogError(exchangeRequest.error);
                 HandleExchangeComplete(true);
                 return;
             }
