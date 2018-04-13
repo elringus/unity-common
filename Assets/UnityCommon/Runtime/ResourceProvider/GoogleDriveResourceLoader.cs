@@ -13,7 +13,6 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
     public string RootPath { get; private set; }
 
     private readonly List<Type> NATIVE_REQUEST_TYPES = new List<Type> { typeof(AudioClip), typeof(Texture2D) };
-    private const string SLASH_REPLACE = "@@";
 
     private bool useNativeRequests;
     private GoogleDriveRequest downloadRequest;
@@ -214,7 +213,7 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
     {
         rawData = null;
 
-        resourcePath = resourcePath.Replace("/", SLASH_REPLACE);
+        resourcePath = resourcePath.Replace("/", GoogleDriveResourceProvider.SLASH_REPLACE);
         var filePath = string.Concat(GoogleDriveResourceProvider.CACHE_DIR_PATH, "/", resourcePath);
         //if (!string.IsNullOrEmpty(usedRepresentation.Extension))
         //    filePath += string.Concat(".", usedRepresentation.Extension);
@@ -253,7 +252,7 @@ public class GoogleDriveResourceLoader<TResource> : AsyncRunner<Resource<TResour
 
     private void WriteFileCacheRoutine (string resourcePath, byte[] fileRawData)
     {
-        resourcePath = resourcePath.Replace("/", SLASH_REPLACE);
+        resourcePath = resourcePath.Replace("/", GoogleDriveResourceProvider.SLASH_REPLACE);
         var filePath = string.Concat(GoogleDriveResourceProvider.CACHE_DIR_PATH, "/", resourcePath);
         //if (!string.IsNullOrEmpty(usedRepresentation.Extension))
         //    filePath += string.Concat(".", usedRepresentation.Extension);

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 /// <summary>
 /// Provides resources stored in Google Drive.
@@ -11,6 +12,7 @@ using UnityEngine;
 public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
 {
     public static string CACHE_DIR_PATH { get { return string.Concat(Application.persistentDataPath, "/GoogleDriveResourceProviderCache"); } }
+    public const string SLASH_REPLACE = "@@";
 
     /// <summary>
     /// Path to the drive folder where resources are located.
@@ -43,6 +45,20 @@ public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
             Directory.Delete(CACHE_DIR_PATH, true);
         // Flush cached file writes to IndexedDB on WebGL.
         // https://forum.unity.com/threads/webgl-filesystem.294358/#post-1940712
+        #if UNITY_WEBGL && !UNITY_EDITOR
+        WebGLExtensions.SyncFs();
+        #endif
+    }
+
+    public void PurgeCachedResources (string resourcesPath)
+    {
+        if (!Directory.Exists(CACHE_DIR_PATH)) return;
+
+        resourcesPath = resourcesPath.Replace("/", SLASH_REPLACE) + SLASH_REPLACE;
+
+        foreach (var filePath in Directory.GetFiles(CACHE_DIR_PATH).Where(f => Path.GetFileName(f).StartsWith(resourcesPath)))
+                File.Delete(filePath);
+
         #if UNITY_WEBGL && !UNITY_EDITOR
         WebGLExtensions.SyncFs();
         #endif
