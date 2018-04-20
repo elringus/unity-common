@@ -175,6 +175,19 @@ public class AsyncAction<TResult> : AsyncAction
     /// <summary>
     /// Adds a delegate to invoke when the action has completed execution.
     /// If the action is already completed, the delegate will be invoked immediately.
+    /// Same as <see cref="Then(Action{TResult})"/>, but returns a generic version of the <see cref="AsyncAction"/>.
+    /// </summary>
+    public virtual AsyncAction<TResult> ThenG (Action action)
+    {
+        if (IsCompleted) action.Invoke();
+        else ThenDelegate += action;
+
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a delegate to invoke when the action has completed execution.
+    /// If the action is already completed, the delegate will be invoked immediately.
     /// </summary>
     public virtual AsyncAction<TResult> Then (Action<TResult> action)
     {
