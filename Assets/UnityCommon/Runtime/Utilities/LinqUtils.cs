@@ -73,6 +73,14 @@ public static class LinqUtils
             return folders.Where(f => !f.Path.Contains("/") || string.IsNullOrEmpty(f.Path.GetBeforeLast("/")));
         return folders.Where(f => f.Path.GetBeforeLast("/").Equals(path) || f.Path.GetBeforeLast("/").Equals("/" + path));
     }
+
+    public static IList<T> Swap<T> (this IList<T> list, int indexA, int indexB)
+    {
+        T tmp = list[indexA];
+        list[indexA] = list[indexB];
+        list[indexB] = tmp;
+        return list;
+    }
 }
 
 public class GeneralPropertyComparer<T, TKey> : IEqualityComparer<T>
