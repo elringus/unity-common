@@ -71,6 +71,16 @@ public class ScriptableUIBehaviour : UIBehaviour
         SetIsVisible(!IsVisible, fadeTime);
     }
 
+    public virtual void Show ()
+    {
+        SetIsVisible(true);
+    }
+
+    public virtual void Hide ()
+    {
+        SetIsVisible(false);
+    }
+
     public virtual float GetCurrentOpacity ()
     {
         if (canvasGroup) return canvasGroup.alpha;
