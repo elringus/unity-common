@@ -15,12 +15,14 @@ public class LabeledButton : Button
         tintTweener = new Tweener<ColorTween>(this);
     }
 
+    #if UNITY_EDITOR
     protected override void OnValidate ()
     {
         base.OnValidate();
 
         if (!labelText) labelText = GetComponentInChildren<Text>();
     }
+    #endif
 
     protected override void Start ()
     {
