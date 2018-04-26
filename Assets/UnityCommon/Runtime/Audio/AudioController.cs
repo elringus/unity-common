@@ -1,166 +1,130 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Audio;
 
-[RequireComponent(typeof(AudioListener), typeof(AudioSource))]
 public class AudioController : MonoBehaviour
 {
-    public AudioListener Listener { get { return audioListener; } }
-    public AudioSource MainSource { get { return audioSource; } }
-    public bool IsMuted { get { return isMuted; } set { SetIsMuted(value); } }
-    public float Volume { get { return lastSetVolume; } set { SetVolume(value); } }
+    public AudioListener Listener { get { return audioListener ?? FindOrAddListener(); } }
+    public float Volume { get { return AudioListener.volume; } set { AudioListener.volume = value; } }
+    public bool IsMuted { get { return AudioListener.pause; } set { AudioListener.pause = value; } }
 
     private AudioListener audioListener;
-    private AudioSource audioSource;
-    private Dictionary<AudioClip, AudioTrack> audioTracks;
-    private Tweener<FloatTween> volumeTweener;
-    private FloatTween volumeTween;
-    private float lastSetVolume = 1f;
-    private bool isMuted;
+    private Tweener<FloatTween> listenerVolumeTweener;
+    private Dictionary<AudioClip, AudioTrack> audioTracks = new Dictionary<AudioClip, AudioTrack>();
+    private Stack<AudioSource> sourcesPool = new Stack<AudioSource>();
 
     private void Awake ()
     {
-        audioListener = GetComponent<AudioListener>();
-        if (!audioListener) audioListener = gameObject.AddComponent<AudioListener>();
-        audioSource = GetComponent<AudioSource>();
-        if (!audioSource) audioSource = gameObject.AddComponent<AudioSource>();
-
-        audioTracks = new Dictionary<AudioClip, AudioTrack>();
-        volumeTweener = new Tweener<FloatTween>(this);
-        volumeTween = new FloatTween(0, 0, 0, SetVolume, true);
+        listenerVolumeTweener = new Tweener<FloatTween>(this);
+        FindOrAddListener();
     }
 
+    /// <summary>
+    /// Sets transform of the current <see cref="Listener"/> as a child of the provided target.
+    /// </summary>
     public void AttachListener (Transform target)
     {
-        transform.SetParent(target);
-        transform.localPosition = Vector3.zero;
-    }
-
-    public void SetIsMuted (bool isMuted)
-    {
-        this.isMuted = isMuted;
-        AudioListener.volume = isMuted ? 0 : lastSetVolume;
-    }
-
-    public void SetVolume (float volume)
-    {
-        lastSetVolume = Mathf.Clamp01(volume);
-        if (!IsMuted) AudioListener.volume = volume;
+        Listener.transform.SetParent(target);
+        Listener.transform.localPosition = Vector3.zero;
     }
 
     public void FadeVolume (float volume, float time)
     {
-        if (IsMuted)
-        {
-            Volume = volume;
-            return;
-        }
-        volumeTween.StartValue = Volume;
-        volumeTween.TargetValue = volume;
-        volumeTween.TweenDuration = time;
-        volumeTweener.Run(volumeTween);
+        if (listenerVolumeTweener.IsRunning)
+            listenerVolumeTweener.CompleteInstantly();
+
+        var tween = new FloatTween(Volume, volume, time, value => Volume = value, ignoreTimeScale: true);
+        listenerVolumeTweener.Run(tween);
     }
 
-    public void Play2D (AudioClip clip, bool loop = false)
+    public bool IsClipPlaying (AudioClip clip)
     {
-        if (!clip) return;
-        audioSource.PlayOneShot(clip);
-        audioSource.loop = loop;
+        if (!clip) return false;
+        return audioTracks.ContainsKey(clip) && audioTracks[clip].IsPlaying;
     }
 
-    public void Play3D (AudioClip clip, AudioSource source, bool loop = false)
+    public AsyncAction PlayClip (AudioClip clip, AudioSource audioSource = null, float volume = 1f, 
+        float fadeInTime = 0f, bool loop = false, AudioMixerGroup mixerGroup = null)
     {
-        if (!clip) return;
-        source.PlayOneShot(clip);
-        source.loop = loop;
-    }
+        if (!clip) return AsyncAction.CreateCompleted();
 
-    public void Play3D (AudioClip clip, GameObject sourceObject, bool loop = false)
-    {
-        var source = sourceObject.GetComponent<AudioSource>();
-        if (!source)
-        {
-            source = sourceObject.AddComponent<AudioSource>();
-            source.spatialBlend = 1f;
-        }
-        Play3D(clip, source, loop);
-    }
+        if (audioTracks.ContainsKey(clip)) StopClip(clip);
+        PoolUnusedSources();
 
-    public AudioTrack AddTrack (AudioClip clip, float volume = 1f, bool loop = false)
-    {
-        if (audioTracks.ContainsKey(clip)) return audioTracks[clip];
-        var source = gameObject.AddComponent<AudioSource>();
-        var track = new AudioTrack(clip, source, this, volume, loop);
+        // In case user somehow provided one of our pooled sources, don't use it.
+        if (audioSource && IsOwnedByController(audioSource)) audioSource = null;
+        if (!audioSource) audioSource = GetPooledSource();
+
+        var track = new AudioTrack(clip, audioSource, this, volume, loop, mixerGroup);
         audioTracks.Add(clip, track);
-        return track;
+        return track.Play(fadeInTime);
     }
 
-    public void RemoveTrack (AudioClip clip)
+    public AsyncAction StopClip (AudioClip clip, float fadeOutTime)
     {
-        if (MainSource.clip == clip)
-            MainSource.clip = null;
-
-        if (audioTracks.ContainsKey(clip))
-        {
-            var track = GetTrack(clip);
-            if (track.Source.isPlaying)
-                track.Source.Stop();
-            Destroy(track.Source);
-            audioTracks.Remove(clip);
-        }
+        if (!clip) return AsyncAction.CreateCompleted();
+        if (!IsClipPlaying(clip)) return AsyncAction.CreateCompleted();
+        return GetTrack(clip).Stop(fadeOutTime);
     }
 
-    public void RemoveTrack (string clipName)
+    public void StopClip (AudioClip clip)
     {
-        var track = GetTrack(clipName);
-        if (track != null) RemoveTrack(track.Clip);
+        if (!clip) return;
+        if (!IsClipPlaying(clip)) return;
+        GetTrack(clip).Stop();
     }
 
-    public void RemoveAllTracks ()
+    public AsyncAction StopAllClips (float fadeOutTime)
     {
-        audioSource.clip = null;
-        var clips = audioTracks.Keys.ToList();
-        foreach (var clip in clips)
-            RemoveTrack(clip);
+        foreach (var track in audioTracks.Values)
+            track.Stop(fadeOutTime);
+        return new Timer(fadeOutTime, coroutineContainer: this).Run();
+    }
+
+    public void StopAllClips ()
+    {
+        foreach (var track in audioTracks.Values)
+            track.Stop();
     }
 
     public AudioTrack GetTrack (AudioClip clip)
     {
+        if (!clip) return null;
         return audioTracks.ContainsKey(clip) ? audioTracks[clip] : null;
     }
 
-    public AudioTrack GetTrack (string clipName)
+    public HashSet<AudioTrack> GetTracksByClipName (string clipName)
     {
-        var clip = audioTracks.Keys.ToList().FirstOrDefault(c => c.name == clipName);
-        if (!clip) return null;
-        return audioTracks[clip];
+        return new HashSet<AudioTrack>(audioTracks.Values.Where(track => track.Name == clipName));
     }
 
-    public AsyncAction FadeIn (AudioClip clip, float time, bool loop = false)
+    private AudioListener FindOrAddListener ()
     {
-        var track = audioTracks.ContainsKey(clip) ? audioTracks[clip] : AddTrack(clip);
-        track.IsLooped = loop;
-        return track.FadeIn(time);
+        audioListener = FindObjectOfType<AudioListener>();
+        if (!audioListener) audioListener = gameObject.AddComponent<AudioListener>();
+        return audioListener;
     }
 
-    public AsyncAction FadeOut (AudioClip clip, float time)
+    private bool IsOwnedByController (AudioSource audioSource)
     {
-        if (!audioTracks.ContainsKey(clip))
-        {
-            Debug.LogError(string.Format("Failed to fade-out clip '{0}': track with this clip wasn't added to the audio controller.", clip.name));
-            return AsyncAction.CreateCompleted();
-        }
-        var track = audioTracks[clip];
-        return track.FadeOut(time);
+        return GetComponents<AudioSource>().Contains(audioSource);
     }
 
-    /// <summary>
-    /// Fade-out all playing tracks.
-    /// </summary>
-    public AsyncAction FadeAllOut (float time)
+    private AudioSource GetPooledSource ()
     {
-        return new AsyncActionSet(audioTracks
-            .Where(a => a.Value.Source.isPlaying)
-            .Select(a => FadeOut(a.Key, time)).ToArray());
+        if (sourcesPool.Count > 0) return sourcesPool.Pop();
+        return gameObject.AddComponent<AudioSource>();
+    }
+
+    private void PoolUnusedSources ()
+    {
+        foreach (var track in audioTracks.Values.ToList())
+            if (!track.IsPlaying)
+            {
+                if (IsOwnedByController(track.Source))
+                    sourcesPool.Push(track.Source);
+                audioTracks.Remove(track.Clip);
+            }
     }
 }
