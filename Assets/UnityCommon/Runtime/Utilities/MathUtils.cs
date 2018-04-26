@@ -65,6 +65,17 @@ public static class MathUtils
         return (value % 2 == 0) ? value : Mathf.Min(value + 1, upperLimit);
     }
 
+    public static float LinearToDecibel (float linear)
+    {
+        if (linear != 0) return 20f * Mathf.Log10(linear);
+        else return -144.0f;
+    }
+
+    public static float DecibelToLinear (float dB)
+    {
+        return Mathf.Pow(10f, dB / 20f);
+    }
+
     /// <summary>
     /// For 'source' rectangle inside 'target' rectangle, get the maximum scale factor 
     /// that permits the 'source' rectangle to be scaled without stretching or squashing.
