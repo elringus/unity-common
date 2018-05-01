@@ -198,6 +198,21 @@ public class AsyncAction<TResult> : AsyncAction
     }
 
     /// <summary>
+    /// Adds a delegate to invoke when the action has completed execution.
+    /// If the action is already completed, the delegate will be invoked immediately.
+    /// </summary>
+    public virtual AsyncAction<TOut> Then<TOut> (Func<TResult, TOut> func)
+    {
+        if (IsCompleted) return AsyncAction<TOut>.CreateCompleted(func.Invoke(Result));
+        else
+        {
+            var promise = new AsyncAction<TOut>();
+            ThenDelegate += () => { promise.CompleteInstantly(func.Invoke(Result)); };
+            return promise;
+        }
+    }
+
+    /// <summary>
     /// Adds an async function to invoke when the action has completed execution.
     /// If the action is already completed, the function will be invoked immediately.
     /// Returned <see cref="AsyncAction"/> will complete after async function completion.
