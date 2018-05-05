@@ -28,8 +28,8 @@ namespace UnityGoogleDrive
         public abstract bool IsError { get; }
         public abstract string Error { get; protected set; }
 
-        public abstract CustomYieldInstruction SendNonGeneric ();
-        public abstract T GetResourceData<T> () where T : Data.ResourceData;
+        public abstract GoogleDriveRequestYeildInstruction SendNonGeneric ();
+        public abstract T GetResponseData<T> () where T : Data.ResourceData;
         public abstract void Abort ();
         public abstract void Dispose ();
     }
@@ -138,7 +138,7 @@ namespace UnityGoogleDrive
             return YeildInstruction;
         }
 
-        public override CustomYieldInstruction SendNonGeneric ()
+        public override GoogleDriveRequestYeildInstruction SendNonGeneric ()
         {
             return Send();
         }
@@ -161,7 +161,7 @@ namespace UnityGoogleDrive
                 WebRequest.Dispose();
         }
 
-        public override T GetResourceData<T> ()
+        public override T GetResponseData<T> ()
         {
             return ResponseData as T;
         }
