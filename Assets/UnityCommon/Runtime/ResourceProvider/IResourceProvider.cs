@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 /// <summary>
-/// Implementation is able to asynchronously load and unload <see cref="Resource"/> at runtime.
+/// Implementation is able to load and unload <see cref="Resource"/> objects at runtime.
 /// </summary>
 public interface IResourceProvider
 {
@@ -30,28 +31,28 @@ public interface IResourceProvider
     /// </summary>
     /// <typeparam name="T">Type of the resource to load.</typeparam>
     /// <param name="path">Path to the resource location.</param>
-    AsyncAction<Resource<T>> LoadResource<T> (string path) where T : class;
+    Task<Resource<T>> LoadResourceAsync<T> (string path) where T : class;
 
     /// <summary>
     /// Loads all available resources at the provided path asynchronously.
     /// </summary>
     /// <typeparam name="T">Type of the resources to load.</typeparam>
     /// <param name="path">Path to the resources location.</param>
-    AsyncAction<List<Resource<T>>> LoadResources<T> (string path) where T : class;
+    Task<List<Resource<T>>> LoadResourcesAsync<T> (string path) where T : class;
 
     /// <summary>
     /// Locates all available resources at the provided path asynchronously.
     /// </summary>
     /// <typeparam name="T">Type of the resources to locate.</typeparam>
     /// <param name="path">Path to the resources location.</param>
-    AsyncAction<List<Resource<T>>> LocateResources<T> (string path) where T : class;
+    Task<List<Resource<T>>> LocateResourcesAsync<T> (string path) where T : class;
 
     /// <summary>
     /// Checks whether resource with the provided type and path is available.
     /// </summary>
     /// <typeparam name="T">Type of the resource to look for.</typeparam>
     /// <param name="path">Path to the resource location.</param>
-    AsyncAction<bool> ResourceExists<T> (string path) where T : class;
+    Task<bool> ResourceExistsAsync<T> (string path) where T : class;
 
     /// <summary>
     /// Unloads resource at the provided path.

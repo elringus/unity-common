@@ -1,28 +1,27 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 
-public class LocalResourceLocator<TResource> : AsyncRunner<List<Resource<TResource>>> where TResource : class
+public class LocalResourceLocator<TResource> : LocateResourcesRunner<TResource> where TResource : class
 {
-    public override bool CanBeInstantlyCompleted { get { return false; } }
-    public List<Resource<TResource>> LocatedResources { get { return Result; } private set { Result = value; } }
     public string RootPath { get; private set; }
     public string ResourcesPath { get; private set; }
 
     private IRawConverter<TResource> converter;
 
-    public LocalResourceLocator (string rootPath, string resourcesPath, IRawConverter<TResource> converter,
-        MonoBehaviour coroutineContainer) : base(coroutineContainer)
+    public LocalResourceLocator (string rootPath, string resourcesPath, IRawConverter<TResource> converter)
     {
         RootPath = rootPath;
         ResourcesPath = resourcesPath;
         this.converter = converter;
     }
 
-    protected override IEnumerator AsyncRoutine ()
+    public override async Task Run ()
     {
+        await base.Run();
+
         LocatedResources = new List<Resource<TResource>>();
 
         // 1. Resolving parent folder.
@@ -35,7 +34,7 @@ public class LocalResourceLocator<TResource> : AsyncRunner<List<Resource<TResour
         if (!parendFolder.Exists)
         {
             HandleOnCompleted();
-            yield break;
+            return;
         }
 
         // Corner case for folders.
@@ -48,7 +47,7 @@ public class LocalResourceLocator<TResource> : AsyncRunner<List<Resource<TResour
                 LocatedResources.Add(resource as Resource<TResource>);
             }
             HandleOnCompleted();
-            yield break;
+            return;
         }
 
         // 2. Searching for the files in the folder.
@@ -72,7 +71,5 @@ public class LocalResourceLocator<TResource> : AsyncRunner<List<Resource<TResour
         }
 
         HandleOnCompleted();
-
-        yield break;
     }
 }

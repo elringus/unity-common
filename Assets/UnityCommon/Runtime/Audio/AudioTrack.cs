@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.Audio;
 
 /// <summary>
@@ -36,14 +37,14 @@ public class AudioTrack
         Source.Play();
     }
 
-    public AsyncAction Play (float fadeInTime)
+    public async Task PlayAsync (float fadeInTime)
     {
-        if (!IsValid) return AsyncAction.CreateCompleted();
+        if (!IsValid) return;
         if (volumeTweener.IsRunning)
             volumeTweener.CompleteInstantly();
         if (!IsPlaying) Play();
         var tween = new FloatTween(0, Volume, fadeInTime, volume => Volume = volume, true);
-        return volumeTweener.Run(tween);
+        await volumeTweener.RunAsync(tween);
     }
 
     public void Stop ()
@@ -52,21 +53,22 @@ public class AudioTrack
         Source.Stop();
     }
 
-    public AsyncAction Stop (float fadeOutTime)
+    public async Task StopAsync (float fadeOutTime)
     {
-        if (!IsValid) return AsyncAction.CreateCompleted();
+        if (!IsValid) return;
         if (volumeTweener.IsRunning)
             volumeTweener.CompleteInstantly();
         var tween = new FloatTween(Volume, 0, fadeOutTime, volume => Volume = volume, true);
-        return volumeTweener.Run(tween).Then(Stop);
+        await volumeTweener.RunAsync(tween);
+        Stop();
     }
 
-    public AsyncAction Fade (float volume, float fadeTime)
+    public async Task FadeAsync (float volume, float fadeTime)
     {
-        if (!IsValid) return AsyncAction.CreateCompleted();
+        if (!IsValid) return;
         if (volumeTweener.IsRunning)
             volumeTweener.CompleteInstantly();
         var tween = new FloatTween(Volume, volume, fadeTime, v => Volume = v, true);
-        return volumeTweener.Run(tween);
+        await volumeTweener.RunAsync(tween);
     }
 }

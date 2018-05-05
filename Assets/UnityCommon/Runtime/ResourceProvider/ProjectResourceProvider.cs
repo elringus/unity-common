@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 /// <summary>
 /// Provides resources stored in the 'Resources' folders of the project.
@@ -45,14 +44,14 @@ public class ProjectResourceProvider : MonoRunnerResourceProvider
         }
     }
 
-    protected override AsyncRunner<Resource<T>> CreateLoadRunner<T> (Resource<T> resource)
+    protected override LoadResourceRunner<T> CreateLoadRunner<T> (Resource<T> resource)
     {
-        return new ProjectResourceLoader<T>(resource, redirectors.ContainsKey(typeof(T)) ? redirectors[typeof(T)] : null, this);
+        return new ProjectResourceLoader<T>(resource, redirectors.ContainsKey(typeof(T)) ? redirectors[typeof(T)] : null);
     }
 
-    protected override AsyncRunner<List<Resource<T>>> CreateLocateRunner<T> (string path)
+    protected override LocateResourcesRunner<T> CreateLocateRunner<T> (string path)
     {
-        return new ProjectResourceLocator<T>(path, projectResources, redirectors.ContainsKey(typeof(T)) ? redirectors[typeof(T)] : null, this);
+        return new ProjectResourceLocator<T>(path, projectResources, redirectors.ContainsKey(typeof(T)) ? redirectors[typeof(T)] : null);
     }
 
     protected override void UnloadResource (Resource resource)

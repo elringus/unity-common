@@ -7,10 +7,10 @@ public class Resource
 {
     public string Path { get; private set; }
     public object Object { get; set; }
-    public bool IsValid { get { return Object != null; } }
-    public bool IsUnityObject { get { return Object is Object; } }
-    public bool IsUnloadable { get { return !(Object is GameObject || Object is Component || Object is AssetBundle); } }
-    public Object AsUnityObject { get { return Object as Object; } }
+    public bool IsValid => Object != null; 
+    public bool IsUnityObject => Object is Object; 
+    public bool IsUnloadable => !(Object is GameObject || Object is Component || Object is AssetBundle); 
+    public Object AsUnityObject => Object as Object;
 
     public Resource (string path, object obj = null)
     {

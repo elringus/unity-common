@@ -1,33 +1,32 @@
-﻿using UnityEngine;
+﻿using System.Threading.Tasks;
+using UnityEngine;
 
-public class ProjectResourceLoader<TResource> : AsyncRunner<Resource<TResource>> where TResource : class
+public class ProjectResourceLoader<TResource> : LoadResourceRunner<TResource> where TResource : class
 {
-    public override bool CanBeInstantlyCompleted { get { return false; } }
-    public Resource<TResource> Resource { get { return Result; } private set { Result = value; } }
-
     private ResourceRequest resourceRequest;
     private ProjectResourceProvider.TypeRedirector redirector;
 
-    public ProjectResourceLoader (Resource<TResource> resource, ProjectResourceProvider.TypeRedirector redirector = null,
-        MonoBehaviour coroutineContainer = null) : base(coroutineContainer)
+    public ProjectResourceLoader (Resource<TResource> resource, ProjectResourceProvider.TypeRedirector redirector = null)
     {
         Resource = resource;
         this.redirector = redirector;
     }
 
-    public override AsyncRunner<Resource<TResource>> Run ()
+    public override async Task Run ()
     {
+        await base.Run(); 
+
         // Corner case when loading folders.
         if (typeof(TResource) == typeof(Folder))
         {
             (Resource as Resource<Folder>).Object = new Folder(Resource.Path);
             base.HandleOnCompleted();
-            return this;
+            return;
         }
 
         var resourceType = redirector != null ? redirector.RedirectType : typeof(TResource);
-        YieldInstruction = resourceRequest = Resources.LoadAsync(Resource.Path, resourceType); 
-        return base.Run();
+        resourceRequest = await Resources.LoadAsync(Resource.Path, resourceType);
+        HandleOnCompleted();
     }
 
     protected override void HandleOnCompleted ()

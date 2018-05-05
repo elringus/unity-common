@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -28,7 +29,7 @@ public class ScriptableUIBehaviour : UIBehaviour
 
         fadeTweener = new Tweener<FloatTween>(this);
         canvasGroup = GetComponent<CanvasGroup>();
-        SetIsVisible(IsVisibleOnAwake, 0f);
+        SetIsVisible(IsVisibleOnAwake);
     }
 
     public Canvas GetTopmostCanvas ()
@@ -39,7 +40,7 @@ public class ScriptableUIBehaviour : UIBehaviour
         return null;
     }
 
-    public virtual AsyncAction SetIsVisible (bool isVisible, float? fadeTime = null)
+    public virtual async Task SetIsVisibleAsync (bool isVisible, float? fadeTime = null)
     {
         if (fadeTweener.IsRunning)
             fadeTweener.Stop();
@@ -48,7 +49,7 @@ public class ScriptableUIBehaviour : UIBehaviour
 
         OnVisibilityChanged.SafeInvoke(isVisible);
 
-        if (!canvasGroup) return AsyncAction.CreateCompleted();
+        if (!canvasGroup) return;
 
         canvasGroup.interactable = isVisible;
         canvasGroup.blocksRaycasts = isVisible;
@@ -59,26 +60,43 @@ public class ScriptableUIBehaviour : UIBehaviour
         if (fadeDuration == 0f)
         {
             canvasGroup.alpha = targetOpacity;
-            return AsyncAction.CreateCompleted();
+            return;
         }
 
         var tween = new FloatTween(canvasGroup.alpha, targetOpacity, fadeDuration, alpha => canvasGroup.alpha = alpha);
-        return fadeTweener.Run(tween);
+        await fadeTweener.RunAsync(tween);
+    }
+
+    public virtual void SetIsVisible (bool isVisible)
+    {
+        if (fadeTweener.IsRunning)
+            fadeTweener.Stop();
+
+        _isVisible = isVisible;
+
+        OnVisibilityChanged.SafeInvoke(isVisible);
+
+        if (!canvasGroup) return;
+
+        canvasGroup.interactable = isVisible;
+        canvasGroup.blocksRaycasts = isVisible;
+
+        canvasGroup.alpha = isVisible ? 1f : 0f;
     }
 
     public virtual void ToggleVisibility (float? fadeTime = null)
     {
-        SetIsVisible(!IsVisible, fadeTime);
+        SetIsVisibleAsync(!IsVisible, fadeTime).WrapAsync();
     }
 
-    public virtual void Show ()
+    public virtual void Show (float? fadeTime = null)
     {
-        SetIsVisible(true);
+        SetIsVisibleAsync(true, fadeTime).WrapAsync();
     }
 
-    public virtual void Hide ()
+    public virtual void Hide (float? fadeTime = null)
     {
-        SetIsVisible(false);
+        SetIsVisibleAsync(false, fadeTime).WrapAsync();
     }
 
     public virtual float GetCurrentOpacity ()

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -68,12 +69,12 @@ public class SceneLoader
     /// <param name="transitionScenePath">Relative scene file path (e.g: "Assets/Scenes/Scene1.unity").</param>
     /// <param name="unloadScenes">Whether to unload currently loaded scenes.</param>
     /// <param name="manualActivation">Whether to wait for manual scene activation.</param>
-    public virtual AsyncAction LoadScene (string sceneToLoadPath, string transitionScenePath, bool unloadScenes = true, bool manualActivation = false)
+    public virtual async Task LoadSceneAsync (string sceneToLoadPath, string transitionScenePath, bool unloadScenes = true, bool manualActivation = false)
     {
         if (IsLoading)
         {
             Debug.LogError(string.Format("Can't load scene '{0}': another scene ('{1}') is being loaded.", sceneToLoadPath, SceneToLoadPath));
-            return AsyncAction.CreateCompleted();
+            return;
         }
 
         IsLoading = true;
@@ -92,7 +93,12 @@ public class SceneLoader
             manualActivationLoopTimer.Run();
         }
 
-        return LoadTransitionScene().ThenAsync(UnloadAllScenesExceptTransition).ThenAsync(LoadNewScene).ThenAsync(UnloadTransitionScene).Then(FinishLoading);
+        await LoadTransitionSceneAsync();
+        await UnloadAllScenesExceptTransitionAsync();
+        await LoadNewSceneAsync();
+        await UnloadTransitionSceneAsync();
+
+        FinishLoading();
     }
 
     /// <summary>
@@ -103,37 +109,29 @@ public class SceneLoader
         manualActivationInvoked = true;
     }
 
-    protected virtual AsyncAction LoadTransitionScene ()
-    {
-        return SceneManager.LoadSceneAsync(TransitionScenePath, LoadSceneMode.Additive);
-    }
+    protected virtual async Task LoadTransitionSceneAsync () => await SceneManager.LoadSceneAsync(TransitionScenePath, LoadSceneMode.Additive);
 
-    protected virtual AsyncAction UnloadAllScenesExceptTransition ()
+    protected virtual async Task UnloadAllScenesExceptTransitionAsync ()
     {
         UnloadedScenesPath.Clear();
-        var actions = new AsyncActionSet();
         for (int i = 0; i < SceneManager.sceneCount; i++)
         {
             var scenePath = SceneManager.GetSceneAt(i).path;
             if (scenePath == TransitionScenePath) continue;
             UnloadedScenesPath.Add(scenePath);
-            actions.AddAction(SceneManager.UnloadSceneAsync(scenePath));
+            await SceneManager.UnloadSceneAsync(scenePath);
         }
-        actions.Dispose();
-        return actions.Then(InvokeOnScenesUnloaded);
+        InvokeOnScenesUnloaded();
     }
 
-    protected virtual AsyncAction LoadNewScene ()
+    protected virtual async Task LoadNewSceneAsync ()
     {
         newSceneLoadOperation = SceneManager.LoadSceneAsync(SceneToLoadPath, LoadSceneMode.Additive);
         newSceneLoadOperation.allowSceneActivation = !ManualActivation;
-        return newSceneLoadOperation;
+        await newSceneLoadOperation;
     }
 
-    protected virtual AsyncAction UnloadTransitionScene ()
-    {
-        return SceneManager.UnloadSceneAsync(TransitionScenePath);
-    }
+    protected virtual async Task UnloadTransitionSceneAsync () => await SceneManager.UnloadSceneAsync(TransitionScenePath);
 
     protected virtual void FinishLoading ()
     {

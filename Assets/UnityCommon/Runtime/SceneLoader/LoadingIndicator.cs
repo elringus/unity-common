@@ -28,7 +28,7 @@ public class LoadingIndicator : ScriptableUIBehaviour
         tweener.Run();
 
         var sceneLoader = Context.Resolve<SceneLoader>(assertResult: true);
-        if (sceneLoader.IsReadyToActivate) SetIsVisible(false, 0f);
+        if (sceneLoader.IsReadyToActivate) SetIsVisible(false);
         else sceneLoader.OnReadyToActivate += () => SetIsVisible(false);
     }
 }

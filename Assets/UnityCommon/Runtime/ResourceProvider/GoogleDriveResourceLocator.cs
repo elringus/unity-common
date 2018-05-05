@@ -1,39 +1,27 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityGoogleDrive;
 
-public class GoogleDriveResourceLocator<TResource> : AsyncRunner<List<Resource<TResource>>> where TResource : class
+public class GoogleDriveResourceLocator<TResource> : LocateResourcesRunner<TResource> where TResource : class
 {
-    public override bool CanBeInstantlyCompleted { get { return false; } }
-    public List<Resource<TResource>> LocatedResources { get { return Result; } private set { Result = value; } }
     public string RootPath { get; private set; }
     public string ResourcesPath { get; private set; }
 
     private GoogleDriveFiles.ListRequest listRequest;
     private IRawConverter<TResource> converter;
 
-    public GoogleDriveResourceLocator (string rootPath, string resourcesPath, IRawConverter<TResource> converter, 
-        MonoBehaviour coroutineContainer) : base(coroutineContainer)
+    public GoogleDriveResourceLocator (string rootPath, string resourcesPath, IRawConverter<TResource> converter)
     {
         RootPath = rootPath;
         ResourcesPath = resourcesPath;
         this.converter = converter;
     }
 
-    public override void Stop ()
+    public override async Task Run ()
     {
-        base.Stop();
+        await base.Run();
 
-        if (listRequest != null)
-        {
-            listRequest.Abort();
-            listRequest = null;
-        }
-    }
-
-    protected override IEnumerator AsyncRoutine ()
-    {
         LocatedResources = new List<Resource<TResource>>();
 
         // 1. Resolving folder ids one by one to find id of the last one.
@@ -55,13 +43,13 @@ public class GoogleDriveResourceLocator<TResource> : AsyncRunner<List<Resource<T
                 listRequest.Q = string.Format("'{0}' in parents and name = '{1}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
                     parendId, parentNames[i]);
 
-                yield return listRequest.Send();
+                await listRequest.Send();
 
                 if (!IsResultFound(listRequest))
                 {
                     //Debug.LogError(string.Format("Failed to retrieve {0} part of {1} resource from Google Drive.", parentNames[i], folderPath));
                     HandleOnCompleted();
-                    yield break;
+                    return;
                 }
 
                 if (listRequest.ResponseData.Files.Count > 1)
@@ -79,7 +67,7 @@ public class GoogleDriveResourceLocator<TResource> : AsyncRunner<List<Resource<T
             listRequest.Fields = new List<string> { "files(name)" };
             listRequest.Q = string.Format("'{0}' in parents and mimeType = '{1}' and trashed = false", parendId, representation.MimeType);
 
-            yield return listRequest.Send();
+            await listRequest.Send();
 
             if (IsResultFound(listRequest))
                 results.Add(representation, listRequest.ResponseData.Files);
@@ -100,6 +88,17 @@ public class GoogleDriveResourceLocator<TResource> : AsyncRunner<List<Resource<T
         if (listRequest != null) listRequest.Dispose();
 
         HandleOnCompleted();
+    }
+
+    public override void Cancel ()
+    {
+        base.Cancel();
+
+        if (listRequest != null)
+        {
+            listRequest.Abort();
+            listRequest = null;
+        }
     }
 
     private bool IsResultFound (GoogleDriveFiles.ListRequest request)

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Audio;
 
@@ -44,10 +45,10 @@ public class AudioController : MonoBehaviour
         return audioTracks.ContainsKey(clip) && audioTracks[clip].IsPlaying;
     }
 
-    public AsyncAction PlayClip (AudioClip clip, AudioSource audioSource = null, float volume = 1f, 
+    public async Task PlayClipAsync (AudioClip clip, AudioSource audioSource = null, float volume = 1f, 
         float fadeInTime = 0f, bool loop = false, AudioMixerGroup mixerGroup = null)
     {
-        if (!clip) return AsyncAction.CreateCompleted();
+        if (!clip) return;
 
         if (audioTracks.ContainsKey(clip)) StopClip(clip);
         PoolUnusedSources();
@@ -58,14 +59,13 @@ public class AudioController : MonoBehaviour
 
         var track = new AudioTrack(clip, audioSource, this, volume, loop, mixerGroup);
         audioTracks.Add(clip, track);
-        return track.Play(fadeInTime);
+        await track.PlayAsync(fadeInTime);
     }
 
-    public AsyncAction StopClip (AudioClip clip, float fadeOutTime)
+    public async Task StopClipAsync (AudioClip clip, float fadeOutTime)
     {
-        if (!clip) return AsyncAction.CreateCompleted();
-        if (!IsClipPlaying(clip)) return AsyncAction.CreateCompleted();
-        return GetTrack(clip).Stop(fadeOutTime);
+        if (!clip || !IsClipPlaying(clip)) return;
+        await GetTrack(clip).StopAsync(fadeOutTime);
     }
 
     public void StopClip (AudioClip clip)
@@ -75,11 +75,9 @@ public class AudioController : MonoBehaviour
         GetTrack(clip).Stop();
     }
 
-    public AsyncAction StopAllClips (float fadeOutTime)
+    public async Task StopAllClipsAsync (float fadeOutTime)
     {
-        foreach (var track in audioTracks.Values)
-            track.Stop(fadeOutTime);
-        return new Timer(fadeOutTime, coroutineContainer: this).Run();
+        await Task.WhenAll(audioTracks.Values.Select(t => t.StopAsync(fadeOutTime)));
     }
 
     public void StopAllClips ()

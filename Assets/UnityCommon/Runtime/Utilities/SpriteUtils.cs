@@ -21,28 +21,4 @@ public static class SpriteUtils
         Debug.Assert(spriteRenderer != null);
         return Mathf.Approximately(spriteRenderer.color.a, 1f);
     }
-
-    public static Tweener<FloatTween> FadeOut (this SpriteRenderer spriteRenderer, float fadeTime = .25f,
-        MonoBehaviour coroutineContainer = null, Action onComplete = null)
-    {
-        Debug.Assert(spriteRenderer != null);
-        if (spriteRenderer.IsTransparent()) { onComplete.SafeInvoke(); return null; }
-
-        if (fadeTime == 0f) { spriteRenderer.SetOpacity(0f); onComplete.SafeInvoke(); return null; }
-
-        var tween = new FloatTween(spriteRenderer.color.a, 0f, fadeTime, a => spriteRenderer.SetOpacity(a));
-        return new Tweener<FloatTween>(coroutineContainer, onComplete).Run(tween);
-    }
-
-    public static Tweener<FloatTween> FadeIn (this SpriteRenderer spriteRenderer, float fadeTime = .25f,
-        MonoBehaviour coroutineContainer = null, Action onComplete = null)
-    {
-        Debug.Assert(spriteRenderer != null);
-        if (spriteRenderer.IsOpaque()) { onComplete.SafeInvoke(); return null; }
-
-        if (fadeTime == 0f) { spriteRenderer.SetOpacity(1f); onComplete.SafeInvoke(); return null; }
-
-        var tween = new FloatTween(spriteRenderer.color.a, 1f, fadeTime, a => spriteRenderer.SetOpacity(a));
-        return new Tweener<FloatTween>(coroutineContainer, onComplete).Run(tween);
-    }
 }

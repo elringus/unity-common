@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEngine;
+using System.Threading.Tasks;
 
 public class RemoteResourceProvider : IResourceProvider
 {
@@ -12,22 +12,22 @@ public class RemoteResourceProvider : IResourceProvider
     public bool IsLoading { get { throw new System.NotImplementedException(); } }
     public float LoadProgress { get { throw new System.NotImplementedException(); } }
 
-    public AsyncAction<Resource<T>> LoadResource<T> (string path) where T : class
+    public Task<Resource<T>> LoadResourceAsync<T> (string path) where T : class
     {
         throw new System.NotImplementedException();
     }
 
-    public AsyncAction<List<Resource<T>>> LoadResources<T> (string path) where T : class
+    public Task<List<Resource<T>>> LoadResourcesAsync<T> (string path) where T : class
     {
         throw new System.NotImplementedException();
     }
 
-    public AsyncAction<List<Resource<T>>> LocateResources<T> (string path) where T : class
+    public Task<List<Resource<T>>> LocateResourcesAsync<T> (string path) where T : class
     {
         throw new NotImplementedException();
     }
 
-    public AsyncAction<bool> ResourceExists<T> (string path) where T : class
+    public Task<bool> ResourceExistsAsync<T> (string path) where T : class
     {
         throw new System.NotImplementedException();
     }

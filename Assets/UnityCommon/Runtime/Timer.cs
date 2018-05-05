@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Threading.Tasks;
 using UnityEngine;
 
-public class Timer : AsyncRunner<object>
+public class Timer : CoroutineRunner
 {
     public event Action OnLoop;
 
@@ -12,16 +13,17 @@ public class Timer : AsyncRunner<object>
     public float ElapsedTime { get; private set; }
 
     public Timer (float duration = 0f, bool loop = false, bool ignoreTimeScale = false, 
-        MonoBehaviour coroutineContainer = null, Action onCompleted = null, Action onLoop = null) : base(coroutineContainer, onCompleted)
+        MonoBehaviour coroutineContainer = null, Action onCompleted = null, Action onLoop = null) : base(coroutineContainer)
     {
         Duration = duration;
         Loop = loop;
         IsTimeScaleIgnored = ignoreTimeScale;
 
+        if (onCompleted != null) OnCompleted += onCompleted;
         if (onLoop != null) OnLoop += onLoop;
     }
 
-    public Timer Run (float duration, bool loop = false, bool ignoreTimeScale = false)
+    public void Run (float duration, bool loop = false, bool ignoreTimeScale = false)
     {
         ElapsedTime = 0f;
         Duration = duration;
@@ -29,14 +31,18 @@ public class Timer : AsyncRunner<object>
         IsTimeScaleIgnored = ignoreTimeScale;
 
         base.Run();
-
-        return this;
     }
 
-    public override AsyncRunner<object> Run ()
+    public async Task RunAsync (float duration, bool loop = false, bool ignoreTimeScale = false)
     {
-        return Run(Duration, Loop, IsTimeScaleIgnored);
+        Run(duration, loop, ignoreTimeScale);
+        var taskCompletionSource = new TaskCompletionSource<object>();
+        if (IsCompleted) taskCompletionSource.SetResult(null);
+        else OnCompleted += () => taskCompletionSource.SetResult(null);
+        await taskCompletionSource.Task;
     }
+
+    public override void Run () => Run(Duration, Loop, IsTimeScaleIgnored);
 
     public override void Stop ()
     {

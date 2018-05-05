@@ -11,7 +11,7 @@ using System.Linq;
 /// </summary>
 public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
 {
-    public static string CACHE_DIR_PATH { get { return string.Concat(Application.persistentDataPath, "/GoogleDriveResourceProviderCache"); } }
+    public static string CACHE_DIR_PATH => string.Concat(Application.persistentDataPath, "/GoogleDriveResourceProviderCache"); 
     public const string SLASH_REPLACE = "@@";
 
     /// <summary>
@@ -23,9 +23,13 @@ public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
     /// </summary>
     public int ConcurrentRequestsLimit { get; set; }
     /// <summary>
+    /// Whether to clear cached resources on start.
+    /// </summary>
+    public bool PurgeCacheOnStart { get; set; } = true;
+    /// <summary>
     /// Current pending concurrent requests count.
     /// </summary>
-    public int RequestsCount { get { return Runners.Count; } }
+    public int RequestsCount => Runners.Count;
 
     private Dictionary<Type, IConverter> converters = new Dictionary<Type, IConverter>();
     private Queue<Action> requestQueue = new Queue<Action>();
@@ -64,36 +68,34 @@ public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
         #endif
     }
 
-    protected override void Awake ()
+    private void Start ()
     {
-        base.Awake();
-
-        PurgeCache();
+        if (PurgeCacheOnStart) PurgeCache();
         Directory.CreateDirectory(CACHE_DIR_PATH);
     }
 
-    protected override void RunLoader<T> (AsyncRunner<Resource<T>> loader)
+    protected override void RunLoader<T> (LoadResourceRunner<T> loader)
     {
         if (ConcurrentRequestsLimit > 0 && RequestsCount > ConcurrentRequestsLimit)
             requestQueue.Enqueue(() => loader.Run());
         else loader.Run();
     }
 
-    protected override void RunLocator<T> (AsyncRunner<List<Resource<T>>> locator)
+    protected override void RunLocator<T> (LocateResourcesRunner<T> locator)
     {
         if (ConcurrentRequestsLimit > 0 && RequestsCount > ConcurrentRequestsLimit)
             requestQueue.Enqueue(() => locator.Run());
         else locator.Run();
     }
 
-    protected override AsyncRunner<Resource<T>> CreateLoadRunner<T> (Resource<T> resource) 
+    protected override LoadResourceRunner<T> CreateLoadRunner<T> (Resource<T> resource) 
     {
-        return new GoogleDriveResourceLoader<T>(DriveRootPath, resource, ResolveConverter<T>(), this);
+        return new GoogleDriveResourceLoader<T>(DriveRootPath, resource, ResolveConverter<T>());
     }
 
-    protected override AsyncRunner<List<Resource<T>>> CreateLocateRunner<T> (string path)
+    protected override LocateResourcesRunner<T> CreateLocateRunner<T> (string path)
     {
-        return new GoogleDriveResourceLocator<T>(DriveRootPath, path, ResolveConverter<T>(), this);
+        return new GoogleDriveResourceLocator<T>(DriveRootPath, path, ResolveConverter<T>());
     }
 
     protected override void UnloadResource (Resource resource)

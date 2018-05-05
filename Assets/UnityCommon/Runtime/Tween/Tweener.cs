@@ -1,41 +1,54 @@
 ﻿using System;
+using System.Threading.Tasks;
 using UnityEngine;
 
 /// <summary>
 /// Allows tweening a <see cref="ITweenValue"/> using coroutine.
 /// </summary>
-public class Tweener<TTweenValue> : AsyncRunner<TTweenValue> where TTweenValue : struct, ITweenValue
+public class Tweener<TTweenValue> : CoroutineRunner where TTweenValue : struct, ITweenValue
 {
-    public TTweenValue TweenValue { get { return Result; } private set { Result = value; } }
+    public TTweenValue TweenValue { get; private set; }
 
     private float elapsedTime;
 
     public Tweener (MonoBehaviour coroutineContainer = null,
-        Action onCompleted = null) : base(coroutineContainer, onCompleted) { }
+        Action onCompleted = null) : base(coroutineContainer)
+    {
+        if (onCompleted != null) OnCompleted += onCompleted;
+    }
 
     public Tweener (TTweenValue tweenValue, MonoBehaviour coroutineContainer = null, 
-        Action onCompleted = null) : base(coroutineContainer, onCompleted)
+        Action onCompleted = null) : this(coroutineContainer, onCompleted)
     {
         TweenValue = tweenValue;
     }
 
-    public Tweener<TTweenValue> Run (TTweenValue tweenValue)
+    public void Run (TTweenValue tweenValue)
     {
         TweenValue = tweenValue;
-        return Run() as Tweener<TTweenValue>;
+        Run();
     }
 
-    public override AsyncRunner<TTweenValue> Run ()
+    public async Task RunAsync (TTweenValue tweenValue)
+    {
+        Run(tweenValue);
+        var taskCompletionSource = new TaskCompletionSource<object>();
+        if (IsCompleted) taskCompletionSource.SetResult(null);
+        else OnCompleted += () => taskCompletionSource.SetResult(null);
+        await taskCompletionSource.Task;
+    }
+
+    public override void Run ()
     {
         elapsedTime = 0f;
 
         if (TweenValue.TweenDuration <= 0f)
         {
             CompleteInstantly();
-            return this;
+            return;
         }
 
-        return base.Run();
+        base.Run();
     }
 
     protected override bool LoopCondition ()

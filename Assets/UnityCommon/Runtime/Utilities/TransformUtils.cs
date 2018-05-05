@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 public static class TransformUtils
 {
@@ -34,15 +33,5 @@ public static class TransformUtils
     {
         if (local) trs.localPosition = new Vector3(trs.localPosition.x, trs.localPosition.y, z);
         else trs.position = new Vector3(trs.position.x, trs.position.y, z);
-    }
-
-    public static Tweener<FloatTween> SlideX (this Transform trs, float x, float duration,
-        MonoBehaviour coroutineContainer = null, Action onComplete = null, bool smoothStep = false)
-    {
-        if (trs.position.x == x) { onComplete.SafeInvoke(); return null; }
-        if (duration == 0f) { trs.SetPosX(x); onComplete.SafeInvoke(); return null; }
-
-        var tween = new FloatTween(trs.position.x, x, duration, newXValue => trs.SetPosX(newXValue), smoothStep: smoothStep);
-        return new Tweener<FloatTween>(coroutineContainer, onComplete).Run(tween);
     }
 }

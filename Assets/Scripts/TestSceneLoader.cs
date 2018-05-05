@@ -11,7 +11,7 @@ public class TestSceneLoader : MonoBehaviour
 
         var loader = Context.Resolve<SceneLoader>();
         loader.OnReadyToActivate += LoadResources;
-        loader.LoadScene(SceneToLoadPath, TransitionScenePath, true, true);
+        loader.LoadSceneAsync(SceneToLoadPath, TransitionScenePath, true, true).WrapAsync();
     }
 
     private void LoadResources ()
@@ -25,6 +25,6 @@ public class TestSceneLoader : MonoBehaviour
         provider.AddConverter(new GFolderToFolderConverter());
         provider.AddConverter(new WavToAudioClipConverter());
 
-        provider.LoadResources<AudioClip>("Audio");
+        provider.LoadResourcesAsync<AudioClip>("Audio").WrapAsync();
     }
 }

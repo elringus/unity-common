@@ -1,5 +1,6 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class TestResourceProvider : MonoBehaviour
@@ -14,35 +15,23 @@ public class TestResourceProvider : MonoBehaviour
         "Sprites/Image01",
         "Sprites/Image02",
         "Sprites/Image03",
-        "Sprites/Image04",
     };
 
     private void Awake ()
     {
-        //InitializeProjectResourceProvider();
+        //provider = InitializeProjectResourceProvider();
         provider = InitializeGoogleDriveResourceProvider();
-        //InitializeLocalResourceProvider();
+        //provider = InitializeLocalResourceProvider();
     }
 
-    private void OnEnable ()
+    private async void Start ()
     {
-        StartCoroutine("Test");
-    }
-
-    private void OnDisable ()
-    {
-        StopAllCoroutines();
-    }
-
-    private IEnumerator Test ()
-    {
-        //yield return ResolveByFullPath();
-        //yield return ResolveTextByPath();
-        //yield return ResolveSpritesByPath();
-        //yield return ResolveFolders();
-        //yield return TestResourceExists();
-        yield return TestAudio();
-        //yield return TestUnload();
+        //await ResolveByFullPathAsync();
+        //await ResolveTextByPathAsync();
+        //await ResolveFoldersAsync();
+        //await TestResourceExistsAsync();
+        await TestAudioAsync();
+        //await TestUnloadAsync();
     }
 
     private void OnGUI ()
@@ -56,23 +45,23 @@ public class TestResourceProvider : MonoBehaviour
     [ContextMenu("Test In Editor")]
     private void TestEditor ()
     {
-        var provider = InitializeGoogleDriveResourceProvider();
-        provider.LoadResources<string>("Text").Then(result => {
-            foreach (var textResource in result) Debug.Log(textResource.Object);
-        });
+        provider = InitializeGoogleDriveResourceProvider();
+        TestEditorAsync().WrapAsync();
+    }
+
+    private async Task TestEditorAsync ()
+    {
+        var result = await provider.LoadResourcesAsync<string>("Text");
+        for (int i = 0; i < result.Count; i++)
+            Debug.Log($"{i}: {result[i].Object}");
     }
 
     private static ProjectResourceProvider InitializeProjectResourceProvider ()
     {
         ProjectResourceProvider provider;
-
-        if (Application.isPlaying) provider = Context.Resolve<ProjectResourceProvider>();
-        else
-        {
-            var go = new GameObject();
-            go.hideFlags = HideFlags.DontSave;
-            provider = go.AddComponent<ProjectResourceProvider>();
-        }
+        var go = new GameObject();
+        go.hideFlags = HideFlags.DontSave;
+        provider = go.AddComponent<ProjectResourceProvider>();
 
         provider.AddRedirector(new TextAssetToStringConverter());
 
@@ -82,18 +71,18 @@ public class TestResourceProvider : MonoBehaviour
     private GoogleDriveResourceProvider InitializeGoogleDriveResourceProvider ()
     {
         GoogleDriveResourceProvider provider;
-
         var go = new GameObject();
         go.hideFlags = HideFlags.DontSave;
         provider = go.AddComponent<GoogleDriveResourceProvider>();
 
         provider.DriveRootPath = "Resources";
         provider.ConcurrentRequestsLimit = 2;
+        provider.PurgeCacheOnStart = false;
         provider.AddConverter(new JpgOrPngToSpriteConverter());
         provider.AddConverter(new GDocToStringConverter());
         provider.AddConverter(new GFolderToFolderConverter());
-        provider.AddConverter(new WavToAudioClipConverter());
-        //provider.AddConverter(new Mp3ToAudioClipConverter());
+        //provider.AddConverter(new WavToAudioClipConverter());
+        provider.AddConverter(new Mp3ToAudioClipConverter());
 
         return provider;
     }
@@ -101,14 +90,9 @@ public class TestResourceProvider : MonoBehaviour
     private static LocalResourceProvider InitializeLocalResourceProvider ()
     {
         LocalResourceProvider provider;
-
-        if (Application.isPlaying) provider = Context.Resolve<LocalResourceProvider>();
-        else
-        {
-            var go = new GameObject();
-            go.hideFlags = HideFlags.DontSave;
-            provider = go.AddComponent<LocalResourceProvider>();
-        }
+        var go = new GameObject();
+        go.hideFlags = HideFlags.DontSave;
+        provider = go.AddComponent<LocalResourceProvider>();
 
         provider.RootPath = "Resources";
         provider.AddConverter(new DirectoryToFolderConverter());
@@ -120,139 +104,101 @@ public class TestResourceProvider : MonoBehaviour
         return provider;
     }
 
-    private IEnumerator ResolveFolders ()
+    private async Task ResolveFoldersAsync ()
     {
-        provider = Context.Resolve<IResourceProvider>();
-        var loadAllAction = provider.LoadResources<Folder>(null);
-
-        yield return loadAllAction;
+        var resources = await provider.LoadResourcesAsync<Folder>(null);
 
         text = "completed";
 
-        foreach (var folderResource in loadAllAction.Result)
+        foreach (var folderResource in resources)
         {
             text = folderResource.Object.Name;
-            yield return new WaitForSeconds(1);
+            await Task.Delay(TimeSpan.FromSeconds(1f));
         }
 
-        foreach (var textResource in loadAllAction.Result)
+        foreach (var textResource in resources)
             provider.UnloadResource(textResource.Path);
-
-        yield return new WaitForSeconds(3);
     }
 
-    private IEnumerator TestUnload ()
+    private async Task TestUnloadAsync ()
     {
-        provider = Context.Resolve<IResourceProvider>();
-
         for (int i = 0; i < 10; i++)
         {
-            var loadAllAction = provider.LoadResources<AudioClip>("Unload");
-            yield return loadAllAction;
+            var resources = await provider.LoadResourcesAsync<AudioClip>("Unload");
+            text = "Total memory used after load: " + Mathf.CeilToInt(System.GC.GetTotalMemory(true) * .000001f) + "Mb";
 
-            text = "Total memory used: " + Mathf.CeilToInt(System.GC.GetTotalMemory(true) * .000001f) + "Mb";
-            yield return new WaitForSeconds(1.5f);
+            await Task.Delay(TimeSpan.FromSeconds(.5f));
 
-            foreach (var resource in loadAllAction.Result)
+            foreach (var resource in resources)
                 provider.UnloadResource(resource.Path);
+            text = "Total memory used after unload: " + Mathf.CeilToInt(System.GC.GetTotalMemory(true) * .000001f) + "Mb";
 
-            text = "Total memory used: " + Mathf.CeilToInt(System.GC.GetTotalMemory(true) * .000001f) + "Mb";
+            await Task.Delay(TimeSpan.FromSeconds(.5f));
         }
     }
 
-    private IEnumerator ResolveSpritesByPath ()
+    private async Task TestAudioAsync ()
     {
-        provider = Context.Resolve<IResourceProvider>();
-        var loadAllAction = provider.LoadResources<Sprite>("Sprites");
+        var resources = await provider.LoadResourcesAsync<AudioClip>("Audio");
 
-        yield return loadAllAction;
-
-        foreach (var spriteResource in loadAllAction.Result)
-        {
-            SpriteRenderer.sprite = spriteResource.Object;
-            yield return new WaitForSeconds(.5f);
-        }
-
-        foreach (var spriteResource in loadAllAction.Result)
-            provider.UnloadResource(spriteResource.Path);
-    }
-
-    private IEnumerator TestAudio ()
-    {
-        var loadAllAction = provider.LoadResources<AudioClip>("Audio");
-
-        yield return loadAllAction;
-
-        foreach (var audioResource in loadAllAction.Result)
+        foreach (var audioResource in resources)
         {
             AudioSource.PlayOneShot(audioResource.Object);
-            yield return new WaitForSeconds(audioResource.Object.length);
+            await Task.Delay(TimeSpan.FromSeconds(audioResource.Object.length));
         }
 
-        foreach (var audioResource in loadAllAction.Result)
+        foreach (var audioResource in resources)
             provider.UnloadResource(audioResource.Path);
     }
 
-    private IEnumerator ResolveTextByPath ()
+    private async Task ResolveTextByPathAsync ()
     {
-        provider = Context.Resolve<IResourceProvider>();
-        var loadAllAction = provider.LoadResources<string>("Text");
+        var resources = await provider.LoadResourcesAsync<string>("Text");
 
-        yield return loadAllAction;
-
-        foreach (var textResource in loadAllAction.Result)
+        foreach (var textResource in resources)
         {
             text = textResource.Object;
-            yield return new WaitForSeconds(1);
+            await Task.Delay(TimeSpan.FromSeconds(1f));
         }
 
-        foreach (var textResource in loadAllAction.Result)
+        foreach (var textResource in resources)
             provider.UnloadResource(textResource.Path);
-
-        yield return new WaitForSeconds(3);
     }
 
-    private IEnumerator TestResourceExists ()
+    private async Task TestResourceExistsAsync ()
     {
-        provider = Context.Resolve<IResourceProvider>();
-
         foreach (var res in RESOURCES)
-            yield return provider.ResourceExists<Sprite>(res).Then(b => print(res + ": " + b.ToString()));
-
+        {
+            var exist = await provider.ResourceExistsAsync<Sprite>(res);
+            print(res + ": " + exist.ToString());
+        }
     }
 
-    private IEnumerator ResolveByFullPath ()
+    private async Task ResolveByFullPathAsync ()
     {
-        provider = Context.Resolve<IResourceProvider>();
-        var waitFordelay = new WaitForSeconds(1.5f);
-
         foreach (var res in RESOURCES)
-            provider.LoadResource<Sprite>(res);
-
-        while (provider.IsLoading) yield return null;
+            await provider.LoadResourceAsync<Sprite>(res);
 
         foreach (var res in RESOURCES)
         {
-            SpriteRenderer.sprite = provider.LoadResource<Sprite>(res).Result.Object;
-            yield return new WaitForSeconds(.5f);
+            SpriteRenderer.sprite = (await provider.LoadResourceAsync<Sprite>(res)).Object;
+            await Task.Delay(TimeSpan.FromSeconds(.5f));
         }
 
-        yield return waitFordelay;
+        await Task.Delay(TimeSpan.FromSeconds(1.5f));
 
         foreach (var res in RESOURCES)
             provider.UnloadResource(res);
 
-        yield return waitFordelay;
+        await Task.Delay(TimeSpan.FromSeconds(1.5f));
 
         foreach (var res in RESOURCES)
-            provider.LoadResource<Sprite>(res);
-
-        while (provider.IsLoading) yield return null;
+            await provider.LoadResourceAsync<Sprite>(res);
 
         foreach (var res in RESOURCES)
         {
-            SpriteRenderer.sprite = provider.LoadResource<Sprite>(res).Result.Object;
-            yield return new WaitForSeconds(.5f);
+            SpriteRenderer.sprite = (await provider.LoadResourceAsync<Sprite>(res)).Object;
+            await Task.Delay(TimeSpan.FromSeconds(.5f));
         }
     }
 }

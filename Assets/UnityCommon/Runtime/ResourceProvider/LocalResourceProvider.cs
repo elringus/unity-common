@@ -20,14 +20,14 @@ public class LocalResourceProvider : MonoRunnerResourceProvider
         converters.Add(typeof(T), converter);
     }
 
-    protected override AsyncRunner<Resource<T>> CreateLoadRunner<T> (Resource<T> resource)
+    protected override LoadResourceRunner<T> CreateLoadRunner<T> (Resource<T> resource)
     {
-        return new LocalResourceLoader<T>(RootPath, resource, ResolveConverter<T>(), this);
+        return new LocalResourceLoader<T>(RootPath, resource, ResolveConverter<T>());
     }
 
-    protected override AsyncRunner<List<Resource<T>>> CreateLocateRunner<T> (string path)
+    protected override LocateResourcesRunner<T> CreateLocateRunner<T> (string path)
     {
-        return new LocalResourceLocator<T>(RootPath, path, ResolveConverter<T>(), this);
+        return new LocalResourceLocator<T>(RootPath, path, ResolveConverter<T>());
     }
 
     protected override void UnloadResource (Resource resource)
@@ -41,7 +41,7 @@ public class LocalResourceProvider : MonoRunnerResourceProvider
         var resourceType = typeof(T);
         if (!converters.ContainsKey(resourceType))
         {
-            Debug.LogError(string.Format("Converter for resource of type '{0}' is not available.", resourceType.Name));
+            Debug.LogError($"Converter for resource of type '{resourceType.Name}' is not available.");
             return null;
         }
         return converters[resourceType] as IRawConverter<T>;

@@ -1,52 +1,56 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 
 /// <summary>
 /// <see cref="MonoBehaviour"/> based <see cref="IResourceProvider"/> implementation;
 /// using <see cref="AsyncRunner"/>-derived classes for resource loading operations.
 /// </summary>
+[ExecuteInEditMode]
 public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvider
 {
     public event Action<float> OnLoadProgress;
     public event Action<string> OnMessage;
 
-    public bool IsLoading { get { return LoadProgress < 1f; } }
+    public bool IsLoading => LoadProgress < 1f;
     public float LoadProgress { get; private set; }
 
     protected Dictionary<string, Resource> Resources = new Dictionary<string, Resource>();
-    protected Dictionary<string, AsyncAction> Runners = new Dictionary<string, AsyncAction>();
+    protected Dictionary<string, ResourceRunner> Runners = new Dictionary<string, ResourceRunner>();
 
     protected virtual void Awake ()
     {
         LoadProgress = 1f;
     }
 
-    public virtual AsyncAction<Resource<T>> LoadResource<T> (string path) where T : class
+    public virtual async Task<Resource<T>> LoadResourceAsync<T> (string path) where T : class
     {
         if (Runners.ContainsKey(path))
-            return Runners[path] as AsyncAction<Resource<T>>;
+            return await (Runners[path] as LoadResourceRunner<T>);
 
         if (Resources.ContainsKey(path))
-            return AsyncAction<Resource<T>>.CreateCompleted(Resources[path] as Resource<T>);
+            return Resources[path] as Resource<T>;
 
         var resource = new Resource<T>(path);
         Resources.Add(path, resource);
 
         var loadRunner = CreateLoadRunner(resource);
-        loadRunner.OnCompleted += HandleResourceLoaded;
         Runners.Add(path, loadRunner);
         UpdateLoadProgress();
 
         RunLoader(loadRunner);
+        await loadRunner;
 
-        return loadRunner;
+        HandleResourceLoaded(loadRunner.Resource);
+        return loadRunner.Resource;
     }
 
-    public virtual AsyncAction<List<Resource<T>>> LoadResources<T> (string path) where T : class
+    public virtual async Task<List<Resource<T>>> LoadResourcesAsync<T> (string path) where T : class
     {
-        return LocateResources<T>(path).ThenAsync(LoadLocatedResources);
+        var loactedResources = await LocateResourcesAsync<T>(path);
+        return await LoadLocatedResourcesAsync(loactedResources);
     }
 
     public virtual void UnloadResource (string path)
@@ -74,30 +78,31 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
         return Resources.ContainsKey(path);
     }
 
-    public virtual AsyncAction<bool> ResourceExists<T> (string path) where T : class
+    public virtual async Task<bool> ResourceExistsAsync<T> (string path) where T : class
     {
         // TODO: Check for resource type.
-        if (ResourceLoaded(path)) return AsyncAction<bool>.CreateCompleted(true);
+        if (ResourceLoaded(path)) return true;
         var folderPath = path.Contains("/") ? path.GetBeforeLast("/") : string.Empty;
-        return LocateResources<T>(folderPath).ThenAsync(resources =>
-            AsyncAction<bool>.CreateCompleted(resources.Exists(r => r.Path.Equals(path))));
+        var locatedResources = await LocateResourcesAsync<T>(folderPath);
+        return locatedResources.Exists(r => r.Path.Equals(path));
     }
 
-    public virtual AsyncAction<List<Resource<T>>> LocateResources<T> (string path) where T : class
+    public virtual async Task<List<Resource<T>>> LocateResourcesAsync<T> (string path) where T : class
     {
         if (path == null) path = string.Empty;
 
         if (Runners.ContainsKey(path))
-            return Runners[path] as AsyncAction<List<Resource<T>>>;
+            return await (Runners[path] as LocateResourcesRunner<T>);
 
         var locateRunner = CreateLocateRunner<T>(path);
-        locateRunner.OnCompleted += locatedResources => HandleResourcesLocated(locatedResources, path);
         Runners.Add(path, locateRunner);
         UpdateLoadProgress();
 
         RunLocator(locateRunner);
 
-        return locateRunner;
+        await locateRunner;
+        HandleResourcesLocated(locateRunner.LocatedResources, path);
+        return locateRunner.LocatedResources;
     }
 
     public void LogMessage (string message)
@@ -105,16 +110,16 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
         OnMessage.SafeInvoke(message);
     }
 
-    protected abstract AsyncRunner<Resource<T>> CreateLoadRunner<T> (Resource<T> resource) where T : class;
-    protected abstract AsyncRunner<List<Resource<T>>> CreateLocateRunner<T> (string path) where T : class;
+    protected abstract LoadResourceRunner<T> CreateLoadRunner<T> (Resource<T> resource) where T : class;
+    protected abstract LocateResourcesRunner<T> CreateLocateRunner<T> (string path) where T : class;
     protected abstract void UnloadResource (Resource resource);
 
-    protected virtual void RunLoader<T> (AsyncRunner<Resource<T>> loader) where T : class
+    protected virtual void RunLoader<T> (LoadResourceRunner<T> loader) where T : class
     {
         loader.Run();
     }
 
-    protected virtual void RunLocator<T> (AsyncRunner<List<Resource<T>>> locator) where T : class
+    protected virtual void RunLocator<T> (LocateResourcesRunner<T> locator) where T : class
     {
         locator.Run();
     }
@@ -123,8 +128,7 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
     {
         if (!Runners.ContainsKey(path)) return;
 
-        //Runners[path].Stop(); Unity .NET4.6 won't allow AsyncRunner<Resource<T>> cast to AsyncRunner<Resource>; waiting for fix.
-        Runners[path].Reset();
+        Runners[path].Cancel();
         Runners.Remove(path);
 
         UpdateLoadProgress();
@@ -150,14 +154,15 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
         UpdateLoadProgress();
     }
 
-    protected virtual AsyncAction<List<Resource<T>>> LoadLocatedResources<T> (List<Resource<T>> locatedResources) where T : class
+    protected virtual async Task<List<Resource<T>>> LoadLocatedResourcesAsync<T> (List<Resource<T>> locatedResources) where T : class
     {
         // Handle corner case when resources got loaded while locating.
         foreach (var locatedResource in locatedResources)
             if (!Resources.ContainsKey(locatedResource.Path) && locatedResource.IsValid)
                 Resources.Add(locatedResource.Path, locatedResource);
 
-        return new AsyncActionSet<Resource<T>>(locatedResources.Select(r => LoadResource<T>(r.Path)).ToArray());
+        var resources = await Task.WhenAll(locatedResources.Select(r => LoadResourceAsync<T>(r.Path)));
+        return resources?.ToList();
     }
 
     protected virtual void UpdateLoadProgress ()

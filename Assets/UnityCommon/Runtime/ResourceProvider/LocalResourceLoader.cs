@@ -1,19 +1,16 @@
-﻿using System.Collections;
-using System.IO;
+﻿using System.IO;
+using System.Threading.Tasks;
 using UnityEngine;
 
-public class LocalResourceLoader<TResource> : AsyncRunner<Resource<TResource>> where TResource : class
+public class LocalResourceLoader<TResource> : LoadResourceRunner<TResource> where TResource : class
 {
-    public override bool CanBeInstantlyCompleted { get { return false; } }
-    public Resource<TResource> Resource { get { return Result; } private set { Result = value; } }
     public string RootPath { get; private set; }
 
     private IRawConverter<TResource> converter;
     private RawDataRepresentation usedRepresentation;
     private byte[] rawData;
 
-    public LocalResourceLoader (string rootPath, Resource<TResource> resource,
-        IRawConverter<TResource> converter, MonoBehaviour coroutineContainer) : base(coroutineContainer)
+    public LocalResourceLoader (string rootPath, Resource<TResource> resource, IRawConverter<TResource> converter)
     {
         RootPath = rootPath;
         Resource = resource;
@@ -21,28 +18,18 @@ public class LocalResourceLoader<TResource> : AsyncRunner<Resource<TResource>> w
         usedRepresentation = new RawDataRepresentation();
     }
 
-    public override AsyncRunner<Resource<TResource>> Run ()
+    public override async Task Run ()
     {
+        await base.Run();
+
         // Corner case when loading folders.
         if (typeof(TResource) == typeof(Folder))
         {
             (Resource as Resource<Folder>).Object = new Folder(Resource.Path);
             base.HandleOnCompleted();
-            return this;
+            return;
         }
 
-        return base.Run();
-    }
-
-    protected override void HandleOnCompleted ()
-    {
-        Debug.Assert(rawData != null);
-        Resource.Object = converter.Convert(rawData);
-        base.HandleOnCompleted();
-    }
-
-    protected override IEnumerator AsyncRoutine ()
-    {
         var filePath = string.IsNullOrEmpty(RootPath) ? Resource.Path : string.Concat(RootPath, '/', Resource.Path);
         filePath = string.Concat(Application.dataPath, "/", filePath);
 
@@ -50,7 +37,13 @@ public class LocalResourceLoader<TResource> : AsyncRunner<Resource<TResource>> w
         {
             var fullPath = string.Concat(filePath, ".", representation.Extension);
             if (!File.Exists(fullPath)) continue;
-            rawData = File.ReadAllBytes(fullPath);
+
+            using (var fileStream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true))
+            {
+                rawData = new byte[fileStream.Length];
+                await fileStream.ReadAsync(rawData, 0, (int)fileStream.Length);
+            }
+
             usedRepresentation = representation;
             break;
         }
@@ -59,7 +52,12 @@ public class LocalResourceLoader<TResource> : AsyncRunner<Resource<TResource>> w
             Debug.LogError(string.Format("Failed to load {0}.{1} resource using local file system: File not found.", Resource.Path, usedRepresentation.Extension));
 
         HandleOnCompleted();
+    }
 
-        yield break;
+    protected override void HandleOnCompleted ()
+    {
+        Debug.Assert(rawData != null);
+        Resource.Object = converter.Convert(rawData);
+        base.HandleOnCompleted();
     }
 }
