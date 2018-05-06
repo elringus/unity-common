@@ -8,9 +8,20 @@ public class ApplicationBehaviour : MonoBehaviour
 
     private static ApplicationBehaviour CreateSingleton ()
     {
+        if (!Application.isPlaying)
+        {
+            Debug.LogWarning("ApplicationBehaviour doesn't work at edit time.");
+            return null;
+        }
+
         singleton = new GameObject("ApplicationBehaviour").AddComponent<ApplicationBehaviour>();
         singleton.gameObject.hideFlags = HideFlags.DontSave;
         DontDestroyOnLoad(singleton.gameObject);
         return singleton;
+    }
+
+    private void OnDestroy ()
+    {
+        singleton = null;
     }
 }

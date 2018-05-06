@@ -14,3 +14,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/UnityCommon/Scenes/LoadTransition.unity
     guid: dba30cee0edad194bb4651bdaa0446f9
+  - enabled: 1
+    path: Assets/Scenes/ApplicationBehaviour.unity
+    guid: 65520c88853c9a9439ba335af7dc06c3
+  - enabled: 1
+    path: Assets/Scenes/Nullables.unity
+    guid: 9f69bbf98c6d2da45a0985388d6921db
+  m_configObjects: {}
