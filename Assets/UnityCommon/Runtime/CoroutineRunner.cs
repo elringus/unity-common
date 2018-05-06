@@ -111,7 +111,7 @@ public class CoroutineRunner : CustomYieldInstruction
 
     protected virtual void HandleOnCompleted ()
     {
-        completionSource.SetResult(this);
+        completionSource.TrySetResult(this);
         OnCompleted?.Invoke();
     }
 

@@ -11,40 +11,40 @@ public static class AsyncExtensions
     public static TaskAwaiter<AsyncOperation> GetAwaiter (this AsyncOperation asyncOperation)
     {
         var taskCompletionSource = new TaskCompletionSource<AsyncOperation>();
-        if (asyncOperation.isDone) taskCompletionSource.SetResult(asyncOperation);
-        else asyncOperation.completed += op => taskCompletionSource.SetResult(op);
+        if (asyncOperation.isDone) taskCompletionSource.TrySetResult(asyncOperation);
+        else asyncOperation.completed += op => taskCompletionSource.TrySetResult(op);
         return taskCompletionSource.Task.GetAwaiter();
     }
 
     public static TaskAwaiter<UnityWebRequestAsyncOperation> GetAwaiter (this UnityWebRequestAsyncOperation webRequestOperation)
     {
         var taskCompletionSource = new TaskCompletionSource<UnityWebRequestAsyncOperation>();
-        if (webRequestOperation.isDone) taskCompletionSource.SetResult(webRequestOperation);
-        else webRequestOperation.completed += op => taskCompletionSource.SetResult(op as UnityWebRequestAsyncOperation);
+        if (webRequestOperation.isDone) taskCompletionSource.TrySetResult(webRequestOperation);
+        else webRequestOperation.completed += op => taskCompletionSource.TrySetResult(op as UnityWebRequestAsyncOperation);
         return taskCompletionSource.Task.GetAwaiter();
     }
 
     public static TaskAwaiter<ResourceRequest> GetAwaiter (this ResourceRequest resourceRequest)
     {
         var taskCompletionSource = new TaskCompletionSource<ResourceRequest>();
-        if (resourceRequest.isDone) taskCompletionSource.SetResult(resourceRequest);
-        else resourceRequest.completed += op => taskCompletionSource.SetResult(op as ResourceRequest);
+        if (resourceRequest.isDone) taskCompletionSource.TrySetResult(resourceRequest);
+        else resourceRequest.completed += op => taskCompletionSource.TrySetResult(op as ResourceRequest);
         return taskCompletionSource.Task.GetAwaiter();
     }
 
     public static TaskAwaiter<AssetBundleCreateRequest> GetAwaiter (this AssetBundleCreateRequest createBundleRequest)
     {
         var taskCompletionSource = new TaskCompletionSource<AssetBundleCreateRequest>();
-        if (createBundleRequest.isDone) taskCompletionSource.SetResult(createBundleRequest);
-        else createBundleRequest.completed += op => taskCompletionSource.SetResult(op as AssetBundleCreateRequest);
+        if (createBundleRequest.isDone) taskCompletionSource.TrySetResult(createBundleRequest);
+        else createBundleRequest.completed += op => taskCompletionSource.TrySetResult(op as AssetBundleCreateRequest);
         return taskCompletionSource.Task.GetAwaiter();
     }
 
     public static TaskAwaiter<AssetBundleRequest> GetAwaiter (this AssetBundleRequest bundleRequest)
     {
         var taskCompletionSource = new TaskCompletionSource<AssetBundleRequest>();
-        if (bundleRequest.isDone) taskCompletionSource.SetResult(bundleRequest);
-        else bundleRequest.completed += op => taskCompletionSource.SetResult(op as AssetBundleRequest);
+        if (bundleRequest.isDone) taskCompletionSource.TrySetResult(bundleRequest);
+        else bundleRequest.completed += op => taskCompletionSource.TrySetResult(op as AssetBundleRequest);
         return taskCompletionSource.Task.GetAwaiter();
     }
 

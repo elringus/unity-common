@@ -21,7 +21,7 @@ public abstract class ResourceRunner
     public virtual void Cancel ()
     {
         State = RunnerState.Canceled;
-        completionSource.SetCanceled();
+        completionSource.TrySetCanceled();
     }
 
     public TaskAwaiter GetAwaiter () => (completionSource.Task as Task).GetAwaiter();
@@ -29,7 +29,7 @@ public abstract class ResourceRunner
     protected virtual void HandleOnCompleted ()
     {
         State = RunnerState.Completed;
-        completionSource.SetResult(null);
+        completionSource.TrySetResult(null);
     }
 }
 
@@ -46,13 +46,13 @@ public class LoadResourceRunner<TResource> : ResourceRunner<TResource> where TRe
     public override void Cancel ()
     {
         base.Cancel();
-        completionSource.SetCanceled();
+        completionSource.TrySetCanceled();
     }
 
     protected override void HandleOnCompleted ()
     {
         base.HandleOnCompleted();
-        completionSource.SetResult(Resource);
+        completionSource.TrySetResult(Resource);
     }
 }
 
@@ -67,12 +67,12 @@ public class LocateResourcesRunner<TResource> : ResourceRunner<TResource> where 
     public override void Cancel ()
     {
         base.Cancel();
-        completionSource.SetCanceled();
+        completionSource.TrySetCanceled();
     }
 
     protected override void HandleOnCompleted ()
     {
         base.HandleOnCompleted();
-        completionSource.SetResult(LocatedResources);
+        completionSource.TrySetResult(LocatedResources);
     }
 }
