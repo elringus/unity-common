@@ -17,7 +17,7 @@ public class CoroutineRunner : CustomYieldInstruction
     /// <summary>
     /// Whether the coroutine has completed execution.
     /// </summary>
-    public virtual bool IsCompleted { get; protected set; }
+    public virtual bool IsCompleted => CompletionTask.IsCompleted;
     /// <summary>
     /// Whether the coroutine is currently running.
     /// </summary>
@@ -51,8 +51,6 @@ public class CoroutineRunner : CustomYieldInstruction
     {
         if (IsRunning) Reset();
 
-        IsCompleted = false;
-
         if (!coroutineContainer || !coroutineContainer.gameObject || !coroutineContainer.gameObject.activeInHierarchy)
         {
             HandleOnCompleted();
@@ -75,7 +73,7 @@ public class CoroutineRunner : CustomYieldInstruction
     public virtual new void Reset ()
     {
         Stop();
-        IsCompleted = false;
+        completionSource = new TaskCompletionSource<CoroutineRunner>();
         base.Reset();
     }
 
@@ -86,8 +84,7 @@ public class CoroutineRunner : CustomYieldInstruction
     {
         if (!IsRunning) return;
 
-        if (coroutineContainer)
-            coroutineContainer.StopCoroutine(coroutine);
+        coroutineContainer?.StopCoroutine(coroutine);
         coroutine = null;
     }
 
@@ -114,7 +111,6 @@ public class CoroutineRunner : CustomYieldInstruction
 
     protected virtual void HandleOnCompleted ()
     {
-        IsCompleted = true;
         completionSource.SetResult(this);
         OnCompleted?.Invoke();
     }
