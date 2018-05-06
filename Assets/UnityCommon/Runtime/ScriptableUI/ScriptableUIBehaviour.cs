@@ -84,19 +84,19 @@ public class ScriptableUIBehaviour : UIBehaviour
         canvasGroup.alpha = isVisible ? 1f : 0f;
     }
 
-    public virtual void ToggleVisibility (float? fadeTime = null)
+    public virtual void ToggleVisibility ()
     {
-        SetIsVisibleAsync(!IsVisible, fadeTime).WrapAsync();
+        SetIsVisibleAsync(!IsVisible).WrapAsync();
     }
 
-    public virtual void Show (float? fadeTime = null)
+    public virtual void Show ()
     {
-        SetIsVisibleAsync(true, fadeTime).WrapAsync();
+        SetIsVisibleAsync(true).WrapAsync();
     }
 
-    public virtual void Hide (float? fadeTime = null)
+    public virtual void Hide ()
     {
-        SetIsVisibleAsync(false, fadeTime).WrapAsync();
+        SetIsVisibleAsync(false).WrapAsync();
     }
 
     public virtual float GetCurrentOpacity ()
