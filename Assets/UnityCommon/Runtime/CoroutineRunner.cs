@@ -21,21 +21,24 @@ public class CoroutineRunner : CustomYieldInstruction
     /// <summary>
     /// Whether the coroutine is currently running.
     /// </summary>
-    public virtual bool IsRunning { get { return coroutine != null; } }
+    public virtual bool IsRunning => coroutine != null;
     /// <summary>
     /// Whether the coroutine can instantly complete execution and use <see cref="CompleteInstantly"/>.
     /// </summary>
-    public virtual bool CanBeInstantlyCompleted { get { return true; } }
-    public override bool keepWaiting { get { return !IsCompleted; } }
+    public virtual bool CanBeInstantlyCompleted => true;
+    public override bool keepWaiting => !IsCompleted;
 
     protected YieldInstruction YieldInstruction { get; set; }
     protected int CoroutineTickCount { get; private set; }
+    protected Task CompletionTask => completionSource.Task;
 
+    private TaskCompletionSource<CoroutineRunner> completionSource;
     private MonoBehaviour coroutineContainer;
     private IEnumerator coroutine;
 
     public CoroutineRunner (MonoBehaviour coroutineContainer = null, YieldInstruction yieldInstruction = null)
     {
+        completionSource = new TaskCompletionSource<CoroutineRunner>();
         this.coroutineContainer = coroutineContainer ?? ApplicationBehaviour.Singleton;
         YieldInstruction = yieldInstruction;
     }
@@ -60,17 +63,10 @@ public class CoroutineRunner : CustomYieldInstruction
         coroutineContainer.StartCoroutine(coroutine);
     }
 
-    /// <summary>
-    /// Starts the coroutine execution using async model. 
-    /// If the coroutine is already running will <see cref="Reset"/> before running.
-    /// </summary>
     public virtual async Task RunAsync ()
     {
         Run();
-        var taskCompletionSource = new TaskCompletionSource<object>();
-        if (IsCompleted) taskCompletionSource.SetResult(null);
-        else OnCompleted += () => taskCompletionSource.SetResult(null);
-        await taskCompletionSource.Task;
+        await CompletionTask;
     }
 
     /// <summary>
@@ -114,17 +110,12 @@ public class CoroutineRunner : CustomYieldInstruction
         OnCompleted = null;
     }
 
-    public TaskAwaiter GetAwaiter ()
-    {
-        var taskCompletionSource = new TaskCompletionSource<object>();
-        if (IsCompleted) taskCompletionSource.SetResult(null);
-        else OnCompleted += () => taskCompletionSource.SetResult(null);
-        return (taskCompletionSource.Task as Task).GetAwaiter();
-    }
+    public TaskAwaiter<CoroutineRunner> GetAwaiter () => completionSource.Task.GetAwaiter();
 
     protected virtual void HandleOnCompleted ()
     {
         IsCompleted = true;
+        completionSource.SetResult(this);
         OnCompleted?.Invoke();
     }
 

@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Threading.Tasks;
 using UnityEngine;
 
 public class Timer : CoroutineRunner
 {
     public event Action OnLoop;
 
-    public override bool CanBeInstantlyCompleted { get { return true; } }
+    public override bool CanBeInstantlyCompleted => true;
     public bool Loop { get; private set; }
     public bool IsTimeScaleIgnored { get; private set; }
     public float Duration { get; private set; }
@@ -31,15 +30,6 @@ public class Timer : CoroutineRunner
         IsTimeScaleIgnored = ignoreTimeScale;
 
         base.Run();
-    }
-
-    public async Task RunAsync (float duration, bool loop = false, bool ignoreTimeScale = false)
-    {
-        Run(duration, loop, ignoreTimeScale);
-        var taskCompletionSource = new TaskCompletionSource<object>();
-        if (IsCompleted) taskCompletionSource.SetResult(null);
-        else OnCompleted += () => taskCompletionSource.SetResult(null);
-        await taskCompletionSource.Task;
     }
 
     public override void Run () => Run(Duration, Loop, IsTimeScaleIgnored);

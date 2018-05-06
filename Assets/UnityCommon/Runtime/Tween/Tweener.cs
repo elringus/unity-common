@@ -7,6 +7,8 @@ using UnityEngine;
 /// </summary>
 public class Tweener<TTweenValue> : CoroutineRunner where TTweenValue : struct, ITweenValue
 {
+    public override bool CanBeInstantlyCompleted => true;
+
     public TTweenValue TweenValue { get; private set; }
 
     private float elapsedTime;
@@ -23,21 +25,6 @@ public class Tweener<TTweenValue> : CoroutineRunner where TTweenValue : struct, 
         TweenValue = tweenValue;
     }
 
-    public void Run (TTweenValue tweenValue)
-    {
-        TweenValue = tweenValue;
-        Run();
-    }
-
-    public async Task RunAsync (TTweenValue tweenValue)
-    {
-        Run(tweenValue);
-        var taskCompletionSource = new TaskCompletionSource<object>();
-        if (IsCompleted) taskCompletionSource.SetResult(null);
-        else OnCompleted += () => taskCompletionSource.SetResult(null);
-        await taskCompletionSource.Task;
-    }
-
     public override void Run ()
     {
         elapsedTime = 0f;
@@ -49,6 +36,18 @@ public class Tweener<TTweenValue> : CoroutineRunner where TTweenValue : struct, 
         }
 
         base.Run();
+    }
+
+    public void Run (TTweenValue tweenValue)
+    {
+        TweenValue = tweenValue;
+        Run();
+    }
+
+    public async Task RunAsync (TTweenValue tweenValue)
+    {
+        Run(tweenValue);
+        await CompletionTask;
     }
 
     protected override bool LoopCondition ()
