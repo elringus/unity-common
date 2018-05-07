@@ -58,7 +58,7 @@ public class LoadResourceRunner<TResource> : ResourceRunner<TResource> where TRe
 
 public class LocateResourcesRunner<TResource> : ResourceRunner<TResource> where TResource : class
 {
-    public List<Resource<TResource>> LocatedResources { get; protected set; }
+    public List<Resource<TResource>> LocatedResources { get; protected set; } = new List<Resource<TResource>>();
 
     private TaskCompletionSource<List<Resource<TResource>>> completionSource = new TaskCompletionSource<List<Resource<TResource>>>();
 
