@@ -45,11 +45,11 @@ public class CoroutineRunner : CustomYieldInstruction
 
     /// <summary>
     /// Starts the coroutine execution. 
-    /// If the coroutine is already running will <see cref="Reset"/> before running.
+    /// If the coroutine is already running or completed will <see cref="Reset"/> before running.
     /// </summary>
     public virtual void Run ()
     {
-        if (IsRunning) Reset();
+        if (IsRunning || IsCompleted) Reset();
 
         if (!coroutineContainer || !coroutineContainer.gameObject || !coroutineContainer.gameObject.activeInHierarchy)
         {
