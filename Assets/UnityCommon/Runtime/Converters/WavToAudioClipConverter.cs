@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using UnityEngine;
 
 /// <summary>
@@ -11,18 +12,17 @@ public class WavToAudioClipConverter : IRawConverter<AudioClip>
         new RawDataRepresentation("wav", "audio/wav")
     }; } }
 
-    public AudioClip Convert (byte[] obj)
+    public async Task<AudioClip> ConvertAsync (byte[] obj)
     {
-        var floatArr = Pcm16ToFloatArray(obj);
+        var floatArr = await Task.Run(() => Pcm16ToFloatArray(obj));
+
         var audioClip = AudioClip.Create("Generated WAV Audio", floatArr.Length / 2, 2, 44100, false);
         audioClip.SetData(floatArr, 0);
+
         return audioClip;
     }
 
-    public object Convert (object obj)
-    {
-        return Convert(obj as byte[]);
-    }
+    public async Task<object> ConvertAsync (object obj) => await ConvertAsync(obj as byte[]);
 
     private static float[] Pcm16ToFloatArray (byte[] input)
     {
@@ -37,6 +37,7 @@ public class WavToAudioClipConverter : IRawConverter<AudioClip>
             short sample = BitConverter.ToInt16(input, n * 2);
             output[outputIndex++] = sample / 32768f;
         }
+
         return output;
     }
 }

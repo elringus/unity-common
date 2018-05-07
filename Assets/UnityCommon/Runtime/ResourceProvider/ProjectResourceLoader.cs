@@ -26,12 +26,7 @@ public class ProjectResourceLoader<TResource> : LoadResourceRunner<TResource> wh
 
         var resourceType = redirector != null ? redirector.RedirectType : typeof(TResource);
         resourceRequest = await Resources.LoadAsync(Resource.Path, resourceType);
+        Resource.Object = redirector != null ? await redirector.ToSourceAsync<TResource>(resourceRequest.asset) : resourceRequest.asset as TResource;
         HandleOnCompleted();
-    }
-
-    protected override void HandleOnCompleted ()
-    {
-        Resource.Object = redirector != null ? redirector.ToSource<TResource>(resourceRequest.asset) : resourceRequest.asset as TResource;
-        base.HandleOnCompleted();
     }
 }

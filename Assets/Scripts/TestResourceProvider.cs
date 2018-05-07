@@ -30,8 +30,9 @@ public class TestResourceProvider : MonoBehaviour
         //await ResolveTextByPathAsync();
         //await ResolveFoldersAsync();
         //await TestResourceExistsAsync();
-        await TestAudioAsync();
+        //await TestAudioAsync();
         //await TestUnloadAsync();
+        await TestTextureResources();
     }
 
     private void OnGUI ()
@@ -79,6 +80,7 @@ public class TestResourceProvider : MonoBehaviour
         provider.ConcurrentRequestsLimit = 2;
         provider.PurgeCacheOnStart = false;
         provider.AddConverter(new JpgOrPngToSpriteConverter());
+        provider.AddConverter(new JpgOrPngToTextureConverter());
         provider.AddConverter(new GDocToStringConverter());
         provider.AddConverter(new GFolderToFolderConverter());
         //provider.AddConverter(new WavToAudioClipConverter());
@@ -97,9 +99,10 @@ public class TestResourceProvider : MonoBehaviour
         provider.RootPath = "Resources";
         provider.AddConverter(new DirectoryToFolderConverter());
         provider.AddConverter(new JpgOrPngToSpriteConverter());
+        provider.AddConverter(new JpgOrPngToTextureConverter());
         provider.AddConverter(new TxtToStringConverter());
-        provider.AddConverter(new WavToAudioClipConverter());
-        //provider.AddConverter(new Mp3ToAudioClipConverter());
+        //provider.AddConverter(new WavToAudioClipConverter());
+        provider.AddConverter(new Mp3ToAudioClipConverter());
 
         return provider;
     }
@@ -198,6 +201,19 @@ public class TestResourceProvider : MonoBehaviour
         foreach (var res in RESOURCES)
         {
             SpriteRenderer.sprite = (await provider.LoadResourceAsync<Sprite>(res)).Object;
+            await Task.Delay(TimeSpan.FromSeconds(.5f));
+        }
+    }
+
+    private async Task TestTextureResources ()
+    {
+        foreach (var res in RESOURCES)
+            await provider.LoadResourceAsync<Texture2D>(res);
+
+        foreach (var res in RESOURCES)
+        {
+            var texture = (await provider.LoadResourceAsync<Texture2D>(res)).Object;
+            SpriteRenderer.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.one * .5f);
             await Task.Delay(TimeSpan.FromSeconds(.5f));
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Threading.Tasks;
 
 public class GDocToStringConverter : IGoogleDriveConverter<string>
 {
@@ -8,13 +9,7 @@ public class GDocToStringConverter : IGoogleDriveConverter<string>
 
     public string ExportMimeType { get { return "text/plain"; } }
 
-    public string Convert (byte[] obj)
-    {
-        return Encoding.UTF8.GetString(obj);
-    }
+    public Task<string> ConvertAsync (byte[] obj) => Task.FromResult(Encoding.UTF8.GetString(obj));
 
-    public object Convert (object obj)
-    {
-        return Convert(obj as byte[]);
-    }
+    public async Task<object> ConvertAsync (object obj) => await ConvertAsync(obj as byte[]);
 }

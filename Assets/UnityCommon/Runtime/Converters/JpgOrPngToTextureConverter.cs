@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Threading.Tasks;
+using UnityEngine;
 
 /// <summary>
 /// Converts <see cref="byte[]"/> raw data of a .png or .jpg image to <see cref="Texture2D"/>.
@@ -10,15 +11,13 @@ public class JpgOrPngToTextureConverter : IRawConverter<Texture2D>
         new RawDataRepresentation("jpg", "image/jpeg")
     }; } }
 
-    public Texture2D Convert (byte[] obj)
+    public Task<Texture2D> ConvertAsync (byte[] obj)
     {
+        Debug.Log("JpgOrPngToTextureConverter");
         var texture = new Texture2D(2, 2);
         texture.LoadImage(obj, true);
-        return texture;
+        return Task.FromResult(texture);
     }
 
-    public object Convert (object obj)
-    {
-        return Convert(obj as byte[]);
-    }
+    public async Task<object> ConvertAsync (object obj) => await ConvertAsync(obj as byte[]);
 }

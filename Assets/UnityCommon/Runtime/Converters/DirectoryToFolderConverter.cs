@@ -1,17 +1,15 @@
-﻿using UnityEngine;
+﻿using System.Threading.Tasks;
+using UnityEngine;
 
 public class DirectoryToFolderConverter : IRawConverter<Folder>
 {
     public RawDataRepresentation[] Representations { get { return null; } }
 
-    public Folder Convert (byte[] obj)
+    public Task<Folder> ConvertAsync (byte[] obj)
     {
         Debug.LogError("Directory doesn't have binary content and can't be converted.");
-        return null;
+        return Task.FromResult(default(Folder));
     }
 
-    public object Convert (object obj)
-    {
-        return Convert(obj as byte[]);
-    }
+    public async Task<object> ConvertAsync (object obj) => await ConvertAsync(obj as byte[]);
 }

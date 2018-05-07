@@ -32,8 +32,14 @@ public class ProjectResourceLocator<TResource> : LocateResourcesRunner<TResource
         // TODO: Make this async (if possible, LoadAllAsync doesn't exist).
         var redirectType = redirector != null ? redirector.RedirectType : typeof(TResource);
         var objects = Resources.LoadAll(ResourcesPath, redirectType);
-        LocatedResources = objects.Select(r => new Resource<TResource>(string.Concat(ResourcesPath, "/", r.name),
-            redirector != null ? redirector.ToSource<TResource>(r) : r as TResource)).ToList();
+
+        foreach (var obj in objects)
+        {
+            var path = string.Concat(ResourcesPath, "/", obj.name);
+            var cObj = redirector != null ? await redirector.ToSourceAsync<TResource>(obj) : obj as TResource;
+            var resource = new Resource<TResource>(path, cObj);
+            LocatedResources.Add(resource);
+        }
 
         HandleOnCompleted();
     }

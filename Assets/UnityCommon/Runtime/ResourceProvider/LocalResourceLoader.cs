@@ -26,7 +26,7 @@ public class LocalResourceLoader<TResource> : LoadResourceRunner<TResource> wher
         if (typeof(TResource) == typeof(Folder))
         {
             (Resource as Resource<Folder>).Object = new Folder(Resource.Path);
-            base.HandleOnCompleted();
+            HandleOnCompleted();
             return;
         }
 
@@ -48,16 +48,9 @@ public class LocalResourceLoader<TResource> : LoadResourceRunner<TResource> wher
             break;
         }
 
-        if (rawData == null)
-            Debug.LogError(string.Format("Failed to load {0}.{1} resource using local file system: File not found.", Resource.Path, usedRepresentation.Extension));
+        if (rawData == null) Debug.LogError(string.Format("Failed to load {0}.{1} resource using local file system: File not found.", Resource.Path, usedRepresentation.Extension));
+        else Resource.Object = await converter.ConvertAsync(rawData);
 
         HandleOnCompleted();
-    }
-
-    protected override void HandleOnCompleted ()
-    {
-        Debug.Assert(rawData != null);
-        Resource.Object = converter.Convert(rawData);
-        base.HandleOnCompleted();
     }
 }

@@ -1,14 +1,9 @@
-﻿using UnityEngine;
+﻿using System.Threading.Tasks;
+using UnityEngine;
 
 public class TextAssetToStringConverter : IConverter<TextAsset, string>
 {
-    public string Convert (TextAsset textAsset)
-    {
-        return textAsset.text;
-    }
+    public Task<string> ConvertAsync (TextAsset textAsset) => Task.FromResult(textAsset.text);
 
-    public object Convert (object obj)
-    {
-        return Convert(obj as TextAsset);
-    }
+    public async Task<object> ConvertAsync (object obj) => await ConvertAsync(obj as TextAsset);
 }

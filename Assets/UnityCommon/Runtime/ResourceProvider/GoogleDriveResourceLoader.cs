@@ -28,7 +28,7 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
         // MP3 is not supported in native requests on the standalone platforms. Fallback to raw converters.
         #if UNITY_STANDALONE || UNITY_EDITOR
         foreach (var r in converter.Representations)
-            if (EvaluateAudioTypeFromMime(r.MimeType) == AudioType.MPEG) useNativeRequests = false;
+            if (WebUtils.EvaluateAudioTypeFromMime(r.MimeType) == AudioType.MPEG) useNativeRequests = false;
         #endif
 
         this.converter = converter;
@@ -43,7 +43,7 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
         if (typeof(TResource) == typeof(Folder))
         {
             (Resource as Resource<Folder>).Object = new Folder(Resource.Path);
-            base.HandleOnCompleted();
+            HandleOnCompleted();
             return;
         }
 
@@ -56,7 +56,7 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
             // 3. Load file metadata from Google Drive.
             var filePath = string.IsNullOrEmpty(RootPath) ? Resource.Path : string.Concat(RootPath, '/', Resource.Path);
             var fileMeta = await GetFileMetaAsync(filePath);
-            if (fileMeta == null) { HandleOnCompleted(); return; }
+            if (fileMeta == null) { Debug.LogError($"Failed to resovle '{filePath}' google drive metadata."); HandleOnCompleted(); return; }
 
             if (converter is IGoogleDriveConverter<TResource>) rawData = await ExportFileAsync(fileMeta);
             else rawData = await DownloadFileAsync(fileMeta);
@@ -64,6 +64,9 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
             // 4. Cache the downloaded file.
             await WriteFileCacheAsync(Resource.Path, rawData);
         }
+
+        // In case we used native requests the resource will already be set, so no need to use converters.
+        if (!Resource.IsValid) Resource.Object = await converter.ConvertAsync(rawData);
 
         HandleOnCompleted();
     }
@@ -87,12 +90,6 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
 
     protected override void HandleOnCompleted ()
     {
-        if (!Resource.IsValid)
-        {
-            Debug.Assert(rawData != null);
-            Resource.Object = converter.Convert(rawData);
-        }
-
         if (downloadRequest != null) downloadRequest.Dispose();
         if (listRequest != null) listRequest.Dispose();
 
@@ -223,7 +220,7 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
             }
 
             UnityWebRequest request = null;
-            if (typeof(TResource) == typeof(AudioClip)) request = UnityWebRequestMultimedia.GetAudioClip(filePath, EvaluateAudioTypeFromMime(converter.Representations[0].MimeType));
+            if (typeof(TResource) == typeof(AudioClip)) request = UnityWebRequestMultimedia.GetAudioClip(filePath, WebUtils.EvaluateAudioTypeFromMime(converter.Representations[0].MimeType));
             else if (typeof(TResource) == typeof(Texture2D)) request = UnityWebRequestTexture.GetTexture(filePath, true);
             using (request)
             {
@@ -265,18 +262,5 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
     private bool IsResultFound (GoogleDriveFiles.ListRequest request)
     {
         return listRequest != null && !listRequest.IsError && listRequest.ResponseData.Files != null && listRequest.ResponseData.Files.Count > 0;
-    }
-
-    private AudioType EvaluateAudioTypeFromMime (string mimeType)
-    {
-        switch (mimeType)
-        {
-            case "audio/aiff": return AudioType.AIFF; 
-            case "audio/mpeg": return AudioType.MPEG; 
-            case "audio/ogg": return AudioType.OGGVORBIS; 
-            case "video/ogg": return AudioType.OGGVORBIS; 
-            case "audio/wav": return AudioType.WAV;
-            default: return AudioType.UNKNOWN;
-        }
     }
 }

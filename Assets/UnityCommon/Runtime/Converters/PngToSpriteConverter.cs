@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Threading.Tasks;
+using UnityEngine;
 
 /// <summary>
 /// Converts <see cref="byte[]"/> raw data of a .png image to <see cref="Sprite"/>.
@@ -9,16 +10,14 @@ public class PngToSpriteConverter : IRawConverter<Sprite>
         new RawDataRepresentation("png", "image/png")
     }; } }
 
-    public Sprite Convert (byte[] obj)
+    public Task<Sprite> ConvertAsync (byte[] obj)
     {
         var texture = new Texture2D(2, 2);
         texture.LoadImage(obj, true);
         var rect = new Rect(0, 0, texture.width, texture.height);
-        return Sprite.Create(texture, rect, Vector2.one * .5f);
+        var sprite = Sprite.Create(texture, rect, Vector2.one * .5f);
+        return Task.FromResult(sprite);
     }
 
-    public object Convert (object obj)
-    {
-        return Convert(obj as byte[]);
-    }
+    public async Task<object> ConvertAsync (object obj) => await ConvertAsync(obj as byte[]);
 }

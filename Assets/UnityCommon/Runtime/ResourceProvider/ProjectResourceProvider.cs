@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 /// <summary>
 /// Provides resources stored in the 'Resources' folders of the project.
@@ -19,9 +20,9 @@ public class ProjectResourceProvider : MonoRunnerResourceProvider
             RedirectToSourceConverter = redirectToSourceConverter;
         }
 
-        public TSource ToSource<TSource> (object obj) where TSource : class
+        public async Task<TSource> ToSourceAsync<TSource> (object obj) where TSource : class
         {
-            return RedirectToSourceConverter.Convert(obj) as TSource;
+            return (await RedirectToSourceConverter.ConvertAsync(obj)) as TSource;
         }
     }
 
