@@ -80,6 +80,7 @@ public class SaveSlotManager<TData> : SaveSlotManager where TData : new()
 
     public override bool AnySaveExists ()
     {
+        if (!Directory.Exists(SaveDataPath)) return false;
         return Directory.GetFiles(SaveDataPath, "*.json", SearchOption.TopDirectoryOnly).Length > 0;
     }
 
