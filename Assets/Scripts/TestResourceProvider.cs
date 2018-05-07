@@ -19,15 +19,15 @@ public class TestResourceProvider : MonoBehaviour
 
     private void Awake ()
     {
-        provider = InitializeProjectResourceProvider();
+        //provider = InitializeProjectResourceProvider();
         //provider = InitializeGoogleDriveResourceProvider();
-        //provider = InitializeLocalResourceProvider();
+        provider = InitializeLocalResourceProvider();
     }
 
     private async void Start ()
     {
-        //await ResolveByFullPathAsync();
-        await ResolveTextByPathAsync();
+        await ResolveByFullPathAsync();
+        //await ResolveTextByPathAsync();
         //await ResolveFoldersAsync();
         //await TestResourceExistsAsync();
         //await TestAudioAsync();

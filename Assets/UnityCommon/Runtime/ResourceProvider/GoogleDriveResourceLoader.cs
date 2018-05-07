@@ -128,6 +128,7 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
         var usedRepresentation = new RawDataRepresentation();
         foreach (var representation in converter.Representations)
         {
+            usedRepresentation = representation;
             listRequest = new GoogleDriveFiles.ListRequest();
             listRequest.Fields = new List<string> { "files(id, modifiedTime, mimeType)" };
             var fullName = string.IsNullOrEmpty(representation.Extension) ? fileName : string.Concat(fileName, ".", representation.Extension);
@@ -135,11 +136,7 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
 
             await listRequest.Send();
 
-            if (IsResultFound(listRequest))
-            {
-                usedRepresentation = representation;
-                break;
-            }
+            if (IsResultFound(listRequest)) break;
         }
 
         if (!IsResultFound(listRequest))

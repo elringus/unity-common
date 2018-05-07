@@ -35,6 +35,7 @@ public class LocalResourceLoader<TResource> : LoadResourceRunner<TResource> wher
 
         foreach (var representation in converter.Representations)
         {
+            usedRepresentation = representation;
             var fullPath = string.Concat(filePath, ".", representation.Extension);
             if (!File.Exists(fullPath)) continue;
 
@@ -44,7 +45,6 @@ public class LocalResourceLoader<TResource> : LoadResourceRunner<TResource> wher
                 await fileStream.ReadAsync(rawData, 0, (int)fileStream.Length);
             }
 
-            usedRepresentation = representation;
             break;
         }
 
