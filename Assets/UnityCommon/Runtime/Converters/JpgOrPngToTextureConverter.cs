@@ -13,7 +13,6 @@ public class JpgOrPngToTextureConverter : IRawConverter<Texture2D>
 
     public Task<Texture2D> ConvertAsync (byte[] obj)
     {
-        Debug.Log("JpgOrPngToTextureConverter");
         var texture = new Texture2D(2, 2);
         texture.LoadImage(obj, true);
         return Task.FromResult(texture);
