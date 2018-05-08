@@ -1,20 +1,26 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class ProjectResourceLoader<TResource> : LoadResourceRunner<TResource> where TResource : class
 {
+    private Action<string> logAction;
     private ResourceRequest resourceRequest;
     private ProjectResourceProvider.TypeRedirector redirector;
 
-    public ProjectResourceLoader (Resource<TResource> resource, ProjectResourceProvider.TypeRedirector redirector = null)
+    public ProjectResourceLoader (Resource<TResource> resource, 
+        ProjectResourceProvider.TypeRedirector redirector = null, Action<string> logAction = null)
     {
         Resource = resource;
         this.redirector = redirector;
+        this.logAction = logAction;
     }
 
     public override async Task Run ()
     {
-        await base.Run(); 
+        await base.Run();
+
+        var startTime = Time.time;
 
         // Corner case when loading folders.
         if (typeof(TResource) == typeof(Folder))
@@ -27,6 +33,9 @@ public class ProjectResourceLoader<TResource> : LoadResourceRunner<TResource> wh
         var resourceType = redirector != null ? redirector.RedirectType : typeof(TResource);
         resourceRequest = await Resources.LoadAsync(Resource.Path, resourceType);
         Resource.Object = redirector != null ? await redirector.ToSourceAsync<TResource>(resourceRequest.asset) : resourceRequest.asset as TResource;
+
+        logAction?.Invoke($"Resource '{Resource.Path}' loaded over {Time.time - startTime:0.###} seconds.");
+
         HandleOnCompleted();
     }
 }

@@ -22,7 +22,7 @@ public class LocalResourceProvider : MonoRunnerResourceProvider
 
     protected override LoadResourceRunner<T> CreateLoadRunner<T> (Resource<T> resource)
     {
-        return new LocalResourceLoader<T>(RootPath, resource, ResolveConverter<T>());
+        return new LocalResourceLoader<T>(RootPath, resource, ResolveConverter<T>(), LogMessage);
     }
 
     protected override LocateResourcesRunner<T> CreateLocateRunner<T> (string path)

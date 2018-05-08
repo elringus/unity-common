@@ -47,7 +47,7 @@ public class ProjectResourceProvider : MonoRunnerResourceProvider
 
     protected override LoadResourceRunner<T> CreateLoadRunner<T> (Resource<T> resource)
     {
-        return new ProjectResourceLoader<T>(resource, redirectors.ContainsKey(typeof(T)) ? redirectors[typeof(T)] : null);
+        return new ProjectResourceLoader<T>(resource, redirectors.ContainsKey(typeof(T)) ? redirectors[typeof(T)] : null, LogMessage);
     }
 
     protected override LocateResourcesRunner<T> CreateLocateRunner<T> (string path)

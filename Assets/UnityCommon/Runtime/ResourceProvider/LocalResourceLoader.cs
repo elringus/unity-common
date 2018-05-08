@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -6,14 +7,17 @@ public class LocalResourceLoader<TResource> : LoadResourceRunner<TResource> wher
 {
     public string RootPath { get; private set; }
 
+    private Action<string> logAction;
     private IRawConverter<TResource> converter;
     private RawDataRepresentation usedRepresentation;
     private byte[] rawData;
 
-    public LocalResourceLoader (string rootPath, Resource<TResource> resource, IRawConverter<TResource> converter)
+    public LocalResourceLoader (string rootPath, Resource<TResource> resource, 
+        IRawConverter<TResource> converter, Action<string> logAction = null)
     {
         RootPath = rootPath;
         Resource = resource;
+        this.logAction = logAction;
         this.converter = converter;
         usedRepresentation = new RawDataRepresentation();
     }
@@ -21,6 +25,8 @@ public class LocalResourceLoader<TResource> : LoadResourceRunner<TResource> wher
     public override async Task Run ()
     {
         await base.Run();
+
+        var startTime = Time.time;
 
         // Corner case when loading folders.
         if (typeof(TResource) == typeof(Folder))
@@ -50,6 +56,8 @@ public class LocalResourceLoader<TResource> : LoadResourceRunner<TResource> wher
 
         if (rawData == null) Debug.LogError(string.Format("Failed to load {0}.{1} resource using local file system: File not found.", Resource.Path, usedRepresentation.Extension));
         else Resource.Object = await converter.ConvertAsync(rawData);
+
+        logAction?.Invoke($"Resource '{Resource.Path}' loaded {(rawData.Length / 1024f) / 1024f:0.###}MB over {Time.time - startTime:0.###} seconds.");
 
         HandleOnCompleted();
     }

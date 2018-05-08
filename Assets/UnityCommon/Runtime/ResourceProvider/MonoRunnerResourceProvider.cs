@@ -141,8 +141,6 @@ public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvi
         if (Runners.ContainsKey(resource.Path)) Runners.Remove(resource.Path);
         else Debug.LogWarning(string.Format("Load runner for resource '{0}' not found.", resource.Path));
 
-        LogMessage(string.Format("Resource '{0}' finished loading.", resource.Path));
-
         UpdateLoadProgress();
     }
 

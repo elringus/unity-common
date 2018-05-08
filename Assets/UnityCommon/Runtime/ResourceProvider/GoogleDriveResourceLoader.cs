@@ -13,17 +13,20 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
     private readonly List<Type> NATIVE_REQUEST_TYPES = new List<Type> { typeof(AudioClip), typeof(Texture2D) };
 
     private bool useNativeRequests;
+    private Action<string> logAction;
     private GoogleDriveRequest downloadRequest;
     private GoogleDriveFiles.ListRequest listRequest;
     private IRawConverter<TResource> converter;
     private RawDataRepresentation usedRepresentation;
     private byte[] rawData;
 
-    public GoogleDriveResourceLoader (string rootPath, Resource<TResource> resource, IRawConverter<TResource> converter)
+    public GoogleDriveResourceLoader (string rootPath, Resource<TResource> resource, 
+        IRawConverter<TResource> converter, Action<string> logAction = null)
     {
         RootPath = rootPath;
         Resource = resource;
         useNativeRequests = NATIVE_REQUEST_TYPES.Contains(typeof(TResource));
+        this.logAction = logAction;
 
         // MP3 is not supported in native requests on the standalone platforms. Fallback to raw converters.
         #if UNITY_STANDALONE || UNITY_EDITOR
@@ -39,7 +42,10 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
     {
         await base.Run();
 
-        // 0. Corner case when loading folders.
+        var startTime = Time.time;
+        var usedCache = false;
+
+        // 1. Corner case when loading folders.
         if (typeof(TResource) == typeof(Folder))
         {
             (Resource as Resource<Folder>).Object = new Folder(Resource.Path);
@@ -47,26 +53,29 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
             return;
         }
 
-        // 1. Check if cached version of the file could be used.
+        // 2. Check if cached version of the file could be used.
         rawData = await TryLoadFileCacheAsync(Resource.Path);
 
-        // 2. Cached version is not valid or doesn't exist; download or export the file.
+        // 3. Cached version is not valid or doesn't exist; download or export the file.
         if (rawData == null)
         {
-            // 3. Load file metadata from Google Drive.
+            // 4. Load file metadata from Google Drive.
             var filePath = string.IsNullOrEmpty(RootPath) ? Resource.Path : string.Concat(RootPath, '/', Resource.Path);
             var fileMeta = await GetFileMetaAsync(filePath);
-            if (fileMeta == null) { Debug.LogError($"Failed to resovle '{filePath}' google drive metadata."); HandleOnCompleted(); return; }
+            if (fileMeta == null) { Debug.LogError($"Failed to resolve '{filePath}' google drive metadata."); HandleOnCompleted(); return; }
 
             if (converter is IGoogleDriveConverter<TResource>) rawData = await ExportFileAsync(fileMeta);
             else rawData = await DownloadFileAsync(fileMeta);
 
-            // 4. Cache the downloaded file.
-            await WriteFileCacheAsync(Resource.Path, rawData);
+            // 5. Cache the downloaded file.
+            await WriteFileCacheAsync(Resource.Path, fileMeta.Id, rawData);
         }
+        else usedCache = true; 
 
         // In case we used native requests the resource will already be set, so no need to use converters.
         if (!Resource.IsValid) Resource.Object = await converter.ConvertAsync(rawData);
+
+        logAction?.Invoke($"Resource '{Resource.Path}' loaded {(rawData.Length / 1024f) / 1024f:0.###}MB over {Time.time - startTime:0.###} seconds from " + (usedCache ? "cache." : "Google Drive."));
 
         HandleOnCompleted();
     }
@@ -239,7 +248,7 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
         }
     }
 
-    private async Task WriteFileCacheAsync (string resourcePath, byte[] fileRawData)
+    private async Task WriteFileCacheAsync (string resourcePath, string fileId, byte[] fileRawData)
     {
         resourcePath = resourcePath.Replace("/", GoogleDriveResourceProvider.SLASH_REPLACE);
         var filePath = string.Concat(GoogleDriveResourceProvider.CACHE_DIR_PATH, "/", resourcePath);
@@ -254,6 +263,9 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
         #if UNITY_WEBGL && !UNITY_EDITOR
         WebGLExtensions.SyncFs();
         #endif
+
+        // Add info for the smart caching policy.
+        PlayerPrefs.SetString(string.Concat(GoogleDriveResourceProvider.SMART_CACHE_KEY_PREFIX, fileId), resourcePath);
     }
 
     private bool IsResultFound (GoogleDriveFiles.ListRequest request)

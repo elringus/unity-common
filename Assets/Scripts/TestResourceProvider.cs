@@ -28,11 +28,11 @@ public class TestResourceProvider : MonoBehaviour
     {
         //await ResolveByFullPathAsync();
         //await ResolveTextByPathAsync();
-        await ResolveFoldersAsync();
+        //await ResolveFoldersAsync();
         //await TestResourceExistsAsync();
         //await TestAudioAsync();
         //await TestUnloadAsync();
-        //await TestTextureResources();
+        await TestTextureResources();
     }
 
     private void OnGUI ()
@@ -78,7 +78,7 @@ public class TestResourceProvider : MonoBehaviour
 
         provider.DriveRootPath = "Resources";
         provider.ConcurrentRequestsLimit = 2;
-        provider.PurgeCacheOnStart = false;
+        provider.CachingPolicy = GoogleDriveResourceProvider.CachingPolicyType.Smart;
         provider.AddConverter(new JpgOrPngToSpriteConverter());
         provider.AddConverter(new JpgOrPngToTextureConverter());
         provider.AddConverter(new GDocToStringConverter());
