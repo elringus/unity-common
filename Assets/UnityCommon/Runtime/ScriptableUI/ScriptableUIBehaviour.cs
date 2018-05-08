@@ -11,6 +11,7 @@ public class ScriptableUIBehaviour : UIBehaviour
     public bool IsVisibleOnAwake { get { return _isVisibleOnAwake; } }
     public virtual bool IsVisible { get { return _isVisible; } set { SetIsVisible(value); } }
     public virtual float CurrentOpacity { get { return GetCurrentOpacity(); } }
+    public virtual bool IsInteractable => canvasGroup ? canvasGroup.interactable : true;
     public RectTransform RectTransform { get { return GetRectTransform(); } }
 
     private Tweener<FloatTween> fadeTweener;
@@ -110,6 +111,13 @@ public class ScriptableUIBehaviour : UIBehaviour
         if (!canvasGroup) return;
 
         canvasGroup.alpha = opacity;
+    }
+
+    public virtual void SetInteractable (bool isInteractable)
+    {
+        if (!canvasGroup) return;
+
+        canvasGroup.interactable = isInteractable;
     }
 
     public void ClearFocus ()
