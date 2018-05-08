@@ -84,7 +84,8 @@ public class CoroutineRunner : CustomYieldInstruction
     {
         if (!IsRunning) return;
 
-        coroutineContainer?.StopCoroutine(coroutine);
+        if (coroutineContainer)
+            coroutineContainer.StopCoroutine(coroutine);
         coroutine = null;
     }
 
