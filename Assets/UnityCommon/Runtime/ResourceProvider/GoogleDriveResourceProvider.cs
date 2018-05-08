@@ -59,8 +59,6 @@ public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
             Directory.CreateDirectory(CACHE_DIR_PATH);
         }
 
-        // Flush cached file writes to IndexedDB on WebGL.
-        // https://forum.unity.com/threads/webgl-filesystem.294358/#post-1940712
         #if UNITY_WEBGL && !UNITY_EDITOR
         WebGLExtensions.SyncFs();
         #endif

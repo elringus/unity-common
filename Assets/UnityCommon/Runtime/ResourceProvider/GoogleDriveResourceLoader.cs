@@ -216,12 +216,7 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
                 // Binary convertion of the audio is fucked on WebGL (can't use buffers), so disable caching here.
                 if (typeof(TResource) == typeof(AudioClip)) return null;
                 // Use raw converters for other native types.
-                using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, 4096, true))
-                {
-                    var cachedData = new byte[fileStream.Length];
-                    await fileStream.ReadAsync(cachedData, 0, (int)fileStream.Length);
-                    return cachedData;
-                }
+                return await IOUtils.ReadFileAsync(filePath);
             }
 
             UnityWebRequest request = null;
@@ -236,15 +231,7 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
                 return request.downloadHandler.data;
             }
         }
-        else
-        {
-            using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, 4096, true))
-            {
-                var cachedData = new byte[fileStream.Length];
-                await fileStream.ReadAsync(cachedData, 0, (int)fileStream.Length);
-                return cachedData;
-            }
-        }
+        else return await IOUtils.ReadFileAsync(filePath);
     }
 
     private async Task WriteFileCacheAsync (string resourcePath, string fileId, byte[] fileRawData)
@@ -254,14 +241,7 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
         //if (!string.IsNullOrEmpty(usedRepresentation.Extension))
         //    filePath += string.Concat(".", usedRepresentation.Extension);
 
-        using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, fileRawData.Length, true))
-            await fileStream.WriteAsync(fileRawData, 0, fileRawData.Length);
-
-        // Flush cached file writes to IndexedDB on WebGL.
-        // https://forum.unity.com/threads/webgl-filesystem.294358/#post-1940712
-        #if UNITY_WEBGL && !UNITY_EDITOR
-        WebGLExtensions.SyncFs();
-        #endif
+        await IOUtils.WriteFileAsync(filePath, fileRawData);
 
         // Add info for the smart caching policy.
         PlayerPrefs.SetString(string.Concat(GoogleDriveResourceProvider.SMART_CACHE_KEY_PREFIX, fileId), resourcePath);

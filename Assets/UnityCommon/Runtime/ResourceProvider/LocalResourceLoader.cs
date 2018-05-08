@@ -45,12 +45,7 @@ public class LocalResourceLoader<TResource> : LoadResourceRunner<TResource> wher
             var fullPath = string.Concat(filePath, ".", representation.Extension);
             if (!File.Exists(fullPath)) continue;
 
-            using (var fileStream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true))
-            {
-                rawData = new byte[fileStream.Length];
-                await fileStream.ReadAsync(rawData, 0, (int)fileStream.Length);
-            }
-
+            rawData = await IOUtils.ReadFileAsync(fullPath);
             break;
         }
 

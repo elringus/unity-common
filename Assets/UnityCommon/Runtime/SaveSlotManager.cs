@@ -31,7 +31,8 @@ public abstract class SaveSlotManager
 /// </summary>
 public class SaveSlotManager<TData> : SaveSlotManager where TData : new()
 {
-    protected virtual string SaveDataPath { get { return string.Concat(Application.dataPath, "/SaveData"); } }
+    protected virtual string GameDataPath => GetGameDataPath();
+    protected virtual string SaveDataPath => string.Concat(GameDataPath, "/SaveData"); 
 
     public async Task SaveAsync (string slotId, TData data)
     {
@@ -89,23 +90,22 @@ public class SaveSlotManager<TData> : SaveSlotManager where TData : new()
         var jsonData = JsonUtility.ToJson(data, Debug.isDebugBuild);
         var filePath = string.Concat(SaveDataPath, "/", slotId, ".json");
         Directory.CreateDirectory(SaveDataPath);
-        using (var stream = File.CreateText(filePath))
-            await stream.WriteAsync(jsonData);
-
-        // Flush cached file writes to IndexedDB on WebGL.
-        // https://forum.unity.com/threads/webgl-filesystem.294358/#post-1940712
-        #if UNITY_WEBGL && !UNITY_EDITOR
-        WebGLExtensions.SyncFs();
-        #endif
+        await IOUtils.WriteTextFileAsync(filePath, jsonData);
     }
 
     protected virtual async Task<TData> DeserializeDataAsync (string slotId)
     {
         var filePath = string.Concat(SaveDataPath, "/", slotId, ".json");
-        using (var stream = File.OpenText(filePath))
-        {
-            var jsonData = await stream.ReadToEndAsync();
-            return JsonUtility.FromJson<TData>(jsonData);
-        }
+        var jsonData = await IOUtils.ReadTextFileAsync(filePath);
+        return JsonUtility.FromJson<TData>(jsonData);
+    }
+
+    protected virtual string GetGameDataPath ()
+    {
+        #if UNITY_STANDALONE || UNITY_EDITOR
+        return Application.dataPath;
+        #else
+        return Application.persistentDataPath;
+        #endif
     }
 }
