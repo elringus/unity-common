@@ -116,19 +116,18 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
         {
             listRequest = new GoogleDriveFiles.ListRequest();
             listRequest.Fields = new List<string> { "files(id)" };
-            listRequest.Q = string.Format("'{0}' in parents and name = '{1}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
-                parendId, parentNames[i]);
+            listRequest.Q = $"'{parendId}' in parents and name = '{parentNames[i]}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
 
             await listRequest.Send();
 
             if (!IsResultFound(listRequest))
             {
-                Debug.LogError(string.Format("Failed to retrieve {0} part of {1} resource from Google Drive.", parentNames[i], Resource.Path));
+                Debug.LogError($"Failed to retrieve '{parentNames[i]}' part of '{filePath}' resource from Google Drive.");
                 return null;
             }
 
             if (listRequest.ResponseData.Files.Count > 1)
-                Debug.LogWarning(string.Format("Multiple '{0}' folders been found in Google Drive.", parentNames[i]));
+                Debug.LogWarning($"Multiple '{parentNames[i]}' folders been found in Google Drive.");
 
             parendId = listRequest.ResponseData.Files[0].Id;
         }
@@ -141,7 +140,7 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
             listRequest = new GoogleDriveFiles.ListRequest();
             listRequest.Fields = new List<string> { "files(id, modifiedTime, mimeType)" };
             var fullName = string.IsNullOrEmpty(representation.Extension) ? fileName : string.Concat(fileName, ".", representation.Extension);
-            listRequest.Q = string.Format("'{0}' in parents and name = '{1}' and mimeType = '{2}' and trashed = false", parendId, fullName, representation.MimeType);
+            listRequest.Q = $"'{parendId}' in parents and name = '{fullName}' and mimeType = '{representation.MimeType}' and trashed = false";
 
             await listRequest.Send();
 
@@ -150,12 +149,12 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
 
         if (!IsResultFound(listRequest))
         {
-            Debug.LogError(string.Format("Failed to retrieve {0}.{1} resource from Google Drive.", Resource.Path, usedRepresentation.Extension));
+            Debug.LogError($"Failed to retrieve '{Resource.Path}.{usedRepresentation.Extension}' resource from Google Drive.");
             return null;
         }
 
         if (listRequest.ResponseData.Files.Count > 1)
-            Debug.LogWarning(string.Format("Multiple '{0}.{1}' files been found in Google Drive.", Resource.Path, usedRepresentation.Extension));
+            Debug.LogWarning($"Multiple '{Resource.Path}.{usedRepresentation.Extension}' files been found in Google Drive.");
 
         return listRequest.ResponseData.Files[0];
     }
@@ -172,7 +171,7 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
         await downloadRequest.SendNonGeneric();
         if (downloadRequest.IsError || downloadRequest.GetResponseData<UnityGoogleDrive.Data.File>().Content == null)
         {
-            Debug.LogError(string.Format("Failed to download {0}.{1} resource from Google Drive.", Resource.Path, usedRepresentation.Extension));
+            Debug.LogError($"Failed to download {Resource.Path}.{usedRepresentation.Extension} resource from Google Drive.");
             return null;
         }
 
@@ -195,7 +194,7 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
         await downloadRequest.SendNonGeneric();
         if (downloadRequest.IsError || downloadRequest.GetResponseData<UnityGoogleDrive.Data.File>().Content == null)
         {
-            Debug.LogError(string.Format("Failed to export {0} resource from Google Drive.", Resource.Path));
+            Debug.LogError($"Failed to export '{Resource.Path}' resource from Google Drive.");
             return null;
         }
         return downloadRequest.GetResponseData<UnityGoogleDrive.Data.File>().Content;
