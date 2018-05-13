@@ -19,6 +19,7 @@ public abstract class SaveSlotManager
 
     public abstract bool SaveSlotExists (string slotId);
     public abstract bool AnySaveExists ();
+    public abstract void DeleteSaveSlot (string slotId);
 
     protected void InvokeOnBeforeSave () { IsSaving = true; OnBeforeSave.SafeInvoke(); }
     protected void InvokeOnSaved () { IsSaving = false; OnSaved.SafeInvoke(); }
@@ -73,11 +74,7 @@ public class SaveSlotManager<TData> : SaveSlotManager where TData : new()
         return await LoadAsync(slotId);
     }
 
-    public override bool SaveSlotExists (string slotId)
-    {
-        var filePath = string.Concat(SaveDataPath, "/", slotId, ".json");
-        return File.Exists(filePath);
-    }
+    public override bool SaveSlotExists (string slotId) => File.Exists(SlotIdToFilePath(slotId));
 
     public override bool AnySaveExists ()
     {
@@ -85,20 +82,28 @@ public class SaveSlotManager<TData> : SaveSlotManager where TData : new()
         return Directory.GetFiles(SaveDataPath, "*.json", SearchOption.TopDirectoryOnly).Length > 0;
     }
 
+    public override void DeleteSaveSlot (string slotId)
+    {
+        if (!SaveSlotExists(slotId)) return;
+        File.Delete(SlotIdToFilePath(slotId));
+    }
+
     protected virtual async Task SerializeDataAsync (string slotId, TData data)
     {
         var jsonData = JsonUtility.ToJson(data, Debug.isDebugBuild);
-        var filePath = string.Concat(SaveDataPath, "/", slotId, ".json");
+        var filePath = SlotIdToFilePath(slotId);
         Directory.CreateDirectory(SaveDataPath);
         await IOUtils.WriteTextFileAsync(filePath, jsonData);
     }
 
     protected virtual async Task<TData> DeserializeDataAsync (string slotId)
     {
-        var filePath = string.Concat(SaveDataPath, "/", slotId, ".json");
+        var filePath = SlotIdToFilePath(slotId);
         var jsonData = await IOUtils.ReadTextFileAsync(filePath);
         return JsonUtility.FromJson<TData>(jsonData);
     }
+
+    protected virtual string SlotIdToFilePath (string slotId) => string.Concat(SaveDataPath, "/", slotId, ".json");
 
     protected virtual string GetGameDataPath ()
     {
