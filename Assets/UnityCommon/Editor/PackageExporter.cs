@@ -102,7 +102,7 @@ public class PackageExporter : EditorWindow
                 var fullpath = Application.dataPath.Replace("Assets", "") + path;
                 var originalScriptText = File.ReadAllText(fullpath, Encoding.UTF8);
 
-                if (originalScriptText.Contains(SKIP_WRAP_TERM)) continue;
+                if (originalScriptText.Contains(SKIP_WRAP_TERM) && !path.EndsWith("PackageExporter.cs")) continue;
 
                 string scriptText = string.Empty;
                 var isImportedScript = path.Contains("ThirdParty");
