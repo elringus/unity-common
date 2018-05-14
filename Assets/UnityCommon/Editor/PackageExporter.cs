@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
@@ -14,8 +15,11 @@ public class PackageExporter : EditorWindow
     protected static string OutputPath { get { return PlayerPrefs.GetString(PREFS_PREFIX + "OutputPath"); } set { PlayerPrefs.SetString(PREFS_PREFIX + "OutputPath", value); } }
     protected static string OutputFileName { get { return PackageName; } }
     protected static string NamespaceToWrap { get { return PlayerPrefs.GetString(PREFS_PREFIX + "NamespaceToWrap"); } set { PlayerPrefs.SetString(PREFS_PREFIX + "NamespaceToWrap", value); } }
+    protected static string IgnoredPaths { get { return PlayerPrefs.GetString(PREFS_PREFIX + "IgnoredPaths"); } set { PlayerPrefs.SetString(PREFS_PREFIX + "IgnoredPaths", value); } }
+    private static bool IsAnyPathsIgnored { get { return !string.IsNullOrEmpty(IgnoredPaths); } }
     protected static bool IsReadyToExport { get { return !string.IsNullOrEmpty(OutputPath) && !string.IsNullOrEmpty(OutputFileName); } }
 
+    private const string TEMP_FOLDER_PATH = "!TEMP_PACKAGE_EXPORTER";
     private const string SKIP_WRAP_TERM = "PackageExporter: SkipWrap";
     private const string PREFS_PREFIX = "PackageExporter.";
     private const string TAB_CHARS = "    ";
@@ -63,14 +67,31 @@ public class PackageExporter : EditorWindow
             if (GUILayout.Button("Select", EditorStyles.miniButton, GUILayout.Width(65)))
                 OutputPath = EditorUtility.OpenFolderPanel("Output Path", "", "");
         }
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField("Ignored paths (split with new line, start with 'Assets/...'): ");
+        IgnoredPaths = EditorGUILayout.TextArea(IgnoredPaths);
     }
 
     private static void Export (bool wrapNamespace = false)
     {
+        // Temporary move-out ignored assets.
+        var tmpFolderPath = string.Empty;
+        if (IsAnyPathsIgnored)
+        {
+            var tmpFolderGuid = AssetDatabase.CreateFolder("Assets", TEMP_FOLDER_PATH);
+            tmpFolderPath = AssetDatabase.GUIDToAssetPath(tmpFolderGuid);
+            var ignoredPaths = IgnoredPaths.SplitByNewLine().ToList();
+            foreach (var path in AssetDatabase.GetAllAssetPaths())
+            {
+                if (!path.StartsWith(AssetsPath)) continue;
+                if (!ignoredPaths.Exists(p => path.StartsWith(p))) continue;
+                AssetDatabase.MoveAsset(path, path.Replace(AssetsPath, tmpFolderPath));
+            }
+        }
+
+        // Modify scripts (namespace and copyright).
         modifiedScripts.Clear();
-
         var needToModify = !string.IsNullOrEmpty(NamespaceToWrap) || !string.IsNullOrEmpty(Copyright);
-
         if (needToModify)
         {
             foreach (var path in AssetDatabase.GetAllAssetPaths())
@@ -104,12 +125,24 @@ public class PackageExporter : EditorWindow
             }
         }
 
+        // Export the package.
         AssetDatabase.ExportPackage(AssetsPath, OutputPath + "/" + OutputFileName + ".unitypackage", ExportPackageOptions.Recurse);
 
+        // Restore modified scripts.
         if (needToModify)
         {
             foreach (var modifiedScript in modifiedScripts)
                 File.WriteAllText(modifiedScript.Key, modifiedScript.Value, Encoding.UTF8);
+        }
+
+        // Restore moved-out ignored assets.
+        if (IsAnyPathsIgnored)
+        {
+            foreach (var path in AssetDatabase.GetAllAssetPaths())
+            {
+                if (!path.StartsWith(tmpFolderPath)) continue;
+                AssetDatabase.MoveAsset(path, path.Replace(tmpFolderPath, AssetsPath));
+            }
         }
     }
 }
