@@ -43,7 +43,7 @@ public class SaveSlotManager<TData> : SaveSlotManager where TData : new()
         InvokeOnSaved();
     }
 
-    public async Task<TData> LoadAsync (string slotId)
+    public async Task<TData> LoadAsync (string slotId, bool showLoadingUI = true)
     {
         InvokeOnBeforeLoad();
 
@@ -53,12 +53,14 @@ public class SaveSlotManager<TData> : SaveSlotManager where TData : new()
             return default(TData);
         }
 
-        if (LoadingUI) await LoadingUI.SetIsVisibleAsync(true);
+        if (showLoadingUI && LoadingUI)
+            await LoadingUI.SetIsVisibleAsync(true);
 
         var data = await DeserializeDataAsync(slotId);
         InvokeOnLoaded();
 
-        if (LoadingUI) await LoadingUI.SetIsVisibleAsync(false);
+        if (showLoadingUI && LoadingUI)
+            await LoadingUI.SetIsVisibleAsync(false);
 
         return data;
     }
