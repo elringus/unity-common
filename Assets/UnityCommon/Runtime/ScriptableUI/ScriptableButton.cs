@@ -5,6 +5,14 @@ public class ScriptableButton : ScriptableUIControl<Button>
 {
     public event Action OnButtonClicked;
 
+    public override bool IsInteractable => CanvasGroup ? base.IsInteractable : UIComponent.interactable;
+
+    public override void SetIsInteractable (bool isInteractable)
+    {
+        if (CanvasGroup) base.SetIsInteractable(isInteractable);
+        else UIComponent.interactable = isInteractable;
+    }
+
     protected override void BindUIEvents ()
     {
         UIComponent.onClick.AddListener(OnButtonClick);

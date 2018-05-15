@@ -11,11 +11,12 @@ public class ScriptableUIBehaviour : UIBehaviour
     public bool IsVisibleOnAwake { get { return _isVisibleOnAwake; } }
     public virtual bool IsVisible { get { return _isVisible; } set { SetIsVisible(value); } }
     public virtual float CurrentOpacity { get { return GetCurrentOpacity(); } }
-    public virtual bool IsInteractable => canvasGroup ? canvasGroup.interactable : true;
+    public virtual bool IsInteractable => CanvasGroup ? CanvasGroup.interactable : true;
     public RectTransform RectTransform { get { return GetRectTransform(); } }
 
+    protected CanvasGroup CanvasGroup { get; private set; }
+
     private Tweener<FloatTween> fadeTweener;
-    private CanvasGroup canvasGroup;
     private RectTransform _rectTransform;
     private bool _isVisible;
 
@@ -29,7 +30,7 @@ public class ScriptableUIBehaviour : UIBehaviour
         base.Awake();
 
         fadeTweener = new Tweener<FloatTween>(this);
-        canvasGroup = GetComponent<CanvasGroup>();
+        CanvasGroup = GetComponent<CanvasGroup>();
         SetIsVisible(IsVisibleOnAwake);
     }
 
@@ -50,21 +51,21 @@ public class ScriptableUIBehaviour : UIBehaviour
 
         OnVisibilityChanged.SafeInvoke(isVisible);
 
-        if (!canvasGroup) return;
+        if (!CanvasGroup) return;
 
-        canvasGroup.interactable = isVisible;
-        canvasGroup.blocksRaycasts = isVisible;
+        CanvasGroup.interactable = isVisible;
+        CanvasGroup.blocksRaycasts = isVisible;
 
         var fadeDuration = fadeTime ?? FadeTime;
         var targetOpacity = isVisible ? 1f : 0f;
 
         if (fadeDuration == 0f)
         {
-            canvasGroup.alpha = targetOpacity;
+            CanvasGroup.alpha = targetOpacity;
             return;
         }
 
-        var tween = new FloatTween(canvasGroup.alpha, targetOpacity, fadeDuration, alpha => canvasGroup.alpha = alpha);
+        var tween = new FloatTween(CanvasGroup.alpha, targetOpacity, fadeDuration, alpha => CanvasGroup.alpha = alpha);
         await fadeTweener.RunAsync(tween);
     }
 
@@ -77,12 +78,12 @@ public class ScriptableUIBehaviour : UIBehaviour
 
         OnVisibilityChanged.SafeInvoke(isVisible);
 
-        if (!canvasGroup) return;
+        if (!CanvasGroup) return;
 
-        canvasGroup.interactable = isVisible;
-        canvasGroup.blocksRaycasts = isVisible;
+        CanvasGroup.interactable = isVisible;
+        CanvasGroup.blocksRaycasts = isVisible;
 
-        canvasGroup.alpha = isVisible ? 1f : 0f;
+        CanvasGroup.alpha = isVisible ? 1f : 0f;
     }
 
     public virtual void ToggleVisibility ()
@@ -102,22 +103,22 @@ public class ScriptableUIBehaviour : UIBehaviour
 
     public virtual float GetCurrentOpacity ()
     {
-        if (canvasGroup) return canvasGroup.alpha;
+        if (CanvasGroup) return CanvasGroup.alpha;
         return 1f;
     }
 
     public virtual void SetOpacity (float opacity)
     {
-        if (!canvasGroup) return;
+        if (!CanvasGroup) return;
 
-        canvasGroup.alpha = opacity;
+        CanvasGroup.alpha = opacity;
     }
 
-    public virtual void SetInteractable (bool isInteractable)
+    public virtual void SetIsInteractable (bool isInteractable)
     {
-        if (!canvasGroup) return;
+        if (!CanvasGroup) return;
 
-        canvasGroup.interactable = isInteractable;
+        CanvasGroup.interactable = isInteractable;
     }
 
     public void ClearFocus ()
