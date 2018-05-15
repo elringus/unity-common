@@ -14,16 +14,16 @@ namespace UnityGoogleDrive
         public static TaskAwaiter<TResponse> GetAwaiter<TResponse> (this GoogleDriveRequestYeildInstruction<TResponse> yeildInstruction)
         {
             var taskCompletionSource = new TaskCompletionSource<TResponse>();
-            if (yeildInstruction.GoogleDriveRequest.IsDone) taskCompletionSource.TrySetResult(yeildInstruction.GoogleDriveRequest.ResponseData);
-            else yeildInstruction.OnDone += responseData => taskCompletionSource.TrySetResult(responseData);
+            if (yeildInstruction.GoogleDriveRequest.IsDone) taskCompletionSource.SetResult(yeildInstruction.GoogleDriveRequest.ResponseData);
+            else yeildInstruction.OnDone += responseData => taskCompletionSource.SetResult(responseData);
             return taskCompletionSource.Task.GetAwaiter();
         }
 
         public static TaskAwaiter GetAwaiter (this GoogleDriveRequestYeildInstruction yeildInstruction)
         {
             var taskCompletionSource = new TaskCompletionSource<object>();
-            if (yeildInstruction.IsDone) taskCompletionSource.TrySetResult(null);
-            else yeildInstruction.OnDoneNonGeneric += () => taskCompletionSource.TrySetResult(null);
+            if (yeildInstruction.IsDone) taskCompletionSource.SetResult(null);
+            else yeildInstruction.OnDoneNonGeneric += () => taskCompletionSource.SetResult(null);
             return (taskCompletionSource.Task as Task).GetAwaiter();
         }
     }
