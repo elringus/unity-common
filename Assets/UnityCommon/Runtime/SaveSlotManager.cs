@@ -15,7 +15,6 @@ public abstract class SaveSlotManager
 
     public bool IsLoading { get; private set; }
     public bool IsSaving { get; private set; }
-    public virtual ScriptableUIBehaviour LoadingUI { get; protected set; }
 
     public abstract bool SaveSlotExists (string slotId);
     public abstract bool AnySaveExists ();
@@ -43,7 +42,7 @@ public class SaveSlotManager<TData> : SaveSlotManager where TData : new()
         InvokeOnSaved();
     }
 
-    public async Task<TData> LoadAsync (string slotId, bool showLoadingUI = true)
+    public async Task<TData> LoadAsync (string slotId)
     {
         InvokeOnBeforeLoad();
 
@@ -53,14 +52,8 @@ public class SaveSlotManager<TData> : SaveSlotManager where TData : new()
             return default(TData);
         }
 
-        if (showLoadingUI && LoadingUI)
-            await LoadingUI.SetIsVisibleAsync(true);
-
         var data = await DeserializeDataAsync(slotId);
         InvokeOnLoaded();
-
-        if (showLoadingUI && LoadingUI)
-            await LoadingUI.SetIsVisibleAsync(false);
 
         return data;
     }
