@@ -20,6 +20,8 @@ public abstract class SaveSlotManager
     public abstract bool AnySaveExists ();
     public abstract void DeleteSaveSlot (string slotId);
 
+    protected abstract bool PrettifyJson { get; }
+
     protected void InvokeOnBeforeSave () { IsSaving = true; OnBeforeSave.SafeInvoke(); }
     protected void InvokeOnSaved () { IsSaving = false; OnSaved.SafeInvoke(); }
     protected void InvokeOnBeforeLoad () { IsLoading = true; OnBeforeLoad.SafeInvoke(); }
@@ -32,7 +34,8 @@ public abstract class SaveSlotManager
 public class SaveSlotManager<TData> : SaveSlotManager where TData : new()
 {
     protected virtual string GameDataPath => GetGameDataPath();
-    protected virtual string SaveDataPath => string.Concat(GameDataPath, "/SaveData"); 
+    protected virtual string SaveDataPath => string.Concat(GameDataPath, "/SaveData");
+    protected override bool PrettifyJson => Debug.isDebugBuild;
 
     public async Task SaveAsync (string slotId, TData data)
     {
@@ -85,7 +88,7 @@ public class SaveSlotManager<TData> : SaveSlotManager where TData : new()
 
     protected virtual async Task SerializeDataAsync (string slotId, TData data)
     {
-        var jsonData = JsonUtility.ToJson(data, Debug.isDebugBuild);
+        var jsonData = JsonUtility.ToJson(data, PrettifyJson);
         var filePath = SlotIdToFilePath(slotId);
         Directory.CreateDirectory(SaveDataPath);
         await IOUtils.WriteTextFileAsync(filePath, jsonData);
