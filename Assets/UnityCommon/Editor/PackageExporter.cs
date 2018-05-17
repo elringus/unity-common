@@ -75,6 +75,7 @@ public class PackageExporter : EditorWindow
     private static void Export (bool wrapNamespace = false)
     {
         // Temporary move-out ignored assets.
+        DisplayProgressBar("Moving-out ignored assets...", 0f);
         var tmpFolderPath = string.Empty;
         if (IsAnyPathsIgnored)
         {
@@ -90,6 +91,7 @@ public class PackageExporter : EditorWindow
         }
 
         // Modify scripts (namespace and copyright).
+        DisplayProgressBar("Modifying scripts...", .25f);
         modifiedScripts.Clear();
         var needToModify = !string.IsNullOrEmpty(NamespaceToWrap) || !string.IsNullOrEmpty(Copyright);
         if (needToModify)
@@ -126,9 +128,11 @@ public class PackageExporter : EditorWindow
         }
 
         // Export the package.
+        DisplayProgressBar("Writing package file...", .5f);
         AssetDatabase.ExportPackage(AssetsPath, OutputPath + "/" + OutputFileName + ".unitypackage", ExportPackageOptions.Recurse);
 
         // Restore modified scripts.
+        DisplayProgressBar("Restoring modified scripts...", .75f);
         if (needToModify)
         {
             foreach (var modifiedScript in modifiedScripts)
@@ -136,6 +140,7 @@ public class PackageExporter : EditorWindow
         }
 
         // Restore moved-out ignored assets.
+        DisplayProgressBar("Restoring moved-out ignored assets...", .95f);
         if (IsAnyPathsIgnored)
         {
             foreach (var path in AssetDatabase.GetAllAssetPaths())
@@ -146,5 +151,12 @@ public class PackageExporter : EditorWindow
 
             AssetDatabase.DeleteAsset(tmpFolderPath);
         }
+
+        EditorUtility.ClearProgressBar();
+    }
+
+    private static void DisplayProgressBar (string activity, float progress)
+    {
+        EditorUtility.DisplayProgressBar(string.Format("Exporting {0}", PackageName), activity, progress);
     }
 }
