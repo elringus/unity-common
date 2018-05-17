@@ -74,4 +74,13 @@ public static class TextureUtils
         }
         return colors;
     }
+
+    public static Texture2D ToTexture2D (this RenderTexture renderTexture)
+    {
+        var texture2d = new Texture2D(renderTexture.width, renderTexture.height, TextureFormat.RGB24, false);
+        RenderTexture.active = renderTexture;
+        texture2d.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
+        texture2d.Apply();
+        return texture2d;
+    }
 }
