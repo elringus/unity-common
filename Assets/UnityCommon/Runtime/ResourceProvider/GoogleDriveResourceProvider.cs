@@ -55,13 +55,9 @@ public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
     {
         if (Directory.Exists(CACHE_DIR_PATH))
         {
-            Directory.Delete(CACHE_DIR_PATH, true);
-            Directory.CreateDirectory(CACHE_DIR_PATH);
+            IOUtils.DeleteDirectory(CACHE_DIR_PATH, true);
+            IOUtils.CreateDirectory(CACHE_DIR_PATH);
         }
-
-        #if UNITY_WEBGL && !UNITY_EDITOR
-        WebGLExtensions.SyncFs();
-        #endif
 
         LogMessage("All cached resources purged.");
     }
@@ -78,9 +74,7 @@ public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
             LogMessage($"Cached resource '{filePath}' purged.");
         }
 
-        #if UNITY_WEBGL && !UNITY_EDITOR
-        WebGLExtensions.SyncFs();
-        #endif
+        IOUtils.WebGLSyncFs();
     }
 
     public override async Task<Resource<T>> LoadResourceAsync<T> (string path)
@@ -93,7 +87,7 @@ public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
     {
         base.Awake();
 
-        Directory.CreateDirectory(CACHE_DIR_PATH);
+        IOUtils.CreateDirectory(CACHE_DIR_PATH);
 
         LogMessage($"Caching policy: {CachingPolicy}");
         if (CachingPolicy == CachingPolicyType.PurgeAllOnInit) PurgeCache();
@@ -195,5 +189,7 @@ public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
 
         if (!string.IsNullOrWhiteSpace(changeList.NextPageToken))
             await ProcessChangesListAsync(changeList.NextPageToken);
+
+        IOUtils.WebGLSyncFs();
     }
 }

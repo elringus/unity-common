@@ -83,14 +83,14 @@ public class SaveSlotManager<TData> : SaveSlotManager where TData : new()
     public override void DeleteSaveSlot (string slotId)
     {
         if (!SaveSlotExists(slotId)) return;
-        File.Delete(SlotIdToFilePath(slotId));
+        IOUtils.DeleteFile(SlotIdToFilePath(slotId));
     }
 
     protected virtual async Task SerializeDataAsync (string slotId, TData data)
     {
         var jsonData = JsonUtility.ToJson(data, PrettifyJson);
         var filePath = SlotIdToFilePath(slotId);
-        Directory.CreateDirectory(SaveDataPath);
+        IOUtils.CreateDirectory(SaveDataPath);
         await IOUtils.WriteTextFileAsync(filePath, jsonData);
     }
 

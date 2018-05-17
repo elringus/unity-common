@@ -32,12 +32,7 @@ public static class IOUtils
             using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, fileData.Length, true))
                 await fileStream.WriteAsync(fileData, 0, fileData.Length);
         }
-
-        // Flush cached file writes to IndexedDB on WebGL.
-        // https://forum.unity.com/threads/webgl-filesystem.294358/#post-1940712
-        #if UNITY_WEBGL && !UNITY_EDITOR
-        WebGLExtensions.SyncFs();
-        #endif
+        WebGLSyncFs();
     }
 
     /// <summary>
@@ -64,9 +59,42 @@ public static class IOUtils
             using (var stream = File.CreateText(filePath))
                 await stream.WriteAsync(fileText);
         }
+        WebGLSyncFs();
+    }
 
-        // Flush cached file writes to IndexedDB on WebGL.
-        // https://forum.unity.com/threads/webgl-filesystem.294358/#post-1940712
+    /// <summary>
+    /// Deletes file at the provided path. Will insure for correct IO on specific plaforms.
+    /// </summary>
+    public static void DeleteFile (string filePath)
+    {
+        File.Delete(filePath);
+        WebGLSyncFs();
+    }
+
+    /// <summary>
+    /// Creates a new directory at the provided path. Will insure for correct IO on specific plaforms.
+    /// </summary>
+    public static void CreateDirectory (string path)
+    {
+        Directory.CreateDirectory(path);
+        WebGLSyncFs();
+    }
+
+    /// <summary>
+    /// Deletes directory at the provided path. Will insure for correct IO on specific plaforms.
+    /// </summary>
+    public static void DeleteDirectory (string path, bool recursive)
+    {
+        Directory.Delete(path, recursive);
+        WebGLSyncFs();
+    }
+
+    /// <summary>
+    /// Flush cached file writes to IndexedDB on WebGL.
+    /// https://forum.unity.com/threads/webgl-filesystem.294358/#post-1940712
+    /// </summary>
+    public static void WebGLSyncFs ()
+    {
         #if UNITY_WEBGL && !UNITY_EDITOR
         WebGLExtensions.SyncFs();
         #endif
