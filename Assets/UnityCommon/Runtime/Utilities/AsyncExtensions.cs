@@ -8,6 +8,8 @@ using UnityEngine.Networking;
 
 public static class AsyncExtensions
 {
+    public static TaskAwaiter GetAwaiter (this YieldInstruction yieldInstruction) => new CoroutineRunner(null, yieldInstruction).RunAsync().GetAwaiter();
+
     public static TaskAwaiter<AsyncOperation> GetAwaiter (this AsyncOperation asyncOperation)
     {
         var taskCompletionSource = new TaskCompletionSource<AsyncOperation>();
