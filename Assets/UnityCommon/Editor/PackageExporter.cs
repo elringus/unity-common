@@ -86,6 +86,15 @@ public class PackageExporter : EditorWindow
             {
                 if (!path.StartsWith(AssetsPath)) continue;
                 if (!ignoredPaths.Exists(p => path.StartsWith(p))) continue;
+
+                var movePath = path.Replace(AssetsPath, tmpFolderPath);
+                var moveDirectory = movePath.GetBeforeLast("/");
+                if (!Directory.Exists(moveDirectory))
+                {
+                    Directory.CreateDirectory(moveDirectory);
+                    AssetDatabase.Refresh();
+                }
+
                 AssetDatabase.MoveAsset(path, path.Replace(AssetsPath, tmpFolderPath));
             }
         }
