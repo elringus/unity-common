@@ -15,7 +15,6 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
     private bool useNativeRequests;
     private Action<string> logAction;
     private GoogleDriveRequest downloadRequest;
-    private GoogleDriveFiles.ListRequest listRequest;
     private IRawConverter<TResource> converter;
     private RawDataRepresentation usedRepresentation;
     private byte[] rawData;
@@ -89,74 +88,27 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
             downloadRequest.Abort();
             downloadRequest = null;
         }
-
-        if (listRequest != null)
-        {
-            listRequest.Abort();
-            listRequest = null;
-        }
     }
 
     protected override void HandleOnCompleted ()
     {
         if (downloadRequest != null) downloadRequest.Dispose();
-        if (listRequest != null) listRequest.Dispose();
 
         base.HandleOnCompleted();
     }
 
     private async Task<UnityGoogleDrive.Data.File> GetFileMetaAsync (string filePath)
     {
-        var fileName = filePath.GetAfter("/");
-        var parentNames = filePath.GetBeforeLast("/").Split('/');
-
-        // 1. Resolving folder ids one by one to find id of the file's parent folder.
-        var parendId = "root"; // 'root' is alias id for the root folder in Google Drive.
-        for (int i = 0; i < parentNames.Length; i++)
-        {
-            listRequest = new GoogleDriveFiles.ListRequest();
-            listRequest.Fields = new List<string> { "files(id)" };
-            listRequest.Q = $"'{parendId}' in parents and name = '{parentNames[i]}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false";
-
-            await listRequest.Send();
-
-            if (!IsResultFound(listRequest))
-            {
-                Debug.LogError($"Failed to retrieve '{parentNames[i]}' part of '{filePath}' resource from Google Drive.");
-                return null;
-            }
-
-            if (listRequest.ResponseData.Files.Count > 1)
-                Debug.LogWarning($"Multiple '{parentNames[i]}' folders been found in Google Drive.");
-
-            parendId = listRequest.ResponseData.Files[0].Id;
-        }
-
-        // 2. Searching the file and getting the metadata.
-        var usedRepresentation = new RawDataRepresentation();
         foreach (var representation in converter.Representations)
         {
-            usedRepresentation = representation;
-            listRequest = new GoogleDriveFiles.ListRequest();
-            listRequest.Fields = new List<string> { "files(id, modifiedTime, mimeType)" };
-            var fullName = string.IsNullOrEmpty(representation.Extension) ? fileName : string.Concat(fileName, ".", representation.Extension);
-            listRequest.Q = $"'{parendId}' in parents and name = '{fullName}' and mimeType = '{representation.MimeType}' and trashed = false";
-
-            await listRequest.Send();
-
-            if (IsResultFound(listRequest)) break;
+            var fullPath = $"{filePath}.{representation.Extension ?? string.Empty}";
+            var files = await Helpers.FindFilesByPathAsync(fullPath, fields: new List<string> { "files(id, mimeType, modifiedTime)" }, mime: representation.MimeType);
+            if (files.Count > 1) Debug.LogWarning($"Multiple '{Resource.Path}.{representation.Extension}' files been found in Google Drive.");
+            if (files.Count > 0) { usedRepresentation = representation; return files[0]; }
         }
 
-        if (!IsResultFound(listRequest))
-        {
-            Debug.LogError($"Failed to retrieve '{Resource.Path}.{usedRepresentation.Extension}' resource from Google Drive.");
-            return null;
-        }
-
-        if (listRequest.ResponseData.Files.Count > 1)
-            Debug.LogWarning($"Multiple '{Resource.Path}.{usedRepresentation.Extension}' files been found in Google Drive.");
-
-        return listRequest.ResponseData.Files[0];
+        Debug.LogError($"Failed to retrieve '{Resource.Path}' resource from Google Drive.");
+        return null;
     }
 
     private async Task<byte[]> DownloadFileAsync (UnityGoogleDrive.Data.File fileMeta)
@@ -245,10 +197,5 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
 
         // Add info for the smart caching policy.
         PlayerPrefs.SetString(string.Concat(GoogleDriveResourceProvider.SMART_CACHE_KEY_PREFIX, fileId), resourcePath);
-    }
-
-    private bool IsResultFound (GoogleDriveFiles.ListRequest request)
-    {
-        return listRequest != null && !listRequest.IsError && listRequest.ResponseData.Files != null && listRequest.ResponseData.Files.Count > 0;
     }
 }

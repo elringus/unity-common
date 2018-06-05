@@ -1,5 +1,6 @@
 ﻿// Copyright 2017-2018 Elringus (Artyom Sovetnikov). All Rights Reserved.
 
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -81,6 +82,40 @@ namespace UnityGoogleDrive
         }
 
         /// <summary>
+        /// Creates a new file and upload file's data in a resumable fashion.
+        /// </summary>
+        public class ResumableCreateRequest : GoogleDriveResumableUploadRequest<Data.File>
+        {
+            /// <summary>
+            /// Whether to ignore the domain's default visibility settings for the created file.
+            /// Domain administrators can choose to make all uploaded files visible to the domain
+            /// by default; this parameter bypasses that behavior for the request. Permissions
+            /// are still inherited from parent folders.
+            /// </summary>
+            [QueryParameter] public bool? IgnoreDefaultVisibility { get; set; }
+            /// <summary>
+            /// Whether to set the 'keepForever' field in the new head revision. This is only 
+            /// applicable to files with binary content in Drive.
+            /// </summary>
+            [QueryParameter] public bool? KeepRevisionForever { get; set; }
+            /// <summary>
+            /// A language hint for OCR processing during image import (ISO 639-1 code).
+            /// </summary>
+            [QueryParameter] public string OcrLanguage { get; set; }
+            /// <summary>
+            /// Whether the requesting application supports Team Drives.
+            /// </summary>
+            [QueryParameter] public bool? SupportsTeamDrives { get; set; }
+            /// <summary>
+            /// Whether to use the uploaded content as indexable text.
+            /// </summary>
+            [QueryParameter] public bool? UseContentAsIndexableText { get; set; }
+
+            public ResumableCreateRequest (Data.File file, string resumableSessionUri = null) : base(@"https://www.googleapis.com/upload/drive/v3/files", 
+                UnityWebRequest.kHttpVerbPOST, file, file.Content, file.MimeType, resumableSessionUri) { }
+        }
+
+        /// <summary>
         /// Permanently deletes a file owned by the user without moving it to the trash.
         /// If the file belongs to a Team Drive the user must be an organizer on the parent.
         /// If the target is a folder, all descendants owned by the user are also deleted.
@@ -125,7 +160,8 @@ namespace UnityGoogleDrive
 
             protected override void HandleResponseData (DownloadHandler downloadHandler)
             {
-                ResponseData.Content = downloadHandler.data;
+                if (IsError) base.HandleResponseData(downloadHandler);
+                else ResponseData.Content = downloadHandler.data;
             }
         }
 
@@ -163,7 +199,10 @@ namespace UnityGoogleDrive
             [QueryParameter] public bool? SupportsTeamDrives { get; set; }
 
             public GetRequest (string fileId)
-                : base(string.Concat(@"https://www.googleapis.com/drive/v3/files/", fileId), UnityWebRequest.kHttpVerbGET) { }
+                : base(string.Concat(@"https://www.googleapis.com/drive/v3/files/", fileId), UnityWebRequest.kHttpVerbGET)
+            {
+                Debug.Assert(!string.IsNullOrEmpty(fileId), "Missing file ID.");
+            }
         }
 
         /// <summary>
@@ -172,24 +211,40 @@ namespace UnityGoogleDrive
         public class DownloadRequest : GetRequest
         {
             /// <summary>
+            /// Portion of the file's content to dowload (byte range). Will download the full file when null (default).
+            /// For more info see <see cref="https://developers.google.com/drive/api/v3/manage-downloads#partial_download"/>.
+            /// </summary>
+            public RangeInt? DownloadRange { get; private set; }
+
+            /// <summary>
             /// Whether the user is acknowledging the risk of downloading known malware or other abusive files. 
             /// </summary>
             [QueryParameter] public bool? AcknowledgeAbuse { get; set; }
 
-            public DownloadRequest (string fileId) : base(fileId)
+            public DownloadRequest (string fileId, RangeInt? downloadRange = null) : base(fileId)
             {
                 Alt = "media";
                 ResponseData = new Data.File() { Id = fileId };
+                DownloadRange = downloadRange;
             }
 
-            public DownloadRequest (Data.File file) : this(file.Id)
+            public DownloadRequest (Data.File file, RangeInt? downloadRange = null) : this(file.Id, downloadRange)
             {
                 ResponseData = file;
             }
 
+            protected override UnityWebRequest CreateWebRequest ()
+            {
+                var webRequest = base.CreateWebRequest();
+                if (DownloadRange.HasValue) webRequest.SetRequestHeader("Range", 
+                    string.Format("bytes={0}-{1}", DownloadRange.Value.start, DownloadRange.Value.end));
+                return webRequest;
+            }
+
             protected override void HandleResponseData (DownloadHandler downloadHandler)
             {
-                ResponseData.Content = downloadHandler.data;
+                if (IsError) base.HandleResponseData(downloadHandler);
+                else ResponseData.Content = downloadHandler.data;
             }
         }
 
@@ -231,8 +286,12 @@ namespace UnityGoogleDrive
 
             protected override void HandleResponseData (DownloadHandler downloadHandler)
             {
-                ResponseData.Content = downloadHandler.data;
-                ResponseData.AudioClip = DownloadHandlerAudioClip.GetContent(WebRequest);
+                if (IsError) base.HandleResponseData(downloadHandler);
+                else
+                {
+                    ResponseData.Content = downloadHandler.data;
+                    ResponseData.AudioClip = DownloadHandlerAudioClip.GetContent(WebRequest);
+                }
             }
         }
 
@@ -274,8 +333,11 @@ namespace UnityGoogleDrive
 
             protected override void HandleResponseData (DownloadHandler downloadHandler)
             {
-                ResponseData.Content = downloadHandler.data;
-                ResponseData.Texture = DownloadHandlerTexture.GetContent(WebRequest);
+                if (IsError) base.HandleResponseData(downloadHandler);
+                {
+                    ResponseData.Content = downloadHandler.data;
+                    ResponseData.Texture = DownloadHandlerTexture.GetContent(WebRequest);
+                }
             }
         }
 
@@ -308,6 +370,7 @@ namespace UnityGoogleDrive
             /// <summary>
             /// The maximum number of files to return per page. Partial or empty result pages
             /// are possible even before the end of the files list has been reached.
+            /// Acceptable values are 1 to 1000, inclusive. (Default: 100) 
             /// </summary>
             [QueryParameter] public int? PageSize { get; set; }
             /// <summary>
@@ -393,6 +456,41 @@ namespace UnityGoogleDrive
         }
 
         /// <summary>
+        /// Updates a file's metadata and/or content with patch semantics and uploads the data in a resumable fashion.
+        /// </summary>
+        public class ResumableUpdateRequest : GoogleDriveResumableUploadRequest<Data.File>
+        {
+            /// <summary>
+            /// A comma-separated list of parent IDs to add.
+            /// </summary>
+            [QueryParameter] public string AddParents { get; set; }
+            /// <summary>
+            /// Whether to set the 'keepForever' field in the new head revision. This is only
+            /// applicable to files with binary content in Drive.
+            /// </summary>
+            [QueryParameter] public bool? KeepRevisionForever { get; set; }
+            /// <summary>
+            /// A language hint for OCR processing during image import (ISO 639-1 code).
+            /// </summary>
+            [QueryParameter] public string OcrLanguage { get; set; }
+            /// <summary>
+            /// A comma-separated list of parent IDs to remove.
+            /// </summary>
+            [QueryParameter] public string RemoveParents { get; set; }
+            /// <summary>
+            /// Whether the requesting application supports Team Drives.
+            /// </summary>
+            [QueryParameter] public bool? SupportsTeamDrives { get; set; }
+            /// <summary>
+            /// Whether to use the uploaded content as indexable text.
+            /// </summary>
+            [QueryParameter] public bool? UseContentAsIndexableText { get; set; }
+
+            public ResumableUpdateRequest (string fileId, Data.File file, string resumableSessionUri = null) 
+                : base(string.Concat(@"https://www.googleapis.com/upload/drive/v3/files/", fileId), "PATCH", file, file.Content, file.MimeType, resumableSessionUri) { }
+        }
+
+        /// <summary>
         /// Creates a copy of a file and applies any requested updates with patch semantics.
         /// Response data will contain copied <see cref="Data.File"/>.
         /// </summary>
@@ -405,13 +503,23 @@ namespace UnityGoogleDrive
         /// <summary>
         /// Creates a new file.
         /// </summary>
-        /// <param name="fileId">
-        /// The file to create. 
-        /// Provide <see cref="Data.File.Content"/> to upload the content of the file.
-        /// </param>
+        /// <param name="fileId">The file to create. Provide <see cref="Data.File.Content"/> to upload the content of the file.</param>
         public static CreateRequest Create (Data.File file)
         {
             return new CreateRequest(file);
+        }
+
+        /// <summary>
+        /// Creates a new file and (optionally) uploads the file's content in a resumable fashion.
+        /// In case the upload is interrupted get <see cref="GoogleDriveResumableUploadRequest{TRequest, TResponse}.ResumableSessionUri"/> property of the failed request and start a new one.
+        /// In case you wish to manually upload the file's data (for example using a chunked transfer), don't set <see cref="Data.File.Content"/>, so the request will just initiate 
+        /// a new resumable upload session. You can then use the returned session URI to manually upload the data. For more info see <see cref="https://developers.google.com/drive/api/v3/resumable-upload#upload-resumable"/>.
+        /// </summary>
+        /// <param name="file">The file to create. Provide <see cref="Data.File.Content"/> to upload the content of the file.</param>
+        /// <param name="resumableSessionUri">Session URI to resume previously unfinished upload. Will upload from start when not provided.</param>
+        public static ResumableCreateRequest CreateResumable (Data.File file, string resumableSessionUri = null)
+        {
+            return new ResumableCreateRequest(file, resumableSessionUri);
         }
 
         /// <summary>
@@ -467,22 +575,25 @@ namespace UnityGoogleDrive
         }
 
         /// <summary>
-        /// Downloads a file's content by ID.
-        /// Only <see cref="Data.File.Id"/> and <see cref="Data.File.Content"/> fields will be returned on success.
+        /// Downloads a file's content by ID. Only <see cref="Data.File.Id"/> and <see cref="Data.File.Content"/> fields will be returned on success.
+        /// For a partial download provide <paramref name="downloadRange"/> argument. More info: <see cref="https://developers.google.com/drive/api/v3/manage-downloads#partial_download"/>.
         /// </summary>
         /// <param name="fileId">The ID of the file to download content for.</param>
-        public static DownloadRequest Download (string fileId)
+        /// <param name="downloadRange">The portion of the file you want to dowload (a byte range). Will download the full file when null (default).</param>
+        public static DownloadRequest Download (string fileId, RangeInt? downloadRange = null)
         {
-            return new DownloadRequest(fileId);
+            return new DownloadRequest(fileId, downloadRange);
         }
 
         /// <summary>
         /// Downloads a file's content by ID of the provided file.
+        /// For a partial download provide <paramref name="downloadRange"/> argument. More info: <see cref="https://developers.google.com/drive/api/v3/manage-downloads#partial_download"/>.
         /// </summary>
         /// <param name="fileId">The file to download content for. File's <see cref="Data.File.Id"/> field must be valid.</param>
-        public static DownloadRequest Download (Data.File file)
+        /// <param name="downloadRange">The portion of the file you want to dowload (a byte range). Will download the full file when null (default).</param>
+        public static DownloadRequest Download (Data.File file, RangeInt? downloadRange = null)
         {
-            return new DownloadRequest(file);
+            return new DownloadRequest(file, downloadRange);
         }
 
         /// <summary>
@@ -536,22 +647,42 @@ namespace UnityGoogleDrive
         /// <summary>
         /// Lists or searches files.
         /// </summary>
-        public static ListRequest List ()
+        /// <param name="query">A query for filtering the file results.</param>
+        /// <param name="fields">Selector specifying a subset of fields to include in the response.</param>
+        /// <param name="spaces">A comma-separated list of spaces to query within the corpus.</param>
+        /// <param name="pageToken">The token for continuing a previous list request on the next page.</param>
+        public static ListRequest List (string query = null, List<string> fields = null, string spaces = "drive", string pageToken = null)
         {
-            return new ListRequest();
+            var listRequest = new ListRequest();
+            listRequest.Q = query;
+            listRequest.Fields = fields;
+            listRequest.Spaces = spaces;
+            listRequest.PageToken = pageToken;
+            return listRequest;
         }
 
         /// <summary>
         /// Updates a file's metadata and/or content with patch semantics.
         /// </summary>
         /// <param name="fileId">ID of the file to update.</param>
-        /// <param name="file">
-        /// Updated metadata of the file. 
-        /// Provide <see cref="Data.File.Content"/> to update the content of the file.
-        /// </param>
+        /// <param name="file">Updated metadata of the file. Provide <see cref="Data.File.Content"/> to update the content of the file.</param>
         public static UpdateRequest Update (string fileId, Data.File file)
         {
             return new UpdateRequest(fileId, file);
+        }
+
+        /// <summary>
+        /// Updates a file's metadata and content with patch semantics and upload the content in resumable fashion.
+        /// In case the upload is interrupted get <see cref="GoogleDriveResumableUploadRequest{TRequest, TResponse}.ResumableSessionUri"/> property of the failed request and start a new one.
+        /// In case you wish to manually upload the file's data (for example using a chunked transfer), don't set <see cref="Data.File.Content"/>, so the request will just initiate 
+        /// a new resumable upload session. You can then use the returned session URI to manually upload the data. For more info see <see cref="https://developers.google.com/drive/api/v3/resumable-upload#upload-resumable"/>.
+        /// </summary>
+        /// <param name="fileId">ID of the file to update.</param>
+        /// <param name="file">Updated metadata of the file. Provide <see cref="Data.File.Content"/> to update the content of the file.</param>
+        /// <param name="resumableSessionUri">Session URI to resume previously unfinished upload. Will upload from start when not provided.</param>
+        public static ResumableUpdateRequest UpdateResumable (string fileId, Data.File file, string resumableSessionUri = null)
+        {
+            return new ResumableUpdateRequest(fileId, file, resumableSessionUri);
         }
 
         /// <summary>

@@ -10,16 +10,16 @@ using UnityEngine.Networking;
 namespace UnityGoogleDrive
 {
     /// <summary>
-    /// Property will be included in the query portion of the request URL.
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Property)]
-    public class QueryParameterAttribute : Attribute { }
-
-    /// <summary>
     /// A request intended to communicate with the Google Drive API. 
     /// </summary>
     public abstract class GoogleDriveRequest : IDisposable
     {
+        /// <summary>
+        /// Property will be included in the query portion of the request URL.
+        /// </summary>
+        [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+        protected sealed class QueryParameterAttribute : Attribute { }
+
         public abstract string Uri { get; protected set; }
         public abstract string Method { get; protected set; }
         public abstract float Progress { get; }
@@ -59,11 +59,11 @@ namespace UnityGoogleDrive
         /// The response data of the request.
         /// Make sure to check for <see cref="IsDone"/> and <see cref="IsError"/> before using.
         /// </summary>
-        public TResponse ResponseData { get; protected set; }
+        public virtual TResponse ResponseData { get; protected set; }
         /// <summary>
-        /// Progress of the request execution, in 0.0 to 1.0 range.
+        /// Progress of the data download, in 0.0 to 1.0 range.
         /// </summary>
-        public override float Progress { get { return WebRequestYeild != null ? WebRequestYeild.progress : 0; } }
+        public override float Progress { get { return WebRequest != null ? WebRequest.downloadProgress : 0; } }
         /// <summary>
         /// Whether the request is currently executing.
         /// </summary>
@@ -109,8 +109,8 @@ namespace UnityGoogleDrive
         protected static AuthController AuthController { get; private set; }
 
         protected UnityWebRequest WebRequest { get; private set; }
-        protected AsyncOperation WebRequestYeild { get; private set; }
         protected GoogleDriveRequestYeildInstruction<TResponse> YeildInstruction { get; private set; }
+        protected virtual bool AutoCompleteOnDone { get { return true; } }
 
         public GoogleDriveRequest (string uri, string method)
         {
@@ -182,7 +182,7 @@ namespace UnityGoogleDrive
             if (!string.IsNullOrEmpty(responseText))
             {
                 var apiError = JsonUtility.FromJson<GoogleDriveResponseError>(responseText);
-                if (apiError.IsError) Error += apiError.Error.Message;
+                if (apiError.IsError) AppendError(apiError.ToString());
                 if (!IsError) ResponseData = JsonUtils.FromJsonPrivateCamel<TResponse>(responseText);
             }
         }
@@ -202,7 +202,17 @@ namespace UnityGoogleDrive
             webRequest.url = string.Concat(webRequest.url, "?", GenerateQueryString());
         }
 
-        private void SendWebRequest ()
+        protected void CompleteRequest ()
+        {
+            IsDone = true;
+
+            if (OnDone != null)
+                OnDone.Invoke(ResponseData);
+
+            if (WebRequest != null) WebRequest.Dispose();
+        }
+
+        protected virtual void SendWebRequest ()
         {
             IsDone = false;
 
@@ -216,7 +226,7 @@ namespace UnityGoogleDrive
             WebRequest.SendWebRequest().completed += HandleWebRequestDone;
         }
 
-        private void HandleWebRequestDone (AsyncOperation requestYeild)
+        protected virtual void HandleWebRequestDone (AsyncOperation requestYeild)
         {
             if (WebRequest.responseCode == GoogleDriveSettings.UNAUTHORIZED_RESPONSE_CODE)
             {
@@ -224,18 +234,20 @@ namespace UnityGoogleDrive
                 return;
             }
 
-            Error = WebRequest.error;
+            AppendError(WebRequest.error);
 
             HandleResponseData(WebRequest.downloadHandler);
 
             if (IsError) Debug.LogError("UnityGoogleDrive: " + Error);
 
-            IsDone = true;
+            if (AutoCompleteOnDone) CompleteRequest();
+        }
 
-            if (OnDone != null)
-                OnDone.Invoke(ResponseData);
-
-            WebRequest.Dispose();
+        protected void AppendError (string newError)
+        {
+            if (string.IsNullOrEmpty(newError)) return;
+            if (string.IsNullOrEmpty(Error)) Error = newError;
+            else Error += Environment.NewLine + newError;
         }
 
         private void HandleUnauthorizedResponse ()

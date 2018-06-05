@@ -12,24 +12,20 @@ namespace UnityGoogleDrive
     {
         protected GoogleDriveSettings TargetSettings { get { return target as GoogleDriveSettings; } }
 
-        private static readonly string[] ACCESS_SCOPE_OPTIONS = new string[] {
-            GoogleDriveSettings.FULL_ACCESS_SCOPE,
-            GoogleDriveSettings.READONLY_ACCESS_SCOPE
-        };
-
         private SerializedProperty authCredentials;
-        private SerializedProperty accessScope;
+        private SerializedProperty accessScopes;
+        private SerializedProperty loopbackUri;
         private SerializedProperty loopbackResponseHtml;
         private SerializedProperty accessTokenPrefsKey;
         private SerializedProperty refreshTokenPrefsKey;
 
-        private GUIContent authCredentialsContent = new GUIContent("Authorization Credentials", "Google Drive API application credentials used to authorize requests.");
-        private GUIContent accessScopeContent = new GUIContent("Access Scope", "Scope of access to the user's Google Drive the app will request.");
-        private GUIContent[] accessScopeOptionsContent = new GUIContent[] { new GUIContent("Full"), new GUIContent("Readonly") };
-        private GUIContent loopbackResponseHtmlContent = new GUIContent("Loopback Response HTML", "HTML page shown to the user when loopback response is received.");
-        private GUIContent accessTokenPrefsKeyContent = new GUIContent("Acces Token Key", "PlayerPrefs key used to store access token.");
-        private GUIContent refreshTokenPrefsKeyContent = new GUIContent("Refresh Token Key", "PlayerPrefs key used to store refresh token.");
-        private GUIContent deleteCachedTokensContent = new GUIContent("Delete cached tokens", "Removes cached access and refresh tokens forcing user to login on the next request.");
+        private readonly static GUIContent authCredentialsContent = new GUIContent("Authorization Credentials", "Google Drive API application credentials used to authorize requests.");
+        private readonly static GUIContent accessScopesContent = new GUIContent("Access Scopes", "Scopes of access to the user's Google Drive the app will request.");
+        private readonly static GUIContent loopbackUriContent = new GUIContent("Loopback URI", "A web address for the loopback authentication requests. Defult is 'localhost'.");
+        private readonly static GUIContent loopbackResponseHtmlContent = new GUIContent("Loopback Response HTML", "HTML page shown to the user when loopback response is received.");
+        private readonly static GUIContent accessTokenPrefsKeyContent = new GUIContent("Acces Token Key", "PlayerPrefs key used to store access token.");
+        private readonly static GUIContent refreshTokenPrefsKeyContent = new GUIContent("Refresh Token Key", "PlayerPrefs key used to store refresh token.");
+        private readonly static GUIContent deleteCachedTokensContent = new GUIContent("Delete cached tokens", "Removes cached access and refresh tokens forcing user to login on the next request.");
 
         private static GoogleDriveSettings GetOrCreateSettings ()
         {
@@ -58,7 +54,8 @@ namespace UnityGoogleDrive
         private void OnEnable ()
         {
             authCredentials = serializedObject.FindProperty("authCredentials");
-            accessScope = serializedObject.FindProperty("accessScope");
+            accessScopes = serializedObject.FindProperty("accessScopes");
+            loopbackUri = serializedObject.FindProperty("loopbackUri");
             loopbackResponseHtml = serializedObject.FindProperty("loopbackResponseHtml");
             accessTokenPrefsKey = serializedObject.FindProperty("accessTokenPrefsKey");
             refreshTokenPrefsKey = serializedObject.FindProperty("refreshTokenPrefsKey");
@@ -73,7 +70,8 @@ namespace UnityGoogleDrive
             EditorGUILayout.Space();
 
             EditorGUILayout.PropertyField(authCredentials, authCredentialsContent, true);
-            AccessScopeGUI();
+            EditorGUILayout.PropertyField(accessScopes, accessScopesContent, true);
+            EditorGUILayout.PropertyField(loopbackUri, loopbackUriContent);
             EditorGUILayout.PropertyField(loopbackResponseHtml, loopbackResponseHtmlContent);
             EditorGUILayout.PropertyField(accessTokenPrefsKey, accessTokenPrefsKeyContent);
             EditorGUILayout.PropertyField(refreshTokenPrefsKey, refreshTokenPrefsKeyContent);
@@ -98,13 +96,6 @@ namespace UnityGoogleDrive
                     TargetSettings.DeleteCachedAuthTokens();
 
             serializedObject.ApplyModifiedProperties();
-        }
-
-        private void AccessScopeGUI ()
-        {
-            var selectedIndex = Array.IndexOf(ACCESS_SCOPE_OPTIONS, accessScope.stringValue);
-            selectedIndex = EditorGUILayout.Popup(accessScopeContent, selectedIndex, accessScopeOptionsContent);
-            accessScope.stringValue = ACCESS_SCOPE_OPTIONS[selectedIndex];
         }
 
         private void ParseCredentialsJson (string path)

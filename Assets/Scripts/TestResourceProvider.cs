@@ -20,7 +20,7 @@ public class TestResourceProvider : MonoBehaviour
     private void Awake ()
     {
         //provider = InitializeProjectResourceProvider();
-        provider = InitializeGoogleDriveResourceProvider();
+        provider = InitializeGoogleDriveResourceProvider(false);
         //provider = InitializeLocalResourceProvider();
     }
 
@@ -32,7 +32,8 @@ public class TestResourceProvider : MonoBehaviour
         //await TestResourceExistsAsync();
         //await TestAudioAsync();
         //await TestUnloadAsync();
-        await TestTextureResources();
+        //await TestTextureResources();
+        await TestTextureByDir();
     }
 
     private void OnGUI ()
@@ -46,7 +47,7 @@ public class TestResourceProvider : MonoBehaviour
     [ContextMenu("Test In Editor")]
     private void TestEditor ()
     {
-        provider = InitializeGoogleDriveResourceProvider();
+        provider = InitializeGoogleDriveResourceProvider(false);
         TestEditorAsync().WrapAsync();
     }
 
@@ -69,7 +70,7 @@ public class TestResourceProvider : MonoBehaviour
         return provider;
     }
 
-    private GoogleDriveResourceProvider InitializeGoogleDriveResourceProvider ()
+    private GoogleDriveResourceProvider InitializeGoogleDriveResourceProvider (bool purgeCache)
     {
         GoogleDriveResourceProvider provider;
         var go = new GameObject();
@@ -85,6 +86,8 @@ public class TestResourceProvider : MonoBehaviour
         provider.AddConverter(new GFolderToFolderConverter());
         //provider.AddConverter(new WavToAudioClipConverter());
         provider.AddConverter(new Mp3ToAudioClipConverter());
+
+        if (purgeCache) provider.PurgeCache();
 
         return provider;
     }
@@ -213,6 +216,18 @@ public class TestResourceProvider : MonoBehaviour
         foreach (var res in RESOURCES)
         {
             var texture = (await provider.LoadResourceAsync<Texture2D>(res)).Object;
+            SpriteRenderer.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.one * .5f);
+            await Task.Delay(TimeSpan.FromSeconds(.5f));
+        }
+    }
+
+    private async Task TestTextureByDir ()
+    {
+        var resources = await provider.LoadResourcesAsync<Texture2D>("Sprites");
+
+        foreach (var res in resources)
+        {
+            var texture = res.Object;
             SpriteRenderer.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.one * .5f);
             await Task.Delay(TimeSpan.FromSeconds(.5f));
         }
