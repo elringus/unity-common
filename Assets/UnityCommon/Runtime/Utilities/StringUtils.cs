@@ -198,4 +198,22 @@ public static class StringUtils
         return source.Trim().Trim(new char[] { '\uFEFF', '\u200B' });
         #endif
     }
+
+    /// <summary>
+    /// Given a file size (length in bytes), produces a human-readable string.
+    /// </summary>
+    /// <param name="size">Bytes length of the file.</param>
+    /// <param name="unit">Minimum unit to use: { "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB" }.</param>
+    public static string FormatFileSize (double size, int unit = 0)
+    {
+        string[] units = { "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB" };
+
+        while (size >= 1024)
+        {
+            size /= 1024;
+            ++unit;
+        }
+
+        return String.Format("{0:G4} {1}", size, units[unit]);
+    }
 }
