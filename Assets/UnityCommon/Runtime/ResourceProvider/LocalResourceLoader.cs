@@ -42,17 +42,17 @@ public class LocalResourceLoader<TResource> : LoadResourceRunner<TResource> wher
         foreach (var representation in converter.Representations)
         {
             usedRepresentation = representation;
-            var fullPath = string.Concat(filePath, ".", representation.Extension);
+            var fullPath = string.Concat(filePath, representation.Extension);
             if (!File.Exists(fullPath)) continue;
 
             rawData = await IOUtils.ReadFileAsync(fullPath);
             break;
         }
 
-        if (rawData == null) Debug.LogError(string.Format("Failed to load {0}.{1} resource using local file system: File not found.", Resource.Path, usedRepresentation.Extension));
+        if (rawData == null) Debug.LogError($"Failed to load {Resource.Path}{usedRepresentation.Extension} resource using local file system: File not found.");
         else Resource.Object = await converter.ConvertAsync(rawData);
 
-        logAction?.Invoke($"Resource '{Resource.Path}' loaded {(rawData.Length / 1024f) / 1024f:0.###}MB over {Time.time - startTime:0.###} seconds.");
+        logAction?.Invoke($"Resource '{Resource.Path}' loaded {StringUtils.FormatFileSize(rawData.Length)} over {Time.time - startTime:0.###} seconds.");
 
         HandleOnCompleted();
     }

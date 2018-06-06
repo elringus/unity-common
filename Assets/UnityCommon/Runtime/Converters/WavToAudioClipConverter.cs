@@ -9,7 +9,7 @@ using UnityEngine;
 public class WavToAudioClipConverter : IRawConverter<AudioClip>
 {
     public RawDataRepresentation[] Representations { get { return new RawDataRepresentation[] {
-        new RawDataRepresentation("wav", "audio/wav")
+        new RawDataRepresentation(".wav", "audio/wav")
     }; } }
 
     public async Task<AudioClip> ConvertAsync (byte[] obj)

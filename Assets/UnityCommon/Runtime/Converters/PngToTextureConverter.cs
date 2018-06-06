@@ -7,7 +7,7 @@ using UnityEngine;
 public class PngToTextureConverter : IRawConverter<Texture2D>
 {
     public RawDataRepresentation[] Representations { get { return new RawDataRepresentation[] {
-        new RawDataRepresentation("png", "image/png")
+        new RawDataRepresentation(".png", "image/png")
     }; } }
 
     public Task<Texture2D> ConvertAsync (byte[] obj)

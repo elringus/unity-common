@@ -141,7 +141,7 @@ public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
         var resourceType = typeof(T);
         if (!converters.ContainsKey(resourceType))
         {
-            Debug.LogError(string.Format("Converter for resource of type '{0}' is not available.", resourceType.Name));
+            Debug.LogError($"Converter for resource of type '{resourceType.Name}' is not available.");
             return null;
         }
         return converters[resourceType] as IRawConverter<T>;

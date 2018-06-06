@@ -74,7 +74,7 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
         // In case we used native requests the resource will already be set, so no need to use converters.
         if (!Resource.IsValid) Resource.Object = await converter.ConvertAsync(rawData);
 
-        logAction?.Invoke($"Resource '{Resource.Path}' loaded {(rawData.Length / 1024f) / 1024f:0.###}MB over {Time.time - startTime:0.###} seconds from " + (usedCache ? "cache." : "Google Drive."));
+        logAction?.Invoke($"Resource '{Resource.Path}' loaded {StringUtils.FormatFileSize(rawData.Length)} over {Time.time - startTime:0.###} seconds from " + (usedCache ? "cache." : "Google Drive."));
 
         HandleOnCompleted();
     }
@@ -101,9 +101,9 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
     {
         foreach (var representation in converter.Representations)
         {
-            var fullPath = $"{filePath}.{representation.Extension ?? string.Empty}";
+            var fullPath = string.Concat(filePath, representation.Extension);
             var files = await Helpers.FindFilesByPathAsync(fullPath, fields: new List<string> { "files(id, mimeType, modifiedTime)" }, mime: representation.MimeType);
-            if (files.Count > 1) Debug.LogWarning($"Multiple '{Resource.Path}.{representation.Extension}' files been found in Google Drive.");
+            if (files.Count > 1) Debug.LogWarning($"Multiple '{fullPath}' files been found in Google Drive.");
             if (files.Count > 0) { usedRepresentation = representation; return files[0]; }
         }
 
@@ -123,7 +123,7 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
         await downloadRequest.SendNonGeneric();
         if (downloadRequest.IsError || downloadRequest.GetResponseData<UnityGoogleDrive.Data.File>().Content == null)
         {
-            Debug.LogError($"Failed to download {Resource.Path}.{usedRepresentation.Extension} resource from Google Drive.");
+            Debug.LogError($"Failed to download {Resource.Path}{usedRepresentation.Extension} resource from Google Drive.");
             return null;
         }
 

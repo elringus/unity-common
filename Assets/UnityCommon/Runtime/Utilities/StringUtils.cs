@@ -203,10 +203,10 @@ public static class StringUtils
     /// Given a file size (length in bytes), produces a human-readable string.
     /// </summary>
     /// <param name="size">Bytes length of the file.</param>
-    /// <param name="unit">Minimum unit to use: { "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB" }.</param>
+    /// <param name="unit">Minimum unit to use: { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" }.</param>
     public static string FormatFileSize (double size, int unit = 0)
     {
-        string[] units = { "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB" };
+        string[] units = { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB" };
 
         while (size >= 1024)
         {
@@ -214,6 +214,6 @@ public static class StringUtils
             ++unit;
         }
 
-        return String.Format("{0:G4} {1}", size, units[unit]);
+        return String.Format("{0:G4}{1}", size, units[unit]);
     }
 }

@@ -54,7 +54,7 @@ public class LocalResourceLocator<TResource> : LocateResourcesRunner<TResource> 
         var results = new Dictionary<RawDataRepresentation, List<FileInfo>>();
         foreach (var representation in converter.Representations)
         {
-            var files = parendFolder.GetFiles(string.Concat("*.", representation.Extension)).ToList();
+            var files = parendFolder.GetFiles(string.Concat("*", representation.Extension)).ToList();
             if (files != null && files.Count > 0) results.Add(representation, files);
         }
 

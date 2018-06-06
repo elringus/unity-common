@@ -7,7 +7,7 @@ using UnityEngine;
 public class JpgToSpriteConverter : IRawConverter<Sprite>
 {
     public RawDataRepresentation[] Representations { get { return new RawDataRepresentation[] {
-        new RawDataRepresentation("jpg", "image/jpeg")
+        new RawDataRepresentation(".jpg", "image/jpeg")
     }; } }
 
     public Task<Sprite> ConvertAsync (byte[] obj)
