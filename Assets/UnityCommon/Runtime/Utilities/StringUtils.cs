@@ -214,6 +214,6 @@ public static class StringUtils
             ++unit;
         }
 
-        return $"{size:G4} {units[unit]}";
+        return string.Format("{0:G4} {1}", size, units[unit]);
     }
 }
