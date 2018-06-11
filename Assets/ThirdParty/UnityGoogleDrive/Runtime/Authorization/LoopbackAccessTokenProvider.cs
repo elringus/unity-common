@@ -3,6 +3,7 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using UnityEngine;
 
 namespace UnityGoogleDrive
@@ -18,6 +19,7 @@ namespace UnityGoogleDrive
         public bool IsDone { get; private set; }
         public bool IsError { get; private set; }
 
+        private SynchronizationContext unitySyncContext;
         private GoogleDriveSettings settings;
         private AccessTokenRefresher accessTokenRefresher;
         private AuthCodeExchanger authCodeExchanger;
@@ -29,6 +31,7 @@ namespace UnityGoogleDrive
         public LoopbackAccessTokenProvider (GoogleDriveSettings googleDriveSettings)
         {
             settings = googleDriveSettings;
+            unitySyncContext = SynchronizationContext.Current;
 
             accessTokenRefresher = new AccessTokenRefresher(settings);
             accessTokenRefresher.OnDone += HandleAccessTokenRefreshed;
@@ -94,11 +97,7 @@ namespace UnityGoogleDrive
             }
         }
 
-        #if NET_4_6 || NET_STANDARD_2_0
-        private async void ExecuteFullAuth ()
-        #else
         private void ExecuteFullAuth ()
-        #endif
         {
             // Generate state and PKCE values.
             expectedState = CryptoUtils.RandomDataBase64Uri(32);
@@ -120,7 +119,7 @@ namespace UnityGoogleDrive
                     "&access_type=offline" + // Forces to return a refresh token at the auth code exchange phase.
                     "&approval_prompt=force", // Forces to show consent screen for each auth request. Needed to return refresh tokens on consequent auth runs.
                 settings.AuthCredentials.AuthUri,
-                string.Join(" ", settings.AccessScopes.ToArray()),
+                Uri.EscapeDataString(string.Join(" ", settings.AccessScopes.ToArray())),
                 Uri.EscapeDataString(redirectUri),
                 settings.AuthCredentials.ClientId,
                 expectedState,
@@ -131,11 +130,20 @@ namespace UnityGoogleDrive
             Application.OpenURL(authRequest);
 
             // Wait for the authorization response.
-            #if NET_4_6 || NET_STANDARD_2_0
-            var context = await httpListener.GetContextAsync();
-            #else
-            var context = httpListener.GetContext();
-            #endif
+            httpListener.BeginGetContext(new AsyncCallback(HandleHttpListenerCallback), httpListener);
+        }
+
+        private void HandleHttpListenerCallback (IAsyncResult result)
+        {
+            // This method is called on a background thread; rerouting it to the Unity's thread.
+            unitySyncContext.Send(HandleHttpListenerCallbackOnUnityThread, result);
+        }
+
+        private void HandleHttpListenerCallbackOnUnityThread (object state)
+        {
+            var result = (IAsyncResult)state;
+            var httpListener = (HttpListener)result.AsyncState;
+            var context = httpListener.EndGetContext(result);
 
             // Send an HTTP response to the browser to notify the user to close the browser.
             var response = context.Response;
@@ -145,7 +153,7 @@ namespace UnityGoogleDrive
             var responseOutput = response.OutputStream;
             responseOutput.Write(buffer, 0, buffer.Length);
             responseOutput.Close();
-            httpListener.Stop();
+            httpListener.Close();
 
             // Check for errors.
             if (context.Request.QueryString.Get("error") != null)

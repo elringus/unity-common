@@ -77,8 +77,8 @@ namespace UnityGoogleDrive
             /// </summary>
             [QueryParameter] public bool? UseContentAsIndexableText { get; set; }
 
-            public CreateRequest (Data.File file) : base(file.Content != null ? @"https://www.googleapis.com/upload/drive/v3/files" :
-                @"https://www.googleapis.com/drive/v3/files", UnityWebRequest.kHttpVerbPOST, file, file.Content, file.MimeType) { }
+            public CreateRequest (Data.File file, string uploadMimeType = null) : base(file.Content != null ? @"https://www.googleapis.com/upload/drive/v3/files" :
+                @"https://www.googleapis.com/drive/v3/files", UnityWebRequest.kHttpVerbPOST, file, file.Content, uploadMimeType ?? file.MimeType) { }
         }
 
         /// <summary>
@@ -111,8 +111,8 @@ namespace UnityGoogleDrive
             /// </summary>
             [QueryParameter] public bool? UseContentAsIndexableText { get; set; }
 
-            public ResumableCreateRequest (Data.File file, string resumableSessionUri = null) : base(@"https://www.googleapis.com/upload/drive/v3/files", 
-                UnityWebRequest.kHttpVerbPOST, file, file.Content, file.MimeType, resumableSessionUri) { }
+            public ResumableCreateRequest (Data.File file, string resumableSessionUri = null, string uploadMimeType = null) : base(@"https://www.googleapis.com/upload/drive/v3/files", 
+                UnityWebRequest.kHttpVerbPOST, file, file.Content, uploadMimeType ?? file.MimeType, resumableSessionUri) { }
         }
 
         /// <summary>
@@ -451,8 +451,8 @@ namespace UnityGoogleDrive
             /// </summary>
             [QueryParameter] public bool? UseContentAsIndexableText { get; set; }
 
-            public UpdateRequest (string fileId, Data.File file) : base(file.Content != null ? string.Concat(@"https://www.googleapis.com/upload/drive/v3/files/", fileId) :
-                string.Concat(@"https://www.googleapis.com/drive/v3/files/", fileId), "PATCH", file, file.Content, file.MimeType) { }
+            public UpdateRequest (string fileId, Data.File file, string uploadMimeType = null) : base(file.Content != null ? string.Concat(@"https://www.googleapis.com/upload/drive/v3/files/", fileId) :
+                string.Concat(@"https://www.googleapis.com/drive/v3/files/", fileId), "PATCH", file, file.Content, uploadMimeType ?? file.MimeType) { }
         }
 
         /// <summary>
@@ -486,8 +486,8 @@ namespace UnityGoogleDrive
             /// </summary>
             [QueryParameter] public bool? UseContentAsIndexableText { get; set; }
 
-            public ResumableUpdateRequest (string fileId, Data.File file, string resumableSessionUri = null) 
-                : base(string.Concat(@"https://www.googleapis.com/upload/drive/v3/files/", fileId), "PATCH", file, file.Content, file.MimeType, resumableSessionUri) { }
+            public ResumableUpdateRequest (string fileId, Data.File file, string resumableSessionUri = null, string uploadMimeType = null) 
+                : base(string.Concat(@"https://www.googleapis.com/upload/drive/v3/files/", fileId), "PATCH", file, file.Content, uploadMimeType ?? file.MimeType, resumableSessionUri) { }
         }
 
         /// <summary>
@@ -504,9 +504,10 @@ namespace UnityGoogleDrive
         /// Creates a new file.
         /// </summary>
         /// <param name="fileId">The file to create. Provide <see cref="Data.File.Content"/> to upload the content of the file.</param>
-        public static CreateRequest Create (Data.File file)
+        /// <param name="uploadMimeType">When the uploaded content differs from the target type (Eg when uploading plain text to create a google document), specify the uploaded content MIME type here.</param>
+        public static CreateRequest Create (Data.File file, string uploadMimeType = null)
         {
-            return new CreateRequest(file);
+            return new CreateRequest(file, uploadMimeType);
         }
 
         /// <summary>
@@ -517,9 +518,10 @@ namespace UnityGoogleDrive
         /// </summary>
         /// <param name="file">The file to create. Provide <see cref="Data.File.Content"/> to upload the content of the file.</param>
         /// <param name="resumableSessionUri">Session URI to resume previously unfinished upload. Will upload from start when not provided.</param>
-        public static ResumableCreateRequest CreateResumable (Data.File file, string resumableSessionUri = null)
+        /// <param name="uploadMimeType">When the uploaded content differs from the target type (Eg when uploading plain text to create a google document), specify the uploaded content MIME type here.</param>
+        public static ResumableCreateRequest CreateResumable (Data.File file, string resumableSessionUri = null, string uploadMimeType = null)
         {
-            return new ResumableCreateRequest(file, resumableSessionUri);
+            return new ResumableCreateRequest(file, resumableSessionUri, uploadMimeType);
         }
 
         /// <summary>
@@ -666,9 +668,10 @@ namespace UnityGoogleDrive
         /// </summary>
         /// <param name="fileId">ID of the file to update.</param>
         /// <param name="file">Updated metadata of the file. Provide <see cref="Data.File.Content"/> to update the content of the file.</param>
-        public static UpdateRequest Update (string fileId, Data.File file)
+        /// <param name="uploadMimeType">When the uploaded content differs from the target type (Eg when uploading plain text to create a google document), specify the uploaded content MIME type here.</param>
+        public static UpdateRequest Update (string fileId, Data.File file, string uploadMimeType = null)
         {
-            return new UpdateRequest(fileId, file);
+            return new UpdateRequest(fileId, file, uploadMimeType);
         }
 
         /// <summary>
@@ -680,9 +683,10 @@ namespace UnityGoogleDrive
         /// <param name="fileId">ID of the file to update.</param>
         /// <param name="file">Updated metadata of the file. Provide <see cref="Data.File.Content"/> to update the content of the file.</param>
         /// <param name="resumableSessionUri">Session URI to resume previously unfinished upload. Will upload from start when not provided.</param>
-        public static ResumableUpdateRequest UpdateResumable (string fileId, Data.File file, string resumableSessionUri = null)
+        /// <param name="uploadMimeType">When the uploaded content differs from the target type (Eg when uploading plain text to create a google document), specify the uploaded content MIME type here.</param>
+        public static ResumableUpdateRequest UpdateResumable (string fileId, Data.File file, string resumableSessionUri = null, string uploadMimeType = null)
         {
-            return new ResumableUpdateRequest(fileId, file, resumableSessionUri);
+            return new ResumableUpdateRequest(fileId, file, resumableSessionUri, uploadMimeType);
         }
 
         /// <summary>

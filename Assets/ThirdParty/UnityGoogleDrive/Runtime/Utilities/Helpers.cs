@@ -1,22 +1,16 @@
 ﻿// Copyright 2017-2018 Elringus (Artyom Sovetnikov). All Rights Reserved.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using UnityEngine;
 
 namespace UnityGoogleDrive
 {
     public static class Helpers
     {
-        /// <summary>
-        /// The MIME type of a <see cref="Data.File"/> representing a folder in Google Drive.
-        /// </summary>
-        /// <remarks>
-        /// A folder in Google Drive is actually a file with the special MIME type. 
-        /// More info: https://developers.google.com/drive/api/v3/folder.
-        /// </remarks>
-        public const string FOLDER_MIME_TYPE = "application/vnd.google-apps.folder";
         /// <summary>
         /// ID alias of the drive's root folder.
         /// </summary>
@@ -33,6 +27,31 @@ namespace UnityGoogleDrive
         /// A special hidden space that your app can use to store application data.
         /// </summary>
         public const string APPDATA_SPACE = "appDataFolder";
+
+        /// <summary>
+        /// The MIME type of a <see cref="Data.File"/> representing a folder in Google Drive.
+        /// </summary>
+        /// <remarks>
+        /// A folder in Google Drive is actually a file with the special MIME type. 
+        /// More info: https://developers.google.com/drive/api/v3/folder.
+        /// </remarks>
+        public const string FOLDER_MIME_TYPE = "application/vnd.google-apps.folder";
+        /// <summary>
+        /// The MIME type of a Google Document.
+        /// </summary>
+        public const string DOCUMENT_MIME_TYPE = "application/vnd.google-apps.document";
+        /// <summary>
+        /// The MIME type of a Google Sheet.
+        /// </summary>
+        public const string SHEET_MIME_TYPE = "application/vnd.google-apps.spreadsheet";
+        /// <summary>
+        /// The MIME type of a Google Slides.
+        /// </summary>
+        public const string SLIDES_MIME_TYPE = "application/vnd.google-apps.presentation";
+        /// <summary>
+        /// The MIME type of a Google App Script.
+        /// </summary>
+        public const string SCRIPT_MIME_TYPE = "application/vnd.google-apps.script";
 
         #if NET_4_6 || NET_STANDARD_2_0
         /// <summary>
@@ -81,19 +100,22 @@ namespace UnityGoogleDrive
         /// <param name="file">Metadata for the created (updated) file.</param>
         /// <param name="path">Created file's path (including file name).</param>
         /// <param name="appData">Whether to use the AppData space instead of the drive root.</param>
+        /// <param name="forceUploadContent">Whether to always upload <see cref="Data.File.Content"/>, even when checksum of the content is equal to the one kept on drive.</param>
+        /// <param name="uploadMimeType">When the uploaded content differs from the target type (Eg when uploading plain text to create a google document), specify the uploaded content MIME type here.</param>
         /// <returns>ID of the created (updated) file. Null if failed.</returns>
-        public static async System.Threading.Tasks.Task<string> CreateOrUpdateFileAtPathAsync (Data.File file, string path, bool appData = false)
+        public static async System.Threading.Tasks.Task<string> CreateOrUpdateFileAtPathAsync (Data.File file, string path, bool appData = false, bool forceUploadContent = false, string uploadMimeType = null)
         {
             var fileName = Path.GetFileName(path);
             if (string.IsNullOrWhiteSpace(fileName)) return null;
             if (string.IsNullOrWhiteSpace(file.Name)) file.Name = fileName;
 
             // Just modify the file if already exists.
-            var files = await FindFilesByPathAsync(path, appData, mime: file.MimeType);
+            var files = await FindFilesByPathAsync(path, appData, new List<string> { "files(md5Checksum)" }, file.MimeType);
             if (files.Count > 0)
             {
                 if (files.Count > 1) Debug.LogWarning($"UnityGoogleDrive: Multiple '{path}' files found while attempting to modify the file. Operation will modify only the first found file.");
-                using (var updateRequest = GoogleDriveFiles.Update(files[0].Id, file))
+                if (!forceUploadContent && file.Content != null && CalculateMD5Checksum(file.Content) == files[0].Md5Checksum) file.Content = null;
+                using (var updateRequest = GoogleDriveFiles.Update(files[0].Id, file, uploadMimeType))
                 {
                     updateRequest.Fields = new List<string> { "id" };
                     var updatedFile = await updateRequest.Send();
@@ -146,7 +168,7 @@ namespace UnityGoogleDrive
 
             // Create the file.
             file.Parents = new List<string> { parentIds.First() };
-            using (var createRequest = GoogleDriveFiles.Create(file))
+            using (var createRequest = GoogleDriveFiles.Create(file, uploadMimeType))
             {
                 createRequest.Fields = new List<string> { "id" };
                 var createdFile = await createRequest.Send();
@@ -205,5 +227,14 @@ namespace UnityGoogleDrive
             return result.Count == 0 ? null : result;
         }
         #endif
+
+        public static string CalculateMD5Checksum (byte[] content)
+        {
+            using (var md5 = MD5.Create())
+            {
+                    var hash = md5.ComputeHash(content);
+                    return BitConverter.ToString(hash).Replace("-", string.Empty).ToLowerInvariant();
+            }
+        }
     }
 }
