@@ -10,7 +10,8 @@ using UnityEngine;
 public class Mp3ToAudioClipConverter : IRawConverter<AudioClip>
 {
     public RawDataRepresentation[] Representations { get { return new RawDataRepresentation[] {
-        new RawDataRepresentation(".mp3", "audio/mpeg")
+        new RawDataRepresentation(".mp3", "audio/mpeg"),    // RFC standard: https://tools.ietf.org/html/rfc3003
+        new RawDataRepresentation(".mp3", "audio/mp3")      //... but Chrome uses this one when uploading an mp3.
     }; } }
 
     public async Task<AudioClip> ConvertAsync (byte[] obj)
