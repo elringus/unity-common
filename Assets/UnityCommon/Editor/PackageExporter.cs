@@ -18,7 +18,7 @@ public class PackageExporter : EditorWindow
     private static bool IsAnyPathsIgnored { get { return !string.IsNullOrEmpty(IgnoredPaths); } }
     protected static bool IsReadyToExport { get { return !string.IsNullOrEmpty(OutputPath) && !string.IsNullOrEmpty(OutputFileName); } }
 
-    private const string TEMP_FOLDER_PATH = "!TEMP_PACKAGE_EXPORTER";
+    private const string TEMP_FOLDER_NAME = "!TEMP_PACKAGE_EXPORTER";
     private const string PREFS_PREFIX = "PackageExporter.";
     private const string TAB_CHARS = "    ";
 
@@ -44,13 +44,6 @@ public class PackageExporter : EditorWindow
             ExportPackageImpl();
     }
 
-    [MenuItem("Assets/+ Export Assembly", priority = 20)]
-    private static void ExportAssembly ()
-    {
-        if (IsReadyToExport)
-            ExportAssemblyImpl();
-    }
-
     private void OnGUI ()
     {
         EditorGUILayout.LabelField("Package Exporter Settings", EditorStyles.boldLabel);
@@ -69,11 +62,6 @@ public class PackageExporter : EditorWindow
         IgnoredPaths = EditorGUILayout.TextArea(IgnoredPaths);
     }
 
-    private static void ExportAssemblyImpl ()
-    {
-
-    }
-
     private static void ExportPackageImpl ()
     {
         // Temporary move-out ignored assets.
@@ -81,7 +69,7 @@ public class PackageExporter : EditorWindow
         var tmpFolderPath = string.Empty;
         if (IsAnyPathsIgnored)
         {
-            var tmpFolderGuid = AssetDatabase.CreateFolder("Assets", TEMP_FOLDER_PATH);
+            var tmpFolderGuid = AssetDatabase.CreateFolder("Assets", TEMP_FOLDER_NAME);
             tmpFolderPath = AssetDatabase.GUIDToAssetPath(tmpFolderGuid);
             var ignoredPaths = IgnoredPaths.SplitByNewLine().ToList();
             foreach (var path in AssetDatabase.GetAllAssetPaths())
@@ -110,7 +98,7 @@ public class PackageExporter : EditorWindow
             foreach (var path in AssetDatabase.GetAllAssetPaths())
             {
                 if (!path.StartsWith(AssetsPath)) continue;
-                if (!path.EndsWith(".cs")) continue;
+                if (!path.EndsWith(".cs") && !path.EndsWith(".shader") && !path.EndsWith(".cginc")) continue;
 
                 var fullpath = Application.dataPath.Replace("Assets", "") + path;
                 var originalScriptText = File.ReadAllText(fullpath, Encoding.UTF8);
