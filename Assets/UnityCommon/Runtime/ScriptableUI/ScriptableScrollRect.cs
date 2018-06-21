@@ -2,21 +2,24 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ScriptableScrollRect : ScriptableUIControl<ScrollRect>
+namespace UnityCommon
 {
-    public event Action<Vector2> OnPositionChanged;
-
-    protected override void BindUIEvents ()
+    public class ScriptableScrollRect : ScriptableUIControl<ScrollRect>
     {
-        UIComponent.onValueChanged.AddListener(OnScrollPositionChanged);
-        UIComponent.onValueChanged.AddListener(OnPositionChanged.SafeInvoke);
-    }
+        public event Action<Vector2> OnPositionChanged;
 
-    protected override void UnbindUIEvents ()
-    {
-        UIComponent.onValueChanged.RemoveListener(OnScrollPositionChanged);
-        UIComponent.onValueChanged.RemoveListener(OnPositionChanged.SafeInvoke);
-    }
+        protected override void BindUIEvents ()
+        {
+            UIComponent.onValueChanged.AddListener(OnScrollPositionChanged);
+            UIComponent.onValueChanged.AddListener(OnPositionChanged.SafeInvoke);
+        }
 
-    protected virtual void OnScrollPositionChanged (Vector2 scrollPosition) { }
+        protected override void UnbindUIEvents ()
+        {
+            UIComponent.onValueChanged.RemoveListener(OnScrollPositionChanged);
+            UIComponent.onValueChanged.RemoveListener(OnPositionChanged.SafeInvoke);
+        }
+
+        protected virtual void OnScrollPositionChanged (Vector2 scrollPosition) { }
+    }
 }

@@ -2,24 +2,27 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public static class GraphicUtils
+namespace UnityCommon
 {
-    public static void SetOpacity (this Graphic graphic, float opacity)
+    public static class GraphicUtils
     {
-        Debug.Assert(graphic != null);
-        var spriteColor = graphic.color;
-        graphic.color = new Color(spriteColor.r, spriteColor.g, spriteColor.b, opacity);
-    }
+        public static void SetOpacity (this Graphic graphic, float opacity)
+        {
+            Debug.Assert(graphic != null);
+            var spriteColor = graphic.color;
+            graphic.color = new Color(spriteColor.r, spriteColor.g, spriteColor.b, opacity);
+        }
 
-    public static bool IsTransparent (this Graphic graphic)
-    {
-        Debug.Assert(graphic != null);
-        return Mathf.Approximately(graphic.color.a, 0f);
-    }
+        public static bool IsTransparent (this Graphic graphic)
+        {
+            Debug.Assert(graphic != null);
+            return Mathf.Approximately(graphic.color.a, 0f);
+        }
 
-    public static bool IsOpaque (this Graphic graphic)
-    {
-        Debug.Assert(graphic != null);
-        return Mathf.Approximately(graphic.color.a, 1f);
+        public static bool IsOpaque (this Graphic graphic)
+        {
+            Debug.Assert(graphic != null);
+            return Mathf.Approximately(graphic.color.a, 1f);
+        }
     }
 }

@@ -1,30 +1,33 @@
 ﻿using UnityEngine;
 
-public class ActiveWhenVisible : MonoBehaviour
+namespace UnityCommon
 {
-    [SerializeField] private MonoBehaviour[] affectedScripts = null;
-
-    private void Start ()
+    public class ActiveWhenVisible : MonoBehaviour
     {
-        SetEnabled(false);
-    }
+        [SerializeField] private MonoBehaviour[] affectedScripts = null;
 
-    private void OnBecameVisible ()
-    {
-        SetEnabled(true);
-    }
+        private void Start ()
+        {
+            SetEnabled(false);
+        }
 
-    private void OnBecameInvisible ()
-    {
-        SetEnabled(false);
-    }
+        private void OnBecameVisible ()
+        {
+            SetEnabled(true);
+        }
 
-    private void SetEnabled (bool isEnabled)
-    {
-        if (affectedScripts == null) return;
+        private void OnBecameInvisible ()
+        {
+            SetEnabled(false);
+        }
 
-        var length = affectedScripts.Length;
-        for (int i = 0; i < length; i++)
-            affectedScripts[i].enabled = isEnabled;
+        private void SetEnabled (bool isEnabled)
+        {
+            if (affectedScripts == null) return;
+
+            var length = affectedScripts.Length;
+            for (int i = 0; i < length; i++)
+                affectedScripts[i].enabled = isEnabled;
+        }
     }
 }

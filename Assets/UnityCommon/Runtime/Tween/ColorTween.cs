@@ -1,47 +1,50 @@
 ﻿using System;
 using UnityEngine;
 
-public enum ColorTweenMode { All, RGB, Alpha }
-
-public struct ColorTween : ITweenValue
+namespace UnityCommon
 {
-    public event Action<Color> OnColorTween;
+    public enum ColorTweenMode { All, RGB, Alpha }
 
-    public Color StartColor { get; set; }
-    public Color TargetColor { get; set; }
-    public ColorTweenMode TweenMode { get; set; }
-    public float TweenDuration { get; set; }
-    public bool IsTimeScaleIgnored { get; set; }
-    public bool IsTargetValid { get { return OnColorTween != null; } }
-
-    public ColorTween (Color from, Color to, ColorTweenMode mode, float time, Action<Color> onTween, bool ignoreTimeScale = false)
+    public struct ColorTween : ITweenValue
     {
-        StartColor = from;
-        TargetColor = to;
-        TweenMode = mode;
-        TweenDuration = time;
-        IsTimeScaleIgnored = ignoreTimeScale;
-        OnColorTween = onTween;
-    }
+        public event Action<Color> OnColorTween;
 
-    public void TweenValue (float tweenPercent)
-    {
-        if (!IsTargetValid) return;
+        public Color StartColor { get; set; }
+        public Color TargetColor { get; set; }
+        public ColorTweenMode TweenMode { get; set; }
+        public float TweenDuration { get; set; }
+        public bool IsTimeScaleIgnored { get; set; }
+        public bool IsTargetValid { get { return OnColorTween != null; } }
 
-        var newColor = Color.Lerp(StartColor, TargetColor, tweenPercent);
-
-        if (TweenMode == ColorTweenMode.Alpha)
+        public ColorTween (Color from, Color to, ColorTweenMode mode, float time, Action<Color> onTween, bool ignoreTimeScale = false)
         {
-            newColor.r = StartColor.r;
-            newColor.g = StartColor.g;
-            newColor.b = StartColor.b;
-        }
-        else if (TweenMode == ColorTweenMode.RGB)
-        {
-            newColor.a = StartColor.a;
+            StartColor = from;
+            TargetColor = to;
+            TweenMode = mode;
+            TweenDuration = time;
+            IsTimeScaleIgnored = ignoreTimeScale;
+            OnColorTween = onTween;
         }
 
-        OnColorTween.Invoke(newColor);
-    }
+        public void TweenValue (float tweenPercent)
+        {
+            if (!IsTargetValid) return;
 
+            var newColor = Color.Lerp(StartColor, TargetColor, tweenPercent);
+
+            if (TweenMode == ColorTweenMode.Alpha)
+            {
+                newColor.r = StartColor.r;
+                newColor.g = StartColor.g;
+                newColor.b = StartColor.b;
+            }
+            else if (TweenMode == ColorTweenMode.RGB)
+            {
+                newColor.a = StartColor.a;
+            }
+
+            OnColorTween.Invoke(newColor);
+        }
+
+    }
 }

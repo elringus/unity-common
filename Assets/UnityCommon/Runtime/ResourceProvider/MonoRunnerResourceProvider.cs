@@ -4,170 +4,173 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
-/// <summary>
-/// <see cref="MonoBehaviour"/> based <see cref="IResourceProvider"/> implementation;
-/// using <see cref="AsyncRunner"/>-derived classes for resource loading operations.
-/// </summary>
-[ExecuteInEditMode]
-public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvider
+namespace UnityCommon
 {
-    public event Action<float> OnLoadProgress;
-    public event Action<string> OnMessage;
-
-    public bool IsLoading => LoadProgress < 1f;
-    public float LoadProgress { get; private set; }
-
-    protected Dictionary<string, Resource> Resources = new Dictionary<string, Resource>();
-    protected Dictionary<string, ResourceRunner> Runners = new Dictionary<string, ResourceRunner>();
-
-    protected virtual void Awake ()
+    /// <summary>
+    /// <see cref="MonoBehaviour"/> based <see cref="IResourceProvider"/> implementation;
+    /// using <see cref="AsyncRunner"/>-derived classes for resource loading operations.
+    /// </summary>
+    [ExecuteInEditMode]
+    public abstract class MonoRunnerResourceProvider : MonoBehaviour, IResourceProvider
     {
-        LoadProgress = 1f;
-    }
+        public event Action<float> OnLoadProgress;
+        public event Action<string> OnMessage;
 
-    public virtual async Task<Resource<T>> LoadResourceAsync<T> (string path) where T : class
-    {
-        if (Runners.ContainsKey(path))
-            return await (Runners[path] as LoadResourceRunner<T>);
+        public bool IsLoading => LoadProgress < 1f;
+        public float LoadProgress { get; private set; }
 
-        if (Resources.ContainsKey(path))
-            return Resources[path] as Resource<T>;
+        protected Dictionary<string, Resource> Resources = new Dictionary<string, Resource>();
+        protected Dictionary<string, ResourceRunner> Runners = new Dictionary<string, ResourceRunner>();
 
-        var resource = new Resource<T>(path);
-        Resources.Add(path, resource);
+        protected virtual void Awake ()
+        {
+            LoadProgress = 1f;
+        }
 
-        var loadRunner = CreateLoadRunner(resource);
-        Runners.Add(path, loadRunner);
-        UpdateLoadProgress();
+        public virtual async Task<Resource<T>> LoadResourceAsync<T> (string path) where T : class
+        {
+            if (Runners.ContainsKey(path))
+                return await (Runners[path] as LoadResourceRunner<T>);
 
-        RunLoader(loadRunner);
-        await loadRunner;
+            if (Resources.ContainsKey(path))
+                return Resources[path] as Resource<T>;
 
-        HandleResourceLoaded(loadRunner.Resource);
-        return loadRunner.Resource;
-    }
+            var resource = new Resource<T>(path);
+            Resources.Add(path, resource);
 
-    public virtual async Task<List<Resource<T>>> LoadResourcesAsync<T> (string path) where T : class
-    {
-        var loactedResources = await LocateResourcesAsync<T>(path);
-        return await LoadLocatedResourcesAsync(loactedResources);
-    }
+            var loadRunner = CreateLoadRunner(resource);
+            Runners.Add(path, loadRunner);
+            UpdateLoadProgress();
 
-    public virtual void UnloadResource (string path)
-    {
-        if (!ResourceLoaded(path)) return;
+            RunLoader(loadRunner);
+            await loadRunner;
 
-        if (Runners.ContainsKey(path))
-            CancelResourceLoading(path);
+            HandleResourceLoaded(loadRunner.Resource);
+            return loadRunner.Resource;
+        }
 
-        var resource = Resources[path];
-        Resources.Remove(path);
-        UnloadResource(resource);
+        public virtual async Task<List<Resource<T>>> LoadResourcesAsync<T> (string path) where T : class
+        {
+            var loactedResources = await LocateResourcesAsync<T>(path);
+            return await LoadLocatedResourcesAsync(loactedResources);
+        }
 
-        LogMessage(string.Format("Resource '{0}' unloaded.", path));
-    }
+        public virtual void UnloadResource (string path)
+        {
+            if (!ResourceLoaded(path)) return;
 
-    public virtual void UnloadResources ()
-    {
-        foreach (var resource in Resources.Values.ToList())
-            UnloadResource(resource.Path);
-    }
+            if (Runners.ContainsKey(path))
+                CancelResourceLoading(path);
 
-    public virtual bool ResourceLoaded (string path)
-    {
-        return Resources.ContainsKey(path);
-    }
+            var resource = Resources[path];
+            Resources.Remove(path);
+            UnloadResource(resource);
 
-    public virtual async Task<bool> ResourceExistsAsync<T> (string path) where T : class
-    {
-        // TODO: Check for resource type.
-        if (ResourceLoaded(path)) return true;
-        var folderPath = path.Contains("/") ? path.GetBeforeLast("/") : string.Empty;
-        var locatedResources = await LocateResourcesAsync<T>(folderPath);
-        return locatedResources.Exists(r => r.Path.Equals(path));
-    }
+            LogMessage(string.Format("Resource '{0}' unloaded.", path));
+        }
 
-    public virtual async Task<List<Resource<T>>> LocateResourcesAsync<T> (string path) where T : class
-    {
-        if (path == null) path = string.Empty;
+        public virtual void UnloadResources ()
+        {
+            foreach (var resource in Resources.Values.ToList())
+                UnloadResource(resource.Path);
+        }
 
-        if (Runners.ContainsKey(path))
-            return await (Runners[path] as LocateResourcesRunner<T>);
+        public virtual bool ResourceLoaded (string path)
+        {
+            return Resources.ContainsKey(path);
+        }
 
-        var locateRunner = CreateLocateRunner<T>(path);
-        Runners.Add(path, locateRunner);
-        UpdateLoadProgress();
+        public virtual async Task<bool> ResourceExistsAsync<T> (string path) where T : class
+        {
+            // TODO: Check for resource type.
+            if (ResourceLoaded(path)) return true;
+            var folderPath = path.Contains("/") ? path.GetBeforeLast("/") : string.Empty;
+            var locatedResources = await LocateResourcesAsync<T>(folderPath);
+            return locatedResources.Exists(r => r.Path.Equals(path));
+        }
 
-        RunLocator(locateRunner);
+        public virtual async Task<List<Resource<T>>> LocateResourcesAsync<T> (string path) where T : class
+        {
+            if (path == null) path = string.Empty;
 
-        await locateRunner;
-        HandleResourcesLocated(locateRunner.LocatedResources, path);
-        return locateRunner.LocatedResources;
-    }
+            if (Runners.ContainsKey(path))
+                return await (Runners[path] as LocateResourcesRunner<T>);
 
-    public void LogMessage (string message)
-    {
-        OnMessage.SafeInvoke(message);
-    }
+            var locateRunner = CreateLocateRunner<T>(path);
+            Runners.Add(path, locateRunner);
+            UpdateLoadProgress();
 
-    protected abstract LoadResourceRunner<T> CreateLoadRunner<T> (Resource<T> resource) where T : class;
-    protected abstract LocateResourcesRunner<T> CreateLocateRunner<T> (string path) where T : class;
-    protected abstract void UnloadResource (Resource resource);
+            RunLocator(locateRunner);
 
-    protected virtual void RunLoader<T> (LoadResourceRunner<T> loader) where T : class
-    {
-        loader.Run();
-    }
+            await locateRunner;
+            HandleResourcesLocated(locateRunner.LocatedResources, path);
+            return locateRunner.LocatedResources;
+        }
 
-    protected virtual void RunLocator<T> (LocateResourcesRunner<T> locator) where T : class
-    {
-        locator.Run();
-    }
+        public void LogMessage (string message)
+        {
+            OnMessage.SafeInvoke(message);
+        }
 
-    protected virtual void CancelResourceLoading (string path)
-    {
-        if (!Runners.ContainsKey(path)) return;
+        protected abstract LoadResourceRunner<T> CreateLoadRunner<T> (Resource<T> resource) where T : class;
+        protected abstract LocateResourcesRunner<T> CreateLocateRunner<T> (string path) where T : class;
+        protected abstract void UnloadResource (Resource resource);
 
-        Runners[path].Cancel();
-        Runners.Remove(path);
+        protected virtual void RunLoader<T> (LoadResourceRunner<T> loader) where T : class
+        {
+            loader.Run();
+        }
 
-        UpdateLoadProgress();
-    }
+        protected virtual void RunLocator<T> (LocateResourcesRunner<T> locator) where T : class
+        {
+            locator.Run();
+        }
 
-    protected virtual void HandleResourceLoaded<T> (Resource<T> resource) where T : class
-    {
-        if (!resource.IsValid) Debug.LogError(string.Format("Resource '{0}' failed to load.", resource.Path));
+        protected virtual void CancelResourceLoading (string path)
+        {
+            if (!Runners.ContainsKey(path)) return;
 
-        if (Runners.ContainsKey(resource.Path)) Runners.Remove(resource.Path);
-        else Debug.LogWarning(string.Format("Load runner for resource '{0}' not found.", resource.Path));
+            Runners[path].Cancel();
+            Runners.Remove(path);
 
-        UpdateLoadProgress();
-    }
+            UpdateLoadProgress();
+        }
 
-    protected virtual void HandleResourcesLocated<T> (List<Resource<T>> locatedResources, string path) where T : class
-    {
-        if (Runners.ContainsKey(path)) Runners.Remove(path);
-        else Debug.LogWarning(string.Format("Locate runner for path '{0}' not found.", path));
+        protected virtual void HandleResourceLoaded<T> (Resource<T> resource) where T : class
+        {
+            if (!resource.IsValid) Debug.LogError(string.Format("Resource '{0}' failed to load.", resource.Path));
 
-        UpdateLoadProgress();
-    }
+            if (Runners.ContainsKey(resource.Path)) Runners.Remove(resource.Path);
+            else Debug.LogWarning(string.Format("Load runner for resource '{0}' not found.", resource.Path));
 
-    protected virtual async Task<List<Resource<T>>> LoadLocatedResourcesAsync<T> (List<Resource<T>> locatedResources) where T : class
-    {
-        // Handle corner case when resources got loaded while locating.
-        foreach (var locatedResource in locatedResources)
-            if (!Resources.ContainsKey(locatedResource.Path) && locatedResource.IsValid)
-                Resources.Add(locatedResource.Path, locatedResource);
+            UpdateLoadProgress();
+        }
 
-        var resources = await Task.WhenAll(locatedResources.Select(r => LoadResourceAsync<T>(r.Path)));
-        return resources?.ToList();
-    }
+        protected virtual void HandleResourcesLocated<T> (List<Resource<T>> locatedResources, string path) where T : class
+        {
+            if (Runners.ContainsKey(path)) Runners.Remove(path);
+            else Debug.LogWarning(string.Format("Locate runner for path '{0}' not found.", path));
 
-    protected virtual void UpdateLoadProgress ()
-    {
-        var prevProgress = LoadProgress;
-        if (Runners.Count == 0) LoadProgress = 1f;
-        else LoadProgress = Mathf.Min(1f / Runners.Count, .999f);
-        if (prevProgress != LoadProgress) OnLoadProgress.SafeInvoke(LoadProgress);
+            UpdateLoadProgress();
+        }
+
+        protected virtual async Task<List<Resource<T>>> LoadLocatedResourcesAsync<T> (List<Resource<T>> locatedResources) where T : class
+        {
+            // Handle corner case when resources got loaded while locating.
+            foreach (var locatedResource in locatedResources)
+                if (!Resources.ContainsKey(locatedResource.Path) && locatedResource.IsValid)
+                    Resources.Add(locatedResource.Path, locatedResource);
+
+            var resources = await Task.WhenAll(locatedResources.Select(r => LoadResourceAsync<T>(r.Path)));
+            return resources?.ToList();
+        }
+
+        protected virtual void UpdateLoadProgress ()
+        {
+            var prevProgress = LoadProgress;
+            if (Runners.Count == 0) LoadProgress = 1f;
+            else LoadProgress = Mathf.Min(1f / Runners.Count, .999f);
+            if (prevProgress != LoadProgress) OnLoadProgress.SafeInvoke(LoadProgress);
+        }
     }
 }

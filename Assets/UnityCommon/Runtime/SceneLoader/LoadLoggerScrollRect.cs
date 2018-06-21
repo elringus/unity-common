@@ -2,90 +2,93 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class LoadLoggerScrollRect : ScriptableUIComponent<ScrollRect>
+namespace UnityCommon
 {
-    [SerializeField] private Text loggerText = null;
-
-    private SceneLoader sceneLoader;
-    private IResourceProvider resourceProvider;
-
-    protected override void Awake ()
+    public class LoadLoggerScrollRect : ScriptableUIComponent<ScrollRect>
     {
-        base.Awake();
+        [SerializeField] private Text loggerText = null;
 
-        this.AssertRequiredObjects(loggerText);
+        private SceneLoader sceneLoader;
+        private IResourceProvider resourceProvider;
 
-        sceneLoader = Context.Resolve<SceneLoader>(assertResult: true);
-        resourceProvider = Context.Resolve<IResourceProvider>();
-    }
+        protected override void Awake ()
+        {
+            base.Awake();
 
-    protected override void OnEnable ()
-    {
-        base.OnEnable();
+            this.AssertRequiredObjects(loggerText);
 
-        sceneLoader.OnScenesUnloaded += LogUnloadedScenes;
-        sceneLoader.OnReadyToActivate += LogActivationReady;
-        sceneLoader.OnSceneLoaded += LogLoadFinished;
+            sceneLoader = Context.Resolve<SceneLoader>(assertResult: true);
+            resourceProvider = Context.Resolve<IResourceProvider>();
+        }
 
-        if (resourceProvider != null)
-            resourceProvider.OnMessage += LogResourceProviderMessage;
-    }
+        protected override void OnEnable ()
+        {
+            base.OnEnable();
 
-    protected override void OnDisable ()
-    {
-        base.OnDisable();
+            sceneLoader.OnScenesUnloaded += LogUnloadedScenes;
+            sceneLoader.OnReadyToActivate += LogActivationReady;
+            sceneLoader.OnSceneLoaded += LogLoadFinished;
 
-        sceneLoader.OnScenesUnloaded -= LogUnloadedScenes;
-        sceneLoader.OnReadyToActivate -= LogActivationReady;
-        sceneLoader.OnSceneLoaded -= LogLoadFinished;
+            if (resourceProvider != null)
+                resourceProvider.OnMessage += LogResourceProviderMessage;
+        }
 
-        if (resourceProvider != null)
-            resourceProvider.OnMessage -= LogResourceProviderMessage;
-    }
+        protected override void OnDisable ()
+        {
+            base.OnDisable();
 
-    protected override void Start ()
-    {
-        base.Start();
+            sceneLoader.OnScenesUnloaded -= LogUnloadedScenes;
+            sceneLoader.OnReadyToActivate -= LogActivationReady;
+            sceneLoader.OnSceneLoaded -= LogLoadFinished;
 
-        loggerText.text = string.Empty;
+            if (resourceProvider != null)
+                resourceProvider.OnMessage -= LogResourceProviderMessage;
+        }
 
-        Log(string.Format("Preparing to load scene <i>{0}</i>...", sceneLoader.SceneToLoadPath));
-        LogCurrentMemoryUsage();
-    }
+        protected override void Start ()
+        {
+            base.Start();
 
-    public void Log (string message)
-    {
-        loggerText.text += message;
-        loggerText.text += Environment.NewLine;
-        UIComponent.verticalNormalizedPosition = 0;
-    }
+            loggerText.text = string.Empty;
 
-    private void LogResourceProviderMessage (string message)
-    {
-        Log(string.Format("{0}", message));
-    }
+            Log(string.Format("Preparing to load scene <i>{0}</i>...", sceneLoader.SceneToLoadPath));
+            LogCurrentMemoryUsage();
+        }
 
-    private void LogUnloadedScenes ()
-    {
-        var paths = string.Join(", ", sceneLoader.UnloadedScenesPath.ToArray());
-        Log(string.Format("Finished unloading scenes: <i>{0}</i>", paths));
-        LogCurrentMemoryUsage();
-    }
+        public void Log (string message)
+        {
+            loggerText.text += message;
+            loggerText.text += Environment.NewLine;
+            UIComponent.verticalNormalizedPosition = 0;
+        }
 
-    private void LogActivationReady ()
-    {
-        Log(string.Format("Scene <i>{0}</i> is loaded and waiting to be activated.", sceneLoader.SceneToLoadPath));
-        LogCurrentMemoryUsage();
-    }
+        private void LogResourceProviderMessage (string message)
+        {
+            Log(string.Format("{0}", message));
+        }
 
-    private void LogLoadFinished ()
-    {
-        Log(string.Format("Scene <i>{0}</i> was loaded and activated.", sceneLoader.SceneToLoadPath));
-        LogCurrentMemoryUsage();
-    }
+        private void LogUnloadedScenes ()
+        {
+            var paths = string.Join(", ", sceneLoader.UnloadedScenesPath.ToArray());
+            Log(string.Format("Finished unloading scenes: <i>{0}</i>", paths));
+            LogCurrentMemoryUsage();
+        }
 
-    private void LogCurrentMemoryUsage ()
-    {
-        Log(string.Concat("<b>Total memory used: ", Mathf.CeilToInt(GC.GetTotalMemory(true) * .000001f), "Mb</b>"));
+        private void LogActivationReady ()
+        {
+            Log(string.Format("Scene <i>{0}</i> is loaded and waiting to be activated.", sceneLoader.SceneToLoadPath));
+            LogCurrentMemoryUsage();
+        }
+
+        private void LogLoadFinished ()
+        {
+            Log(string.Format("Scene <i>{0}</i> was loaded and activated.", sceneLoader.SceneToLoadPath));
+            LogCurrentMemoryUsage();
+        }
+
+        private void LogCurrentMemoryUsage ()
+        {
+            Log(string.Concat("<b>Total memory used: ", Mathf.CeilToInt(GC.GetTotalMemory(true) * .000001f), "Mb</b>"));
+        }
     }
 }

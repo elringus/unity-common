@@ -1,22 +1,25 @@
 ﻿using System.Threading.Tasks;
 using UnityEngine;
 
-/// <summary>
-/// Converts <see cref="byte[]"/> raw data of a .png or .jpg image to <see cref="Texture2D"/>.
-/// </summary>
-public class JpgOrPngToTextureConverter : IRawConverter<Texture2D>
+namespace UnityCommon
 {
-    public RawDataRepresentation[] Representations { get { return new RawDataRepresentation[] {
-        new RawDataRepresentation(".png", "image/png"),
-        new RawDataRepresentation(".jpg", "image/jpeg")
-    }; } }
-
-    public Task<Texture2D> ConvertAsync (byte[] obj)
+    /// <summary>
+    /// Converts <see cref="byte[]"/> raw data of a .png or .jpg image to <see cref="Texture2D"/>.
+    /// </summary>
+    public class JpgOrPngToTextureConverter : IRawConverter<Texture2D>
     {
-        var texture = new Texture2D(2, 2);
-        texture.LoadImage(obj, true);
-        return Task.FromResult(texture);
-    }
+        public RawDataRepresentation[] Representations { get { return new RawDataRepresentation[] {
+            new RawDataRepresentation(".png", "image/png"),
+            new RawDataRepresentation(".jpg", "image/jpeg")
+        }; } }
 
-    public async Task<object> ConvertAsync (object obj) => await ConvertAsync(obj as byte[]);
+        public Task<Texture2D> ConvertAsync (byte[] obj)
+        {
+            var texture = new Texture2D(2, 2);
+            texture.LoadImage(obj, true);
+            return Task.FromResult(texture);
+        }
+
+        public async Task<object> ConvertAsync (object obj) => await ConvertAsync(obj as byte[]);
+    }
 }

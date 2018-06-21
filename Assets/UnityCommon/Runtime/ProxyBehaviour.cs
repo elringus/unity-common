@@ -1,42 +1,45 @@
 ﻿using System;
 using UnityEngine;
 
-public class ProxyBehaviour : MonoBehaviour
+namespace UnityCommon
 {
-    public event Action OnBehaviourAwake;
-    public event Action OnBehaviourEnable;
-    public event Action OnBehaviourStart;
-    public event Action OnBehaviourUpdate;
-    public event Action OnBehaviourDisable;
-    public event Action OnBehaviourDestroy;
-
-    private void Awake ()
+    public class ProxyBehaviour : MonoBehaviour
     {
-        OnBehaviourAwake.SafeInvoke();
-    }
+        public event Action OnBehaviourAwake;
+        public event Action OnBehaviourEnable;
+        public event Action OnBehaviourStart;
+        public event Action OnBehaviourUpdate;
+        public event Action OnBehaviourDisable;
+        public event Action OnBehaviourDestroy;
 
-    private void OnEnable ()
-    {
-        OnBehaviourEnable.SafeInvoke();
-    }
+        private void Awake ()
+        {
+            OnBehaviourAwake.SafeInvoke();
+        }
 
-    private void Start ()
-    {
-        OnBehaviourStart.SafeInvoke();
-    }
+        private void OnEnable ()
+        {
+            OnBehaviourEnable.SafeInvoke();
+        }
 
-    private void Update ()
-    {
-        OnBehaviourUpdate.SafeInvoke();
-    }
+        private void Start ()
+        {
+            OnBehaviourStart.SafeInvoke();
+        }
 
-    private void OnDisable ()
-    {
-        OnBehaviourDisable.SafeInvoke();
-    }
+        private void Update ()
+        {
+            OnBehaviourUpdate.SafeInvoke();
+        }
 
-    private void OnDestroy ()
-    {
-        OnBehaviourDestroy.SafeInvoke();
+        private void OnDisable ()
+        {
+            OnBehaviourDisable.SafeInvoke();
+        }
+
+        private void OnDestroy ()
+        {
+            OnBehaviourDestroy.SafeInvoke();
+        }
     }
 }

@@ -2,42 +2,45 @@
 using System.Threading.Tasks;
 using UnityEngine;
 
-/// <summary>
-/// Converts <see cref="byte[]"/> raw data of a .wav audio file to <see cref="AudioClip"/>.
-/// Only PCM16 44100Hz stereo wavs are supported.
-/// </summary>
-public class WavToAudioClipConverter : IRawConverter<AudioClip>
+namespace UnityCommon
 {
-    public RawDataRepresentation[] Representations { get { return new RawDataRepresentation[] {
-        new RawDataRepresentation(".wav", "audio/wav")
-    }; } }
-
-    public async Task<AudioClip> ConvertAsync (byte[] obj)
+    /// <summary>
+    /// Converts <see cref="byte[]"/> raw data of a .wav audio file to <see cref="AudioClip"/>.
+    /// Only PCM16 44100Hz stereo wavs are supported.
+    /// </summary>
+    public class WavToAudioClipConverter : IRawConverter<AudioClip>
     {
-        var floatArr = await Task.Run(() => Pcm16ToFloatArray(obj));
+        public RawDataRepresentation[] Representations { get { return new RawDataRepresentation[] {
+            new RawDataRepresentation(".wav", "audio/wav")
+        }; } }
 
-        var audioClip = AudioClip.Create("Generated WAV Audio", floatArr.Length / 2, 2, 44100, false);
-        audioClip.SetData(floatArr, 0);
-
-        return audioClip;
-    }
-
-    public async Task<object> ConvertAsync (object obj) => await ConvertAsync(obj as byte[]);
-
-    private static float[] Pcm16ToFloatArray (byte[] input)
-    {
-        // PCM16 wav usually has 44 byte headers, though not always. 
-        // https://stackoverflow.com/questions/19991405/how-can-i-detect-whether-a-wav-file-has-a-44-or-46-byte-header
-        const int HEADER_SIZE = 444;
-        var inputSamples = input.Length / 2; // 16 bit input, so 2 bytes per sample.
-        var output = new float[inputSamples];
-        var outputIndex = 0;
-        for (var n = HEADER_SIZE; n < inputSamples; n++)
+        public async Task<AudioClip> ConvertAsync (byte[] obj)
         {
-            short sample = BitConverter.ToInt16(input, n * 2);
-            output[outputIndex++] = sample / 32768f;
+            var floatArr = await Task.Run(() => Pcm16ToFloatArray(obj));
+
+            var audioClip = AudioClip.Create("Generated WAV Audio", floatArr.Length / 2, 2, 44100, false);
+            audioClip.SetData(floatArr, 0);
+
+            return audioClip;
         }
 
-        return output;
+        public async Task<object> ConvertAsync (object obj) => await ConvertAsync(obj as byte[]);
+
+        private static float[] Pcm16ToFloatArray (byte[] input)
+        {
+            // PCM16 wav usually has 44 byte headers, though not always. 
+            // https://stackoverflow.com/questions/19991405/how-can-i-detect-whether-a-wav-file-has-a-44-or-46-byte-header
+            const int HEADER_SIZE = 444;
+            var inputSamples = input.Length / 2; // 16 bit input, so 2 bytes per sample.
+            var output = new float[inputSamples];
+            var outputIndex = 0;
+            for (var n = HEADER_SIZE; n < inputSamples; n++)
+            {
+                short sample = BitConverter.ToInt16(input, n * 2);
+                output[outputIndex++] = sample / 32768f;
+            }
+
+            return output;
+        }
     }
 }

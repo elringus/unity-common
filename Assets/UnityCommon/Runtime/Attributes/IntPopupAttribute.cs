@@ -1,17 +1,20 @@
 ﻿using UnityEngine;
 
-/// <summary>
-/// The field will be edited as an integer popup selection field.
-/// </summary>
-public class IntPopupAttribute : PropertyAttribute
+namespace UnityCommon
 {
     /// <summary>
-    /// Available options for the popup value.
+    /// The field will be edited as an integer popup selection field.
     /// </summary>
-    public int[] Values { get; private set; }
-
-    public IntPopupAttribute (params int[] values)
+    public class IntPopupAttribute : PropertyAttribute
     {
-        Values = values;
+        /// <summary>
+        /// Available options for the popup value.
+        /// </summary>
+        public int[] Values { get; private set; }
+
+        public IntPopupAttribute (params int[] values)
+        {
+            Values = values;
+        }
     }
 }

@@ -1,17 +1,20 @@
 ﻿using System.Threading.Tasks;
 using UnityEngine;
 
-public class GFolderToFolderConverter : IRawConverter<Folder>
+namespace UnityCommon
 {
-    public RawDataRepresentation[] Representations { get { return new RawDataRepresentation[] {
-        new RawDataRepresentation(null, "application/vnd.google-apps.folder")
-    }; } }
-
-    public Task<Folder> ConvertAsync (byte[] obj)
+    public class GFolderToFolderConverter : IRawConverter<Folder>
     {
-        Debug.LogError("Google Drive folders doesn't have binary content and are not downloadable.");
-        return null;
-    }
+        public RawDataRepresentation[] Representations { get { return new RawDataRepresentation[] {
+            new RawDataRepresentation(null, "application/vnd.google-apps.folder")
+        }; } }
 
-    public async Task<object> ConvertAsync (object obj) => await ConvertAsync(obj as byte[]);
+        public Task<Folder> ConvertAsync (byte[] obj)
+        {
+            Debug.LogError("Google Drive folders doesn't have binary content and are not downloadable.");
+            return null;
+        }
+
+        public async Task<object> ConvertAsync (object obj) => await ConvertAsync(obj as byte[]);
+    }
 }

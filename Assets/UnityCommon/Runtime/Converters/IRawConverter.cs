@@ -1,20 +1,23 @@
 ﻿
-public struct RawDataRepresentation
+namespace UnityCommon
 {
-    public readonly string Extension, MimeType;
-
-    public RawDataRepresentation (string extension, string mimeType)
+    public struct RawDataRepresentation
     {
-        Extension = extension;
-        MimeType = mimeType;
-    }
-}
+        public readonly string Extension, MimeType;
 
-/// <summary>
-/// Implementation is able to convert <see cref="byte[]"/> to <see cref="TResult"/>
-/// and provide additional information about the raw data represenation of the object. 
-/// </summary>
-public interface IRawConverter<TResult> : IConverter<byte[], TResult> 
-{
-    RawDataRepresentation[] Representations { get; }
+        public RawDataRepresentation (string extension, string mimeType)
+        {
+            Extension = extension;
+            MimeType = mimeType;
+        }
+    }
+
+    /// <summary>
+    /// Implementation is able to convert <see cref="byte[]"/> to <see cref="TResult"/>
+    /// and provide additional information about the raw data represenation of the object. 
+    /// </summary>
+    public interface IRawConverter<TResult> : IConverter<byte[], TResult>
+    {
+        RawDataRepresentation[] Representations { get; }
+    }
 }

@@ -1,36 +1,39 @@
 ﻿using UnityEditor;
 using UnityEditor.UI;
 
-[CustomEditor(typeof(LabeledButton), true)]
-public class LabeledButtonEditor : ButtonEditor
+namespace UnityCommon
 {
-    SerializedProperty labelTextProperty;
-    SerializedProperty labelColorsProperty;
-
-    protected override void OnEnable ()
+    [CustomEditor(typeof(LabeledButton), true)]
+    public class LabeledButtonEditor : ButtonEditor
     {
-        base.OnEnable();
+        SerializedProperty labelTextProperty;
+        SerializedProperty labelColorsProperty;
 
-        labelTextProperty = serializedObject.FindProperty("labelText");
-        labelColorsProperty = serializedObject.FindProperty("labelColors");
-    }
-
-    public override void OnInspectorGUI ()
-    {
-        base.OnInspectorGUI();
-
-        serializedObject.Update();
-
-        EditorGUILayout.PropertyField(labelTextProperty);
-
-        ++EditorGUI.indentLevel;
+        protected override void OnEnable ()
         {
-            EditorGUILayout.PropertyField(labelColorsProperty);
+            base.OnEnable();
+
+            labelTextProperty = serializedObject.FindProperty("labelText");
+            labelColorsProperty = serializedObject.FindProperty("labelColors");
         }
-        --EditorGUI.indentLevel;
 
-        EditorGUILayout.Space();
+        public override void OnInspectorGUI ()
+        {
+            base.OnInspectorGUI();
 
-        serializedObject.ApplyModifiedProperties();
+            serializedObject.Update();
+
+            EditorGUILayout.PropertyField(labelTextProperty);
+
+            ++EditorGUI.indentLevel;
+            {
+                EditorGUILayout.PropertyField(labelColorsProperty);
+            }
+            --EditorGUI.indentLevel;
+
+            EditorGUILayout.Space();
+
+            serializedObject.ApplyModifiedProperties();
+        }
     }
 }

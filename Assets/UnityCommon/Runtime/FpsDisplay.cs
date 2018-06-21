@@ -2,38 +2,41 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(Text))]
-public class FpsDisplay : MonoBehaviour
+namespace UnityCommon
 {
-    [SerializeField] private float updateFrequency = 1f;
-
-    private Text text;
-
-    private void Awake ()
+    [RequireComponent(typeof(Text))]
+    public class FpsDisplay : MonoBehaviour
     {
-        text = GetComponent<Text>();
-    }
+        [SerializeField] private float updateFrequency = 1f;
 
-    private void Start ()
-    {
-        StartCoroutine(UpdateCounter());
-    }
+        private Text text;
 
-    private IEnumerator UpdateCounter ()
-    {
-        var waitForDelay = new WaitForSeconds(updateFrequency);
-
-        while (true)
+        private void Awake ()
         {
-            var lastFrameCount = Time.frameCount;
-            var lastTime = Time.realtimeSinceStartup;
+            text = GetComponent<Text>();
+        }
 
-            yield return waitForDelay;
+        private void Start ()
+        {
+            StartCoroutine(UpdateCounter());
+        }
 
-            var timeDelta = Time.realtimeSinceStartup - lastTime;
-            var frameDelta = Time.frameCount - lastFrameCount;
+        private IEnumerator UpdateCounter ()
+        {
+            var waitForDelay = new WaitForSeconds(updateFrequency);
 
-            text.text = string.Format("{0:0.} FPS", frameDelta / timeDelta);
+            while (true)
+            {
+                var lastFrameCount = Time.frameCount;
+                var lastTime = Time.realtimeSinceStartup;
+
+                yield return waitForDelay;
+
+                var timeDelta = Time.realtimeSinceStartup - lastTime;
+                var frameDelta = Time.frameCount - lastFrameCount;
+
+                text.text = string.Format("{0:0.} FPS", frameDelta / timeDelta);
+            }
         }
     }
 }

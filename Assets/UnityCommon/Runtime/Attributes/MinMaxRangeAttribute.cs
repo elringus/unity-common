@@ -1,13 +1,16 @@
 ﻿using UnityEngine;
 
-public class MinMaxRangeAttribute : PropertyAttribute
+namespace UnityCommon
 {
-    public readonly float Min;
-    public readonly float Max;
-
-    public MinMaxRangeAttribute (float min, float max)
+    public class MinMaxRangeAttribute : PropertyAttribute
     {
-        Min = min;
-        Max = max;
+        public readonly float Min;
+        public readonly float Max;
+
+        public MinMaxRangeAttribute (float min, float max)
+        {
+            Min = min;
+            Max = max;
+        }
     }
 }

@@ -2,40 +2,43 @@
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class ProjectResourceLoader<TResource> : LoadResourceRunner<TResource> where TResource : class
+namespace UnityCommon
 {
-    private Action<string> logAction;
-    private ResourceRequest resourceRequest;
-    private ProjectResourceProvider.TypeRedirector redirector;
-
-    public ProjectResourceLoader (Resource<TResource> resource, 
-        ProjectResourceProvider.TypeRedirector redirector = null, Action<string> logAction = null)
+    public class ProjectResourceLoader<TResource> : LoadResourceRunner<TResource> where TResource : class
     {
-        Resource = resource;
-        this.redirector = redirector;
-        this.logAction = logAction;
-    }
+        private Action<string> logAction;
+        private ResourceRequest resourceRequest;
+        private ProjectResourceProvider.TypeRedirector redirector;
 
-    public override async Task Run ()
-    {
-        await base.Run();
-
-        var startTime = Time.time;
-
-        // Corner case when loading folders.
-        if (typeof(TResource) == typeof(Folder))
+        public ProjectResourceLoader (Resource<TResource> resource,
+            ProjectResourceProvider.TypeRedirector redirector = null, Action<string> logAction = null)
         {
-            (Resource as Resource<Folder>).Object = new Folder(Resource.Path);
-            base.HandleOnCompleted();
-            return;
+            Resource = resource;
+            this.redirector = redirector;
+            this.logAction = logAction;
         }
 
-        var resourceType = redirector != null ? redirector.RedirectType : typeof(TResource);
-        resourceRequest = await Resources.LoadAsync(Resource.Path, resourceType);
-        Resource.Object = redirector != null ? await redirector.ToSourceAsync<TResource>(resourceRequest.asset) : resourceRequest.asset as TResource;
+        public override async Task Run ()
+        {
+            await base.Run();
 
-        logAction?.Invoke($"Resource '{Resource.Path}' loaded over {Time.time - startTime:0.###} seconds.");
+            var startTime = Time.time;
 
-        HandleOnCompleted();
+            // Corner case when loading folders.
+            if (typeof(TResource) == typeof(Folder))
+            {
+                (Resource as Resource<Folder>).Object = new Folder(Resource.Path);
+                base.HandleOnCompleted();
+                return;
+            }
+
+            var resourceType = redirector != null ? redirector.RedirectType : typeof(TResource);
+            resourceRequest = await Resources.LoadAsync(Resource.Path, resourceType);
+            Resource.Object = redirector != null ? await redirector.ToSourceAsync<TResource>(resourceRequest.asset) : resourceRequest.asset as TResource;
+
+            logAction?.Invoke($"Resource '{Resource.Path}' loaded over {Time.time - startTime:0.###} seconds.");
+
+            HandleOnCompleted();
+        }
     }
 }

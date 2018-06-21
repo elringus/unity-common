@@ -1,14 +1,17 @@
 ﻿using System;
 
-/// <summary>
-/// Sets Unity script execution order.
-/// </summary>
-public class ScriptOrderAttribute : Attribute
+namespace UnityCommon
 {
-    public readonly int ExecutionOrder;
-
-    public ScriptOrderAttribute (int order)
+    /// <summary>
+    /// Sets Unity script execution order.
+    /// </summary>
+    public class ScriptOrderAttribute : Attribute
     {
-        ExecutionOrder = order;
+        public readonly int ExecutionOrder;
+
+        public ScriptOrderAttribute (int order)
+        {
+            ExecutionOrder = order;
+        }
     }
 }

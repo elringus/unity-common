@@ -1,21 +1,24 @@
 ﻿using System;
 using UnityEngine.UI;
 
-public class ScriptableSlider : ScriptableUIControl<Slider>
+namespace UnityCommon
 {
-    public event Action<float> OnSliderValueChanged;
-
-    protected override void BindUIEvents ()
+    public class ScriptableSlider : ScriptableUIControl<Slider>
     {
-        UIComponent.onValueChanged.AddListener(OnValueChanged);
-        UIComponent.onValueChanged.AddListener(OnSliderValueChanged.SafeInvoke);
-    }
+        public event Action<float> OnSliderValueChanged;
 
-    protected override void UnbindUIEvents ()
-    {
-        UIComponent.onValueChanged.RemoveListener(OnValueChanged);
-        UIComponent.onValueChanged.RemoveListener(OnSliderValueChanged.SafeInvoke);
-    }
+        protected override void BindUIEvents ()
+        {
+            UIComponent.onValueChanged.AddListener(OnValueChanged);
+            UIComponent.onValueChanged.AddListener(OnSliderValueChanged.SafeInvoke);
+        }
 
-    protected virtual void OnValueChanged (float value) { }
+        protected override void UnbindUIEvents ()
+        {
+            UIComponent.onValueChanged.RemoveListener(OnValueChanged);
+            UIComponent.onValueChanged.RemoveListener(OnSliderValueChanged.SafeInvoke);
+        }
+
+        protected virtual void OnValueChanged (float value) { }
+    }
 }

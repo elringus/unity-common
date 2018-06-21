@@ -2,71 +2,74 @@
 using System.Threading.Tasks;
 using UnityEngine;
 
-/// <summary>
-/// Allows tweening a <see cref="ITweenValue"/> using coroutine.
-/// </summary>
-public class Tweener<TTweenValue> : CoroutineRunner where TTweenValue : struct, ITweenValue
+namespace UnityCommon
 {
-    public override bool CanBeInstantlyCompleted => true;
-
-    public TTweenValue TweenValue { get; private set; }
-
-    private float elapsedTime;
-
-    public Tweener (MonoBehaviour coroutineContainer = null,
-        Action onCompleted = null) : base(coroutineContainer)
+    /// <summary>
+    /// Allows tweening a <see cref="ITweenValue"/> using coroutine.
+    /// </summary>
+    public class Tweener<TTweenValue> : CoroutineRunner where TTweenValue : struct, ITweenValue
     {
-        if (onCompleted != null) OnCompleted += onCompleted;
-    }
+        public override bool CanBeInstantlyCompleted => true;
 
-    public Tweener (TTweenValue tweenValue, MonoBehaviour coroutineContainer = null, 
-        Action onCompleted = null) : this(coroutineContainer, onCompleted)
-    {
-        TweenValue = tweenValue;
-    }
+        public TTweenValue TweenValue { get; private set; }
 
-    public override void Run ()
-    {
-        elapsedTime = 0f;
+        private float elapsedTime;
 
-        if (TweenValue.TweenDuration <= 0f)
+        public Tweener (MonoBehaviour coroutineContainer = null,
+            Action onCompleted = null) : base(coroutineContainer)
         {
-            CompleteInstantly();
-            return;
+            if (onCompleted != null) OnCompleted += onCompleted;
         }
 
-        base.Run();
-    }
+        public Tweener (TTweenValue tweenValue, MonoBehaviour coroutineContainer = null,
+            Action onCompleted = null) : this(coroutineContainer, onCompleted)
+        {
+            TweenValue = tweenValue;
+        }
 
-    public void Run (TTweenValue tweenValue)
-    {
-        TweenValue = tweenValue;
-        Run();
-    }
+        public override void Run ()
+        {
+            elapsedTime = 0f;
 
-    public async Task RunAsync (TTweenValue tweenValue)
-    {
-        Run(tweenValue);
-        await CompletionTask;
-    }
+            if (TweenValue.TweenDuration <= 0f)
+            {
+                CompleteInstantly();
+                return;
+            }
 
-    protected override bool LoopCondition ()
-    {
-        return elapsedTime <= TweenValue.TweenDuration;
-    }
+            base.Run();
+        }
 
-    protected override void OnCoroutineTick ()
-    {
-        base.OnCoroutineTick();
+        public void Run (TTweenValue tweenValue)
+        {
+            TweenValue = tweenValue;
+            Run();
+        }
 
-        elapsedTime += TweenValue.IsTimeScaleIgnored ? Time.unscaledDeltaTime : Time.deltaTime;
-        var tweenPercent = Mathf.Clamp01(elapsedTime / TweenValue.TweenDuration);
-        TweenValue.TweenValue(tweenPercent);
-    }
+        public async Task RunAsync (TTweenValue tweenValue)
+        {
+            Run(tweenValue);
+            await CompletionTask;
+        }
 
-    public override void CompleteInstantly ()
-    {
-        TweenValue.TweenValue(1f);
-        base.CompleteInstantly();
+        protected override bool LoopCondition ()
+        {
+            return elapsedTime <= TweenValue.TweenDuration;
+        }
+
+        protected override void OnCoroutineTick ()
+        {
+            base.OnCoroutineTick();
+
+            elapsedTime += TweenValue.IsTimeScaleIgnored ? Time.unscaledDeltaTime : Time.deltaTime;
+            var tweenPercent = Mathf.Clamp01(elapsedTime / TweenValue.TweenDuration);
+            TweenValue.TweenValue(tweenPercent);
+        }
+
+        public override void CompleteInstantly ()
+        {
+            TweenValue.TweenValue(1f);
+            base.CompleteInstantly();
+        }
     }
 }

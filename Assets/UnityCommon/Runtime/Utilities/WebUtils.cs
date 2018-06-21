@@ -1,19 +1,22 @@
 ﻿using UnityEngine;
 
-public static class WebUtils
+namespace UnityCommon
 {
-    public static AudioType EvaluateAudioTypeFromMime (string mimeType)
+    public static class WebUtils
     {
-        switch (mimeType)
+        public static AudioType EvaluateAudioTypeFromMime (string mimeType)
         {
-            case "audio/aiff": return AudioType.AIFF;
-            case "audio/mpeg": return AudioType.MPEG;
-            case "audio/mpeg3": return AudioType.MPEG;
-            case "audio/mp3": return AudioType.MPEG;
-            case "audio/ogg": return AudioType.OGGVORBIS;
-            case "video/ogg": return AudioType.OGGVORBIS;
-            case "audio/wav": return AudioType.WAV;
-            default: return AudioType.UNKNOWN;
+            switch (mimeType)
+            {
+                case "audio/aiff": return AudioType.AIFF;
+                case "audio/mpeg": return AudioType.MPEG;
+                case "audio/mpeg3": return AudioType.MPEG;
+                case "audio/mp3": return AudioType.MPEG;
+                case "audio/ogg": return AudioType.OGGVORBIS;
+                case "video/ogg": return AudioType.OGGVORBIS;
+                case "audio/wav": return AudioType.WAV;
+                default: return AudioType.UNKNOWN;
+            }
         }
     }
 }

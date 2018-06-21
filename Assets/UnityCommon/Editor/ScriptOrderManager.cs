@@ -1,21 +1,24 @@
 ﻿using System;
 using UnityEditor;
 
-[InitializeOnLoad]
-public class ScriptOrderManager
+namespace UnityCommon
 {
-    static ScriptOrderManager ()
+    [InitializeOnLoad]
+    public class ScriptOrderManager
     {
-        foreach (var monoScript in MonoImporter.GetAllRuntimeMonoScripts())
+        static ScriptOrderManager ()
         {
-            if (monoScript.GetClass() == null) continue;
-
-            foreach (var attribute in Attribute.GetCustomAttributes(monoScript.GetClass(), typeof(ScriptOrderAttribute), true))
+            foreach (var monoScript in MonoImporter.GetAllRuntimeMonoScripts())
             {
-                var currentOrder = MonoImporter.GetExecutionOrder(monoScript);
-                var newOrder = ((ScriptOrderAttribute)attribute).ExecutionOrder;
-                if (currentOrder != newOrder)
-                    MonoImporter.SetExecutionOrder(monoScript, newOrder);
+                if (monoScript.GetClass() == null) continue;
+
+                foreach (var attribute in Attribute.GetCustomAttributes(monoScript.GetClass(), typeof(ScriptOrderAttribute), true))
+                {
+                    var currentOrder = MonoImporter.GetExecutionOrder(monoScript);
+                    var newOrder = ((ScriptOrderAttribute)attribute).ExecutionOrder;
+                    if (currentOrder != newOrder)
+                        MonoImporter.SetExecutionOrder(monoScript, newOrder);
+                }
             }
         }
     }

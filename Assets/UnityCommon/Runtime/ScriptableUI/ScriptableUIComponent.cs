@@ -1,16 +1,19 @@
 ﻿using UnityEngine.EventSystems;
 
-public abstract class ScriptableUIComponent<T> : ScriptableUIBehaviour where T : UIBehaviour
+namespace UnityCommon
 {
-    public T UIComponent
+    public abstract class ScriptableUIComponent<T> : ScriptableUIBehaviour where T : UIBehaviour
     {
-        get
+        public T UIComponent
         {
-            if (!_uiComponent)
-                _uiComponent = GetComponent<T>();
-            return _uiComponent;
+            get
+            {
+                if (!_uiComponent)
+                    _uiComponent = GetComponent<T>();
+                return _uiComponent;
+            }
         }
-    }
 
-    private T _uiComponent;
+        private T _uiComponent;
+    }
 }

@@ -1,38 +1,41 @@
 ﻿using UnityEngine;
 
-public class Billboard : MonoBehaviour
+namespace UnityCommon
 {
-    private Transform cameraTransform;
-    private Transform myTransform;
-
-    private void Awake ()
+    public class Billboard : MonoBehaviour
     {
-        cameraTransform = Camera.main.transform;
-        myTransform = transform;
-    }
+        private Transform cameraTransform;
+        private Transform myTransform;
 
-    private void Start ()
-    {
-        enabled = false;
-    }
+        private void Awake ()
+        {
+            cameraTransform = Camera.main.transform;
+            myTransform = transform;
+        }
 
-    public void SetLookCamera (Camera camera)
-    {
-        cameraTransform = camera.transform;
-    }
+        private void Start ()
+        {
+            enabled = false;
+        }
 
-    private void LateUpdate ()
-    {
-        myTransform.forward = cameraTransform.forward;
-    }
+        public void SetLookCamera (Camera camera)
+        {
+            cameraTransform = camera.transform;
+        }
 
-    private void OnBecameVisible ()
-    {
-        enabled = true;
-    }
+        private void LateUpdate ()
+        {
+            myTransform.forward = cameraTransform.forward;
+        }
 
-    private void OnBecameInvisible ()
-    {
-        enabled = false;
+        private void OnBecameVisible ()
+        {
+            enabled = true;
+        }
+
+        private void OnBecameInvisible ()
+        {
+            enabled = false;
+        }
     }
 }

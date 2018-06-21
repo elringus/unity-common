@@ -1,11 +1,14 @@
 ﻿using UnityEngine;
 
-public static class ColorUtils
+namespace UnityCommon
 {
-    /// <summary>
-    /// Solid white color with zero alpha.
-    /// </summary>
-    public static Color ClearWhite { get { return clearWhite; } }
+    public static class ColorUtils
+    {
+        /// <summary>
+        /// Solid white color with zero alpha.
+        /// </summary>
+        public static Color ClearWhite { get { return clearWhite; } }
 
-    private static Color clearWhite = new Color(1, 1, 1, 0);
+        private static Color clearWhite = new Color(1, 1, 1, 0);
+    }
 }

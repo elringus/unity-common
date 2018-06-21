@@ -1,12 +1,15 @@
 ﻿using System.Text.RegularExpressions;
 
-public static class RegexUtils
+namespace UnityCommon
 {
-    /// <summary>
-    /// Get index of the last character in the match.
-    /// </summary>
-    public static int GetEndIndex (this Match match)
+    public static class RegexUtils
     {
-        return match.Index + match.Length - 1;
+        /// <summary>
+        /// Get index of the last character in the match.
+        /// </summary>
+        public static int GetEndIndex (this Match match)
+        {
+            return match.Index + match.Length - 1;
+        }
     }
 }

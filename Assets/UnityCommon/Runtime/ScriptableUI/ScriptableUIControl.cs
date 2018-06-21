@@ -1,19 +1,22 @@
 ﻿using UnityEngine.EventSystems;
 
-public abstract class ScriptableUIControl<T> : ScriptableUIComponent<T> where T : UIBehaviour
+namespace UnityCommon
 {
-    protected override void OnEnable ()
+    public abstract class ScriptableUIControl<T> : ScriptableUIComponent<T> where T : UIBehaviour
     {
-        base.OnEnable();
-        BindUIEvents();
-    }
+        protected override void OnEnable ()
+        {
+            base.OnEnable();
+            BindUIEvents();
+        }
 
-    protected override void OnDisable ()
-    {
-        base.OnDisable();
-        UnbindUIEvents();
-    }
+        protected override void OnDisable ()
+        {
+            base.OnDisable();
+            UnbindUIEvents();
+        }
 
-    protected abstract void BindUIEvents ();
-    protected abstract void UnbindUIEvents ();
+        protected abstract void BindUIEvents ();
+        protected abstract void UnbindUIEvents ();
+    }
 }

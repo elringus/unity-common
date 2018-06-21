@@ -1,24 +1,27 @@
 ﻿using System;
 using UnityEngine;
 
-public static class SpriteUtils
+namespace UnityCommon
 {
-    public static void SetOpacity (this SpriteRenderer spriteRenderer, float opacity)
+    public static class SpriteUtils
     {
-        Debug.Assert(spriteRenderer != null);
-        var spriteColor = spriteRenderer.color;
-        spriteRenderer.color = new Color(spriteColor.r, spriteColor.g, spriteColor.b, opacity);
-    }
+        public static void SetOpacity (this SpriteRenderer spriteRenderer, float opacity)
+        {
+            Debug.Assert(spriteRenderer != null);
+            var spriteColor = spriteRenderer.color;
+            spriteRenderer.color = new Color(spriteColor.r, spriteColor.g, spriteColor.b, opacity);
+        }
 
-    public static bool IsTransparent (this SpriteRenderer spriteRenderer)
-    {
-        Debug.Assert(spriteRenderer != null);
-        return Mathf.Approximately(spriteRenderer.color.a, 0f);
-    }
+        public static bool IsTransparent (this SpriteRenderer spriteRenderer)
+        {
+            Debug.Assert(spriteRenderer != null);
+            return Mathf.Approximately(spriteRenderer.color.a, 0f);
+        }
 
-    public static bool IsOpaque (this SpriteRenderer spriteRenderer)
-    {
-        Debug.Assert(spriteRenderer != null);
-        return Mathf.Approximately(spriteRenderer.color.a, 1f);
+        public static bool IsOpaque (this SpriteRenderer spriteRenderer)
+        {
+            Debug.Assert(spriteRenderer != null);
+            return Mathf.Approximately(spriteRenderer.color.a, 1f);
+        }
     }
 }

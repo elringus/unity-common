@@ -2,24 +2,27 @@
 using System.Threading;
 using UnityEngine;
 
-public static class SyncContextUtils
+namespace UnityCommon
 {
-    public static int UnityThreadId { get; private set; }
-    public static SynchronizationContext UnitySynchronizationContext { get; private set; }
-
-    /// <summary>
-    /// Provided action will be invoked on the main thread no matter from which thread this is used.
-    /// </summary>
-    public static void InvokeOnUnityThread (Action action)
+    public static class SyncContextUtils
     {
-        if (SynchronizationContext.Current == UnitySynchronizationContext) action?.Invoke();
-        else UnitySynchronizationContext.Post(_ => action(), null);
-    }
+        public static int UnityThreadId { get; private set; }
+        public static SynchronizationContext UnitySynchronizationContext { get; private set; }
 
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-    private static void Initialize ()
-    {
-        UnitySynchronizationContext = SynchronizationContext.Current;
-        UnityThreadId = Thread.CurrentThread.ManagedThreadId;
+        /// <summary>
+        /// Provided action will be invoked on the main thread no matter from which thread this is used.
+        /// </summary>
+        public static void InvokeOnUnityThread (Action action)
+        {
+            if (SynchronizationContext.Current == UnitySynchronizationContext) action?.Invoke();
+            else UnitySynchronizationContext.Post(_ => action(), null);
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void Initialize ()
+        {
+            UnitySynchronizationContext = SynchronizationContext.Current;
+            UnityThreadId = Thread.CurrentThread.ManagedThreadId;
+        }
     }
 }
