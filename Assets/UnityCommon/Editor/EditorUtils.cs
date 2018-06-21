@@ -78,4 +78,9 @@ public static class EditorUtils
             property.boolValue = property.hasMultipleDifferentValues ? true : !property.boolValue;
         EditorGUI.showMixedValue = false;
     }
+
+    public static string ToRelativePath (string absolutePath)
+    {
+        return "Assets" + absolutePath.Replace(Application.dataPath, string.Empty);
+    }
 }
