@@ -14,13 +14,11 @@ public class PackageExporter : EditorWindow
     protected static string AssetsPath { get { return "Assets/" + PackageName; } }
     protected static string OutputPath { get { return PlayerPrefs.GetString(PREFS_PREFIX + "OutputPath"); } set { PlayerPrefs.SetString(PREFS_PREFIX + "OutputPath", value); } }
     protected static string OutputFileName { get { return PackageName; } }
-    protected static string NamespaceToWrap { get { return PlayerPrefs.GetString(PREFS_PREFIX + "NamespaceToWrap"); } set { PlayerPrefs.SetString(PREFS_PREFIX + "NamespaceToWrap", value); } }
     protected static string IgnoredPaths { get { return PlayerPrefs.GetString(PREFS_PREFIX + "IgnoredPaths"); } set { PlayerPrefs.SetString(PREFS_PREFIX + "IgnoredPaths", value); } }
     private static bool IsAnyPathsIgnored { get { return !string.IsNullOrEmpty(IgnoredPaths); } }
     protected static bool IsReadyToExport { get { return !string.IsNullOrEmpty(OutputPath) && !string.IsNullOrEmpty(OutputFileName); } }
 
     private const string TEMP_FOLDER_PATH = "!TEMP_PACKAGE_EXPORTER";
-    private const string SKIP_WRAP_TERM = "PackageExporter: SkipWrap";
     private const string PREFS_PREFIX = "PackageExporter.";
     private const string TAB_CHARS = "    ";
 
@@ -43,14 +41,14 @@ public class PackageExporter : EditorWindow
     private static void ExportPackage ()
     {
         if (IsReadyToExport)
-            Export();
+            ExportPackageImpl();
     }
 
-    [MenuItem("Assets/+ Export Package (Wrap)", priority = 20)]
-    private static void ExportPackageWrapped ()
+    [MenuItem("Assets/+ Export Assembly", priority = 20)]
+    private static void ExportAssembly ()
     {
         if (IsReadyToExport)
-            Export(true);
+            ExportAssemblyImpl();
     }
 
     private void OnGUI ()
@@ -60,7 +58,6 @@ public class PackageExporter : EditorWindow
         EditorGUILayout.Space();
         PackageName = EditorGUILayout.TextField("Package Name", PackageName);
         Copyright = EditorGUILayout.TextField("Copyright Notice", Copyright);
-        NamespaceToWrap = EditorGUILayout.TextField("Namespace", NamespaceToWrap);
         using (new EditorGUILayout.HorizontalScope())
         {
             OutputPath = EditorGUILayout.TextField("Output Path", OutputPath);
@@ -72,7 +69,12 @@ public class PackageExporter : EditorWindow
         IgnoredPaths = EditorGUILayout.TextArea(IgnoredPaths);
     }
 
-    private static void Export (bool wrapNamespace = false)
+    private static void ExportAssemblyImpl ()
+    {
+
+    }
+
+    private static void ExportPackageImpl ()
     {
         // Temporary move-out ignored assets.
         DisplayProgressBar("Moving-out ignored assets...", 0f);
@@ -102,7 +104,7 @@ public class PackageExporter : EditorWindow
         // Modify scripts (namespace and copyright).
         DisplayProgressBar("Modifying scripts...", .25f);
         modifiedScripts.Clear();
-        var needToModify = !string.IsNullOrEmpty(NamespaceToWrap) || !string.IsNullOrEmpty(Copyright);
+        var needToModify = !string.IsNullOrEmpty(Copyright);
         if (needToModify)
         {
             foreach (var path in AssetDatabase.GetAllAssetPaths())
@@ -113,22 +115,14 @@ public class PackageExporter : EditorWindow
                 var fullpath = Application.dataPath.Replace("Assets", "") + path;
                 var originalScriptText = File.ReadAllText(fullpath, Encoding.UTF8);
 
-                if (originalScriptText.Contains(SKIP_WRAP_TERM) && !path.EndsWith("PackageExporter.cs")) continue;
-
                 string scriptText = string.Empty;
                 var isImportedScript = path.Contains("ThirdParty");
 
                 var copyright = isImportedScript || string.IsNullOrEmpty(Copyright) ? string.Empty : "// " + Copyright;
-                if (!string.IsNullOrEmpty(copyright) && (!isImportedScript || wrapNamespace))
+                if (!string.IsNullOrEmpty(copyright) && !isImportedScript)
                     scriptText += copyright + Environment.NewLine + Environment.NewLine;
 
-                if (!string.IsNullOrEmpty(NamespaceToWrap))
-                {
-                    if (!isImportedScript || wrapNamespace) scriptText += "namespace " + NamespaceToWrap + Environment.NewLine + "{" + Environment.NewLine;
-                    scriptText += isImportedScript ? originalScriptText : TAB_CHARS + originalScriptText.Replace(Environment.NewLine, Environment.NewLine + TAB_CHARS);
-                    if (!isImportedScript || wrapNamespace) scriptText += Environment.NewLine + "}" + Environment.NewLine;
-                }
-                else scriptText += originalScriptText;
+                scriptText += originalScriptText;
 
                 File.WriteAllText(fullpath, scriptText, Encoding.UTF8);
 

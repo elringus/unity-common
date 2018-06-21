@@ -115,7 +115,7 @@ public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource
     {
         if (useNativeRequests)
         {
-            if (typeof(TResource) == typeof(AudioClip)) downloadRequest = GoogleDriveFiles.DownloadAudio(fileMeta);
+            if (typeof(TResource) == typeof(AudioClip)) downloadRequest = GoogleDriveFiles.DownloadAudio(fileMeta.Id, WebUtils.EvaluateAudioTypeFromMime(fileMeta.MimeType));
             else if (typeof(TResource) == typeof(Texture2D)) downloadRequest = GoogleDriveFiles.DownloadTexture(fileMeta.Id, true);
         }
         else downloadRequest = new GoogleDriveFiles.DownloadRequest(fileMeta);
