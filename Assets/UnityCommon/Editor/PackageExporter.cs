@@ -18,11 +18,8 @@ public class PackageExporter : EditorWindow
     private static bool IsAnyPathsIgnored { get { return !string.IsNullOrEmpty(IgnoredPaths); } }
     protected static bool IsReadyToExport { get { return !string.IsNullOrEmpty(OutputPath) && !string.IsNullOrEmpty(OutputFileName); } }
 
-    private const string TEMP_FOLDER_PATH = "!TEMP_PACKAGE_EXPORTER";
+    private const string TEMP_FOLDER_PATH = ".TEMP_PACKAGE_EXPORTER";
     private const string PREFS_PREFIX = "PackageExporter.";
-    private const string TAB_CHARS = "    ";
-
-    private static Dictionary<string, string> modifiedScripts = new Dictionary<string, string>();
 
     private void Awake ()
     {
@@ -71,89 +68,55 @@ public class PackageExporter : EditorWindow
 
     private static void ExportAssemblyImpl ()
     {
-
+        // Find all .asmdef files.
+        var asset = AssetDatabase.LoadAssetAtPath<UnityEditorInternal.AssemblyDefinitionAsset>("");
+        var assymblyDataType = Type.GetType("UnityEditor.Scripting.ScriptCompilation.CustomScriptAssemblyData");
+        var assemblyData = JsonUtility.FromJson(asset.text, assymblyDataType);
+        var assemblyName = assymblyDataType.GetField("name").GetValue(assemblyData);
+        Debug.Log(assemblyName);
     }
 
     private static void ExportPackageImpl ()
     {
-        // Temporary move-out ignored assets.
-        DisplayProgressBar("Moving-out ignored assets...", 0f);
-        var tmpFolderPath = string.Empty;
-        if (IsAnyPathsIgnored)
+        // Copy package assets to temp folder and modify scripts and shaders (add copyright).
+        DisplayProgressBar("Warming up...", 0f);
+        var tmpFolderGuid = AssetDatabase.CreateFolder("Assets", TEMP_FOLDER_PATH);
+        var tmpFolderPath = AssetDatabase.GUIDToAssetPath(tmpFolderGuid);
+        var ignoredPaths = IsAnyPathsIgnored ? IgnoredPaths.SplitByNewLine().ToList() : new List<string>();
+        var allAssetPaths = AssetDatabase.GetAllAssetPaths();
+        for (int i = 0; i < allAssetPaths.Length; i++)
         {
-            var tmpFolderGuid = AssetDatabase.CreateFolder("Assets", TEMP_FOLDER_PATH);
-            tmpFolderPath = AssetDatabase.GUIDToAssetPath(tmpFolderGuid);
-            var ignoredPaths = IgnoredPaths.SplitByNewLine().ToList();
-            foreach (var path in AssetDatabase.GetAllAssetPaths())
+            DisplayProgressBar("Processings assets...", ((float)i / allAssetPaths.Length) / 2f);
+            var path = allAssetPaths[i];
+            if (!path.StartsWith(AssetsPath)) continue;
+            if (ignoredPaths.Exists(p => path.StartsWith(p))) continue;
+
+            var copyPath = path.Replace(AssetsPath, tmpFolderPath);
+            var copyDirectory = copyPath.GetBeforeLast("/");
+            if (!Directory.Exists(copyDirectory))
             {
-                if (!path.StartsWith(AssetsPath)) continue;
-                if (!ignoredPaths.Exists(p => path.StartsWith(p))) continue;
-
-                var movePath = path.Replace(AssetsPath, tmpFolderPath);
-                var moveDirectory = movePath.GetBeforeLast("/");
-                if (!Directory.Exists(moveDirectory))
-                {
-                    Directory.CreateDirectory(moveDirectory);
-                    AssetDatabase.Refresh();
-                }
-
-                AssetDatabase.MoveAsset(path, path.Replace(AssetsPath, tmpFolderPath));
+                Directory.CreateDirectory(copyDirectory);
+                AssetDatabase.Refresh();
             }
-        }
+            AssetDatabase.CopyAsset(path, copyPath);
 
-        // Modify scripts (namespace and copyright).
-        DisplayProgressBar("Modifying scripts...", .25f);
-        modifiedScripts.Clear();
-        var needToModify = !string.IsNullOrEmpty(Copyright);
-        if (needToModify)
-        {
-            foreach (var path in AssetDatabase.GetAllAssetPaths())
-            {
-                if (!path.StartsWith(AssetsPath)) continue;
-                if (!path.EndsWith(".cs")) continue;
-
-                var fullpath = Application.dataPath.Replace("Assets", "") + path;
-                var originalScriptText = File.ReadAllText(fullpath, Encoding.UTF8);
-
-                string scriptText = string.Empty;
-                var isImportedScript = path.Contains("ThirdParty");
-
-                var copyright = isImportedScript || string.IsNullOrEmpty(Copyright) ? string.Empty : "// " + Copyright;
-                if (!string.IsNullOrEmpty(copyright) && !isImportedScript)
-                    scriptText += copyright + Environment.NewLine + Environment.NewLine;
-
-                scriptText += originalScriptText;
-
-                File.WriteAllText(fullpath, scriptText, Encoding.UTF8);
-
-                modifiedScripts.Add(fullpath, originalScriptText);
-            }
+            if (!copyPath.EndsWith(".cs") && !copyPath.EndsWith(".shader")) continue;
+            var fullpath = Application.dataPath.Replace("Assets", "") + copyPath;
+            var originalScriptText = File.ReadAllText(fullpath, Encoding.UTF8);
+            string scriptText = string.Empty;
+            var isImportedScript = copyPath.Contains("ThirdParty");
+            var copyright = isImportedScript || string.IsNullOrEmpty(Copyright) ? string.Empty : "// " + Copyright;
+            if (!string.IsNullOrEmpty(copyright) && !isImportedScript)
+                scriptText += copyright + Environment.NewLine + Environment.NewLine + originalScriptText;
+            File.WriteAllText(fullpath, scriptText, Encoding.UTF8);
         }
 
         // Export the package.
         DisplayProgressBar("Writing package file...", .5f);
-        AssetDatabase.ExportPackage(AssetsPath, OutputPath + "/" + OutputFileName + ".unitypackage", ExportPackageOptions.Recurse);
+        AssetDatabase.ExportPackage(tmpFolderPath, OutputPath + "/" + OutputFileName + ".unitypackage", ExportPackageOptions.Recurse);
 
-        // Restore modified scripts.
-        DisplayProgressBar("Restoring modified scripts...", .75f);
-        if (needToModify)
-        {
-            foreach (var modifiedScript in modifiedScripts)
-                File.WriteAllText(modifiedScript.Key, modifiedScript.Value, Encoding.UTF8);
-        }
-
-        // Restore moved-out ignored assets.
-        DisplayProgressBar("Restoring moved-out ignored assets...", .95f);
-        if (IsAnyPathsIgnored)
-        {
-            foreach (var path in AssetDatabase.GetAllAssetPaths())
-            {
-                if (!path.StartsWith(tmpFolderPath)) continue;
-                AssetDatabase.MoveAsset(path, path.Replace(tmpFolderPath, AssetsPath));
-            }
-
-            AssetDatabase.DeleteAsset(tmpFolderPath);
-        }
+        // Delete temp folder.
+        AssetDatabase.DeleteAsset(tmpFolderPath);
 
         EditorUtility.ClearProgressBar();
     }
