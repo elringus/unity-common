@@ -17,14 +17,14 @@ namespace UnityCommon
             void OnPackagePostProcess ();
         }
 
-        protected static string PackageName { get { return PlayerPrefs.GetString(PREFS_PREFIX + "PackageName"); } set { PlayerPrefs.SetString(PREFS_PREFIX + "PackageName", value); } }
-        protected static string Copyright { get { return PlayerPrefs.GetString(PREFS_PREFIX + "Copyright"); } set { PlayerPrefs.SetString(PREFS_PREFIX + "Copyright", value); } }
-        protected static string AssetsPath { get { return "Assets/" + PackageName; } }
-        protected static string OutputPath { get { return PlayerPrefs.GetString(PREFS_PREFIX + "OutputPath"); } set { PlayerPrefs.SetString(PREFS_PREFIX + "OutputPath", value); } }
-        protected static string OutputFileName { get { return PackageName; } }
-        protected static string IgnoredAssetGUIds { get { return PlayerPrefs.GetString(PREFS_PREFIX + "IgnoredAssetGUIds"); } set { PlayerPrefs.SetString(PREFS_PREFIX + "IgnoredAssetGUIds", value); } }
+        private static string PackageName { get { return PlayerPrefs.GetString(PREFS_PREFIX + "PackageName"); } set { PlayerPrefs.SetString(PREFS_PREFIX + "PackageName", value); } }
+        private static string Copyright { get { return PlayerPrefs.GetString(PREFS_PREFIX + "Copyright"); } set { PlayerPrefs.SetString(PREFS_PREFIX + "Copyright", value); } }
+        private static string AssetsPath { get { return "Assets/" + PackageName; } }
+        private static string OutputPath { get { return PlayerPrefs.GetString(PREFS_PREFIX + "OutputPath"); } set { PlayerPrefs.SetString(PREFS_PREFIX + "OutputPath", value); } }
+        private static string OutputFileName { get { return PackageName; } }
+        private static string IgnoredAssetGUIds { get { return PlayerPrefs.GetString(PREFS_PREFIX + "IgnoredAssetGUIds"); } set { PlayerPrefs.SetString(PREFS_PREFIX + "IgnoredAssetGUIds", value); } }
         private static bool IsAnyPathsIgnored { get { return !string.IsNullOrEmpty(IgnoredAssetGUIds); } }
-        protected static bool IsReadyToExport { get { return !string.IsNullOrEmpty(OutputPath) && !string.IsNullOrEmpty(OutputFileName); } }
+        private static bool IsReadyToExport { get { return !string.IsNullOrEmpty(OutputPath) && !string.IsNullOrEmpty(OutputFileName); } }
 
         private const string TEMP_FOLDER_NAME = "!TEMP_PACKAGE_EXPORTER";
         private const string PREFS_PREFIX = "PackageExporter.";
@@ -175,7 +175,7 @@ namespace UnityCommon
 
                     var copyright = isImportedScript || string.IsNullOrEmpty(Copyright) ? string.Empty : "// " + Copyright;
                     if (!string.IsNullOrEmpty(copyright) && !isImportedScript)
-                        scriptText += copyright + Environment.NewLine + Environment.NewLine;
+                        scriptText += copyright + "\r\n\r\n";
 
                     scriptText += originalScriptText;
 
