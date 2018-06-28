@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 
 namespace UnityCommon
@@ -26,12 +27,12 @@ namespace UnityCommon
         private static bool IsAnyPathsIgnored { get { return !string.IsNullOrEmpty(IgnoredAssetGUIds); } }
         private static bool IsReadyToExport { get { return !string.IsNullOrEmpty(OutputPath) && !string.IsNullOrEmpty(OutputFileName); } }
 
-        private const string TEMP_FOLDER_NAME = "!TEMP_PACKAGE_EXPORTER";
         private const string PREFS_PREFIX = "PackageExporter.";
-        private const string TAB_CHARS = "    ";
+        private const string AUTO_REFRESH_KEY = "kAutoRefresh";
 
         private static Dictionary<string, string> modifiedScripts = new Dictionary<string, string>();
         private static List<UnityEngine.Object> ignoredAssets = new List<UnityEngine.Object>();
+        private static SceneSetup[] sceneSetup = null;
 
         public static void AddIgnoredAsset (string assetPath)
         {
@@ -127,33 +128,32 @@ namespace UnityCommon
 
         private static void ExportPackageImpl ()
         {
+            // Disable auto recompile.
+            var wasAutoRefreshEnabled = EditorPrefs.GetBool(AUTO_REFRESH_KEY);
+            EditorPrefs.SetBool(AUTO_REFRESH_KEY, false);
+
             DisplayProgressBar("Pre-processing assets...", 0f);
             var processors = GetProcessors();
             foreach (var proc in processors)
                 proc.OnPackagePreProcess();
 
-            // Temporary move-out ignored assets.
-            DisplayProgressBar("Moving-out ignored assets...", 1f);
-            var tmpFolderPath = string.Empty;
+            var assetPaths = AssetDatabase.GetAllAssetPaths().Where(p => p.StartsWith(AssetsPath));
+            var ignoredPaths = assetPaths.Where(p => IsAssetIgnored(p));
+            var unignoredPaths = assetPaths.Where(p => !IsAssetIgnored(p));
+
+            // Temporary hide ignored assets.
+            DisplayProgressBar("Hiding ignored assets...", .1f);
             if (IsAnyPathsIgnored)
             {
-                var tmpFolderGuid = AssetDatabase.CreateFolder("Assets", TEMP_FOLDER_NAME);
-                tmpFolderPath = AssetDatabase.GUIDToAssetPath(tmpFolderGuid);
-                foreach (var path in AssetDatabase.GetAllAssetPaths())
+                // Load a temp scene to prevent errors when hiding source assets.
+                sceneSetup = EditorSceneManager.GetSceneManagerSetup();
+                EditorSceneManager.NewScene(NewSceneSetup.EmptyScene);
+                foreach (var path in ignoredPaths)
                 {
-                    if (!path.StartsWith(AssetsPath)) continue;
-                    if (!IsAssetIgnored(path)) continue;
-
-                    var movePath = path.Replace(AssetsPath, tmpFolderPath);
-                    var moveDirectory = movePath.GetBeforeLast("/");
-                    if (!Directory.Exists(moveDirectory))
-                    {
-                        Directory.CreateDirectory(moveDirectory);
-                        AssetDatabase.Refresh();
-                    }
-
-                    AssetDatabase.MoveAsset(path, path.Replace(AssetsPath, tmpFolderPath));
+                    File.SetAttributes(path, File.GetAttributes(path) | FileAttributes.Hidden);
+                    File.SetAttributes(path + ".meta", File.GetAttributes(path) | FileAttributes.Hidden);
                 }
+                AssetDatabase.Refresh();
             }
 
             // Modify scripts (namespace and copyright).
@@ -162,12 +162,11 @@ namespace UnityCommon
             var needToModify = !string.IsNullOrEmpty(Copyright);
             if (needToModify)
             {
-                foreach (var path in AssetDatabase.GetAllAssetPaths())
+                foreach (var path in unignoredPaths)
                 {
-                    if (!path.StartsWith(AssetsPath)) continue;
                     if (!path.EndsWith(".cs") && !path.EndsWith(".shader") && !path.EndsWith(".cginc")) continue;
 
-                    var fullpath = Application.dataPath.Replace("Assets", "") + path;
+                    var fullpath = Application.dataPath.Replace("Assets", string.Empty) + path;
                     var originalScriptText = File.ReadAllText(fullpath, Encoding.UTF8);
 
                     string scriptText = string.Empty;
@@ -197,22 +196,24 @@ namespace UnityCommon
                     File.WriteAllText(modifiedScript.Key, modifiedScript.Value, Encoding.UTF8);
             }
 
-            // Restore moved-out ignored assets.
-            DisplayProgressBar("Restoring moved-out ignored assets...", .95f);
+            // Un-hide ignored assets.
+            DisplayProgressBar("Un-hiding ignored assets...", .95f);
             if (IsAnyPathsIgnored)
             {
-                foreach (var path in AssetDatabase.GetAllAssetPaths())
+                foreach (var path in ignoredPaths)
                 {
-                    if (!path.StartsWith(tmpFolderPath)) continue;
-                    AssetDatabase.MoveAsset(path, path.Replace(tmpFolderPath, AssetsPath));
+                    File.SetAttributes(path, File.GetAttributes(path) & ~FileAttributes.Hidden);
+                    File.SetAttributes(path + ".meta", File.GetAttributes(path) & ~FileAttributes.Hidden);
                 }
-
-                AssetDatabase.DeleteAsset(tmpFolderPath);
+                AssetDatabase.Refresh();
             }
 
             DisplayProgressBar("Post-processing assets...", 1f);
             foreach (var proc in processors)
                 proc.OnPackagePostProcess();
+
+            EditorPrefs.SetBool(AUTO_REFRESH_KEY, wasAutoRefreshEnabled);
+            if (IsAnyPathsIgnored) EditorSceneManager.RestoreSceneManagerSetup(sceneSetup);
 
             EditorUtility.ClearProgressBar();
         }
