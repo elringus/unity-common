@@ -9,23 +9,23 @@ namespace UnityCommon
     {
         public event Action<bool> OnVisibilityChanged;
 
-        public float FadeTime { get { return _fadeTime; } set { _fadeTime = value; } }
-        public bool IsVisibleOnAwake { get { return _isVisibleOnAwake; } }
-        public virtual bool IsVisible { get { return _isVisible; } set { SetIsVisible(value); } }
+        public float FadeTime { get { return fadeTime; } set { fadeTime = value; } }
+        public bool IsVisibleOnAwake { get { return isVisibleOnAwake; } }
+        public virtual bool IsVisible { get { return isVisible; } set { SetIsVisible(value); } }
         public virtual float CurrentOpacity { get { return GetCurrentOpacity(); } }
         public virtual bool IsInteractable => CanvasGroup ? CanvasGroup.interactable : true;
         public RectTransform RectTransform { get { return GetRectTransform(); } }
 
         protected CanvasGroup CanvasGroup { get; private set; }
 
-        private Tweener<FloatTween> fadeTweener;
-        private RectTransform _rectTransform;
-        private bool _isVisible;
-
         [Tooltip("Whether UI element should be visible or hidden on awake.")]
-        [SerializeField] private bool _isVisibleOnAwake = true;
+        [SerializeField] private bool isVisibleOnAwake = true;
         [Tooltip("Fade duration (in seconds) when changing visiblity.")]
-        [SerializeField] private float _fadeTime = .3f;
+        [SerializeField] private float fadeTime = .3f;
+
+        private Tweener<FloatTween> fadeTweener;
+        private RectTransform rectTransform;
+        private bool isVisible;
 
         protected override void Awake ()
         {
@@ -49,7 +49,7 @@ namespace UnityCommon
             if (fadeTweener.IsRunning)
                 fadeTweener.Stop();
 
-            _isVisible = isVisible;
+            this.isVisible = isVisible;
 
             OnVisibilityChanged.SafeInvoke(isVisible);
 
@@ -76,7 +76,7 @@ namespace UnityCommon
             if (fadeTweener.IsRunning)
                 fadeTweener.Stop();
 
-            _isVisible = isVisible;
+            this.isVisible = isVisible;
 
             OnVisibilityChanged.SafeInvoke(isVisible);
 
@@ -139,9 +139,9 @@ namespace UnityCommon
 
         private RectTransform GetRectTransform ()
         {
-            if (!_rectTransform)
-                _rectTransform = GetComponent<RectTransform>();
-            return _rectTransform;
+            if (!rectTransform)
+                rectTransform = GetComponent<RectTransform>();
+            return rectTransform;
         }
     }
 }

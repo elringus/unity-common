@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -12,7 +13,7 @@ namespace UnityCommon
     {
         public string RootPath { get; private set; }
 
-        private readonly List<Type> NATIVE_REQUEST_TYPES = new List<Type> { typeof(AudioClip), typeof(Texture2D) };
+        private readonly Type[] nativeRequestTypes = new[] { typeof(AudioClip), typeof(Texture2D) };
 
         private bool useNativeRequests;
         private Action<string> logAction;
@@ -26,7 +27,7 @@ namespace UnityCommon
         {
             RootPath = rootPath;
             Resource = resource;
-            useNativeRequests = NATIVE_REQUEST_TYPES.Contains(typeof(TResource));
+            useNativeRequests = nativeRequestTypes.Contains(typeof(TResource));
             this.logAction = logAction;
 
             // MP3 is not supported in native requests on the standalone platforms. Fallback to raw converters.
@@ -156,8 +157,8 @@ namespace UnityCommon
 
         private async Task<byte[]> TryLoadFileCacheAsync (string resourcePath)
         {
-            resourcePath = resourcePath.Replace("/", GoogleDriveResourceProvider.SLASH_REPLACE);
-            var filePath = string.Concat(GoogleDriveResourceProvider.CACHE_DIR_PATH, "/", resourcePath);
+            resourcePath = resourcePath.Replace("/", GoogleDriveResourceProvider.SlashReplace);
+            var filePath = string.Concat(GoogleDriveResourceProvider.CacheDirPath, "/", resourcePath);
             //if (!string.IsNullOrEmpty(usedRepresentation.Extension))
             //    filePath += string.Concat(".", usedRepresentation.Extension);
             if (!File.Exists(filePath)) return null;
@@ -190,15 +191,15 @@ namespace UnityCommon
 
         private async Task WriteFileCacheAsync (string resourcePath, string fileId, byte[] fileRawData)
         {
-            resourcePath = resourcePath.Replace("/", GoogleDriveResourceProvider.SLASH_REPLACE);
-            var filePath = string.Concat(GoogleDriveResourceProvider.CACHE_DIR_PATH, "/", resourcePath);
+            resourcePath = resourcePath.Replace("/", GoogleDriveResourceProvider.SlashReplace);
+            var filePath = string.Concat(GoogleDriveResourceProvider.CacheDirPath, "/", resourcePath);
             //if (!string.IsNullOrEmpty(usedRepresentation.Extension))
             //    filePath += string.Concat(".", usedRepresentation.Extension);
 
             await IOUtils.WriteFileAsync(filePath, fileRawData);
 
             // Add info for the smart caching policy.
-            PlayerPrefs.SetString(string.Concat(GoogleDriveResourceProvider.SMART_CACHE_KEY_PREFIX, fileId), resourcePath);
+            PlayerPrefs.SetString(string.Concat(GoogleDriveResourceProvider.SmartCacheKeyPrefix, fileId), resourcePath);
         }
     }
 }

@@ -11,15 +11,15 @@ namespace UnityCommon
         public event Action OnJumped;
         public event Action OnLanded;
 
-        public bool IsInputBlocked { get { return isInputBlocked; } set { isInputBlocked = value; } }
+        public bool IsInputBlocked { get; set; }
         public bool IsMoving { get { return Velocity.magnitude > 0; } }
-        public bool IsSprinting { get { return isSprinting; } }
-        public bool IsGrounded { get { return characterController.isGrounded; } }
+        public bool IsSprinting { get; private set; }
+        public bool IsGrounded { get { return CharacterController.isGrounded; } }
         public bool IsMoveInputActive { get { return moveInputVelocity.magnitude > 0; } }
         public float TimeSinceLastMoveInputStart { get { return Time.time - lastMoveInputStartTime; } }
         public float TimeSinceLastMoveInputEnd { get { return Time.time - lastMoveInputEndTime; } }
-        public Vector3 Velocity { get { return characterController.velocity; } }
-        public CharacterController CharacterController { get { return characterController; } }
+        public Vector3 Velocity { get { return CharacterController.velocity; } }
+        public CharacterController CharacterController { get; private set; }
 
         [Header("Input")]
         [SerializeField] private string horizontalAxisName = "Horizontal";
@@ -36,21 +36,17 @@ namespace UnityCommon
 
         [Header("Behaviour")]
         [SerializeField] private bool updateForwardDirection = true;
-
-        private CharacterController characterController;
         private Vector3 moveVelocity;
         private Vector2 moveInputVelocity;
         private float lastMoveInputStartTime;
         private float lastMoveInputEndTime;
-        private bool isSprinting;
         private bool wasGroundedLastFrame;
         private bool wasMovingLastFrame;
         private bool wasMoveInputActiveLastFrame;
-        private bool isInputBlocked;
 
         private void Awake ()
         {
-            characterController = GetComponent<CharacterController>();
+            CharacterController = GetComponent<CharacterController>();
         }
 
         private void Update ()
@@ -77,12 +73,12 @@ namespace UnityCommon
 
         public void StartSprint ()
         {
-            isSprinting = true;
+            IsSprinting = true;
         }
 
         public void EndSprint ()
         {
-            isSprinting = false;
+            IsSprinting = false;
         }
 
         private void HandleInput ()
@@ -118,12 +114,12 @@ namespace UnityCommon
         private void HandleMovement ()
         {
             if (!IsGrounded) moveVelocity.y -= gravity;
-            else moveVelocity.y = Mathf.Max(moveVelocity.y, -characterController.stepOffset);
+            else moveVelocity.y = Mathf.Max(moveVelocity.y, -CharacterController.stepOffset);
 
             var velocityModifier = movementSpeed * (IsSprinting ? sprintModifier : accelerationCurve.Evaluate(TimeSinceLastMoveInputStart));
             moveVelocity = new Vector3(moveInputVelocity.x * velocityModifier, moveVelocity.y, moveInputVelocity.y * velocityModifier);
 
-            characterController.Move(moveVelocity * Time.deltaTime);
+            CharacterController.Move(moveVelocity * Time.deltaTime);
         }
 
         private void DetectLanding ()

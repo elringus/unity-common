@@ -56,7 +56,7 @@ namespace UnityCommon
         private int version;
         private KeyCollection keys;
         private ValueCollection values;
-        private object _syncRoot;
+        private object syncRoot;
 
         protected SerializableDictionary ()
         {
@@ -399,9 +399,9 @@ namespace UnityCommon
         {
             get
             {
-                if (_syncRoot == null)
-                    System.Threading.Interlocked.CompareExchange<object>(ref _syncRoot, new object(), null);
-                return _syncRoot;
+                if (syncRoot == null)
+                    System.Threading.Interlocked.CompareExchange<object>(ref syncRoot, new object(), null);
+                return syncRoot;
             }
         }
 

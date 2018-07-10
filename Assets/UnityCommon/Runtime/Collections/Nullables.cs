@@ -10,11 +10,11 @@ namespace UnityCommon
     [Serializable]
     public class Nullable<T>
     {
-        public T Value { get { return _value; } set { HasValue = true; _value = value; } }
-        public bool HasValue { get { return _hasValue; } set { _hasValue = value; } }
+        public T Value { get { return value; } set { HasValue = true; this.value = value; } }
+        public bool HasValue { get { return hasValue; } set { hasValue = value; } }
 
-        [SerializeField] private T _value;
-        [SerializeField] private bool _hasValue;
+        [SerializeField] private T value;
+        [SerializeField] private bool hasValue;
 
         public void Reset ()
         {

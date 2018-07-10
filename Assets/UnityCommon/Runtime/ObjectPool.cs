@@ -19,16 +19,16 @@ namespace UnityCommon
 
     public class ObjectPool : MonoBehaviour
     {
-        public StartupPoolMode StartupPoolMode { get { return _startupPoolMode; } private set { _startupPoolMode = value; } }
-        public StartupPool[] StartupPools { get { return _startupPools; } private set { _startupPools = value; } }
+        public StartupPoolMode StartupPoolMode { get { return startupPoolMode; } private set { startupPoolMode = value; } }
+        public StartupPool[] StartupPools { get { return startupPools; } private set { startupPools = value; } }
 
         private Dictionary<GameObject, List<GameObject>> pooledObjects = new Dictionary<GameObject, List<GameObject>>();
         private Dictionary<GameObject, GameObject> spawnedObjects = new Dictionary<GameObject, GameObject>();
         private List<GameObject> tempList = new List<GameObject>();
         private bool startupPoolsCreated;
 
-        [SerializeField] private StartupPoolMode _startupPoolMode;
-        [SerializeField] private StartupPool[] _startupPools;
+        [SerializeField] private StartupPoolMode startupPoolMode;
+        [SerializeField] private StartupPool[] startupPools;
 
         private void Awake ()
         {

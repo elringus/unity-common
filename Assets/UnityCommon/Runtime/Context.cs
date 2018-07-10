@@ -44,10 +44,8 @@ namespace UnityCommon
     /// </summary>
     public class Context : MonoBehaviour
     {
-        private const float GC_INTERVAL = 60;
-
+        private const float gcInterval = 60;
         private static Context instance;
-
         private Dictionary<Type, List<WeakReference>> references;
 
         private void Start ()
@@ -241,7 +239,7 @@ namespace UnityCommon
 
         private IEnumerator RemoveDeadReferences ()
         {
-            var waitForGcInterval = new WaitForSeconds(GC_INTERVAL);
+            var waitForGcInterval = new WaitForSeconds(gcInterval);
 
             while (true)
             {

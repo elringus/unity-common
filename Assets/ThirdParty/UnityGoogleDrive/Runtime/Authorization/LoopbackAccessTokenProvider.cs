@@ -124,7 +124,7 @@ namespace UnityGoogleDrive
                 settings.AuthCredentials.ClientId,
                 expectedState,
                 codeChallenge,
-                GoogleDriveSettings.CODE_CHALLENGE_METHOD);
+                GoogleDriveSettings.CodeChallengeMethod);
 
             // Open request in the browser.
             Application.OpenURL(authRequest);

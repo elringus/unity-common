@@ -6,9 +6,9 @@ namespace UnityCommon
 {
     public class Updater : MonoBehaviour
     {
-        public float UpdateDelay { get { return _updateDelay; } set { _updateDelay = value; } }
+        public float UpdateDelay { get { return updateDelay; } set { updateDelay = value; } }
 
-        [SerializeField] private float _updateDelay = 0f;
+        [SerializeField] private float updateDelay = 0f;
 
         private Action[] actions = new Action[0];
         private float lastUpdateTime = 0f;

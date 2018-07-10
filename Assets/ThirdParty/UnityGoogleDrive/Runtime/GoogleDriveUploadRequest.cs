@@ -44,8 +44,8 @@ namespace UnityGoogleDrive
         /// </summary>
         [QueryParameter] public virtual string UploadType { get { return HasPayload ? "multipart" : null; } }
 
-        private const string REQUEST_CONTENT_TYPE = "application/json; charset=UTF-8";
-        private const string DEFAULT_MIME_TYPE = "application/octet-stream";
+        private const string RequestContentType = "application/json; charset=UTF-8";
+        private const string DefaultMimeType = "application/octet-stream";
 
         public GoogleDriveUploadRequest (string uri, string method, TRequest requestData,
             byte[] requestPayload = null, string payloadMimeType = null) : base(uri, method)
@@ -54,7 +54,7 @@ namespace UnityGoogleDrive
             if (requestPayload != null)
             {
                 RequestPayload = requestPayload;
-                PayloadMimeType = string.IsNullOrEmpty(payloadMimeType) ? DEFAULT_MIME_TYPE : payloadMimeType;
+                PayloadMimeType = string.IsNullOrEmpty(payloadMimeType) ? DefaultMimeType : payloadMimeType;
             }
         }
 
@@ -67,7 +67,7 @@ namespace UnityGoogleDrive
         protected UnityWebRequest CreateMultipartUpload (UnityWebRequest webRequest)
         {
             var boundary = UnityWebRequest.GenerateBoundary();
-            var metadata = new MultipartFormDataSection(null, JsonUtils.ToJsonPrivateCamel(RequestData), REQUEST_CONTENT_TYPE);
+            var metadata = new MultipartFormDataSection(null, JsonUtils.ToJsonPrivateCamel(RequestData), RequestContentType);
             var content = new MultipartFormDataSection(null, RequestPayload, PayloadMimeType);
             var formData = UnityWebRequest.SerializeFormSections(new List<IMultipartFormSection> { metadata, content }, boundary);
 
@@ -88,7 +88,7 @@ namespace UnityGoogleDrive
             var requestJson = JsonUtils.ToJsonPrivateCamel(RequestData);
             var requestData = Encoding.UTF8.GetBytes(requestJson);
             webRequest.uploadHandler = new UploadHandlerRaw(requestData);
-            webRequest.SetRequestHeader("Content-Type", REQUEST_CONTENT_TYPE);
+            webRequest.SetRequestHeader("Content-Type", RequestContentType);
 
             return webRequest;
         }

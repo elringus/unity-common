@@ -12,7 +12,7 @@ public class TestResourceProvider : MonoBehaviour
     private IResourceProvider provider;
     private string text = "empty";
 
-    private readonly List<string> RESOURCES = new List<string>() {
+    private readonly List<string> resources = new List<string>() {
         "Sprites/Image01",
         "Sprites/Image02",
         "Sprites/Image03",
@@ -174,7 +174,7 @@ public class TestResourceProvider : MonoBehaviour
 
     private async Task TestResourceExistsAsync ()
     {
-        foreach (var res in RESOURCES)
+        foreach (var res in resources)
         {
             var exist = await provider.ResourceExistsAsync<Sprite>(res);
             print(res + ": " + exist.ToString());
@@ -183,10 +183,10 @@ public class TestResourceProvider : MonoBehaviour
 
     private async Task ResolveByFullPathAsync ()
     {
-        foreach (var res in RESOURCES)
+        foreach (var res in resources)
             await provider.LoadResourceAsync<Sprite>(res);
 
-        foreach (var res in RESOURCES)
+        foreach (var res in resources)
         {
             SpriteRenderer.sprite = (await provider.LoadResourceAsync<Sprite>(res)).Object;
             await Task.Delay(TimeSpan.FromSeconds(.5f));
@@ -194,15 +194,15 @@ public class TestResourceProvider : MonoBehaviour
 
         await Task.Delay(TimeSpan.FromSeconds(1.5f));
 
-        foreach (var res in RESOURCES)
+        foreach (var res in resources)
             provider.UnloadResource(res);
 
         await Task.Delay(TimeSpan.FromSeconds(1.5f));
 
-        foreach (var res in RESOURCES)
+        foreach (var res in resources)
             await provider.LoadResourceAsync<Sprite>(res);
 
-        foreach (var res in RESOURCES)
+        foreach (var res in resources)
         {
             SpriteRenderer.sprite = (await provider.LoadResourceAsync<Sprite>(res)).Object;
             await Task.Delay(TimeSpan.FromSeconds(.5f));
@@ -211,10 +211,10 @@ public class TestResourceProvider : MonoBehaviour
 
     private async Task TestTextureResources ()
     {
-        foreach (var res in RESOURCES)
+        foreach (var res in resources)
             await provider.LoadResourceAsync<Texture2D>(res);
 
-        foreach (var res in RESOURCES)
+        foreach (var res in resources)
         {
             var texture = (await provider.LoadResourceAsync<Texture2D>(res)).Object;
             SpriteRenderer.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.one * .5f);

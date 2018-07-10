@@ -4,15 +4,15 @@ namespace UnityCommon
 {
     public class ParallaxLayer : MonoBehaviour
     {
-        public Camera Camera { get { return _camera; } }
-        public float ParallaxFactor { get { return _parallaxFactor; } }
+        public Camera Camera { get { return cameraComponent; } }
+        public float ParallaxFactor { get { return parallaxFactor; } }
 
         private Transform cameraTrs;
         private float initialOffset;
 
-        [SerializeField] private Camera _camera = null;
+        [SerializeField] private Camera cameraComponent = null;
         [Range(0f, 1f)]
-        [SerializeField] private float _parallaxFactor = 1f;
+        [SerializeField] private float parallaxFactor = 1f;
 
         private void Awake ()
         {

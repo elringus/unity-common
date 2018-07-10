@@ -685,8 +685,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2309ad939ce4fa4c903b3130c507f6b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _isVisibleOnAwake: 1
-  _fadeTime: 0.3
+  isVisibleOnAwake: 1
+  fadeTime: 0.3
   loadingIcon: {fileID: 1962985202}
   animationTime: 1
   animationDelay: 0

@@ -30,11 +30,11 @@ namespace UnityCommon
         {
             // PCM16 wav usually has 44 byte headers, though not always. 
             // https://stackoverflow.com/questions/19991405/how-can-i-detect-whether-a-wav-file-has-a-44-or-46-byte-header
-            const int HEADER_SIZE = 444;
+            const int headerSize = 444;
             var inputSamples = input.Length / 2; // 16 bit input, so 2 bytes per sample.
             var output = new float[inputSamples];
             var outputIndex = 0;
-            for (var n = HEADER_SIZE; n < inputSamples; n++)
+            for (var n = headerSize; n < inputSamples; n++)
             {
                 short sample = BitConverter.ToInt16(input, n * 2);
                 output[outputIndex++] = sample / 32768f;

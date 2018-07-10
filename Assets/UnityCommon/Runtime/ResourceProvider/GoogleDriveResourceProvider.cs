@@ -17,10 +17,10 @@ namespace UnityCommon
     {
         public enum CachingPolicyType { Smart, PurgeAllOnInit }
 
-        public static string CACHE_DIR_PATH => string.Concat(Application.persistentDataPath, "/GoogleDriveResourceProviderCache");
-        public static string SMART_CACHE_START_TOKEN_KEY => "GDRIVE_CACHE_START_TOKEN";
-        public static string SMART_CACHE_KEY_PREFIX => "GDRIVE_CACHE_";
-        public const string SLASH_REPLACE = "@@";
+        public static string CacheDirPath => string.Concat(Application.persistentDataPath, "/GoogleDriveResourceProviderCache");
+        public static string SmartCacheStartTokenKey => "GDRIVE_CACHE_START_TOKEN";
+        public static string SmartCacheKeyPrefix => "GDRIVE_CACHE_";
+        public const string SlashReplace = "@@";
 
         /// <summary>
         /// Path to the drive folder where resources are located.
@@ -55,10 +55,10 @@ namespace UnityCommon
 
         public void PurgeCache ()
         {
-            if (Directory.Exists(CACHE_DIR_PATH))
+            if (Directory.Exists(CacheDirPath))
             {
-                IOUtils.DeleteDirectory(CACHE_DIR_PATH, true);
-                IOUtils.CreateDirectory(CACHE_DIR_PATH);
+                IOUtils.DeleteDirectory(CacheDirPath, true);
+                IOUtils.CreateDirectory(CacheDirPath);
             }
 
             LogMessage("All cached resources purged.");
@@ -66,11 +66,11 @@ namespace UnityCommon
 
         public void PurgeCachedResources (string resourcesPath)
         {
-            if (!Directory.Exists(CACHE_DIR_PATH)) return;
+            if (!Directory.Exists(CacheDirPath)) return;
 
-            resourcesPath = resourcesPath.Replace("/", SLASH_REPLACE) + SLASH_REPLACE;
+            resourcesPath = resourcesPath.Replace("/", SlashReplace) + SlashReplace;
 
-            foreach (var filePath in Directory.GetFiles(CACHE_DIR_PATH).Where(f => Path.GetFileName(f).StartsWith(resourcesPath)))
+            foreach (var filePath in Directory.GetFiles(CacheDirPath).Where(f => Path.GetFileName(f).StartsWith(resourcesPath)))
             {
                 File.Delete(filePath);
                 LogMessage($"Cached resource '{filePath}' purged.");
@@ -89,7 +89,7 @@ namespace UnityCommon
         {
             base.Awake();
 
-            IOUtils.CreateDirectory(CACHE_DIR_PATH);
+            IOUtils.CreateDirectory(CacheDirPath);
 
             LogMessage($"Caching policy: {CachingPolicy}");
             if (CachingPolicy == CachingPolicyType.PurgeAllOnInit) PurgeCache();
@@ -163,11 +163,11 @@ namespace UnityCommon
             var startTime = Time.time;
             LogMessage("Running smart caching scan...");
 
-            if (PlayerPrefs.HasKey(SMART_CACHE_START_TOKEN_KEY))
-                await ProcessChangesListAsync(PlayerPrefs.GetString(SMART_CACHE_START_TOKEN_KEY));
+            if (PlayerPrefs.HasKey(SmartCacheStartTokenKey))
+                await ProcessChangesListAsync(PlayerPrefs.GetString(SmartCacheStartTokenKey));
 
             var newStartToken = (await GoogleDriveChanges.GetStartPageToken().Send()).StartPageTokenValue;
-            PlayerPrefs.SetString(SMART_CACHE_START_TOKEN_KEY, newStartToken);
+            PlayerPrefs.SetString(SmartCacheStartTokenKey, newStartToken);
             LogMessage($"Updated smart cache changes token: {newStartToken}");
             LogMessage($"Finished smart caching scan in {Time.time - startTime:0.###} seconds.");
         }
@@ -177,10 +177,10 @@ namespace UnityCommon
             var changeList = await GoogleDriveChanges.List(pageToken).Send();
             foreach (var change in changeList.Changes)
             {
-                var cachedFileKey = string.Concat(SMART_CACHE_KEY_PREFIX, change.FileId);
+                var cachedFileKey = string.Concat(SmartCacheKeyPrefix, change.FileId);
                 if (PlayerPrefs.HasKey(cachedFileKey))
                 {
-                    var filePath = string.Concat(CACHE_DIR_PATH, "/", PlayerPrefs.GetString(cachedFileKey));
+                    var filePath = string.Concat(CacheDirPath, "/", PlayerPrefs.GetString(cachedFileKey));
                     if (File.Exists(filePath))
                     {
                         File.Delete(filePath);
