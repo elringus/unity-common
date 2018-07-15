@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 namespace UnityCommon
 {
@@ -16,6 +18,16 @@ namespace UnityCommon
         public Folder (string path)
         {
             Path = path;
+        }
+    }
+
+    public static class FolderExtensions
+    {
+        public static IEnumerable<Folder> FindAllAtPath (this IEnumerable<Folder> folders, string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                return folders.Where(f => !f.Path.Contains("/") || string.IsNullOrEmpty(f.Path.GetBeforeLast("/")));
+            return folders.Where(f => f.Path.GetBeforeLast("/").Equals(path) || f.Path.GetBeforeLast("/").Equals("/" + path));
         }
     }
 }
