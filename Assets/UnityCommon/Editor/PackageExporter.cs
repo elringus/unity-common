@@ -161,7 +161,7 @@ namespace UnityCommon
                 foreach (var path in ignoredPaths)
                 {
                     File.SetAttributes(path, File.GetAttributes(path) | FileAttributes.Hidden);
-                    File.SetAttributes(path + ".meta", File.GetAttributes(path) | FileAttributes.Hidden);
+                    File.SetAttributes(path + ".meta", File.GetAttributes(path + ".meta") | FileAttributes.Hidden);
                 }
                 AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
             }
@@ -214,6 +214,9 @@ namespace UnityCommon
                     File.WriteAllText(modifiedScript.Key, modifiedScript.Value, Encoding.UTF8);
             }
 
+            // Remove previously added license asset.
+            if (needToAddLicense) AssetDatabase.DeleteAsset(LicenseAssetPath);
+
             // Un-hide ignored assets.
             DisplayProgressBar("Un-hiding ignored assets...", .95f);
             if (IsAnyPathsIgnored)
@@ -221,13 +224,10 @@ namespace UnityCommon
                 foreach (var path in ignoredPaths)
                 {
                     File.SetAttributes(path, File.GetAttributes(path) & ~FileAttributes.Hidden);
-                    File.SetAttributes(path + ".meta", File.GetAttributes(path) & ~FileAttributes.Hidden);
+                    File.SetAttributes(path + ".meta", File.GetAttributes(path + ".meta") & ~FileAttributes.Hidden);
                 }
-                AssetDatabase.Refresh();
+                AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
             }
-
-            // Remove previously added license asset.
-            if (needToAddLicense) AssetDatabase.DeleteAsset(LicenseAssetPath);
 
             DisplayProgressBar("Post-processing assets...", 1f);
             foreach (var proc in processors)
