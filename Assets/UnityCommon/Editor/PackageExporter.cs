@@ -159,10 +159,7 @@ namespace UnityCommon
             if (IsAnyPathsIgnored)
             {
                 foreach (var path in ignoredPaths)
-                {
                     File.SetAttributes(path, File.GetAttributes(path) | FileAttributes.Hidden);
-                    File.SetAttributes(path + ".meta", File.GetAttributes(path + ".meta") | FileAttributes.Hidden);
-                }
                 AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
             }
 
@@ -222,10 +219,7 @@ namespace UnityCommon
             if (IsAnyPathsIgnored)
             {
                 foreach (var path in ignoredPaths)
-                {
                     File.SetAttributes(path, File.GetAttributes(path) & ~FileAttributes.Hidden);
-                    File.SetAttributes(path + ".meta", File.GetAttributes(path + ".meta") & ~FileAttributes.Hidden);
-                }
                 AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
             }
 
