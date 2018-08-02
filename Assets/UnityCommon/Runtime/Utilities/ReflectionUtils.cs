@@ -7,6 +7,10 @@ namespace UnityCommon
 {
     public static class ReflectionUtils
     {
+        public static IEnumerable<Type> ExportedDomainTypes { get { return cachedDomainTypes ?? (cachedDomainTypes = GetExportedDomainTypes()); } }
+
+        private static IEnumerable<Type> cachedDomainTypes;
+
         public static bool IsDynamicAssembly (Assembly assembly)
         {
             #if NET_4_6 || NET_STANDARD_2_0
