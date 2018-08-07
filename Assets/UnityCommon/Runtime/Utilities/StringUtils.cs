@@ -128,7 +128,7 @@ namespace UnityCommon
         /// Splits the string using new line symbol as a separator.
         /// Will split by all type of new lines, independant of environment.
         /// </summary>
-        public static string[] SplitByNewLine (this string content)
+        public static string[] SplitByNewLine (this string content, StringSplitOptions splitOptions = StringSplitOptions.None)
         {
             if (string.IsNullOrEmpty(content)) return null;
 
@@ -137,7 +137,7 @@ namespace UnityCommon
             // "\r"     (\u000D)        Mac
             // Not using Environment.NewLine here, as content could've been produced 
             // in not the same environment we running the program in.
-            return content.Split(new string[] { "\r\n", "\n", "\r" }, StringSplitOptions.RemoveEmptyEntries);
+            return content.Split(new string[] { "\r\n", "\n", "\r" }, splitOptions);
         }
 
         /// <summary>
