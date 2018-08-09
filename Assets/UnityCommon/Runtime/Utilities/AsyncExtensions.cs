@@ -10,7 +10,24 @@ namespace UnityCommon
 {
     public static class AsyncExtensions
     {
-        public static TaskAwaiter GetAwaiter (this YieldInstruction yieldInstruction) => new CoroutineRunner(null, yieldInstruction).RunAsync().GetAwaiter();
+        private class YieldInstructionRunner : CoroutineRunner
+        {
+            public YieldInstructionRunner (YieldInstruction yieldInstruction, MonoBehaviour coroutineContainer = null) 
+                : base(coroutineContainer, yieldInstruction) { }
+
+            protected override IEnumerator CoroutineLoop ()
+            {
+                yield return YieldInstruction;
+                HandleOnCompleted();
+            }
+        }
+
+        public static TaskAwaiter GetAwaiter (this YieldInstruction yieldInstruction, MonoBehaviour coroutineContainer)
+        {
+            return new YieldInstructionRunner(yieldInstruction, coroutineContainer).RunAsync().GetAwaiter();
+        }
+
+        public static TaskAwaiter GetAwaiter (this YieldInstruction yieldInstruction) => GetAwaiter(yieldInstruction, null);
 
         public static TaskAwaiter<AsyncOperation> GetAwaiter (this AsyncOperation asyncOperation)
         {
