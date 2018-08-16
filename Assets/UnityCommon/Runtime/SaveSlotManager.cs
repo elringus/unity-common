@@ -88,6 +88,8 @@ namespace UnityCommon
             IOUtils.DeleteFile(SlotIdToFilePath(slotId));
         }
 
+        public virtual string SlotIdToFilePath (string slotId) => string.Concat(SaveDataPath, "/", slotId, ".json");
+
         protected virtual async Task SerializeDataAsync (string slotId, TData data)
         {
             var jsonData = JsonUtility.ToJson(data, PrettifyJson);
@@ -102,8 +104,6 @@ namespace UnityCommon
             var jsonData = await IOUtils.ReadTextFileAsync(filePath);
             return JsonUtility.FromJson<TData>(jsonData);
         }
-
-        protected virtual string SlotIdToFilePath (string slotId) => string.Concat(SaveDataPath, "/", slotId, ".json");
 
         protected virtual string GetGameDataPath ()
         {
