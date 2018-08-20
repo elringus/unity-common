@@ -5,6 +5,9 @@ namespace UnityCommon
 {
     public class LabeledButton : Button
     {
+        public Text Label => labelText;
+        public ColorBlock LabelColorBlock => labelColors;
+
         [SerializeField] private Text labelText;
         [SerializeField] private ColorBlock labelColors = ColorBlock.defaultColorBlock;
 
