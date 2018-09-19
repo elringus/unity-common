@@ -11,7 +11,7 @@ namespace UnityCommon
         private ProjectResourceProvider.TypeRedirector redirector;
 
         public ProjectResourceLoader (Resource<TResource> resource,
-            ProjectResourceProvider.TypeRedirector redirector = null, Action<string> logAction = null)
+            ProjectResourceProvider.TypeRedirector redirector, Action<string> logAction)
         {
             Resource = resource;
             this.redirector = redirector;

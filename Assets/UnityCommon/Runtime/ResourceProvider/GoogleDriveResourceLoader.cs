@@ -24,7 +24,7 @@ namespace UnityCommon
         private byte[] rawData;
 
         public GoogleDriveResourceLoader (string rootPath, Resource<TResource> resource,
-            IRawConverter<TResource> converter, Action<string> logAction = null)
+            IRawConverter<TResource> converter, Action<string> logAction)
         {
             RootPath = rootPath;
             Resource = resource;

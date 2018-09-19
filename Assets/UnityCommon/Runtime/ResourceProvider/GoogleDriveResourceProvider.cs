@@ -145,7 +145,7 @@ namespace UnityCommon
 
         protected override LoadResourceRunner<T> CreateLoadRunner<T> (Resource<T> resource)
         {
-            return new GoogleDriveResourceLoader<T>(DriveRootPath, resource, ResolveConverter<T>());
+            return new GoogleDriveResourceLoader<T>(DriveRootPath, resource, ResolveConverter<T>(), LogMessage);
         }
 
         protected override LocateResourcesRunner<T> CreateLocateRunner<T> (string path)
