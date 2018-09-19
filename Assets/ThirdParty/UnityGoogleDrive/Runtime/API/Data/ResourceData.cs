@@ -1,6 +1,4 @@
-﻿// Copyright 2017-2018 Elringus (Artyom Sovetnikov). All Rights Reserved.
-
-namespace UnityGoogleDrive.Data
+﻿namespace UnityGoogleDrive.Data
 {
     /// <summary>
     /// Base class for a Google Drive resource data representation.

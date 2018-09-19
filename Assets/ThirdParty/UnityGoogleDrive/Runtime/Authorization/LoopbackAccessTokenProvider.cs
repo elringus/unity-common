@@ -1,6 +1,4 @@
-﻿// Copyright 2017-2018 Elringus (Artyom Sovetnikov). All Rights Reserved.
-
-using System;
+﻿using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -33,17 +31,18 @@ namespace UnityGoogleDrive
             settings = googleDriveSettings;
             unitySyncContext = SynchronizationContext.Current;
 
-            accessTokenRefresher = new AccessTokenRefresher(settings);
+            accessTokenRefresher = new AccessTokenRefresher(settings.GenericClientCredentials);
             accessTokenRefresher.OnDone += HandleAccessTokenRefreshed;
 
-            authCodeExchanger = new AuthCodeExchanger(settings);
+            authCodeExchanger = new AuthCodeExchanger(settings, settings.GenericClientCredentials);
             authCodeExchanger.OnDone += HandleAuthCodeExchanged;
         }
 
         public void ProvideAccessToken ()
         {
-            if (!settings.AuthCredentials.ContainsSensitiveData())
+            if (!settings.GenericClientCredentials.ContainsSensitiveData())
             {
+                Debug.LogError("Generic credentials are not valid.");
                 HandleProvideAccessTokenComplete(true);
                 return;
             }
@@ -118,10 +117,10 @@ namespace UnityGoogleDrive
             var authRequest = string.Format("{0}?response_type=code&scope={1}&redirect_uri={2}&client_id={3}&state={4}&code_challenge={5}&code_challenge_method={6}" +
                     "&access_type=offline" + // Forces to return a refresh token at the auth code exchange phase.
                     "&approval_prompt=force", // Forces to show consent screen for each auth request. Needed to return refresh tokens on consequent auth runs.
-                settings.AuthCredentials.AuthUri,
-                Uri.EscapeDataString(string.Join(" ", settings.AccessScopes.ToArray())),
+                settings.GenericClientCredentials.AuthUri,
+                Uri.EscapeDataString(settings.AccessScope),
                 Uri.EscapeDataString(redirectUri),
-                settings.AuthCredentials.ClientId,
+                settings.GenericClientCredentials.ClientId,
                 expectedState,
                 codeChallenge,
                 GoogleDriveSettings.CodeChallengeMethod);
@@ -130,7 +129,11 @@ namespace UnityGoogleDrive
             Application.OpenURL(authRequest);
 
             // Wait for the authorization response.
-            httpListener.BeginGetContext(HandleHttpListenerCallback, httpListener);
+            var asyncResult = httpListener.BeginGetContext(HandleHttpListenerCallback, httpListener);
+
+            // Block the thread when backround mode is not supported to serve HTTP response while the application is not in focus.
+            if (!Application.runInBackground)
+                asyncResult.AsyncWaitHandle.WaitOne();
         }
 
         private void HandleHttpListenerCallback (IAsyncResult result)

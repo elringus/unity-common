@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace UnityCommon
 {
     /// <summary>
-    /// Implementation is able to load and unload <see cref="Resource"/> objects at runtime.
+    /// Implementation is able to asynchronously load and unload <see cref="Resource"/> objects at runtime.
     /// </summary>
     public interface IResourceProvider
     {
@@ -22,7 +22,6 @@ namespace UnityCommon
         /// Whether any resource loading operations are currently active.
         /// </summary>
         bool IsLoading { get; }
-
         /// <summary>
         /// Current resources loading progress, in 0.0 to 1.0 range.
         /// </summary>
@@ -33,43 +32,41 @@ namespace UnityCommon
         /// </summary>
         /// <typeparam name="T">Type of the resource to load.</typeparam>
         /// <param name="path">Path to the resource location.</param>
-        Task<Resource<T>> LoadResourceAsync<T> (string path) where T : class;
-
+        Task<Resource<T>> LoadResourceAsync<T> (string path);
         /// <summary>
         /// Loads all available resources at the provided path asynchronously.
         /// </summary>
         /// <typeparam name="T">Type of the resources to load.</typeparam>
         /// <param name="path">Path to the resources location.</param>
-        Task<List<Resource<T>>> LoadResourcesAsync<T> (string path) where T : class;
-
+        Task<IEnumerable<Resource<T>>> LoadResourcesAsync<T> (string path);
         /// <summary>
         /// Locates all available resources at the provided path asynchronously.
         /// </summary>
         /// <typeparam name="T">Type of the resources to locate.</typeparam>
         /// <param name="path">Path to the resources location.</param>
-        Task<List<Resource<T>>> LocateResourcesAsync<T> (string path) where T : class;
-
+        Task<IEnumerable<Resource<T>>> LocateResourcesAsync<T> (string path);
         /// <summary>
-        /// Checks whether resource with the provided type and path is available.
+        /// Checks whether resource with the provided type and path is available asynchronously.
         /// </summary>
         /// <typeparam name="T">Type of the resource to look for.</typeparam>
         /// <param name="path">Path to the resource location.</param>
-        Task<bool> ResourceExistsAsync<T> (string path) where T : class;
-
+        Task<bool> ResourceExistsAsync<T> (string path);
         /// <summary>
-        /// Unloads resource at the provided path.
+        /// Unloads resource at the provided path asynchronously.
         /// </summary>
         /// <param name="path">Path to the resource location.</param>
-        void UnloadResource (string path);
-
+        Task UnloadResourceAsync (string path);
         /// <summary>
-        /// Unloads all loaded resources.
+        /// Unloads all loaded resources asynchronously.
         /// </summary>
-        void UnloadResources ();
-
+        Task UnloadResourcesAsync ();
         /// <summary>
         /// Checks whether resource with the provided path is loaded.
         /// </summary>
         bool ResourceLoaded (string path);
+        /// <summary>
+        /// Checks whether resource with the provided path is currently being loaded.
+        /// </summary>
+        bool ResourceLoading (string path);
     }
 }

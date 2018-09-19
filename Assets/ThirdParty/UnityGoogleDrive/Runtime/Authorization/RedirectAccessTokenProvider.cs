@@ -1,6 +1,4 @@
-﻿// Copyright 2017-2018 Elringus (Artyom Sovetnikov). All Rights Reserved.
-
-using System;
+﻿using System;
 using System.Linq;
 using UnityEngine;
 
@@ -28,7 +26,7 @@ namespace UnityGoogleDrive
 
         public void ProvideAccessToken ()
         {
-            if (!settings.AuthCredentials.ContainsSensitiveData())
+            if (!settings.GenericClientCredentials.ContainsSensitiveData())
             {
                 HandleProvideAccessTokenComplete(true);
                 return;
@@ -38,10 +36,10 @@ namespace UnityGoogleDrive
             if (string.IsNullOrEmpty(accessToken)) // Access token isn't available; retrieve it.
             {
                 var authRequest = string.Format("{0}?response_type=token&scope={1}&redirect_uri={2}&client_id={3}",
-                    settings.AuthCredentials.AuthUri,
-                    string.Join(" ", settings.AccessScopes.ToArray()),
+                    settings.GenericClientCredentials.AuthUri,
+                    settings.AccessScope,
                     Uri.EscapeDataString(Application.absoluteURL),
-                    settings.AuthCredentials.ClientId);
+                    settings.GenericClientCredentials.ClientId);
 
                 Application.OpenURL(authRequest);
             }

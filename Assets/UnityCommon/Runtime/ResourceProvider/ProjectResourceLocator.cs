@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace UnityCommon
 {
-    public class ProjectResourceLocator<TResource> : LocateResourcesRunner<TResource> where TResource : class
+    public class ProjectResourceLocator<TResource> : LocateResourcesRunner<TResource>
     {
         public string ResourcesPath { get; private set; }
 
@@ -38,7 +38,7 @@ namespace UnityCommon
             foreach (var obj in objects)
             {
                 var path = string.Concat(ResourcesPath, "/", obj.name);
-                var cObj = redirector != null ? await redirector.ToSourceAsync<TResource>(obj) : obj as TResource;
+                var cObj = redirector != null ? await redirector.ToSourceAsync<TResource>(obj) : (TResource)(object)obj;
                 var resource = new Resource<TResource>(path, cObj);
                 LocatedResources.Add(resource);
             }

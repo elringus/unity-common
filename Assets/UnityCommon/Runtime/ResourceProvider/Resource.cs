@@ -25,27 +25,27 @@ namespace UnityCommon
     /// A strongly typed version of the <see cref="Resource"/>.
     /// </summary>
     /// <typeparam name="T">Type of the resource object.</typeparam>
-    public class Resource<T> : Resource where T : class
+    public class Resource<T> : Resource
     {
         public new T Object { get { return CastObject(base.Object); } set { base.Object = value; } }
 
-        public Resource (string path, T obj = null) : base(path, obj) { }
+        public Resource (string path, T obj = default(T)) : base(path, obj) { }
 
         private T CastObject (object resourceObject)
         {
             if (resourceObject == null)
             {
                 Debug.LogError(string.Format("Resource '{0}' is null.", Path, typeof(T).Name));
-                return null;
+                return default(T);
             }
 
-            var castedResource = resourceObject as T;
-            if (castedResource == null)
+            if (!typeof(T).IsAssignableFrom(resourceObject.GetType()))
             {
                 Debug.LogError(string.Format("Resource '{0}' is not of type '{1}'.", Path, typeof(T).Name));
-                return null;
+                return default(T);
             }
-            return castedResource;
+
+            return (T)resourceObject;
         }
     }
 }

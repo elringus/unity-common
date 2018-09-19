@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace UnityCommon
 {
-    public class ProjectResourceLoader<TResource> : LoadResourceRunner<TResource> where TResource : class
+    public class ProjectResourceLoader<TResource> : LoadResourceRunner<TResource>
     {
         private Action<string> logAction;
         private ResourceRequest resourceRequest;
@@ -34,7 +34,7 @@ namespace UnityCommon
 
             var resourceType = redirector != null ? redirector.RedirectType : typeof(TResource);
             resourceRequest = await Resources.LoadAsync(Resource.Path, resourceType);
-            Resource.Object = redirector != null ? await redirector.ToSourceAsync<TResource>(resourceRequest.asset) : resourceRequest.asset as TResource;
+            Resource.Object = redirector != null ? await redirector.ToSourceAsync<TResource>(resourceRequest.asset) : (TResource)(object)resourceRequest.asset;
 
             logAction?.Invoke($"Resource '{Resource.Path}' loaded over {Time.time - startTime:0.###} seconds.");
 

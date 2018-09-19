@@ -1,6 +1,4 @@
-﻿// Copyright 2017-2018 Elringus (Artyom Sovetnikov). All Rights Reserved.
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace UnityGoogleDrive
@@ -15,14 +13,22 @@ namespace UnityGoogleDrive
         public const int UnauthorizedResponseCode = 401;
 
         /// <summary>
-        /// Google Drive API application credentials used to authorize requests.
+        /// Google Drive API application credentials used to authorize requests via loopback and redirect schemes.
         /// </summary>
-        public AuthCredentials AuthCredentials { get { return authCredentials; } }
+        public GenericClientCredentials GenericClientCredentials { get { return genericClientCredentials; } }
+        /// <summary>
+        /// Google Drive API application credentials used to authorize requests via custom URI scheme.
+        /// </summary>
+        public UriSchemeClientCredentials UriSchemeClientCredentials { get { return uriSchemeClientCredentials; } }
         /// <summary>
         /// Scopes of access to the user's Google Drive the app will request.
         /// For available scopes see: <see cref="https://developers.google.com/drive/api/v3/about-auth"/>.
         /// </summary>
         public List<string> AccessScopes { get { return accessScopes; } }
+        /// <summary>
+        /// Joined version of the <see cref="AccessScopes"/>.
+        /// </summary>
+        public string AccessScope { get { return string.Join(" ", AccessScopes.ToArray()); } }
         /// <summary>
         /// A web address for the loopback authentication requests. Defult is 'localhost'.
         /// </summary>
@@ -31,7 +37,7 @@ namespace UnityGoogleDrive
         /// <summary>
         /// HTML page shown to the user when loopback response is received.
         /// </summary>
-        public string LoopbackResponseHtml { get { return loopbackResponseHtml; } }
+        public string LoopbackResponseHtml { get { return loopbackResponseHtml; } set { loopbackResponseHtml = value; } }
         /// <summary>
         /// Token used to authenticate requests; cached in <see cref="PlayerPrefs"/>.
         /// </summary>
@@ -41,7 +47,8 @@ namespace UnityGoogleDrive
         /// </summary>
         public string CachedRefreshToken { get { return PlayerPrefs.GetString(refreshTokenPrefsKey); } set { PlayerPrefs.SetString(refreshTokenPrefsKey, value); } }
 
-        [SerializeField] private AuthCredentials authCredentials = null;
+        [SerializeField] private GenericClientCredentials genericClientCredentials = null;
+        [SerializeField] private UriSchemeClientCredentials uriSchemeClientCredentials = null;
         [SerializeField] private List<string> accessScopes = new List<string> { "https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/drive.appdata" };
         [SerializeField] private string loopbackUri = "http://localhost";
         [SerializeField] private string loopbackResponseHtml = "<html><h1>Please return to the app.</h1></html>";

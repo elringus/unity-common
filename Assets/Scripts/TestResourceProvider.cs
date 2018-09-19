@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityCommon;
 using UnityEngine;
@@ -27,14 +28,16 @@ public class TestResourceProvider : MonoBehaviour
 
     private async void Start ()
     {
-        //await ResolveByFullPathAsync();
+        await new WaitForEndOfFrame();
+
+        await ResolveByFullPathAsync();
         //await ResolveTextByPathAsync();
         //await ResolveFoldersAsync();
         //await TestResourceExistsAsync();
         //await TestAudioAsync();
         //await TestUnloadAsync();
         //await TestTextureResources();
-        await TestTextureByDir();
+        //await TestTextureByDir();
     }
 
     private void OnGUI ()
@@ -54,17 +57,14 @@ public class TestResourceProvider : MonoBehaviour
 
     private async Task TestEditorAsync ()
     {
-        var result = await provider.LoadResourcesAsync<string>("Text");
+        var result = (await provider.LoadResourcesAsync<string>("Text")).ToList();
         for (int i = 0; i < result.Count; i++)
             Debug.Log($"{i}: {result[i].Object}");
     }
 
     private static ProjectResourceProvider InitializeProjectResourceProvider ()
     {
-        ProjectResourceProvider provider;
-        var go = new GameObject();
-        go.hideFlags = HideFlags.DontSave;
-        provider = go.AddComponent<ProjectResourceProvider>();
+        var provider = new ProjectResourceProvider();
 
         provider.AddRedirector(new TextAssetToStringConverter());
 
@@ -73,14 +73,8 @@ public class TestResourceProvider : MonoBehaviour
 
     private GoogleDriveResourceProvider InitializeGoogleDriveResourceProvider (bool purgeCache)
     {
-        GoogleDriveResourceProvider provider;
-        var go = new GameObject();
-        go.hideFlags = HideFlags.DontSave;
-        provider = go.AddComponent<GoogleDriveResourceProvider>();
+        var provider = new GoogleDriveResourceProvider("Resources", GoogleDriveResourceProvider.CachingPolicyType.Smart, 2);
 
-        provider.DriveRootPath = "Resources";
-        provider.ConcurrentRequestsLimit = 2;
-        provider.CachingPolicy = GoogleDriveResourceProvider.CachingPolicyType.Smart;
         provider.AddConverter(new JpgOrPngToSpriteConverter());
         provider.AddConverter(new JpgOrPngToTextureConverter());
         provider.AddConverter(new GDocToStringConverter());
@@ -95,12 +89,8 @@ public class TestResourceProvider : MonoBehaviour
 
     private static LocalResourceProvider InitializeLocalResourceProvider ()
     {
-        LocalResourceProvider provider;
-        var go = new GameObject();
-        go.hideFlags = HideFlags.DontSave;
-        provider = go.AddComponent<LocalResourceProvider>();
+        var provider = new LocalResourceProvider("Resources");
 
-        provider.RootPath = "Resources";
         provider.AddConverter(new DirectoryToFolderConverter());
         provider.AddConverter(new JpgOrPngToSpriteConverter());
         provider.AddConverter(new JpgOrPngToTextureConverter());
@@ -124,20 +114,20 @@ public class TestResourceProvider : MonoBehaviour
         }
 
         foreach (var textResource in resources)
-            provider.UnloadResource(textResource.Path);
+            await provider.UnloadResourceAsync(textResource.Path);
     }
 
     private async Task TestUnloadAsync ()
     {
         for (int i = 0; i < 10; i++)
         {
-            var resources = await provider.LoadResourcesAsync<AudioClip>("Unload");
+            var resources = await provider.LoadResourcesAsync<AudioClip>("Sprites");
             text = "Total memory used after load: " + Mathf.CeilToInt(System.GC.GetTotalMemory(true) * .000001f) + "Mb";
 
             await Task.Delay(TimeSpan.FromSeconds(.5f));
 
             foreach (var resource in resources)
-                provider.UnloadResource(resource.Path);
+                await provider.UnloadResourceAsync(resource.Path);
             text = "Total memory used after unload: " + Mathf.CeilToInt(System.GC.GetTotalMemory(true) * .000001f) + "Mb";
 
             await Task.Delay(TimeSpan.FromSeconds(.5f));
@@ -155,7 +145,7 @@ public class TestResourceProvider : MonoBehaviour
         }
 
         foreach (var audioResource in resources)
-            provider.UnloadResource(audioResource.Path);
+            await provider.UnloadResourceAsync(audioResource.Path);
     }
 
     private async Task ResolveTextByPathAsync ()
@@ -169,7 +159,7 @@ public class TestResourceProvider : MonoBehaviour
         }
 
         foreach (var textResource in resources)
-            provider.UnloadResource(textResource.Path);
+            await provider.UnloadResourceAsync(textResource.Path);
     }
 
     private async Task TestResourceExistsAsync ()
@@ -195,7 +185,7 @@ public class TestResourceProvider : MonoBehaviour
         await Task.Delay(TimeSpan.FromSeconds(1.5f));
 
         foreach (var res in resources)
-            provider.UnloadResource(res);
+            await provider.UnloadResourceAsync(res);
 
         await Task.Delay(TimeSpan.FromSeconds(1.5f));
 

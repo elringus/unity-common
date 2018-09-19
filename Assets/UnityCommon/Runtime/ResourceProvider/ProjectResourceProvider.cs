@@ -7,7 +7,7 @@ namespace UnityCommon
     /// <summary>
     /// Provides resources stored in the 'Resources' folders of the project.
     /// </summary>
-    public class ProjectResourceProvider : MonoRunnerResourceProvider
+    public class ProjectResourceProvider : ResourceProvider
     {
         public class TypeRedirector
         {
@@ -22,18 +22,17 @@ namespace UnityCommon
                 RedirectToSourceConverter = redirectToSourceConverter;
             }
 
-            public async Task<TSource> ToSourceAsync<TSource> (object obj) where TSource : class
+            public async Task<TSource> ToSourceAsync<TSource> (object obj)
             {
-                return (await RedirectToSourceConverter.ConvertAsync(obj)) as TSource;
+                return (TSource)await RedirectToSourceConverter.ConvertAsync(obj);
             }
         }
 
         private ProjectResources projectResources;
         private Dictionary<Type, TypeRedirector> redirectors = new Dictionary<Type, TypeRedirector>();
 
-        protected override void Awake ()
+        public ProjectResourceProvider ()
         {
-            base.Awake();
             projectResources = ProjectResources.Get();
         }
 
@@ -57,10 +56,11 @@ namespace UnityCommon
             return new ProjectResourceLocator<T>(path, projectResources, redirectors.ContainsKey(typeof(T)) ? redirectors[typeof(T)] : null);
         }
 
-        protected override void UnloadResource (Resource resource)
+        protected override Task UnloadResourceAsync (Resource resource)
         {
             if (resource.IsValid && resource.IsUnloadable)
                 UnityEngine.Resources.UnloadAsset(resource.AsUnityObject);
+            return Task.CompletedTask;
         }
     }
 }

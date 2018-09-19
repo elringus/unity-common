@@ -1,6 +1,4 @@
-﻿// Copyright 2017-2018 Elringus (Artyom Sovetnikov). All Rights Reserved.
-
-
+﻿
 namespace UnityGoogleDrive.Data
 {
     /// <summary>

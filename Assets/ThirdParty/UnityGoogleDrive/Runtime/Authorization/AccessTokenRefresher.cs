@@ -1,6 +1,4 @@
-﻿// Copyright 2017-2018 Elringus (Artyom Sovetnikov). All Rights Reserved.
-
-using System;
+﻿using System;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -23,25 +21,24 @@ namespace UnityGoogleDrive
         public string Error { get; private set; }
         public string AccesToken { get; private set; }
 
-        private GoogleDriveSettings settings;
+        private IClientCredentials credentials;
         private UnityWebRequest refreshRequest;
 
-        public AccessTokenRefresher (GoogleDriveSettings googleDriveSettings)
+        public AccessTokenRefresher (IClientCredentials clientCredentials)
         {
-            settings = googleDriveSettings;
+            credentials = clientCredentials;
         }
 
         public void RefreshAccessToken (string refreshToken)
         {
-            var refreshRequestURI = settings.AuthCredentials.TokenUri;
-
             var refreshRequestForm = new WWWForm();
-            refreshRequestForm.AddField("client_id", settings.AuthCredentials.ClientId);
-            refreshRequestForm.AddField("client_secret", settings.AuthCredentials.ClientSecret);
+            refreshRequestForm.AddField("client_id", credentials.ClientId);
+            if (!string.IsNullOrEmpty(credentials.ClientSecret))
+                refreshRequestForm.AddField("client_secret", credentials.ClientSecret);
             refreshRequestForm.AddField("refresh_token", refreshToken);
             refreshRequestForm.AddField("grant_type", "refresh_token");
 
-            refreshRequest = UnityWebRequest.Post(refreshRequestURI, refreshRequestForm);
+            refreshRequest = UnityWebRequest.Post(credentials.TokenUri, refreshRequestForm);
             refreshRequest.SetRequestHeader("Content-Type", GoogleDriveSettings.RequestContentType);
             refreshRequest.SetRequestHeader("Accept", "Accept=text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
             refreshRequest.SendWebRequest().completed += HandleRequestComplete;
@@ -57,22 +54,40 @@ namespace UnityGoogleDrive
 
         private void HandleRequestComplete (AsyncOperation requestYeild)
         {
-            if (refreshRequest == null || !string.IsNullOrEmpty(refreshRequest.error))
+            if (CheckRequestErrors(refreshRequest))
             {
                 HandleRefreshComplete(true);
                 return;
             }
 
             var response = JsonUtility.FromJson<RefreshResponse>(refreshRequest.downloadHandler.text);
-            if (!string.IsNullOrEmpty(response.error))
-            {
-                Error = string.Format("{0}: {1}", response.error, response.error_description);
-                HandleRefreshComplete(true);
-                return;
-            }
-
             AccesToken = response.access_token;
             HandleRefreshComplete();
+        }
+
+        private static bool CheckRequestErrors (UnityWebRequest request)
+        {
+            if (request == null)
+            {
+                Debug.LogError("UnityGoogleDrive: Refresh token request failed. Request object is null.");
+                return true;
+            }
+
+            var errorDescription = string.Empty;
+
+            if (!string.IsNullOrEmpty(request.error))
+                errorDescription += " HTTP Error: " + request.error;
+
+            if (request.downloadHandler != null && !string.IsNullOrEmpty(request.downloadHandler.text))
+            {
+                var response = JsonUtility.FromJson<RefreshResponse>(request.downloadHandler.text);
+                if (!string.IsNullOrEmpty(response.error))
+                    errorDescription += " API Error: " + response.error + " API Error Description: " + response.error_description;
+            }
+
+            var isError = errorDescription.Length > 0;
+            if (isError) Debug.LogError("UnityGoogleDrive: Refresh token code request failed." + errorDescription);
+            return isError;
         }
     }
 }

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace UnityCommon
 {
-    public class LocalResourceLocator<TResource> : LocateResourcesRunner<TResource> where TResource : class
+    public class LocalResourceLocator<TResource> : LocateResourcesRunner<TResource>
     {
         public string RootPath { get; private set; }
         public string ResourcesPath { get; private set; }

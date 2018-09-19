@@ -11,32 +11,47 @@ namespace UnityCommon
         public event Action<string> OnMessage;
         #pragma warning restore 67
 
-        public bool IsLoading { get { throw new System.NotImplementedException(); } }
-        public float LoadProgress { get { throw new System.NotImplementedException(); } }
+        public bool IsLoading { get { throw new NotImplementedException(); } }
+        public float LoadProgress { get { throw new NotImplementedException(); } }
 
-        public Task<Resource<T>> LoadResourceAsync<T> (string path) where T : class
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task<List<Resource<T>>> LoadResourcesAsync<T> (string path) where T : class
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task<List<Resource<T>>> LocateResourcesAsync<T> (string path) where T : class
+        public Resource<T> LoadResource<T> (string path)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> ResourceExistsAsync<T> (string path) where T : class
+        public Task<Resource<T>> LoadResourceAsync<T> (string path)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<Resource<T>> LoadResources<T> (string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<Resource<T>>> LoadResourcesAsync<T> (string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<Resource<T>> LocateResources<T> (string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<Resource<T>>> LocateResourcesAsync<T> (string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> ResourceExistsAsync<T> (string path)
+        {
+            throw new NotImplementedException();
         }
 
         public void UnloadResource (string path)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void UnloadResources ()
@@ -44,9 +59,29 @@ namespace UnityCommon
             throw new NotImplementedException();
         }
 
+        public bool ResourceExists<T> (string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UnloadResourceAsync (string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task UnloadResourcesAsync ()
+        {
+            throw new NotImplementedException();
+        }
+
         public bool ResourceLoaded (string path)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
+        }
+
+        public bool ResourceLoading (string path)
+        {
+            throw new NotImplementedException();
         }
     }
 }

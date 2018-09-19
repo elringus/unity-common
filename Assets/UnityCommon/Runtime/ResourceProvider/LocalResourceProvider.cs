@@ -1,22 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace UnityCommon
 {
-    public class LocalResourceProvider : MonoRunnerResourceProvider
+    public class LocalResourceProvider : ResourceProvider
     {
         /// <summary>
         /// Path to the folder where resources are located (realtive to <see cref="Application.dataPath"/>).
         /// </summary>
-        public string RootPath { get; set; }
+        public string RootPath { get; private set; }
 
         private Dictionary<Type, IConverter> converters = new Dictionary<Type, IConverter>();
+
+        public LocalResourceProvider (string rootPath)
+        {
+            RootPath = rootPath;
+        }
 
         /// <summary>
         /// Adds a resource type converter.
         /// </summary>
-        public void AddConverter<T> (IRawConverter<T> converter) where T : class
+        public void AddConverter<T> (IRawConverter<T> converter)
         {
             if (converters.ContainsKey(typeof(T))) return;
             converters.Add(typeof(T), converter);
@@ -32,10 +38,14 @@ namespace UnityCommon
             return new LocalResourceLocator<T>(RootPath, path, ResolveConverter<T>());
         }
 
-        protected override void UnloadResource (Resource resource)
+        protected override Task UnloadResourceAsync (Resource resource)
         {
             if (resource.IsValid && resource.IsUnityObject)
-                Destroy(resource.AsUnityObject);
+            {
+                if (!Application.isPlaying) UnityEngine.Object.DestroyImmediate(resource.AsUnityObject);
+                else UnityEngine.Object.Destroy(resource.AsUnityObject);
+            }
+            return Task.CompletedTask;
         }
 
         private IRawConverter<T> ResolveConverter<T> ()

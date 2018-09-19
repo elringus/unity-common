@@ -9,7 +9,7 @@ using UnityGoogleDrive;
 
 namespace UnityCommon
 {
-    public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource> where TResource : class
+    public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource>
     {
         public string RootPath { get; private set; }
 
@@ -20,6 +20,7 @@ namespace UnityCommon
         private GoogleDriveRequest downloadRequest;
         private IRawConverter<TResource> converter;
         private RawDataRepresentation usedRepresentation;
+        private GoogleDriveResourceProvider.CacheManifest cacheManifest;
         private byte[] rawData;
 
         public GoogleDriveResourceLoader (string rootPath, Resource<TResource> resource,
@@ -199,7 +200,9 @@ namespace UnityCommon
             await IOUtils.WriteFileAsync(filePath, fileRawData);
 
             // Add info for the smart caching policy.
-            PlayerPrefs.SetString(string.Concat(GoogleDriveResourceProvider.SmartCacheKeyPrefix, fileId), resourcePath);
+            if (cacheManifest == null) cacheManifest = await GoogleDriveResourceProvider.CacheManifest.ReadOrCreateAsync();
+            cacheManifest[fileId] = resourcePath;
+            await cacheManifest.WriteAsync();
         }
     }
 }

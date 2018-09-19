@@ -1,6 +1,4 @@
-﻿// Copyright 2017-2018 Elringus (Artyom Sovetnikov). All Rights Reserved.
-
-#if NET_4_6 || NET_STANDARD_2_0
+﻿#if NET_4_6 || NET_STANDARD_2_0
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 

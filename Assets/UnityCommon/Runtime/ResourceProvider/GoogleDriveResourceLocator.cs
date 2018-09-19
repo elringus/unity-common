@@ -6,7 +6,7 @@ using UnityGoogleDrive;
 
 namespace UnityCommon
 {
-    public class GoogleDriveResourceLocator<TResource> : LocateResourcesRunner<TResource> where TResource : class
+    public class GoogleDriveResourceLocator<TResource> : LocateResourcesRunner<TResource>
     {
         public string RootPath { get; private set; }
         public string ResourcesPath { get; private set; }

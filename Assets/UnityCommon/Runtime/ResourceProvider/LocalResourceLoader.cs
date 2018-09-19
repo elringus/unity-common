@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace UnityCommon
 {
-    public class LocalResourceLoader<TResource> : LoadResourceRunner<TResource> where TResource : class
+    public class LocalResourceLoader<TResource> : LoadResourceRunner<TResource>
     {
         public string RootPath { get; private set; }
 

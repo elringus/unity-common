@@ -13,40 +13,84 @@ namespace UnityCommon
     /// Will only work for the resources covered by the available converters; 
     /// use <see cref="AddConverter{T}(IRawConverter{T})"/> to extend covered resource types.
     /// </summary>
-    public class GoogleDriveResourceProvider : MonoRunnerResourceProvider
+    public class GoogleDriveResourceProvider : ResourceProvider
     {
+        [Serializable]
+        public class CacheManifest : SerializableLiteralStringMap
+        {
+            public string StartToken { get { return ContainsKey(startTokenKey) ? this[startTokenKey] : null; } set { this[startTokenKey] = value; } }
+
+            private const string startTokenKey = "GDRIVE_CACHE_START_TOKEN";
+            private static readonly string filePath = string.Concat(CacheDirPath, "/CacheManifest");
+
+            public static async Task<CacheManifest> ReadOrCreateAsync ()
+            {
+                if (!File.Exists(filePath))
+                {
+                    var manifest = new CacheManifest();
+                    await IOUtils.WriteTextFileAsync(filePath, JsonUtility.ToJson(manifest));
+                    return manifest;
+                }
+
+                var manifestJson = await IOUtils.ReadTextFileAsync(filePath);
+                return JsonUtility.FromJson<CacheManifest>(manifestJson);
+            }
+
+            public async Task WriteAsync ()
+            {
+                var manifestJson = JsonUtility.ToJson(this);
+                await IOUtils.WriteTextFileAsync(filePath, manifestJson);
+            }
+        }
+
         public enum CachingPolicyType { Smart, PurgeAllOnInit }
 
-        public static string CacheDirPath => string.Concat(Application.persistentDataPath, "/GoogleDriveResourceProviderCache");
-        public static string SmartCacheStartTokenKey => "GDRIVE_CACHE_START_TOKEN";
-        public static string SmartCacheKeyPrefix => "GDRIVE_CACHE_";
+        /// <summary>
+        /// Full path to the cache directory.
+        /// </summary>
+        public static readonly string CacheDirPath = string.Concat(Application.persistentDataPath, "/GoogleDriveResourceProviderCache");
+        /// <summary>
+        /// String used to replace slashes in file paths.
+        /// </summary>
         public const string SlashReplace = "@@";
-
         /// <summary>
         /// Path to the drive folder where resources are located.
         /// </summary>
-        public string DriveRootPath { get; set; }
+        public string DriveRootPath { get; private set; }
         /// <summary>
         /// Limits concurrent requests count using queueing.
         /// </summary>
-        public int ConcurrentRequestsLimit { get; set; }
+        public int ConcurrentRequestsLimit { get; private set; }
         /// <summary>
         /// Caching policy to use.
         /// </summary>
-        public CachingPolicyType CachingPolicy { get; set; }
+        public CachingPolicyType CachingPolicy { get; private set; }
         /// <summary>
         /// Current pending concurrent requests count.
         /// </summary>
-        public int RequestsCount => Runners.Count;
+        public int RequestsCount => ResourceRunners.Count;
 
         private Dictionary<Type, IConverter> converters = new Dictionary<Type, IConverter>();
         private Queue<Action> requestQueue = new Queue<Action>();
         private bool smartCachingScanPending;
 
+        public GoogleDriveResourceProvider (string driveRootPath, CachingPolicyType cachingPolicy, int concurrentRequestsLimit)
+        {
+            DriveRootPath = driveRootPath;
+            CachingPolicy = cachingPolicy;
+            ConcurrentRequestsLimit = concurrentRequestsLimit;
+
+            IOUtils.CreateDirectory(CacheDirPath);
+
+            LogMessage($"Caching policy: {CachingPolicy}");
+            if (CachingPolicy == CachingPolicyType.PurgeAllOnInit) PurgeCache();
+            if (CachingPolicy == CachingPolicyType.Smart) smartCachingScanPending = true;
+        }
+
         /// <summary>
         /// Adds a resource type converter.
         /// </summary>
-        public void AddConverter<T> (IRawConverter<T> converter) where T : class
+        public void AddConverter<T> (IRawConverter<T> converter)
         {
             if (converters.ContainsKey(typeof(T))) return;
             converters.Add(typeof(T), converter);
@@ -85,17 +129,6 @@ namespace UnityCommon
             return await base.LoadResourceAsync<T>(path);
         }
 
-        protected override void Awake ()
-        {
-            base.Awake();
-
-            IOUtils.CreateDirectory(CacheDirPath);
-
-            LogMessage($"Caching policy: {CachingPolicy}");
-            if (CachingPolicy == CachingPolicyType.PurgeAllOnInit) PurgeCache();
-            if (CachingPolicy == CachingPolicyType.Smart) smartCachingScanPending = true;
-        }
-
         protected override void RunLoader<T> (LoadResourceRunner<T> loader)
         {
             if (ConcurrentRequestsLimit > 0 && RequestsCount > ConcurrentRequestsLimit)
@@ -112,7 +145,7 @@ namespace UnityCommon
 
         protected override LoadResourceRunner<T> CreateLoadRunner<T> (Resource<T> resource)
         {
-            return new GoogleDriveResourceLoader<T>(DriveRootPath, resource, ResolveConverter<T>(), LogMessage);
+            return new GoogleDriveResourceLoader<T>(DriveRootPath, resource, ResolveConverter<T>());
         }
 
         protected override LocateResourcesRunner<T> CreateLocateRunner<T> (string path)
@@ -120,10 +153,14 @@ namespace UnityCommon
             return new GoogleDriveResourceLocator<T>(DriveRootPath, path, ResolveConverter<T>());
         }
 
-        protected override void UnloadResource (Resource resource)
+        protected override Task UnloadResourceAsync (Resource resource)
         {
             if (resource.IsValid && resource.IsUnityObject)
-                Destroy(resource.AsUnityObject);
+            {
+                if (!Application.isPlaying) UnityEngine.Object.DestroyImmediate(resource.AsUnityObject);
+                else UnityEngine.Object.Destroy(resource.AsUnityObject);
+            }
+            return Task.CompletedTask;
         }
 
         protected override void HandleResourceLoaded<T> (Resource<T> resource)
@@ -132,7 +169,7 @@ namespace UnityCommon
             ProcessLoadQueue();
         }
 
-        protected override void HandleResourcesLocated<T> (List<Resource<T>> locatedResources, string path)
+        protected override void HandleResourcesLocated<T> (IEnumerable<Resource<T>> locatedResources, string path)
         {
             base.HandleResourcesLocated(locatedResources, path);
             ProcessLoadQueue();
@@ -160,37 +197,37 @@ namespace UnityCommon
         {
             smartCachingScanPending = false;
 
-            var startTime = Time.time;
+            var startTime = DateTime.Now;
+            var manifest = await CacheManifest.ReadOrCreateAsync();
             LogMessage("Running smart caching scan...");
 
-            if (PlayerPrefs.HasKey(SmartCacheStartTokenKey))
-                await ProcessChangesListAsync(PlayerPrefs.GetString(SmartCacheStartTokenKey));
+            if (!string.IsNullOrEmpty(manifest.StartToken))
+                await ProcessChangesListAsync(manifest);
 
             var newStartToken = (await GoogleDriveChanges.GetStartPageToken().Send()).StartPageTokenValue;
-            PlayerPrefs.SetString(SmartCacheStartTokenKey, newStartToken);
+            manifest.StartToken = newStartToken;
+            await manifest.WriteAsync();
             LogMessage($"Updated smart cache changes token: {newStartToken}");
-            LogMessage($"Finished smart caching scan in {Time.time - startTime:0.###} seconds.");
+            LogMessage($"Finished smart caching scan in {(DateTime.Now - startTime).TotalSeconds:0.###} seconds.");
         }
 
-        private async Task ProcessChangesListAsync (string pageToken)
+        private async Task ProcessChangesListAsync (CacheManifest manifest)
         {
-            var changeList = await GoogleDriveChanges.List(pageToken).Send();
+            var changeList = await GoogleDriveChanges.List(manifest.StartToken).Send();
             foreach (var change in changeList.Changes)
             {
-                var cachedFileKey = string.Concat(SmartCacheKeyPrefix, change.FileId);
-                if (PlayerPrefs.HasKey(cachedFileKey))
+                if (!manifest.ContainsKey(change.FileId)) continue;
+
+                var filePath = string.Concat(CacheDirPath, "/", manifest[change.FileId]);
+                if (File.Exists(filePath))
                 {
-                    var filePath = string.Concat(CacheDirPath, "/", PlayerPrefs.GetString(cachedFileKey));
-                    if (File.Exists(filePath))
-                    {
-                        File.Delete(filePath);
-                        LogMessage($"File '{filePath}' has been changed; cached version has been purged.");
-                    }
+                    File.Delete(filePath);
+                    LogMessage($"File '{filePath}' has been changed; cached version has been purged.");
                 }
             }
 
             if (!string.IsNullOrWhiteSpace(changeList.NextPageToken))
-                await ProcessChangesListAsync(changeList.NextPageToken);
+                await ProcessChangesListAsync(manifest);
 
             IOUtils.WebGLSyncFs();
         }

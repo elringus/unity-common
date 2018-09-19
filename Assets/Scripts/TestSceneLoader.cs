@@ -17,10 +17,8 @@ public class TestSceneLoader : MonoBehaviour
 
     private void LoadResources ()
     {
-        var provider = Context.Resolve<GoogleDriveResourceProvider>();
+        var provider = new GoogleDriveResourceProvider("Resources", GoogleDriveResourceProvider.CachingPolicyType.Smart, 2);
 
-        provider.DriveRootPath = "Resources";
-        provider.ConcurrentRequestsLimit = 2;
         provider.AddConverter(new JpgOrPngToSpriteConverter());
         provider.AddConverter(new GDocToStringConverter());
         provider.AddConverter(new GFolderToFolderConverter());

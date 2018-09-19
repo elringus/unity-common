@@ -1,6 +1,4 @@
-﻿// Copyright 2017-2018 Elringus (Artyom Sovetnikov). All Rights Reserved.
-
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace UnityGoogleDrive.Data
 {

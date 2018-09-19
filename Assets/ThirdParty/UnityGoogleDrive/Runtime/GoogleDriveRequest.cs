@@ -1,6 +1,4 @@
-﻿// Copyright 2017-2018 Elringus (Artyom Sovetnikov). All Rights Reserved.
-
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -260,6 +258,7 @@ namespace UnityGoogleDrive
         {
             AuthController.OnAccessTokenRefreshed -= HandleAccessTokenRefreshed;
             if (success) SendWebRequest();
+            else { Error = "Authorization error."; CompleteRequest(); }
         }
 
         /// <summary>

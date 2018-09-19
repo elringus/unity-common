@@ -1,6 +1,4 @@
-﻿// Copyright 2017-2018 Elringus (Artyom Sovetnikov). All Rights Reserved.
-
-using System;
+﻿using System;
 using UnityEngine;
 
 namespace UnityGoogleDrive
@@ -27,10 +25,13 @@ namespace UnityGoogleDrive
         {
             settings = googleDriveSettings;
 
-            // WebGL doesn't support loopback method; using redirection scheme instead.
-            #if UNITY_WEBGL && !UNITY_EDITOR
+            #if UNITY_WEBGL && !UNITY_EDITOR // WebGL doesn't support loopback method; using redirection scheme instead.
             accessTokenProvider = new RedirectAccessTokenProvider(settings);
-            #else
+            #elif UNITY_ANDROID && !UNITY_EDITOR // On Android a native OpenID lib is used for better UX.
+            accessTokenProvider = new AndroidAccessTokenProvider(settings);
+            #elif UNITY_IOS && !UNITY_EDITOR // On iOS a native OpenID lib is used for better UX.
+            accessTokenProvider = new IOSAccessTokenProvider(settings);
+            #else // Loopback scheme is used on other platforms.
             accessTokenProvider = new LoopbackAccessTokenProvider(settings);
             #endif
 
@@ -48,10 +49,9 @@ namespace UnityGoogleDrive
         private void HandleAccessTokenProviderDone (IAccessTokenProvider provider)
         {
             if (provider.IsError)
-            {
                 Debug.LogError("UnityGoogleDrive: Failed to execute authorization procedure. Check application settings and credentials.");
-            }
-            else IsRefreshingAccessToken = false;
+
+            IsRefreshingAccessToken = false;
 
             if (OnAccessTokenRefreshed != null)
                 OnAccessTokenRefreshed.Invoke(!provider.IsError);

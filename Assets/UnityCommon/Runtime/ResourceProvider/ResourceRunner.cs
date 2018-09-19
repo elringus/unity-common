@@ -35,9 +35,9 @@ namespace UnityCommon
         }
     }
 
-    public class ResourceRunner<TResource> : ResourceRunner where TResource : class { }
+    public class ResourceRunner<TResource> : ResourceRunner { }
 
-    public class LoadResourceRunner<TResource> : ResourceRunner<TResource> where TResource : class
+    public class LoadResourceRunner<TResource> : ResourceRunner<TResource>
     {
         public Resource<TResource> Resource { get; protected set; }
 
@@ -58,7 +58,7 @@ namespace UnityCommon
         }
     }
 
-    public class LocateResourcesRunner<TResource> : ResourceRunner<TResource> where TResource : class
+    public class LocateResourcesRunner<TResource> : ResourceRunner<TResource>
     {
         public List<Resource<TResource>> LocatedResources { get; protected set; } = new List<Resource<TResource>>();
 
