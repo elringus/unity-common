@@ -11,15 +11,21 @@ namespace UnityCommon
         protected override void BindUIEvents ()
         {
             UIComponent.onValueChanged.AddListener(OnScrollPositionChanged);
-            UIComponent.onValueChanged.AddListener(OnPositionChanged.SafeInvoke);
+            UIComponent.onValueChanged.AddListener(InvokeOnPositionChanged);
         }
 
         protected override void UnbindUIEvents ()
         {
             UIComponent.onValueChanged.RemoveListener(OnScrollPositionChanged);
-            UIComponent.onValueChanged.RemoveListener(OnPositionChanged.SafeInvoke);
+            UIComponent.onValueChanged.RemoveListener(InvokeOnPositionChanged);
         }
 
         protected virtual void OnScrollPositionChanged (Vector2 scrollPosition) { }
+
+        private void InvokeOnPositionChanged (Vector2 value)
+        {
+            if (OnPositionChanged != null)
+                OnPositionChanged.Invoke(value);
+        }
     }
 }

@@ -10,15 +10,21 @@ namespace UnityCommon
         protected override void BindUIEvents ()
         {
             UIComponent.onValueChanged.AddListener(OnValueChanged);
-            UIComponent.onValueChanged.AddListener(OnSliderValueChanged.SafeInvoke);
+            UIComponent.onValueChanged.AddListener(InvokeOnSliderValueChanged);
         }
 
         protected override void UnbindUIEvents ()
         {
             UIComponent.onValueChanged.RemoveListener(OnValueChanged);
-            UIComponent.onValueChanged.RemoveListener(OnSliderValueChanged.SafeInvoke);
+            UIComponent.onValueChanged.RemoveListener(InvokeOnSliderValueChanged);
         }
 
         protected virtual void OnValueChanged (float value) { }
+
+        private void InvokeOnSliderValueChanged (float value)
+        {
+            if (OnSliderValueChanged != null)
+                OnSliderValueChanged.Invoke(value);
+        }
     }
 }

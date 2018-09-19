@@ -10,15 +10,21 @@ namespace UnityCommon
         protected override void BindUIEvents ()
         {
             UIComponent.onValueChanged.AddListener(OnValueChanged);
-            UIComponent.onValueChanged.AddListener(OnDropdownValueChanged.SafeInvoke);
+            UIComponent.onValueChanged.AddListener(InvokeOnDropdownValueChanged);
         }
 
         protected override void UnbindUIEvents ()
         {
             UIComponent.onValueChanged.RemoveListener(OnValueChanged);
-            UIComponent.onValueChanged.RemoveListener(OnDropdownValueChanged.SafeInvoke);
+            UIComponent.onValueChanged.RemoveListener(InvokeOnDropdownValueChanged);
         }
 
         protected virtual void OnValueChanged (int value) { }
+
+        private void InvokeOnDropdownValueChanged (int value)
+        {
+            if (OnDropdownValueChanged != null)
+                OnDropdownValueChanged.Invoke(value);
+        }
     }
 }

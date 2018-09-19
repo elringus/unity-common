@@ -18,15 +18,21 @@ namespace UnityCommon
         protected override void BindUIEvents ()
         {
             UIComponent.onClick.AddListener(OnButtonClick);
-            UIComponent.onClick.AddListener(OnButtonClicked.SafeInvoke);
+            UIComponent.onClick.AddListener(InvokeOnButtonClicked);
         }
 
         protected override void UnbindUIEvents ()
         {
             UIComponent.onClick.RemoveListener(OnButtonClick);
-            UIComponent.onClick.RemoveListener(OnButtonClicked.SafeInvoke);
+            UIComponent.onClick.RemoveListener(InvokeOnButtonClicked);
         }
 
         protected virtual void OnButtonClick () { }
+
+        private void InvokeOnButtonClicked ()
+        {
+            if (OnButtonClicked != null)
+                OnButtonClicked.Invoke();
+        }
     }
 }
