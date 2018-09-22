@@ -30,7 +30,7 @@ namespace UnityCommon
     /// <summary>
     /// Allows working with resources of specific type using a prioritized providers list.
     /// </summary>
-    public class ResourceLoader<TResource> : ResourceLoader
+    public class ResourceLoader<TResource> : ResourceLoader where TResource : class
     {
         public override bool IsLoadingAny => loadCounter > 0;
         public Dictionary<string, TResource> LoadedResources { get; }
@@ -49,10 +49,10 @@ namespace UnityCommon
             if (!isFullPath) path = BuildFullPath(path);
 
             var resource = await Providers.LoadResourceAsync<TResource>(path);
-
             AddLoadedResource(resource);
+
             DecrementLoadCounter();
-            return resource.Object;
+            return resource != null && resource.IsValid ? resource.Object : null;
         }
 
         public virtual async Task<IEnumerable<TResource>> LoadAllAsync (string path = null, bool isFullPath = false)
@@ -61,10 +61,10 @@ namespace UnityCommon
             if (!isFullPath) path = BuildFullPath(path);
 
             var resources = await Providers.LoadResourcesAsync<TResource>(path);
-
             AddLoadedResources(resources);
+
             DecrementLoadCounter();
-            return resources.Select(r => r.Object);
+            return resources.Select(r => r != null && r.IsValid ? r.Object : null);
         }
 
         public virtual async Task<IEnumerable<Resource<TResource>>> LocateResourcesAsync (string path, bool isFullPath = false)
@@ -137,12 +137,14 @@ namespace UnityCommon
         protected virtual void AddLoadedResources (IEnumerable<Resource<TResource>> resources)
         {
             foreach (var resource in resources)
-                AddLoadedResource(resource);
+                if (resource != null && resource.IsValid)
+                    AddLoadedResource(resource);
         }
 
         protected virtual void AddLoadedResource (Resource<TResource> resource)
         {
-            LoadedResources[resource.Path] = resource.Object;
+            if (resource != null && resource.IsValid)
+                LoadedResources[resource.Path] = resource.Object;
         }
 
         protected virtual void RemoveLoadedResource (string resourcePath)

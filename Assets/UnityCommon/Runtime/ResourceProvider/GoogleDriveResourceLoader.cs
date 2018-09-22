@@ -65,7 +65,7 @@ namespace UnityCommon
                 // 4. Load file metadata from Google Drive.
                 var filePath = string.IsNullOrEmpty(RootPath) ? Resource.Path : string.Concat(RootPath, '/', Resource.Path);
                 var fileMeta = await GetFileMetaAsync(filePath);
-                if (fileMeta == null) { Debug.LogError($"Failed to resolve '{filePath}' google drive metadata."); HandleOnCompleted(); return; }
+                if (fileMeta == null) { Debug.LogError($"Failed to resolve '{filePath}' Google Drive metadata."); HandleOnCompleted(); return; }
 
                 if (converter is IGoogleDriveConverter<TResource>) rawData = await ExportFileAsync(fileMeta);
                 else rawData = await DownloadFileAsync(fileMeta);

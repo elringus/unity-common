@@ -30,7 +30,7 @@ public class TestResourceProvider : MonoBehaviour
     {
         await new WaitForEndOfFrame();
 
-        await ResolveByFullPathAsync();
+        //await ResolveByFullPathAsync();
         //await ResolveTextByPathAsync();
         //await ResolveFoldersAsync();
         //await TestResourceExistsAsync();
@@ -38,6 +38,7 @@ public class TestResourceProvider : MonoBehaviour
         //await TestUnloadAsync();
         //await TestTextureResources();
         //await TestTextureByDir();
+        await TestNullPropagation();
     }
 
     private void OnGUI ()
@@ -222,5 +223,13 @@ public class TestResourceProvider : MonoBehaviour
             SpriteRenderer.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.one * .5f);
             await Task.Delay(TimeSpan.FromSeconds(.5f));
         }
+    }
+
+    private async Task TestNullPropagation ()
+    {
+        var loader = new ResourceLoader<Texture2D>(new List<IResourceProvider> { provider }, "Sprites");
+        var image = await loader.LoadAsync("Image09");
+        print(image);
+        print("Propagated!");
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -11,7 +12,6 @@ namespace UnityCommon
 
         private Action<string> logAction;
         private IRawConverter<TResource> converter;
-        private RawDataRepresentation usedRepresentation;
         private byte[] rawData;
 
         public LocalResourceLoader (string rootPath, Resource<TResource> resource,
@@ -21,7 +21,6 @@ namespace UnityCommon
             Resource = resource;
             this.logAction = logAction;
             this.converter = converter;
-            usedRepresentation = new RawDataRepresentation();
         }
 
         public override async Task Run ()
@@ -43,7 +42,6 @@ namespace UnityCommon
 
             foreach (var representation in converter.Representations)
             {
-                usedRepresentation = representation;
                 var fullPath = string.Concat(filePath, representation.Extension);
                 if (!File.Exists(fullPath)) continue;
 
@@ -51,10 +49,16 @@ namespace UnityCommon
                 break;
             }
 
-            if (rawData == null) Debug.LogError($"Failed to load {Resource.Path}{usedRepresentation.Extension} resource using local file system: File not found.");
-            else Resource.Object = await converter.ConvertAsync(rawData);
-
-            logAction?.Invoke($"Resource '{Resource.Path}' loaded {StringUtils.FormatFileSize(rawData.Length)} over {Time.time - startTime:0.###} seconds.");
+            if (rawData == null)
+            {
+                var usedExtensions = string.Join("/", converter.Representations.Select(r => r.Extension));
+                Debug.LogError($"Failed to load `{filePath}({usedExtensions})` resource using local file system: File not found.");
+            }
+            else
+            {
+                Resource.Object = await converter.ConvertAsync(rawData);
+                logAction?.Invoke($"Resource `{Resource.Path}` loaded {StringUtils.FormatFileSize(rawData.Length)} over {Time.time - startTime:0.###} seconds.");
+            }
 
             HandleOnCompleted();
         }
