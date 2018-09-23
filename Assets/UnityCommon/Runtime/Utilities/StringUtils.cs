@@ -15,6 +15,25 @@ namespace UnityCommon
         }
 
         /// <summary>
+        /// Attempts to extract a subset of the provided <paramref name="source"/> string, starting at
+        /// <paramref name="startIndex"/> and ending at <paramref name="endIndex"/>; returns <see cref="null"/> on fail.
+        /// </summary>
+        /// <param name="source">The string to extract the subset from.</param>
+        /// <param name="startIndex">Start index of the subset.</param>
+        /// <param name="endIndex">End index of the subset.</param>
+        /// <returns>The extracted subset string or <see cref="null"/> if failed.</returns>
+        public static string TrySubset(string source, int startIndex, int endIndex)
+        {
+            if (string.IsNullOrWhiteSpace(source)) return null;
+            if (startIndex < 0 || startIndex >= source.Length) return null;
+            if (endIndex < 0 || endIndex >= source.Length) return null;
+            if (endIndex - startIndex < 0) return null;
+
+            var length = endIndex - startIndex + 1;
+            return source.Substring(startIndex, length);
+        }
+
+        /// <summary>
         /// More performant version of string.EndsWith method.
         /// https://docs.unity3d.com/Manual/BestPracticeUnderstandingPerformanceInUnity5.html
         /// </summary>
