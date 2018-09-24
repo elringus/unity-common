@@ -28,6 +28,11 @@ namespace UnityCommon
             return array.Length > 0 && index >= 0 && index < array.Length;
         }
 
+        public static bool IsIndexValid<T> (this List<T> list, int index)
+        {
+            return list.Count > 0 && index >= 0 && index < list.Count;
+        }
+
         public static T[] Append<T> (this T[] array, T item)
         {
             Array.Resize(ref array, array.Length + 1);
