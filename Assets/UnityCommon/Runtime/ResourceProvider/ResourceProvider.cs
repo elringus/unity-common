@@ -63,7 +63,8 @@ namespace UnityCommon
 
         public virtual async Task UnloadResourcesAsync ()
         {
-            await Task.WhenAll(LoadedResources.Values.Select(r => UnloadResourceAsync(r.Path)));
+            var loadedPaths = LoadedResources.Values.Select(r => r.Path);
+            await Task.WhenAll(loadedPaths.Select(path => UnloadResourceAsync(path)));
         }
 
         public virtual bool ResourceLoaded (string path)
