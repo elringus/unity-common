@@ -45,7 +45,7 @@ namespace UnityCommon
             if (volumeTweener.IsRunning)
                 volumeTweener.CompleteInstantly();
             if (!IsPlaying) Play();
-            var tween = new FloatTween(0, Volume, fadeInTime, volume => Volume = volume, true);
+            var tween = new FloatTween(0, Volume, fadeInTime, volume => Volume = volume);
             await volumeTweener.RunAsync(tween);
         }
 
@@ -60,7 +60,7 @@ namespace UnityCommon
             if (!IsValid) return;
             if (volumeTweener.IsRunning)
                 volumeTweener.CompleteInstantly();
-            var tween = new FloatTween(Volume, 0, fadeOutTime, volume => Volume = volume, true);
+            var tween = new FloatTween(Volume, 0, fadeOutTime, volume => Volume = volume);
             await volumeTweener.RunAsync(tween);
             Stop();
         }
@@ -70,7 +70,7 @@ namespace UnityCommon
             if (!IsValid) return;
             if (volumeTweener.IsRunning)
                 volumeTweener.CompleteInstantly();
-            var tween = new FloatTween(Volume, volume, fadeTime, v => Volume = v, true);
+            var tween = new FloatTween(Volume, volume, fadeTime, v => Volume = v);
             await volumeTweener.RunAsync(tween);
         }
     }
