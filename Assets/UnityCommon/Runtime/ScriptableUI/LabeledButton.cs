@@ -7,10 +7,16 @@ namespace UnityCommon
     {
         public Text Label => labelText;
         public ColorBlock LabelColorBlock => labelColors;
+        public Color LabelColorMultiplier
+        {
+            get { return labelColorMultiplier; }
+            set { labelColorMultiplier = value; DoStateTransition(currentSelectionState, false); }
+        }
 
         [SerializeField] private Text labelText;
         [SerializeField] private ColorBlock labelColors = ColorBlock.defaultColorBlock;
 
+        private Color labelColorMultiplier = Color.white;
         private Tweener<ColorTween> tintTweener;
 
         protected override void Awake ()
@@ -40,22 +46,22 @@ namespace UnityCommon
         {
             base.DoStateTransition(state, instant);
 
-            if (!labelText) return;
+            if (!Label) return;
 
             Color tintColor;
             switch (state)
             {
                 case SelectionState.Normal:
-                    tintColor = labelColors.normalColor;
+                    tintColor = LabelColorBlock.normalColor;
                     break;
                 case SelectionState.Highlighted:
-                    tintColor = labelColors.highlightedColor;
+                    tintColor = LabelColorBlock.highlightedColor;
                     break;
                 case SelectionState.Pressed:
-                    tintColor = labelColors.pressedColor;
+                    tintColor = LabelColorBlock.pressedColor;
                     break;
                 case SelectionState.Disabled:
-                    tintColor = labelColors.disabledColor;
+                    tintColor = LabelColorBlock.disabledColor;
                     break;
                 default:
                     tintColor = Color.black;
@@ -65,11 +71,11 @@ namespace UnityCommon
             if (instant)
             {
                 if (tintTweener != null && tintTweener.IsRunning) tintTweener.CompleteInstantly();
-                labelText.color = tintColor;
+                Label.color = tintColor * LabelColorBlock.colorMultiplier * LabelColorMultiplier;
             }
             else if (tintTweener != null)
             {
-                var tween = new ColorTween(labelText.color, tintColor * labelColors.colorMultiplier, ColorTweenMode.All, labelColors.fadeDuration, c => labelText.color = c);
+                var tween = new ColorTween(Label.color, tintColor * LabelColorBlock.colorMultiplier * LabelColorMultiplier, ColorTweenMode.All, LabelColorBlock.fadeDuration, c => Label.color = c);
                 tintTweener.Run(tween);
             }
         }
