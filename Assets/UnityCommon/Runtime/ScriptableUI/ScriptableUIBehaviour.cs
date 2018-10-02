@@ -15,6 +15,7 @@ namespace UnityCommon
         public virtual float CurrentOpacity { get { return GetCurrentOpacity(); } }
         public virtual bool IsInteractable => CanvasGroup ? CanvasGroup.interactable : true;
         public RectTransform RectTransform { get { return GetRectTransform(); } }
+        public int SortingOrder { get { return GetTopmostCanvas()?.sortingOrder ?? 0; } set { SetSortingOrder(value); } }
 
         protected CanvasGroup CanvasGroup { get; private set; }
 
@@ -142,6 +143,12 @@ namespace UnityCommon
             if (!rectTransform)
                 rectTransform = GetComponent<RectTransform>();
             return rectTransform;
+        }
+
+        private void SetSortingOrder (int value)
+        {
+            var topmostCanvas = GetTopmostCanvas();
+            if (topmostCanvas) topmostCanvas.sortingOrder = value;
         }
     }
 }
