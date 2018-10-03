@@ -64,8 +64,8 @@ namespace UnityCommon
             track.Play();
         }
 
-        public async Task PlayClipAsync (AudioClip clip, AudioSource audioSource = null, float volume = 1f,
-            float fadeInTime = 0f, bool loop = false, AudioMixerGroup mixerGroup = null)
+        public async Task PlayClipAsync (AudioClip clip, float fadeInTime, AudioSource audioSource = null, float volume = 1f,
+            bool loop = false, AudioMixerGroup mixerGroup = null)
         {
             if (!clip) return;
 
