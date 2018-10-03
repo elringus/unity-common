@@ -19,6 +19,7 @@ namespace UnityCommon
         public float Volume { get { return IsValid ? Source.volume : 0f; } set { if (IsValid) Source.volume = value; } }
 
         private Tweener<FloatTween> volumeTweener;
+        private Timer stopTimer;
 
         public AudioTrack (AudioClip clip, AudioSource source, MonoBehaviour behaviourContainer = null,
             float volume = 1f, bool loop = false, AudioMixerGroup mixerGroup = null)
@@ -31,19 +32,22 @@ namespace UnityCommon
             Source.outputAudioMixerGroup = mixerGroup;
 
             volumeTweener = new Tweener<FloatTween>(behaviourContainer);
+            stopTimer = new Timer(coroutineContainer: behaviourContainer, onCompleted: Stop);
         }
 
         public void Play ()
         {
             if (!IsValid) return;
+            CompleteAllRunners();
+
             Source.Play();
         }
 
         public async Task PlayAsync (float fadeInTime)
         {
             if (!IsValid) return;
-            if (volumeTweener.IsRunning)
-                volumeTweener.CompleteInstantly();
+            CompleteAllRunners();
+
             if (!IsPlaying) Play();
             var tween = new FloatTween(0, Volume, fadeInTime, volume => Volume = volume);
             await volumeTweener.RunAsync(tween);
@@ -52,26 +56,36 @@ namespace UnityCommon
         public void Stop ()
         {
             if (!IsValid) return;
+            CompleteAllRunners();
+
             Source.Stop();
         }
 
         public async Task StopAsync (float fadeOutTime)
         {
             if (!IsValid) return;
-            if (volumeTweener.IsRunning)
-                volumeTweener.CompleteInstantly();
+            CompleteAllRunners();
+
             var tween = new FloatTween(Volume, 0, fadeOutTime, volume => Volume = volume);
+            stopTimer.Run(fadeOutTime);
             await volumeTweener.RunAsync(tween);
-            Stop();
         }
 
         public async Task FadeAsync (float volume, float fadeTime)
         {
             if (!IsValid) return;
-            if (volumeTweener.IsRunning)
-                volumeTweener.CompleteInstantly();
+            CompleteAllRunners();
+
             var tween = new FloatTween(Volume, volume, fadeTime, v => Volume = v);
             await volumeTweener.RunAsync(tween);
+        }
+
+        private void CompleteAllRunners ()
+        {
+            if (volumeTweener.IsRunning)
+                volumeTweener.CompleteInstantly();
+            if (stopTimer.IsRunning)
+                stopTimer.CompleteInstantly();
         }
     }
 }
