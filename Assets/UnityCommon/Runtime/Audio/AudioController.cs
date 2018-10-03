@@ -47,6 +47,23 @@ namespace UnityCommon
             return audioTracks.ContainsKey(clip) && audioTracks[clip].IsPlaying;
         }
 
+        public void PlayClip (AudioClip clip, AudioSource audioSource = null, float volume = 1f, 
+            bool loop = false, AudioMixerGroup mixerGroup = null)
+        {
+            if (!clip) return;
+
+            if (audioTracks.ContainsKey(clip)) StopClip(clip);
+            PoolUnusedSources();
+
+            // In case user somehow provided one of our pooled sources, don't use it.
+            if (audioSource && IsOwnedByController(audioSource)) audioSource = null;
+            if (!audioSource) audioSource = GetPooledSource();
+
+            var track = new AudioTrack(clip, audioSource, this, volume, loop, mixerGroup);
+            audioTracks.Add(clip, track);
+            track.Play();
+        }
+
         public async Task PlayClipAsync (AudioClip clip, AudioSource audioSource = null, float volume = 1f,
             float fadeInTime = 0f, bool loop = false, AudioMixerGroup mixerGroup = null)
         {
@@ -64,28 +81,27 @@ namespace UnityCommon
             await track.PlayAsync(fadeInTime);
         }
 
-        public async Task StopClipAsync (AudioClip clip, float fadeOutTime)
-        {
-            if (!clip || !IsClipPlaying(clip)) return;
-            await GetTrack(clip).StopAsync(fadeOutTime);
-        }
-
         public void StopClip (AudioClip clip)
         {
-            if (!clip) return;
-            if (!IsClipPlaying(clip)) return;
+            if (!clip || !IsClipPlaying(clip)) return;
             GetTrack(clip).Stop();
-        }
-
-        public async Task StopAllClipsAsync (float fadeOutTime)
-        {
-            await Task.WhenAll(audioTracks.Values.Select(t => t.StopAsync(fadeOutTime)));
         }
 
         public void StopAllClips ()
         {
             foreach (var track in audioTracks.Values)
                 track.Stop();
+        }
+
+        public async Task StopClipAsync (AudioClip clip, float fadeOutTime)
+        {
+            if (!clip || !IsClipPlaying(clip)) return;
+            await GetTrack(clip).StopAsync(fadeOutTime);
+        }
+
+        public async Task StopAllClipsAsync (float fadeOutTime)
+        {
+            await Task.WhenAll(audioTracks.Values.Select(t => t.StopAsync(fadeOutTime)));
         }
 
         public AudioTrack GetTrack (AudioClip clip)
