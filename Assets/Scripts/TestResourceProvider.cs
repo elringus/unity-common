@@ -72,8 +72,9 @@ public class TestResourceProvider : MonoBehaviour
         return provider;
     }
 
-    private GoogleDriveResourceProvider InitializeGoogleDriveResourceProvider (bool purgeCache)
+    private IResourceProvider InitializeGoogleDriveResourceProvider (bool purgeCache)
     {
+        #if UNITY_GOOGLE_DRIVE_AVAILABLE
         var provider = new GoogleDriveResourceProvider("Resources", GoogleDriveResourceProvider.CachingPolicyType.Smart, 2);
 
         provider.AddConverter(new JpgOrPngToSpriteConverter());
@@ -86,6 +87,9 @@ public class TestResourceProvider : MonoBehaviour
         if (purgeCache) provider.PurgeCache();
 
         return provider;
+        #else
+        return null;
+        #endif
     }
 
     private static LocalResourceProvider InitializeLocalResourceProvider ()

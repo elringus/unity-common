@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if UNITY_GOOGLE_DRIVE_AVAILABLE
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -233,3 +235,5 @@ namespace UnityCommon
         }
     }
 }
+
+#endif
