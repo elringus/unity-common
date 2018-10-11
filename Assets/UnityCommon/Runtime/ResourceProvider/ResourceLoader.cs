@@ -73,6 +73,12 @@ namespace UnityCommon
             return await Providers.LocateResourcesAsync<TResource>(path);
         }
 
+        public virtual async Task<bool> ResourceExistsAsync (string path, bool isFullPath = false)
+        {
+            if (!isFullPath) path = BuildFullPath(path);
+            return await Providers.ResourceExistsAsync<TResource>(path);
+        }
+
         public override async Task PreloadAsync (string path, bool isFullPath = false)
         {
             await LoadAsync(path, isFullPath);
