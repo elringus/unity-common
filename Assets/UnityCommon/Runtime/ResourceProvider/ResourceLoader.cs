@@ -33,7 +33,9 @@ namespace UnityCommon
     public class ResourceLoader<TResource> : ResourceLoader where TResource : class
     {
         public override bool IsLoadingAny => loadCounter > 0;
-        public Dictionary<string, TResource> LoadedResources { get; }
+
+        protected Dictionary<string, TResource> LoadedResources { get; }
+        protected Dictionary<string, TResource> PreloadedResources { get; }
 
         private int loadCounter;
 
@@ -41,14 +43,27 @@ namespace UnityCommon
             : base(providersList, resourcePathPrefix)
         {
             LoadedResources = new Dictionary<string, TResource>();
+            PreloadedResources = new Dictionary<string, TResource>();
+        }
+
+        public virtual void AddPreloadedResource (string path, TResource resourceObj)
+        {
+            PreloadedResources[path] = resourceObj;
+        }
+
+        public virtual void RemovePreloadedResource (string path)
+        {
+            PreloadedResources.Remove(path);
         }
 
         public virtual async Task<TResource> LoadAsync (string path, bool isFullPath = false)
         {
+            if (IsLoaded(path, isFullPath)) return GetLoaded(path, isFullPath);
+
             IncrementLoadCounter();
             if (!isFullPath) path = BuildFullPath(path);
 
-            var resource = await Providers.LoadResourceAsync<TResource>(path);
+            var resource = PreloadedResources.ContainsKey(path) ? new Resource<TResource>(path, PreloadedResources[path]) : await Providers.LoadResourceAsync<TResource>(path);
             AddLoadedResource(resource);
 
             DecrementLoadCounter();
@@ -75,6 +90,8 @@ namespace UnityCommon
 
         public virtual async Task<bool> ResourceExistsAsync (string path, bool isFullPath = false)
         {
+            if (IsLoaded(path, isFullPath) || IsLoadedByProvider(path, isFullPath)) return true;
+
             if (!isFullPath) path = BuildFullPath(path);
             return await Providers.ResourceExistsAsync<TResource>(path);
         }
