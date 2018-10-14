@@ -46,13 +46,15 @@ namespace UnityCommon
             PreloadedResources = new Dictionary<string, TResource>();
         }
 
-        public virtual void AddPreloadedResource (string path, TResource resourceObj)
+        public virtual void AddPreloadedResource (string path, TResource resourceObj, bool isFullPath = false)
         {
+            if (!isFullPath) path = BuildFullPath(path);
             PreloadedResources[path] = resourceObj;
         }
 
-        public virtual void RemovePreloadedResource (string path)
+        public virtual void RemovePreloadedResource (string path, bool isFullPath = false)
         {
+            if (!isFullPath) path = BuildFullPath(path);
             PreloadedResources.Remove(path);
         }
 
