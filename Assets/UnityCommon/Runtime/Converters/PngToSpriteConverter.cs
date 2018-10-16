@@ -12,14 +12,22 @@ namespace UnityCommon
             new RawDataRepresentation(".png", "image/png")
         }; } }
 
-        public Task<Sprite> ConvertAsync (byte[] obj)
+        public Sprite Convert (byte[] obj)
         {
             var texture = new Texture2D(2, 2);
             texture.LoadImage(obj, true);
             var rect = new Rect(0, 0, texture.width, texture.height);
             var sprite = Sprite.Create(texture, rect, Vector2.one * .5f);
+            return sprite;
+        }
+
+        public Task<Sprite> ConvertAsync (byte[] obj)
+        {
+            var sprite = Convert(obj);
             return Task.FromResult(sprite);
         }
+
+        public object Convert (object obj) => Convert(obj as byte[]);
 
         public async Task<object> ConvertAsync (object obj) => await ConvertAsync(obj as byte[]);
     }

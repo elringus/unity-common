@@ -3,18 +3,20 @@
 namespace UnityCommon
 {
     /// <summary>
-    /// Implentation is able to asynchronously convert objects.
+    /// Implentation is able to convert objects.
     /// </summary>
     public interface IConverter
     {
+        object Convert (object obj);
         Task<object> ConvertAsync (object obj);
     }
 
     /// <summary>
-    /// Implentation is able to asynchronously convert <see cref="TSource"/> to <see cref="TResult"/>.
+    /// Implentation is able to convert <see cref="TSource"/> to <see cref="TResult"/>.
     /// </summary>
     public interface IConverter<TSource, TResult> : IConverter
     {
+        TResult Convert (TSource obj);
         Task<TResult> ConvertAsync (TSource obj);
     }
 }

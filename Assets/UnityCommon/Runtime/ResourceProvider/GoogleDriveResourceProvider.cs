@@ -177,6 +177,11 @@ namespace UnityCommon
             ProcessLoadQueue();
         }
 
+        // TODO: Support blocking mode (?).
+        protected override Resource<T> LoadResourceBlocking<T> (string path) { throw new NotImplementedException(); }
+        protected override IEnumerable<Resource<T>> LocateResourcesBlocking<T> (string path) { throw new NotImplementedException(); }
+        protected override void UnloadResourceBlocking (Resource resource) { throw new NotImplementedException(); }
+
         private IRawConverter<T> ResolveConverter<T> ()
         {
             var resourceType = typeof(T);

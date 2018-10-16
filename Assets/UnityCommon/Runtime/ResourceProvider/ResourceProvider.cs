@@ -20,6 +20,23 @@ namespace UnityCommon
         protected Dictionary<string, Resource> LoadedResources = new Dictionary<string, Resource>();
         protected Dictionary<string, ResourceRunner> ResourceRunners = new Dictionary<string, ResourceRunner>();
 
+        public virtual Resource<T> LoadResource<T> (string path)
+        {
+            if (ResourceRunners.ContainsKey(path))
+            {
+                Debug.LogError($"Resource `{path}` is currently loading in async mode, but is requested in blocking mode.");
+                return null;
+            }
+
+            if (LoadedResources.ContainsKey(path))
+                return LoadedResources[path] as Resource<T>;
+
+            var resource = LoadResourceBlocking<T>(path);
+
+            HandleResourceLoaded(resource);
+            return resource;
+        }
+
         public virtual async Task<Resource<T>> LoadResourceAsync<T> (string path)
         {
             if (ResourceRunners.ContainsKey(path))
@@ -40,10 +57,31 @@ namespace UnityCommon
             return loadRunner.Resource;
         }
 
+        public virtual IEnumerable<Resource<T>> LoadResources<T> (string path)
+        {
+            var loactedResources = LocateResources<T>(path);
+            return LoadLocatedResources(loactedResources);
+        }
+
         public virtual async Task<IEnumerable<Resource<T>>> LoadResourcesAsync<T> (string path)
         {
             var loactedResources = await LocateResourcesAsync<T>(path);
             return await LoadLocatedResourcesAsync(loactedResources);
+        }
+
+        public virtual void UnloadResource (string path)
+        {
+            if (!ResourceLoaded(path)) return;
+
+            if (ResourceRunners.ContainsKey(path))
+                CancelResourceLoading(path);
+
+            var resource = LoadedResources[path];
+            LoadedResources.Remove(path);
+
+            UnloadResourceBlocking(resource);
+
+            LogMessage($"Resource '{path}' unloaded.");
         }
 
         public virtual async Task UnloadResourceAsync (string path)
@@ -59,6 +97,13 @@ namespace UnityCommon
             await UnloadResourceAsync(resource);
 
             LogMessage($"Resource '{path}' unloaded.");
+        }
+
+        public virtual void UnloadResources ()
+        {
+            var loadedPaths = LoadedResources.Values.Select(r => r.Path).ToList();
+            foreach (var path in loadedPaths)
+                UnloadResource(path);
         }
 
         public virtual async Task UnloadResourcesAsync ()
@@ -77,6 +122,15 @@ namespace UnityCommon
             return ResourceRunners.ContainsKey(path);
         }
 
+        public virtual bool ResourceExists<T> (string path)
+        {
+            // TODO: Check for resource type.
+            if (ResourceLoaded(path)) return true;
+            var folderPath = path.Contains("/") ? path.GetBeforeLast("/") : string.Empty;
+            var locatedResources = LocateResources<T>(folderPath);
+            return locatedResources.Any(r => r.Path.Equals(path));
+        }
+
         public virtual async Task<bool> ResourceExistsAsync<T> (string path)
         {
             // TODO: Check for resource type.
@@ -84,6 +138,22 @@ namespace UnityCommon
             var folderPath = path.Contains("/") ? path.GetBeforeLast("/") : string.Empty;
             var locatedResources = await LocateResourcesAsync<T>(folderPath);
             return locatedResources.Any(r => r.Path.Equals(path));
+        }
+
+        public virtual IEnumerable<Resource<T>> LocateResources<T> (string path)
+        {
+            if (path == null) path = string.Empty;
+
+            if (ResourceRunners.ContainsKey(path))
+            {
+                Debug.LogError($"Resources `{path}` are already being located in async mode.");
+                return null;
+            }
+
+            var locatedResources = LocateResourcesBlocking<T>(path);
+
+            HandleResourcesLocated(locatedResources, path);
+            return locatedResources;
         }
 
         public virtual async Task<IEnumerable<Resource<T>>> LocateResourcesAsync<T> (string path)
@@ -109,8 +179,11 @@ namespace UnityCommon
             OnMessage.SafeInvoke(message);
         }
 
+        protected abstract Resource<T> LoadResourceBlocking<T> (string path);
+        protected abstract IEnumerable<Resource<T>> LocateResourcesBlocking<T> (string path);
         protected abstract LoadResourceRunner<T> CreateLoadRunner<T> (Resource<T> resource);
         protected abstract LocateResourcesRunner<T> CreateLocateRunner<T> (string path);
+        protected abstract void UnloadResourceBlocking (Resource resource);
         protected abstract Task UnloadResourceAsync (Resource resource);
 
         protected virtual void RunLoader<T> (LoadResourceRunner<T> loader)
@@ -138,18 +211,24 @@ namespace UnityCommon
             if (!resource.IsValid) Debug.LogError($"Resource '{resource.Path}' failed to load.");
             else LoadedResources[resource.Path] = resource;
 
-            if (ResourceRunners.ContainsKey(resource.Path)) ResourceRunners.Remove(resource.Path);
-            else Debug.LogWarning($"Load runner for resource '{resource.Path}' not found.");
+            if (ResourceRunners.ContainsKey(resource.Path))
+                ResourceRunners.Remove(resource.Path);
 
             UpdateLoadProgress();
         }
 
         protected virtual void HandleResourcesLocated<T> (IEnumerable<Resource<T>> locatedResources, string path)
         {
-            if (ResourceRunners.ContainsKey(path)) ResourceRunners.Remove(path);
-            else Debug.LogWarning($"Locate runner for path '{path}' not found.");
+            if (ResourceRunners.ContainsKey(path))
+                ResourceRunners.Remove(path);
 
             UpdateLoadProgress();
+        }
+
+        protected virtual IEnumerable<Resource<T>> LoadLocatedResources<T> (IEnumerable<Resource<T>> locatedResources)
+        {
+            var resources = locatedResources.Select(r => LoadResource<T>(r.Path));
+            return resources?.ToList();
         }
 
         protected virtual async Task<IEnumerable<Resource<T>>> LoadLocatedResourcesAsync<T> (IEnumerable<Resource<T>> locatedResources)

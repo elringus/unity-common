@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace UnityCommon
 {
@@ -25,6 +27,11 @@ namespace UnityCommon
             public async Task<TSource> ToSourceAsync<TSource> (object obj)
             {
                 return (TSource)await RedirectToSourceConverter.ConvertAsync(obj);
+            }
+
+            public TSource ToSource<TSource> (object obj)
+            {
+                return (TSource)RedirectToSourceConverter.Convert(obj);
             }
         }
 
@@ -56,11 +63,61 @@ namespace UnityCommon
             return new ProjectResourceLocator<T>(path, projectResources, redirectors.ContainsKey(typeof(T)) ? redirectors[typeof(T)] : null);
         }
 
-        protected override Task UnloadResourceAsync (Resource resource)
+        protected override void UnloadResourceBlocking (Resource resource)
         {
             if (resource.IsValid && resource.IsUnloadable)
                 UnityEngine.Resources.UnloadAsset(resource.AsUnityObject);
+        }
+
+        protected override Task UnloadResourceAsync (Resource resource)
+        {
+            // TODO: Support async unloading (?).
+            UnloadResourceBlocking(resource);
             return Task.CompletedTask;
+        }
+
+        protected override Resource<T> LoadResourceBlocking<T> (string path)
+        {
+            var resource = new Resource<T>(path);
+            var redirector = redirectors.ContainsKey(typeof(T)) ? redirectors[typeof(T)] : null;
+
+            // Corner case when loading folders.
+            if (typeof(T) == typeof(Folder))
+            {
+                (resource as Resource<Folder>).Object = new Folder(resource.Path);
+                return resource;
+            }
+
+            var resourceType = redirector != null ? redirector.RedirectType : typeof(T);
+            var obj = Resources.Load(resource.Path, resourceType);
+            resource.Object = redirector != null ? redirector.ToSource<T>(obj) : (T)(object)obj;
+            return resource;
+        }
+
+        protected override IEnumerable<Resource<T>> LocateResourcesBlocking<T> (string path)
+        {
+            var locatedResources = new List<Resource<T>>();
+            var redirector = redirectors.ContainsKey(typeof(T)) ? redirectors[typeof(T)] : null;
+
+            // Corner case when locating folders (unity doesn't see folder as a resource).
+            if (typeof(T) == typeof(Folder))
+            {
+                return projectResources.LocateAllResourceFolders().FindAllAtPath(path)
+                    .Select(f => new Resource<Folder>(f.Path, f) as Resource<T>).ToList();
+            }
+
+            var redirectType = redirector != null ? redirector.RedirectType : typeof(T);
+            var objects = Resources.LoadAll(path, redirectType);
+
+            foreach (var obj in objects)
+            {
+                var objPath = string.Concat(path, "/", obj.name);
+                var cObj = redirector != null ? redirector.ToSource<T>(obj) : (T)(object)obj;
+                var resource = new Resource<T>(objPath, cObj);
+                locatedResources.Add(resource);
+            }
+
+            return locatedResources;
         }
     }
 }
