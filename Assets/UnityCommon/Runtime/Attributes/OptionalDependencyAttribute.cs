@@ -10,7 +10,7 @@ using System.Diagnostics;
 /// Unity's conditional compilation utility (<see cref="https://github.com/Unity-Technologies/ConditionalCompilationUtility"/>)
 /// uses this attribute to manage the project defines.
 /// </remarks>
-[Conditional("UNITY_CCU")]
+[Conditional("UNITY_CCU"), AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
 public class OptionalDependencyAttribute : Attribute
 {
     public string dependentClass;
