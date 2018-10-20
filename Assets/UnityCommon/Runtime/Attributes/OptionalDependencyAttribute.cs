@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 
-[assembly: OptionalDependency("UnityGoogleDrive.GoogleDriveRequest", "UNITY_GOOGLE_DRIVE_AVAILABLE")]
-
 /// <summary>
 /// Adds a define based on presence of specified type in the project.
 /// </summary>
