@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
@@ -85,6 +86,24 @@ namespace UnityCommon
         {
             absolutePath = absolutePath.Replace("\\", "/");
             return "Assets" + absolutePath.Replace(Application.dataPath, string.Empty);
+        }
+
+        /// <summary>
+        /// Creates a new folder in the project's `Assets` directory. 
+        /// Path should be relative to the project (starting with `Assets/`).
+        /// </summary>
+        public static void CreateFolderAsset (string assetPath)
+        {
+            EnsureFolderIsCreatedRecursively(assetPath);
+        }
+
+        private static void EnsureFolderIsCreatedRecursively (string targetFolder)
+        {
+            if (!AssetDatabase.IsValidFolder(targetFolder))
+            {
+                EnsureFolderIsCreatedRecursively(Path.GetDirectoryName(targetFolder));
+                AssetDatabase.CreateFolder(Path.GetDirectoryName(targetFolder), Path.GetFileName(targetFolder));
+            }
         }
     }
 }
