@@ -81,8 +81,9 @@ namespace UnityCommon
             EditorGUI.showMixedValue = false;
         }
 
-        public static string ToRelativePath (string absolutePath)
+        public static string AbsoluteToAssetPath (string absolutePath)
         {
+            absolutePath = absolutePath.Replace("\\", "/");
             return "Assets" + absolutePath.Replace(Application.dataPath, string.Empty);
         }
     }
