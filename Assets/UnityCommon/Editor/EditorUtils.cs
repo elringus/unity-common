@@ -8,6 +8,18 @@ namespace UnityCommon
 {
     public static class EditorUtils
     {
+        public static T LoadOrCreateSerializableAsset<T> (string assetPath) where T : ScriptableObject
+        {
+            var existingAsset = AssetDatabase.LoadAssetAtPath<T>(assetPath);
+            if (existingAsset) return existingAsset;
+
+            var asset = ScriptableObject.CreateInstance<T>();
+            CreateFolderAsset(Path.GetDirectoryName(assetPath));
+            AssetDatabase.CreateAsset(asset, assetPath);
+            AssetDatabase.SaveAssets();
+            return asset;
+        }
+
         public static T CreateOrReplaceAsset<T> (this Object asset, string path) where T : Object
         {
             var existingAsset = AssetDatabase.LoadAssetAtPath<T>(path);
