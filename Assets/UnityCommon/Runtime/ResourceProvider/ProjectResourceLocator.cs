@@ -1,6 +1,6 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using UnityEngine;
 
 namespace UnityCommon
 {
@@ -8,42 +8,37 @@ namespace UnityCommon
     {
         public string ResourcesPath { get; private set; }
 
-        private ProjectResourceProvider.TypeRedirector redirector;
-        private ProjectResources resources;
+        private ProjectResources projectResources;
 
-        public ProjectResourceLocator (string resourcesPath, ProjectResources resources, ProjectResourceProvider.TypeRedirector redirector = null)
+        public ProjectResourceLocator (string resourcesPath, ProjectResources projectResources)
         {
             ResourcesPath = resourcesPath ?? string.Empty;
-            this.resources = resources;
-            this.redirector = redirector;
+            this.projectResources = projectResources;
         }
 
         public override async Task Run ()
         {
             await base.Run();
 
-            // Corner case when locating folders (unity doesn't see folder as a resource).
-            if (typeof(TResource) == typeof(Folder))
-            {
-                LocatedResources = resources.LocateAllResourceFolders().FindAllAtPath(ResourcesPath)
-                    .Select(f => new Resource<Folder>(f.Path, f) as Resource<TResource>).ToList();
-                HandleOnCompleted();
-                return;
-            }
-
-            // TODO: Make this async (if possible, LoadAllAsync doesn't exist).
-            var redirectType = redirector != null ? redirector.RedirectType : typeof(TResource);
-            var objects = Resources.LoadAll(ResourcesPath, redirectType);
-
-            foreach (var obj in objects)
-            {
-                var path = string.Concat(ResourcesPath, "/", obj.name);
-                var cObj = redirector != null ? await redirector.ToSourceAsync<TResource>(obj) : (TResource)(object)obj;
-                var resource = new Resource<TResource>(path, cObj);
-                LocatedResources.Add(resource);
-            }
+            LocatedResources = LocateProjectResources(ResourcesPath, projectResources);
 
             HandleOnCompleted();
+        }
+
+        public static List<Resource<TResource>> LocateProjectResources (string path, ProjectResources projectResources)
+        {
+            path = path ?? string.Empty;
+
+            // Corner case when locating folders (Unity doesn't see folder as a resource).
+            if (typeof(TResource) == typeof(Folder))
+            {
+                return projectResources.Folders.FindAllAtPath(path)
+                    .Select(f => new Resource<Folder>(f.Path) as Resource<TResource>).ToList();
+            }
+
+            if (string.IsNullOrWhiteSpace(path))
+                return projectResources.ResourcePaths.Where(p => !p.Contains("/") || string.IsNullOrEmpty(p.GetBeforeLast("/"))).Select(p => new Resource<TResource>(p)).ToList();
+            return projectResources.ResourcePaths.Where(p => p.GetBeforeLast("/").Equals(path) || p.GetBeforeLast("/").Equals("/" + path)).Select(p => new Resource<TResource>(p)).ToList();
         }
     }
 }

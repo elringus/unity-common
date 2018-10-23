@@ -21,8 +21,8 @@ public class TestResourceProvider : MonoBehaviour
 
     private void Awake ()
     {
-        //provider = InitializeProjectResourceProvider();
-        provider = InitializeGoogleDriveResourceProvider(false);
+        provider = InitializeProjectResourceProvider();
+        //provider = InitializeGoogleDriveResourceProvider(false);
         //provider = InitializeLocalResourceProvider();
     }
 
@@ -31,14 +31,14 @@ public class TestResourceProvider : MonoBehaviour
         await new WaitForEndOfFrame();
 
         //await ResolveByFullPathAsync();
-        //await ResolveTextByPathAsync();
+        await ResolveTextByPathAsync();
         //await ResolveFoldersAsync();
         //await TestResourceExistsAsync();
         //await TestAudioAsync();
         //await TestUnloadAsync();
         //await TestTextureResources();
-        //await TestTextureByDir();
-        await TestNullPropagation();
+        await TestTextureByDir();
+        //await TestNullPropagation();
     }
 
     private void OnGUI ()
@@ -126,7 +126,7 @@ public class TestResourceProvider : MonoBehaviour
     {
         for (int i = 0; i < 10; i++)
         {
-            var resources = await provider.LoadResourcesAsync<AudioClip>("Sprites");
+            var resources = await provider.LoadResourcesAsync<Texture2D>("Sprites");
             text = "Total memory used after load: " + Mathf.CeilToInt(System.GC.GetTotalMemory(true) * .000001f) + "Mb";
 
             await Task.Delay(TimeSpan.FromSeconds(.5f));

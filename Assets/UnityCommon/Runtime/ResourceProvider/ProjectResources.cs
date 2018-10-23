@@ -1,40 +1,61 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace UnityCommon
 {
     public class ProjectResources : ScriptableObject
     {
+        public List<Folder> Folders => folders;
+        public List<string> ResourcePaths => resourcePaths;
+
         [SerializeField] List<Folder> folders = new List<Folder>();
+        [SerializeField] List<string> resourcePaths = new List<string>();
+
+        private void Awake ()
+        {
+            LocateAllResources();
+        }
 
         public static ProjectResources Get ()
         {
-            return Application.isEditor ? CreateInstance<ProjectResources>() : Resources.Load<ProjectResources>("ProjectResources");
+            return Application.isEditor ? CreateInstance<ProjectResources>() : Resources.Load<ProjectResources>(nameof(ProjectResources));
         }
 
-        public List<Folder> LocateAllResourceFolders ()
+        public void LocateAllResources ()
         {
             #if UNITY_EDITOR
             folders.Clear();
-            WalkDirectoryTree(new System.IO.DirectoryInfo(Application.dataPath), ref folders, false);
+            resourcePaths.Clear();
+            WalkDirectoryTree(new System.IO.DirectoryInfo(Application.dataPath), folders, resourcePaths, false);
             #endif
-            return folders;
         }
 
         #if UNITY_EDITOR
-        private static void WalkDirectoryTree (System.IO.DirectoryInfo directory, ref List<Folder> outFolders, bool isInsideResources)
+        private static void WalkDirectoryTree (System.IO.DirectoryInfo directory, List<Folder> outFolders, List<string> outPaths, bool isInsideResources)
         {
             var subDirs = directory.GetDirectories();
             foreach (var dirInfo in subDirs)
             {
                 if (!isInsideResources && dirInfo.Name != "Resources") continue;
-                if (!isInsideResources && dirInfo.Name == "Resources") WalkDirectoryTree(dirInfo, ref outFolders, true);
+                if (!isInsideResources && dirInfo.Name == "Resources") WalkDirectoryTree(dirInfo, outFolders, outPaths, true);
 
                 if (isInsideResources)
                 {
-                    var folder = new Folder(dirInfo.FullName.Replace("\\", "/").GetAfterFirst("/Resources"));
-                    outFolders.Add(folder);
-                    WalkDirectoryTree(dirInfo, ref outFolders, true);
+                    if (outFolders != null)
+                    {
+                        var folder = new Folder(dirInfo.FullName.Replace("\\", "/").GetAfterFirst("/Resources"));
+                        outFolders.Add(folder);
+                    }
+
+                    if (outPaths != null)
+                    {
+                        var paths = dirInfo.GetFiles().Where(p => !p.FullName.EndsWithFast(".meta"))
+                            .Select(p => p.FullName.Replace("\\", "/").GetAfterFirst("/Resources/").GetBeforeLast("."));
+                        outPaths.AddRange(paths);
+                    }
+
+                    WalkDirectoryTree(dirInfo, outFolders, outPaths, true);
                 }
             }
         }
@@ -49,33 +70,33 @@ namespace UnityCommon
         UnityEditor.Build.IPreprocessBuild, UnityEditor.Build.IPostprocessBuild
         #endif
     {
-        public int callbackOrder { get { return 0; } }
+        public int callbackOrder => 0;
 
-        protected string DIR_PATH { get { return "Assets/Resources"; } }
-        protected string ASSET_PATH { get { return DIR_PATH + "/ProjectResources.asset"; } }
+        protected string DirectoryPath => "Assets/Resources"; 
+        protected string AssetPath => DirectoryPath + $"/{nameof(ProjectResources)}.asset";
 
         private bool folderCreated;
 
         public void OnPreprocessBuild (UnityEditor.BuildTarget target, string path)
         {
             var asset = ScriptableObject.CreateInstance<ProjectResources>();
-            asset.LocateAllResourceFolders();
+            asset.LocateAllResources();
 
-            if (!System.IO.Directory.Exists(DIR_PATH))
+            if (!System.IO.Directory.Exists(DirectoryPath))
             {
-                System.IO.Directory.CreateDirectory(DIR_PATH);
+                System.IO.Directory.CreateDirectory(DirectoryPath);
                 folderCreated = true;
             }
             else folderCreated = false;
 
-            UnityEditor.AssetDatabase.CreateAsset(asset, ASSET_PATH);
+            UnityEditor.AssetDatabase.CreateAsset(asset, AssetPath);
             UnityEditor.AssetDatabase.SaveAssets();
         }
 
         public void OnPostprocessBuild (UnityEditor.BuildTarget target, string path)
         {
-            UnityEditor.AssetDatabase.DeleteAsset(ASSET_PATH);
-            if (folderCreated) UnityEditor.AssetDatabase.DeleteAsset(DIR_PATH);
+            UnityEditor.AssetDatabase.DeleteAsset(AssetPath);
+            if (folderCreated) UnityEditor.AssetDatabase.DeleteAsset(DirectoryPath);
             UnityEditor.AssetDatabase.SaveAssets();
         }
 

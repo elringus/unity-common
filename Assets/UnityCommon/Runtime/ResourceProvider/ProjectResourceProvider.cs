@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -60,7 +59,7 @@ namespace UnityCommon
 
         protected override LocateResourcesRunner<T> CreateLocateRunner<T> (string path)
         {
-            return new ProjectResourceLocator<T>(path, projectResources, redirectors.ContainsKey(typeof(T)) ? redirectors[typeof(T)] : null);
+            return new ProjectResourceLocator<T>(path, projectResources);
         }
 
         protected override void UnloadResourceBlocking (Resource resource)
@@ -96,28 +95,7 @@ namespace UnityCommon
 
         protected override IEnumerable<Resource<T>> LocateResourcesBlocking<T> (string path)
         {
-            var locatedResources = new List<Resource<T>>();
-            var redirector = redirectors.ContainsKey(typeof(T)) ? redirectors[typeof(T)] : null;
-
-            // Corner case when locating folders (unity doesn't see folder as a resource).
-            if (typeof(T) == typeof(Folder))
-            {
-                return projectResources.LocateAllResourceFolders().FindAllAtPath(path)
-                    .Select(f => new Resource<Folder>(f.Path, f) as Resource<T>).ToList();
-            }
-
-            var redirectType = redirector != null ? redirector.RedirectType : typeof(T);
-            var objects = Resources.LoadAll(path, redirectType);
-
-            foreach (var obj in objects)
-            {
-                var objPath = string.Concat(path, "/", obj.name);
-                var cObj = redirector != null ? redirector.ToSource<T>(obj) : (T)(object)obj;
-                var resource = new Resource<T>(objPath, cObj);
-                locatedResources.Add(resource);
-            }
-
-            return locatedResources;
+            return ProjectResourceLocator<T>.LocateProjectResources(path, projectResources);
         }
     }
 }

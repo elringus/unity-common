@@ -227,19 +227,12 @@ namespace UnityCommon
 
         protected virtual IEnumerable<Resource<T>> LoadLocatedResources<T> (IEnumerable<Resource<T>> locatedResources)
         {
-            var resources = locatedResources.Select(r => LoadResource<T>(r.Path));
-            return resources?.ToList();
+            return locatedResources.Select(r => LoadResource<T>(r.Path));
         }
 
         protected virtual async Task<IEnumerable<Resource<T>>> LoadLocatedResourcesAsync<T> (IEnumerable<Resource<T>> locatedResources)
         {
-            // Handle corner case when resources got loaded while locating.
-            foreach (var locatedResource in locatedResources)
-                if (!LoadedResources.ContainsKey(locatedResource.Path) && locatedResource.IsValid)
-                    LoadedResources.Add(locatedResource.Path, locatedResource);
-
-            var resources = await Task.WhenAll(locatedResources.Select(r => LoadResourceAsync<T>(r.Path)));
-            return resources?.ToList();
+            return await Task.WhenAll(locatedResources.Select(r => LoadResourceAsync<T>(r.Path)));
         }
 
         protected virtual void UpdateLoadProgress ()
