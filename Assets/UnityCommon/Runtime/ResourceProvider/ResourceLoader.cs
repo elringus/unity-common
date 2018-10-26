@@ -14,9 +14,9 @@ namespace UnityCommon
         protected List<IResourceProvider> Providers { get; }
         protected string Prefix { get; }
 
-        public ResourceLoader (List<IResourceProvider> providersList, string resourcePathPrefix = null)
+        public ResourceLoader (IList<IResourceProvider> providersList, string resourcePathPrefix = null)
         {
-            Providers = providersList;
+            Providers = providersList.ToList();
             Prefix = resourcePathPrefix;
         }
 
@@ -42,11 +42,15 @@ namespace UnityCommon
 
         private int loadCounter;
 
-        public ResourceLoader (List<IResourceProvider> providersList, string resourcePathPrefix = null)
+        public ResourceLoader (IList<IResourceProvider> providersList, string resourcePathPrefix = null, IDictionary<string, TResource> preloadedObjects = null)
             : base(providersList, resourcePathPrefix)
         {
             LoadedResources = new Dictionary<string, TResource>();
             PreloadedResources = new Dictionary<string, TResource>();
+
+            if (preloadedObjects != null)
+                foreach (var kv in preloadedObjects)
+                    AddPreloadedResource(kv.Key, kv.Value);
         }
 
         public virtual void AddPreloadedResource (string path, TResource resourceObj, bool isFullPath = false)
