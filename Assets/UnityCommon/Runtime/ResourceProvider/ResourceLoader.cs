@@ -33,7 +33,7 @@ namespace UnityCommon
     /// <summary>
     /// Allows working with resources of specific type using a prioritized providers list.
     /// </summary>
-    public class ResourceLoader<TResource> : ResourceLoader where TResource : class
+    public class ResourceLoader<TResource> : ResourceLoader where TResource : UnityEngine.Object
     {
         public override bool IsLoadingAny => loadCounter > 0;
 
@@ -213,7 +213,7 @@ namespace UnityCommon
         public virtual TResource GetLoaded (string path, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
-            if (!IsLoaded(path, true)) return default(TResource);
+            if (!IsLoaded(path, true)) return default;
             return LoadedResources[path];
         }
 

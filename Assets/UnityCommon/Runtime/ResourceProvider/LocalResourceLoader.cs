@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace UnityCommon
 {
-    public class LocalResourceLoader<TResource> : LoadResourceRunner<TResource>
+    public class LocalResourceLoader<TResource> : LoadResourceRunner<TResource> where TResource : UnityEngine.Object
     {
         public string RootPath { get; private set; }
 
@@ -32,7 +32,7 @@ namespace UnityCommon
             // Corner case when loading folders.
             if (typeof(TResource) == typeof(Folder))
             {
-                (Resource as Resource<Folder>).Object = new Folder(Resource.Path);
+                (Resource as Resource<Folder>).Object = Folder.CreateInstance(Resource.Path);
                 HandleOnCompleted();
                 return;
             }

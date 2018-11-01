@@ -3,18 +3,19 @@
 namespace UnityCommon
 {
     /// <summary>
-    /// Represents a resource object stored at the specified path. 
+    /// Represents a <see cref="UnityEngine.Object"/> stored at the specified path. 
     /// </summary>
+    [System.Serializable]
     public class Resource
     {
-        public string Path { get; private set; }
-        public object Object { get; set; }
-        public bool IsValid => Object != null;
-        public bool IsUnityObject => Object is Object;
-        public bool IsUnloadable => !(Object is GameObject || Object is Component || Object is AssetBundle);
-        public Object AsUnityObject => Object as Object;
+        public string Path { get => path; set => path = value; }
+        public Object Object { get => obj; set => obj = value; }
+        public bool IsValid => Object != null && Object;
 
-        public Resource (string path, object obj = null)
+        [SerializeField] private string path;
+        [SerializeField] private Object obj;
+
+        public Resource (string path, Object obj)
         {
             Path = path;
             Object = obj;
@@ -22,30 +23,30 @@ namespace UnityCommon
     }
 
     /// <summary>
-    /// A strongly typed version of the <see cref="Resource"/>.
+    /// Represents a strongly typed <see cref="UnityEngine.Object"/> stored at the specified path. 
     /// </summary>
     /// <typeparam name="T">Type of the resource object.</typeparam>
-    public class Resource<T> : Resource
+    public class Resource<T> : Resource where T : Object
     {
-        public new T Object { get { return CastObject(base.Object); } set { base.Object = value; } }
+        public new T Object { get => CastObject(base.Object); set => base.Object = value; }
 
-        public Resource (string path, T obj = default(T)) : base(path, obj) { }
+        public Resource (string path, T obj = default) : base(path, obj) { }
 
-        private T CastObject (object resourceObject)
+        private T CastObject (object obj)
         {
-            if (resourceObject == null)
+            if (obj == null)
             {
-                Debug.LogError(string.Format("Resource '{0}' is null.", Path, typeof(T).Name));
-                return default(T);
+                Debug.LogError($"Resource '{Path}' is null.");
+                return default;
             }
 
-            if (!typeof(T).IsAssignableFrom(resourceObject.GetType()))
+            if (!typeof(T).IsAssignableFrom(obj.GetType()))
             {
-                Debug.LogError(string.Format("Resource '{0}' is not of type '{1}'.", Path, typeof(T).Name));
-                return default(T);
+                Debug.LogError($"Resource '{Path}' is not of type '{typeof(T).FullName}'.");
+                return default;
             }
 
-            return (T)resourceObject;
+            return (T)obj;
         }
     }
 }

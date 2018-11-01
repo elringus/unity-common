@@ -40,18 +40,22 @@ namespace UnityCommon
 
         protected override Task UnloadResourceAsync (Resource resource)
         {
-            if (resource.IsValid && resource.IsUnityObject)
-            {
-                if (!Application.isPlaying) UnityEngine.Object.DestroyImmediate(resource.AsUnityObject);
-                else UnityEngine.Object.Destroy(resource.AsUnityObject);
-            }
+            UnloadResourceBlocking(resource);
             return Task.CompletedTask;
         }
 
         // TODO: Support blocking mode (?).
         protected override Resource<T> LoadResourceBlocking<T> (string path) { throw new NotImplementedException(); }
         protected override IEnumerable<Resource<T>> LocateResourcesBlocking<T> (string path) { throw new NotImplementedException(); }
-        protected override void UnloadResourceBlocking (Resource resource) { throw new NotImplementedException(); }
+
+        protected override void UnloadResourceBlocking (Resource resource)
+        {
+            if (resource.IsValid)
+            {
+                if (!Application.isPlaying) UnityEngine.Object.DestroyImmediate(resource.Object);
+                else UnityEngine.Object.Destroy(resource.Object);
+            }
+        }
 
         private IRawConverter<T> ResolveConverter<T> ()
         {

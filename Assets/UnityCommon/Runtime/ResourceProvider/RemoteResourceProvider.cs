@@ -14,37 +14,37 @@ namespace UnityCommon
         public bool IsLoading { get { throw new NotImplementedException(); } }
         public float LoadProgress { get { throw new NotImplementedException(); } }
 
-        public Resource<T> LoadResource<T> (string path)
+        public Resource<T> LoadResource<T> (string path) where T : UnityEngine.Object
         {
             throw new NotImplementedException();
         }
 
-        public Task<Resource<T>> LoadResourceAsync<T> (string path)
+        public Task<Resource<T>> LoadResourceAsync<T> (string path) where T : UnityEngine.Object
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<Resource<T>> LoadResources<T> (string path)
+        public IEnumerable<Resource<T>> LoadResources<T> (string path) where T : UnityEngine.Object
         {
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<Resource<T>>> LoadResourcesAsync<T> (string path)
+        public Task<IEnumerable<Resource<T>>> LoadResourcesAsync<T> (string path) where T : UnityEngine.Object
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<Resource<T>> LocateResources<T> (string path)
+        public IEnumerable<Resource<T>> LocateResources<T> (string path) where T : UnityEngine.Object
         {
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<Resource<T>>> LocateResourcesAsync<T> (string path)
+        public Task<IEnumerable<Resource<T>>> LocateResourcesAsync<T> (string path) where T : UnityEngine.Object
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> ResourceExistsAsync<T> (string path)
+        public Task<bool> ResourceExistsAsync<T> (string path) where T : UnityEngine.Object
         {
             throw new NotImplementedException();
         }
@@ -59,7 +59,7 @@ namespace UnityCommon
             throw new NotImplementedException();
         }
 
-        public bool ResourceExists<T> (string path)
+        public bool ResourceExists<T> (string path) where T : UnityEngine.Object
         {
             throw new NotImplementedException();
         }

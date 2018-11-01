@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace UnityCommon
 {
-    public class LocalResourceLocator<TResource> : LocateResourcesRunner<TResource>
+    public class LocalResourceLocator<TResource> : LocateResourcesRunner<TResource> where TResource : UnityEngine.Object
     {
         public string RootPath { get; private set; }
         public string ResourcesPath { get; private set; }
@@ -45,7 +45,7 @@ namespace UnityCommon
                 foreach (var dir in parendFolder.GetDirectories())
                 {
                     var path = dir.FullName.Replace("\\", "/").GetAfterFirst(RootPath + "/");
-                    var resource = new Resource<Folder>(path, new Folder(path));
+                    var resource = new Resource<Folder>(path, Folder.CreateInstance(path));
                     LocatedResources.Add(resource as Resource<TResource>);
                 }
                 HandleOnCompleted();
@@ -54,7 +54,7 @@ namespace UnityCommon
 
             // 2. Searching for the files in the folder.
             var results = new Dictionary<RawDataRepresentation, List<FileInfo>>();
-            foreach (var representation in converter.Representations)
+            foreach (var representation in converter.Representations.DistinctBy(r => r.Extension))
             {
                 var files = parendFolder.GetFiles(string.Concat("*", representation.Extension)).ToList();
                 if (files != null && files.Count > 0) results.Add(representation, files);

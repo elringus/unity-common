@@ -11,7 +11,7 @@ using UnityGoogleDrive;
 
 namespace UnityCommon
 {
-    public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource>
+    public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource> where TResource : UnityEngine.Object
     {
         public string RootPath { get; private set; }
 
@@ -53,7 +53,7 @@ namespace UnityCommon
             // 1. Corner case when loading folders.
             if (typeof(TResource) == typeof(Folder))
             {
-                (Resource as Resource<Folder>).Object = new Folder(Resource.Path);
+                (Resource as Resource<Folder>).Object = Folder.CreateInstance(Resource.Path);
                 HandleOnCompleted();
                 return;
             }

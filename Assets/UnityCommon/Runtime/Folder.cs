@@ -8,16 +8,18 @@ namespace UnityCommon
     /// Represents a directory in file systems.
     /// </summary>
     [System.Serializable]
-    public class Folder
+    public class Folder : ScriptableObject
     {
         public string Path { get { return path; } private set { path = value; } }
         public string Name { get { return Path.Contains("/") ? Path.GetAfter("/") : Path; } }
 
         [SerializeField] string path = null;
 
-        public Folder (string path)
+        public new static Folder CreateInstance (string path)
         {
-            Path = path;
+            var folder = CreateInstance<Folder>();
+            folder.path = path;
+            return folder;
         }
     }
 

@@ -1,9 +1,10 @@
 ﻿using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace UnityCommon
 {
-    public class GDocToStringConverter : IGoogleDriveConverter<string>
+    public class GDocToTextAssetConverter : IGoogleDriveConverter<TextAsset>
     {
         public RawDataRepresentation[] Representations { get { return new RawDataRepresentation[] {
             new RawDataRepresentation(null, "application/vnd.google-apps.document")
@@ -11,9 +12,9 @@ namespace UnityCommon
 
         public string ExportMimeType { get { return "text/plain"; } }
 
-        public string Convert (byte[] obj) => Encoding.UTF8.GetString(obj);
+        public TextAsset Convert (byte[] obj) => new TextAsset(Encoding.UTF8.GetString(obj));
 
-        public Task<string> ConvertAsync (byte[] obj) => Task.FromResult(Encoding.UTF8.GetString(obj));
+        public Task<TextAsset> ConvertAsync (byte[] obj) => Task.FromResult(new TextAsset(Encoding.UTF8.GetString(obj)));
 
         public object Convert (object obj) => Convert(obj as byte[]);
 

@@ -21,8 +21,8 @@ public class TestResourceProvider : MonoBehaviour
 
     private void Awake ()
     {
-        provider = InitializeProjectResourceProvider();
-        //provider = InitializeGoogleDriveResourceProvider(false);
+        //provider = InitializeProjectResourceProvider();
+        provider = InitializeGoogleDriveResourceProvider(false);
         //provider = InitializeLocalResourceProvider();
     }
 
@@ -30,13 +30,13 @@ public class TestResourceProvider : MonoBehaviour
     {
         await new WaitForEndOfFrame();
 
-        //await ResolveByFullPathAsync();
+        await ResolveByFullPathAsync();
         await ResolveTextByPathAsync();
-        //await ResolveFoldersAsync();
-        //await TestResourceExistsAsync();
-        //await TestAudioAsync();
-        //await TestUnloadAsync();
-        //await TestTextureResources();
+        await ResolveFoldersAsync();
+        await TestResourceExistsAsync();
+        await TestAudioAsync();
+        await TestUnloadAsync();
+        await TestTextureResources();
         await TestTextureByDir();
         //await TestNullPropagation();
     }
@@ -58,16 +58,14 @@ public class TestResourceProvider : MonoBehaviour
 
     private async Task TestEditorAsync ()
     {
-        var result = (await provider.LoadResourcesAsync<string>("Text")).ToList();
+        var result = (await provider.LoadResourcesAsync<TextAsset>("Text")).ToList();
         for (int i = 0; i < result.Count; i++)
-            Debug.Log($"{i}: {result[i].Object}");
+            Debug.Log($"{i}: {result[i].Object.text}");
     }
 
     private static ProjectResourceProvider InitializeProjectResourceProvider ()
     {
         var provider = new ProjectResourceProvider();
-
-        provider.AddRedirector(new TextAssetToStringConverter());
 
         return provider;
     }
@@ -79,7 +77,7 @@ public class TestResourceProvider : MonoBehaviour
 
         provider.AddConverter(new JpgOrPngToSpriteConverter());
         provider.AddConverter(new JpgOrPngToTextureConverter());
-        provider.AddConverter(new GDocToStringConverter());
+        provider.AddConverter(new GDocToTextAssetConverter());
         provider.AddConverter(new GFolderToFolderConverter());
         //provider.AddConverter(new WavToAudioClipConverter());
         provider.AddConverter(new Mp3ToAudioClipConverter());
@@ -99,9 +97,9 @@ public class TestResourceProvider : MonoBehaviour
         provider.AddConverter(new DirectoryToFolderConverter());
         provider.AddConverter(new JpgOrPngToSpriteConverter());
         provider.AddConverter(new JpgOrPngToTextureConverter());
-        provider.AddConverter(new TxtToStringConverter());
-        //provider.AddConverter(new WavToAudioClipConverter());
-        provider.AddConverter(new Mp3ToAudioClipConverter());
+        provider.AddConverter(new TxtToTextAssetConverter());
+        provider.AddConverter(new WavToAudioClipConverter());
+        //provider.AddConverter(new Mp3ToAudioClipConverter());
 
         return provider;
     }
@@ -146,7 +144,8 @@ public class TestResourceProvider : MonoBehaviour
         foreach (var audioResource in resources)
         {
             AudioSource.PlayOneShot(audioResource.Object);
-            await Task.Delay(TimeSpan.FromSeconds(audioResource.Object.length));
+            await Task.Delay(TimeSpan.FromSeconds(5));
+            AudioSource.Stop();
         }
 
         foreach (var audioResource in resources)
@@ -155,11 +154,11 @@ public class TestResourceProvider : MonoBehaviour
 
     private async Task ResolveTextByPathAsync ()
     {
-        var resources = await provider.LoadResourcesAsync<string>("Text");
+        var resources = await provider.LoadResourcesAsync<TextAsset>("Text");
 
         foreach (var textResource in resources)
         {
-            text = textResource.Object;
+            text = textResource.Object.text;
             await Task.Delay(TimeSpan.FromSeconds(1f));
         }
 

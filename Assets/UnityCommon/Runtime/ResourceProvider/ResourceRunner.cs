@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -10,6 +11,7 @@ namespace UnityCommon
         public enum RunnerState { Created, Running, Completed, Canceled }
 
         public virtual RunnerState State { get; protected set; }
+        public Type ExpectedResourceType { get; protected set; }
 
         private TaskCompletionSource<object> completionSource = new TaskCompletionSource<object>();
 
@@ -35,9 +37,15 @@ namespace UnityCommon
         }
     }
 
-    public class ResourceRunner<TResource> : ResourceRunner { }
+    public class ResourceRunner<TResource> : ResourceRunner
+    {
+        public ResourceRunner ()
+        {
+            ExpectedResourceType = typeof(TResource);
+        }
+    }
 
-    public class LoadResourceRunner<TResource> : ResourceRunner<TResource>
+    public class LoadResourceRunner<TResource> : ResourceRunner<TResource> where TResource : UnityEngine.Object
     {
         public Resource<TResource> Resource { get; protected set; }
 
@@ -58,7 +66,7 @@ namespace UnityCommon
         }
     }
 
-    public class LocateResourcesRunner<TResource> : ResourceRunner<TResource>
+    public class LocateResourcesRunner<TResource> : ResourceRunner<TResource> where TResource : UnityEngine.Object
     {
         public List<Resource<TResource>> LocatedResources { get; protected set; } = new List<Resource<TResource>>();
 

@@ -32,49 +32,49 @@ namespace UnityCommon
         /// </summary>
         /// <typeparam name="T">Type of the resource to load.</typeparam>
         /// <param name="path">Path to the resource location.</param>
-        Resource<T> LoadResource<T> (string path);
+        Resource<T> LoadResource<T> (string path) where T : UnityEngine.Object;
         /// <summary>
         /// Loads resource asynchronously.
         /// </summary>
         /// <typeparam name="T">Type of the resource to load.</typeparam>
         /// <param name="path">Path to the resource location.</param>
-        Task<Resource<T>> LoadResourceAsync<T> (string path);
+        Task<Resource<T>> LoadResourceAsync<T> (string path) where T : UnityEngine.Object;
         /// <summary>
         /// Loads all available resources at the provided path synchronously (blocking the calling thread).
         /// </summary>
         /// <typeparam name="T">Type of the resources to load.</typeparam>
         /// <param name="path">Path to the resources location.</param>
-        IEnumerable<Resource<T>> LoadResources<T> (string path);
+        IEnumerable<Resource<T>> LoadResources<T> (string path) where T : UnityEngine.Object;
         /// <summary>
         /// Loads all available resources at the provided path asynchronously.
         /// </summary>
         /// <typeparam name="T">Type of the resources to load.</typeparam>
         /// <param name="path">Path to the resources location.</param>
-        Task<IEnumerable<Resource<T>>> LoadResourcesAsync<T> (string path);
+        Task<IEnumerable<Resource<T>>> LoadResourcesAsync<T> (string path) where T : UnityEngine.Object;
         /// <summary>
         /// Locates all available resources at the provided path synchronously (blocking the calling thread).
         /// </summary>
         /// <typeparam name="T">Type of the resources to locate.</typeparam>
         /// <param name="path">Path to the resources location.</param>
-        IEnumerable<Resource<T>> LocateResources<T> (string path);
+        IEnumerable<Resource<T>> LocateResources<T> (string path) where T : UnityEngine.Object;
         /// <summary>
         /// Locates all available resources at the provided path asynchronously.
         /// </summary>
         /// <typeparam name="T">Type of the resources to locate.</typeparam>
         /// <param name="path">Path to the resources location.</param>
-        Task<IEnumerable<Resource<T>>> LocateResourcesAsync<T> (string path);
+        Task<IEnumerable<Resource<T>>> LocateResourcesAsync<T> (string path) where T : UnityEngine.Object;
         /// <summary>
         /// Checks whether resource with the provided type and path is available synchronously (blocking the calling thread).
         /// </summary>
         /// <typeparam name="T">Type of the resource to look for.</typeparam>
         /// <param name="path">Path to the resource location.</param>
-        bool ResourceExists<T> (string path);
+        bool ResourceExists<T> (string path) where T : UnityEngine.Object;
         /// <summary>
         /// Checks whether resource with the provided type and path is available asynchronously.
         /// </summary>
         /// <typeparam name="T">Type of the resource to look for.</typeparam>
         /// <param name="path">Path to the resource location.</param>
-        Task<bool> ResourceExistsAsync<T> (string path);
+        Task<bool> ResourceExistsAsync<T> (string path) where T : UnityEngine.Object;
         /// <summary>
         /// Unloads resource at the provided path synchronously (blocking the calling thread).
         /// </summary>

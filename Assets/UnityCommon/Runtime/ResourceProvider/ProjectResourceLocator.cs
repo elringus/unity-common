@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace UnityCommon
 {
-    public class ProjectResourceLocator<TResource> : LocateResourcesRunner<TResource>
+    public class ProjectResourceLocator<TResource> : LocateResourcesRunner<TResource> where TResource : UnityEngine.Object
     {
         public string ResourcesPath { get; private set; }
 

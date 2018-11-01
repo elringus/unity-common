@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace UnityCommon
 {
-    public class ProjectResourceLoader<TResource> : LoadResourceRunner<TResource>
+    public class ProjectResourceLoader<TResource> : LoadResourceRunner<TResource> where TResource : UnityEngine.Object
     {
         private Action<string> logAction;
         private ResourceRequest resourceRequest;
@@ -27,7 +27,7 @@ namespace UnityCommon
             // Corner case when loading folders.
             if (typeof(TResource) == typeof(Folder))
             {
-                (Resource as Resource<Folder>).Object = new Folder(Resource.Path);
+                (Resource as Resource<Folder>).Object = Folder.CreateInstance(Resource.Path);
                 base.HandleOnCompleted();
                 return;
             }

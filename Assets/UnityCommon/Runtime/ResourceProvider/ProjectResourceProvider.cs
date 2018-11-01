@@ -64,8 +64,12 @@ namespace UnityCommon
 
         protected override void UnloadResourceBlocking (Resource resource)
         {
-            if (resource.IsValid && resource.IsUnloadable)
-                UnityEngine.Resources.UnloadAsset(resource.AsUnityObject);
+            // We shouldn't destroy project assets, so attempting to filter them out.
+            if (resource.IsValid && (resource.Object is GameObject || resource.Object is ScriptableObject || resource.Object is Component))
+            {
+                if (!Application.isPlaying) UnityEngine.Object.DestroyImmediate(resource.Object);
+                else UnityEngine.Object.Destroy(resource.Object);
+            }
         }
 
         protected override Task UnloadResourceAsync (Resource resource)
@@ -83,13 +87,13 @@ namespace UnityCommon
             // Corner case when loading folders.
             if (typeof(T) == typeof(Folder))
             {
-                (resource as Resource<Folder>).Object = new Folder(resource.Path);
+                (resource as Resource<Folder>).Object = Folder.CreateInstance(resource.Path);
                 return resource;
             }
 
             var resourceType = redirector != null ? redirector.RedirectType : typeof(T);
             var obj = Resources.Load(resource.Path, resourceType);
-            resource.Object = redirector != null ? redirector.ToSource<T>(obj) : (T)(object)obj;
+            resource.Object = redirector != null ? redirector.ToSource<T>(obj) : (T)obj;
             return resource;
         }
 

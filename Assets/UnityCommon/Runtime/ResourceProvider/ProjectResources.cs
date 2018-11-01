@@ -44,7 +44,7 @@ namespace UnityCommon
                 {
                     if (outFolders != null)
                     {
-                        var folder = new Folder(dirInfo.FullName.Replace("\\", "/").GetAfterFirst("/Resources"));
+                        var folder = Folder.CreateInstance(dirInfo.FullName.Replace("\\", "/").GetAfterFirst("/Resources"));
                         outFolders.Add(folder);
                     }
 

@@ -70,7 +70,7 @@ namespace UnityCommon
         /// <summary>
         /// Current pending concurrent requests count.
         /// </summary>
-        public int RequestsCount => ResourceRunners.Count;
+        public int RequestsCount => LoadRunners.Count + LocateRunners.Count;
 
         private Dictionary<Type, IConverter> converters = new Dictionary<Type, IConverter>();
         private Queue<Action> requestQueue = new Queue<Action>();
@@ -157,10 +157,10 @@ namespace UnityCommon
 
         protected override Task UnloadResourceAsync (Resource resource)
         {
-            if (resource.IsValid && resource.IsUnityObject)
+            if (resource.IsValid)
             {
-                if (!Application.isPlaying) UnityEngine.Object.DestroyImmediate(resource.AsUnityObject);
-                else UnityEngine.Object.Destroy(resource.AsUnityObject);
+                if (!Application.isPlaying) UnityEngine.Object.DestroyImmediate(resource.Object);
+                else UnityEngine.Object.Destroy(resource.Object);
             }
             return Task.CompletedTask;
         }
@@ -221,6 +221,7 @@ namespace UnityCommon
         private async Task ProcessChangesListAsync (CacheManifest manifest)
         {
             var changeList = await GoogleDriveChanges.List(manifest.StartToken).Send();
+            Debug.Log(changeList.Changes.Count);
             foreach (var change in changeList.Changes)
             {
                 if (!manifest.ContainsKey(change.FileId)) continue;
@@ -234,7 +235,10 @@ namespace UnityCommon
             }
 
             if (!string.IsNullOrWhiteSpace(changeList.NextPageToken))
+            {
+                manifest.StartToken = changeList.NextPageToken;
                 await ProcessChangesListAsync(manifest);
+            }
 
             IOUtils.WebGLSyncFs();
         }
