@@ -221,7 +221,6 @@ namespace UnityCommon
         private async Task ProcessChangesListAsync (CacheManifest manifest)
         {
             var changeList = await GoogleDriveChanges.List(manifest.StartToken).Send();
-            Debug.Log(changeList.Changes.Count);
             foreach (var change in changeList.Changes)
             {
                 if (!manifest.ContainsKey(change.FileId)) continue;
