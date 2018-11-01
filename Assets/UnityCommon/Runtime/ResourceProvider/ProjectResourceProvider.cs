@@ -64,12 +64,7 @@ namespace UnityCommon
 
         protected override void UnloadResourceBlocking (Resource resource)
         {
-            // We shouldn't destroy project assets, so attempting to filter them out.
-            if (resource.IsValid && (resource.Object is GameObject || resource.Object is ScriptableObject || resource.Object is Component))
-            {
-                if (!Application.isPlaying) UnityEngine.Object.DestroyImmediate(resource.Object);
-                else UnityEngine.Object.Destroy(resource.Object);
-            }
+            // TODO: We shouldn't destroy asset objects, but it's impossible (?) to tell if the object is an asset.
         }
 
         protected override Task UnloadResourceAsync (Resource resource)
