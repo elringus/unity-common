@@ -20,6 +20,8 @@ namespace UnityCommon
             Path = path;
             Object = obj;
         }
+
+        public static implicit operator Object (Resource resource) => resource.Object;
     }
 
     /// <summary>
@@ -31,6 +33,8 @@ namespace UnityCommon
         public new T Object { get => CastObject(base.Object); set => base.Object = value; }
 
         public Resource (string path, T obj = default) : base(path, obj) { }
+
+        public static implicit operator T (Resource<T> resource) => resource.Object;
 
         private T CastObject (object obj)
         {

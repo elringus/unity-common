@@ -65,7 +65,7 @@ namespace UnityCommon
             PreloadedResources.Remove(path);
         }
 
-        public virtual TResource Load (string path, bool isFullPath = false)
+        public virtual Resource<TResource> Load (string path, bool isFullPath = false)
         {
             if (IsLoaded(path, isFullPath)) return GetLoaded(path, isFullPath);
 
@@ -76,10 +76,10 @@ namespace UnityCommon
             AddLoadedResource(resource);
 
             DecrementLoadCounter();
-            return resource != null && resource.IsValid ? resource.Object : null;
+            return resource != null && resource.IsValid ? new Resource<TResource>(path, resource.Object) : null;
         }
 
-        public virtual async Task<TResource> LoadAsync (string path, bool isFullPath = false)
+        public virtual async Task<Resource<TResource>> LoadAsync (string path, bool isFullPath = false)
         {
             if (IsLoaded(path, isFullPath)) return GetLoaded(path, isFullPath);
 
@@ -90,10 +90,10 @@ namespace UnityCommon
             AddLoadedResource(resource);
 
             DecrementLoadCounter();
-            return resource != null && resource.IsValid ? resource.Object : null;
+            return resource != null && resource.IsValid ? new Resource<TResource>(path, resource.Object) : null;
         }
 
-        public virtual IEnumerable<TResource> LoadAll (string path = null, bool isFullPath = false)
+        public virtual IEnumerable<Resource<TResource>> LoadAll (string path = null, bool isFullPath = false)
         {
             IncrementLoadCounter();
             if (!isFullPath) path = BuildFullPath(path);
@@ -102,10 +102,10 @@ namespace UnityCommon
             AddLoadedResources(resources);
 
             DecrementLoadCounter();
-            return resources.Select(r => r != null && r.IsValid ? r.Object : null);
+            return resources.Select(r => r != null && r.IsValid ? new Resource<TResource>(path, r.Object) : null);
         }
 
-        public virtual async Task<IEnumerable<TResource>> LoadAllAsync (string path = null, bool isFullPath = false)
+        public virtual async Task<IEnumerable<Resource<TResource>>> LoadAllAsync (string path = null, bool isFullPath = false)
         {
             IncrementLoadCounter();
             if (!isFullPath) path = BuildFullPath(path);
@@ -114,7 +114,7 @@ namespace UnityCommon
             AddLoadedResources(resources);
 
             DecrementLoadCounter();
-            return resources.Select(r => r != null && r.IsValid ? r.Object : null);
+            return resources.Select(r => r != null && r.IsValid ? new Resource<TResource>(path, r.Object) : null);
         }
 
         public virtual IEnumerable<Resource<TResource>> LocateResources (string path, bool isFullPath = false)
@@ -210,11 +210,11 @@ namespace UnityCommon
         /// Returns a loaded resource with the provided path.
         /// In case the resource is not loaded, will return null.
         /// </summary>
-        public virtual TResource GetLoaded (string path, bool isFullPath = false)
+        public virtual Resource<TResource> GetLoaded (string path, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
             if (!IsLoaded(path, true)) return default;
-            return LoadedResources[path];
+            return new Resource<TResource>(path, LoadedResources[path]);
         }
 
         protected virtual string BuildFullPath (string path)
