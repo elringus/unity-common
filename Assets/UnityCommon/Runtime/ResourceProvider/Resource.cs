@@ -15,7 +15,10 @@ namespace UnityCommon
         [SerializeField] private string path;
         [SerializeField] private Object obj;
 
-        public Resource (string path, Object obj)
+        // For serialization to work properly.
+        public Resource () : this(null) { }
+
+        public Resource (string path, Object obj = default)
         {
             Path = path;
             Object = obj;
