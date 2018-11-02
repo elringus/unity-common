@@ -29,14 +29,6 @@ namespace UnityCommon
 
             var startTime = Time.time;
 
-            // Corner case when loading folders.
-            if (typeof(TResource) == typeof(Folder))
-            {
-                (Resource as Resource<Folder>).Object = Folder.CreateInstance(Resource.Path);
-                HandleOnCompleted();
-                return;
-            }
-
             var filePath = string.IsNullOrEmpty(RootPath) ? Resource.Path : string.Concat(RootPath, '/', Resource.Path);
             filePath = string.Concat(Application.dataPath, "/", filePath);
 

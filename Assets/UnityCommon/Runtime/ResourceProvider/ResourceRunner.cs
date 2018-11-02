@@ -86,4 +86,25 @@ namespace UnityCommon
             completionSource.TrySetResult(LocatedResources);
         }
     }
+
+    public class LocateFoldersRunner : ResourceRunner<Folder>
+    {
+        public List<Folder> LocatedFolders { get; protected set; } = new List<Folder>();
+
+        private TaskCompletionSource<List<Folder>> completionSource = new TaskCompletionSource<List<Folder>>();
+
+        public new TaskAwaiter<List<Folder>> GetAwaiter () => completionSource.Task.GetAwaiter();
+
+        public override void Cancel ()
+        {
+            base.Cancel();
+            completionSource.TrySetCanceled();
+        }
+
+        protected override void HandleOnCompleted ()
+        {
+            base.HandleOnCompleted();
+            completionSource.TrySetResult(LocatedFolders);
+        }
+    }
 }

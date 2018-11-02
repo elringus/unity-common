@@ -39,19 +39,6 @@ namespace UnityCommon
                 return;
             }
 
-            // Corner case for folders.
-            if (typeof(TResource) == typeof(Folder))
-            {
-                foreach (var dir in parendFolder.GetDirectories())
-                {
-                    var path = dir.FullName.Replace("\\", "/").GetAfterFirst(RootPath + "/");
-                    var resource = new Resource<Folder>(path, Folder.CreateInstance(path));
-                    LocatedResources.Add(resource as Resource<TResource>);
-                }
-                HandleOnCompleted();
-                return;
-            }
-
             // 2. Searching for the files in the folder.
             var results = new Dictionary<RawDataRepresentation, List<FileInfo>>();
             foreach (var representation in converter.Representations.DistinctBy(r => r.Extension))

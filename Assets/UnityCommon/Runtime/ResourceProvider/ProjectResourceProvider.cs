@@ -52,12 +52,12 @@ namespace UnityCommon
             }
         }
 
-        protected override LoadResourceRunner<T> CreateLoadRunner<T> (Resource<T> resource)
+        protected override LoadResourceRunner<T> CreateLoadResourceRunner<T> (Resource<T> resource)
         {
             return new ProjectResourceLoader<T>(resource, redirectors.ContainsKey(typeof(T)) ? redirectors[typeof(T)] : null, LogMessage);
         }
 
-        protected override LocateResourcesRunner<T> CreateLocateRunner<T> (string path)
+        protected override LocateResourcesRunner<T> CreateLocateResourcesRunner<T> (string path)
         {
             return new ProjectResourceLocator<T>(path, projectResources);
         }
@@ -78,13 +78,6 @@ namespace UnityCommon
         {
             var resource = new Resource<T>(path);
             var redirector = redirectors.ContainsKey(typeof(T)) ? redirectors[typeof(T)] : null;
-
-            // Corner case when loading folders.
-            if (typeof(T) == typeof(Folder))
-            {
-                (resource as Resource<Folder>).Object = Folder.CreateInstance(resource.Path);
-                return resource;
-            }
 
             var resourceType = redirector != null ? redirector.RedirectType : typeof(T);
             var obj = Resources.Load(resource.Path, resourceType);

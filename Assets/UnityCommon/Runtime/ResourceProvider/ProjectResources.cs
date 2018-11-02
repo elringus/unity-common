@@ -6,10 +6,8 @@ namespace UnityCommon
 {
     public class ProjectResources : ScriptableObject
     {
-        public List<Folder> Folders => folders;
         public List<string> ResourcePaths => resourcePaths;
 
-        [SerializeField] List<Folder> folders = new List<Folder>();
         [SerializeField] List<string> resourcePaths = new List<string>();
 
         private void Awake ()
@@ -25,37 +23,27 @@ namespace UnityCommon
         public void LocateAllResources ()
         {
             #if UNITY_EDITOR
-            folders.Clear();
             resourcePaths.Clear();
-            WalkDirectoryTree(new System.IO.DirectoryInfo(Application.dataPath), folders, resourcePaths, false);
+            WalkDirectoryTree(new System.IO.DirectoryInfo(Application.dataPath), resourcePaths, false);
             #endif
         }
 
         #if UNITY_EDITOR
-        private static void WalkDirectoryTree (System.IO.DirectoryInfo directory, List<Folder> outFolders, List<string> outPaths, bool isInsideResources)
+        private static void WalkDirectoryTree (System.IO.DirectoryInfo directory, List<string> outPaths, bool isInsideResources)
         {
             var subDirs = directory.GetDirectories();
             foreach (var dirInfo in subDirs)
             {
                 if (!isInsideResources && dirInfo.Name != "Resources") continue;
-                if (!isInsideResources && dirInfo.Name == "Resources") WalkDirectoryTree(dirInfo, outFolders, outPaths, true);
+                if (!isInsideResources && dirInfo.Name == "Resources") WalkDirectoryTree(dirInfo, outPaths, true);
 
                 if (isInsideResources)
                 {
-                    if (outFolders != null)
-                    {
-                        var folder = Folder.CreateInstance(dirInfo.FullName.Replace("\\", "/").GetAfterFirst("/Resources/"));
-                        outFolders.Add(folder);
-                    }
+                    var paths = dirInfo.GetFiles().Where(p => !p.FullName.EndsWithFast(".meta"))
+                        .Select(p => p.FullName.Replace("\\", "/").GetAfterFirst("/Resources/").GetBeforeLast("."));
+                    outPaths.AddRange(paths);
 
-                    if (outPaths != null)
-                    {
-                        var paths = dirInfo.GetFiles().Where(p => !p.FullName.EndsWithFast(".meta"))
-                            .Select(p => p.FullName.Replace("\\", "/").GetAfterFirst("/Resources/").GetBeforeLast("."));
-                        outPaths.AddRange(paths);
-                    }
-
-                    WalkDirectoryTree(dirInfo, outFolders, outPaths, true);
+                    WalkDirectoryTree(dirInfo, outPaths, true);
                 }
             }
         }

@@ -29,13 +29,6 @@ namespace UnityCommon
         {
             path = path ?? string.Empty;
 
-            // Corner case when locating folders (Unity doesn't see folder as a resource).
-            if (typeof(TResource) == typeof(Folder))
-            {
-                return projectResources.Folders.FindAllAtPath(path)
-                    .Select(f => new Resource<Folder>(f.Path) as Resource<TResource>).ToList();
-            }
-
             if (string.IsNullOrWhiteSpace(path))
                 return projectResources.ResourcePaths.Where(p => !p.Contains("/") || string.IsNullOrEmpty(p.GetBeforeLast("/"))).Select(p => new Resource<TResource>(p)).ToList();
             return projectResources.ResourcePaths.Where(p => p.GetBeforeLast("/").Equals(path) || p.GetBeforeLast("/").Equals("/" + path)).Select(p => new Resource<TResource>(p)).ToList();

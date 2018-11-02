@@ -5,21 +5,19 @@ using UnityEngine;
 namespace UnityCommon
 {
     /// <summary>
-    /// Represents a directory in file systems.
+    /// Represents a directory in the project assets.
     /// </summary>
     [System.Serializable]
-    public class Folder : ScriptableObject
+    public class Folder
     {
         public string Path { get => path; private set => path = value; }
         public string Name => Path.Contains("/") ? Path.GetAfter("/") : Path;
 
         [SerializeField] string path = null;
 
-        public new static Folder CreateInstance (string path)
+        public Folder (string path)
         {
-            var folder = CreateInstance<Folder>();
-            folder.path = path;
-            return folder;
+            this.path = path;
         }
     }
 

@@ -50,18 +50,10 @@ namespace UnityCommon
             var startTime = Time.time;
             var usedCache = false;
 
-            // 1. Corner case when loading folders.
-            if (typeof(TResource) == typeof(Folder))
-            {
-                (Resource as Resource<Folder>).Object = Folder.CreateInstance(Resource.Path);
-                HandleOnCompleted();
-                return;
-            }
-
-            // 2. Check if cached version of the file could be used.
+            // Check if cached version of the file could be used.
             rawData = await TryLoadFileCacheAsync(Resource.Path);
 
-            // 3. Cached version is not valid or doesn't exist; download or export the file.
+            // Cached version is not valid or doesn't exist; download or export the file.
             if (rawData == null)
             {
                 // 4. Load file metadata from Google Drive.

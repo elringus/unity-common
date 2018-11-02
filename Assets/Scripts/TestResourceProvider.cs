@@ -78,7 +78,6 @@ public class TestResourceProvider : MonoBehaviour
         provider.AddConverter(new JpgOrPngToSpriteConverter());
         provider.AddConverter(new JpgOrPngToTextureConverter());
         provider.AddConverter(new GDocToTextAssetConverter());
-        provider.AddConverter(new GFolderToFolderConverter());
         //provider.AddConverter(new WavToAudioClipConverter());
         provider.AddConverter(new Mp3ToAudioClipConverter());
 
@@ -94,7 +93,6 @@ public class TestResourceProvider : MonoBehaviour
     {
         var provider = new LocalResourceProvider("Resources");
 
-        provider.AddConverter(new DirectoryToFolderConverter());
         provider.AddConverter(new JpgOrPngToSpriteConverter());
         provider.AddConverter(new JpgOrPngToTextureConverter());
         provider.AddConverter(new TxtToTextAssetConverter());
@@ -106,18 +104,18 @@ public class TestResourceProvider : MonoBehaviour
 
     private async Task ResolveFoldersAsync ()
     {
-        var resources = await provider.LoadResourcesAsync<Folder>(null);
+        //var resources = await provider.LoadResourcesAsync<Folder>(null);
 
-        text = "completed";
+        //text = "completed";
 
-        foreach (var folderResource in resources)
-        {
-            text = folderResource.Object.Name;
-            await Task.Delay(TimeSpan.FromSeconds(1f));
-        }
+        //foreach (var folderResource in resources)
+        //{
+        //    text = folderResource.Object.Name;
+        //    await Task.Delay(TimeSpan.FromSeconds(1f));
+        //}
 
-        foreach (var textResource in resources)
-            await provider.UnloadResourceAsync(textResource.Path);
+        //foreach (var textResource in resources)
+        //    await provider.UnloadResourceAsync(textResource.Path);
     }
 
     private async Task TestUnloadAsync ()

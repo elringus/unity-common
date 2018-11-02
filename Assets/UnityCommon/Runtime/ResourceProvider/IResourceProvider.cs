@@ -64,6 +64,16 @@ namespace UnityCommon
         /// <param name="path">Path to the resources location.</param>
         Task<IEnumerable<Resource<T>>> LocateResourcesAsync<T> (string path) where T : UnityEngine.Object;
         /// <summary>
+        /// Locates all available folders at the provided path synchronously (blocking the calling thread).
+        /// </summary>
+        /// <param name="path">Path to the parent folder or empty string if none.</param>
+        IEnumerable<Folder> LocateFolders (string path);
+        /// <summary>
+        /// Locates all available folders at the provided path asynchronously.
+        /// </summary>
+        /// <param name="path">Path to the parent folder or empty string if none.</param>
+        Task<IEnumerable<Folder>> LocateFoldersAsync (string path);
+        /// <summary>
         /// Checks whether resource with the provided type and path is available synchronously (blocking the calling thread).
         /// </summary>
         /// <typeparam name="T">Type of the resource to look for.</typeparam>

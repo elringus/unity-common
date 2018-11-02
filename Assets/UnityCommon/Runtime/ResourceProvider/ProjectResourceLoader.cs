@@ -24,14 +24,6 @@ namespace UnityCommon
 
             var startTime = Time.time;
 
-            // Corner case when loading folders.
-            if (typeof(TResource) == typeof(Folder))
-            {
-                (Resource as Resource<Folder>).Object = Folder.CreateInstance(Resource.Path);
-                base.HandleOnCompleted();
-                return;
-            }
-
             var resourceType = redirector != null ? redirector.RedirectType : typeof(TResource);
             resourceRequest = await Resources.LoadAsync(Resource.Path, resourceType);
             Resource.Object = redirector != null ? await redirector.ToSourceAsync<TResource>(resourceRequest.asset) : (TResource)(object)resourceRequest.asset;

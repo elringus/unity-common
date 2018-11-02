@@ -18,8 +18,9 @@ namespace UnityCommon
         public float LoadProgress { get; private set; } = 1f;
 
         protected Dictionary<string, Resource> LoadedResources = new Dictionary<string, Resource>();
+        protected Dictionary<string, List<Folder>> LocatedFolders = new Dictionary<string, List<Folder>>();
         protected Dictionary<string, ResourceRunner> LoadRunners = new Dictionary<string, ResourceRunner>();
-        protected Dictionary<string, ResourceRunner> LocateRunners = new Dictionary<string, ResourceRunner>();
+        protected Dictionary<Tuple<string, Type>, ResourceRunner> LocateRunners = new Dictionary<Tuple<string, Type>, ResourceRunner>();
 
         public virtual Resource<T> LoadResource<T> (string path) where T : UnityEngine.Object
         {
@@ -53,11 +54,11 @@ namespace UnityCommon
             }
 
             var resource = new Resource<T>(path);
-            var loadRunner = CreateLoadRunner(resource);
+            var loadRunner = CreateLoadResourceRunner(resource);
             LoadRunners.Add(path, loadRunner);
             UpdateLoadProgress();
 
-            RunLoader(loadRunner);
+            RunResourceLoader(loadRunner);
             await loadRunner;
 
             HandleResourceLoaded(loadRunner.Resource);
@@ -135,9 +136,9 @@ namespace UnityCommon
             return LoadRunners.ContainsKey(path);
         }
 
-        public virtual bool ResourceLocating (string path)
+        public virtual bool ResourceLocating<T> (string path)
         {
-            return LocateRunners.ContainsKey(path);
+            return LocateRunners.ContainsKey(new Tuple<string, Type>(path, typeof(T)));
         }
 
         public virtual bool ResourceExists<T> (string path) where T : UnityEngine.Object
@@ -161,7 +162,7 @@ namespace UnityCommon
             if (path == null) path = string.Empty;
 
             // We're currently locating this resource in async mode; cancel and locate blocking.
-            if (ResourceLocating(path)) CancelResourceLocating(path);
+            if (ResourceLocating<T>(path)) CancelResourceLocating<T>(path);
 
             var locatedResources = LocateResourcesBlocking<T>(path);
 
@@ -173,44 +174,69 @@ namespace UnityCommon
         {
             if (path == null) path = string.Empty;
 
-            if (ResourceLocating(path))
-            {
-                if (LocateRunners[path].ExpectedResourceType != typeof(T)) CancelResourceLocating(path);
-                else return await (LocateRunners[path] as LocateResourcesRunner<T>);
-            }
+            var locateKey = new Tuple<string, Type>(path, typeof(T));
 
-            var locateRunner = CreateLocateRunner<T>(path);
-            LocateRunners.Add(path, locateRunner);
+            if (ResourceLocating<T>(path))
+                return await (LocateRunners[locateKey] as LocateResourcesRunner<T>);
+
+            var locateRunner = CreateLocateResourcesRunner<T>(path);
+            LocateRunners.Add(locateKey, locateRunner);
             UpdateLoadProgress();
 
-            RunLocator(locateRunner);
+            RunResourcesLocator(locateRunner);
 
             await locateRunner;
             HandleResourcesLocated(locateRunner.LocatedResources, path);
             return locateRunner.LocatedResources;
         }
 
-        public void LogMessage (string message)
+        public IEnumerable<Folder> LocateFolders (string path)
         {
-            OnMessage.SafeInvoke(message);
+            if (LocatedFolders.ContainsKey(path)) return LocatedFolders[path];
+
+            // We're currently locating folders at this path in async mode; cancel and locate blocking.
+            if (ResourceLocating<Folder>(path)) CancelResourceLocating<Folder>(path);
+
+            var locatedFolders = LocateFoldersBlocking(path);
+
+            HandleFoldersLocated(locatedFolders, path);
+            return locatedFolders;
         }
 
+        public async Task<IEnumerable<Folder>> LocateFoldersAsync (string path)
+        {
+            if (LocatedFolders.ContainsKey(path)) return LocatedFolders[path];
+
+            var locateKey = new Tuple<string, Type>(path, typeof(Folder));
+
+            if (ResourceLocating<Folder>(path))
+                return await (LocateRunners[locateKey] as LocateFoldersRunner);
+
+            var locateRunner = CreateLocateFoldersRunner(path);
+            LocateRunners.Add(locateKey, locateRunner);
+            UpdateLoadProgress();
+
+            RunFoldersLocator(locateRunner);
+
+            await locateRunner;
+            HandleFoldersLocated(locateRunner.LocatedFolders, path);
+            return locateRunner.LocatedFolders;
+        }
+
+        public void LogMessage (string message) => OnMessage?.Invoke(message);
+
         protected abstract Resource<T> LoadResourceBlocking<T> (string path) where T : UnityEngine.Object;
+        protected abstract LoadResourceRunner<T> CreateLoadResourceRunner<T> (Resource<T> resource) where T : UnityEngine.Object;
         protected abstract IEnumerable<Resource<T>> LocateResourcesBlocking<T> (string path) where T : UnityEngine.Object;
-        protected abstract LoadResourceRunner<T> CreateLoadRunner<T> (Resource<T> resource) where T : UnityEngine.Object;
-        protected abstract LocateResourcesRunner<T> CreateLocateRunner<T> (string path) where T : UnityEngine.Object;
+        protected abstract LocateResourcesRunner<T> CreateLocateResourcesRunner<T> (string path) where T : UnityEngine.Object;
+        protected abstract IEnumerable<Folder> LocateFoldersBlocking (string path);
+        protected abstract LocateFoldersRunner CreateLocateFoldersRunner (string path);
         protected abstract void UnloadResourceBlocking (Resource resource);
         protected abstract Task UnloadResourceAsync (Resource resource);
 
-        protected virtual void RunLoader<T> (LoadResourceRunner<T> loader) where T : UnityEngine.Object
-        {
-            loader.Run();
-        }
-
-        protected virtual void RunLocator<T> (LocateResourcesRunner<T> locator) where T : UnityEngine.Object
-        {
-            locator.Run();
-        }
+        protected virtual void RunResourceLoader<T> (LoadResourceRunner<T> loader) where T : UnityEngine.Object => loader.Run();
+        protected virtual void RunResourcesLocator<T> (LocateResourcesRunner<T> locator) where T : UnityEngine.Object => locator.Run();
+        protected virtual void RunFoldersLocator (LocateFoldersRunner locator) => locator.Run();
 
         protected virtual void CancelResourceLoading (string path)
         {
@@ -222,12 +248,14 @@ namespace UnityCommon
             UpdateLoadProgress();
         }
 
-        protected virtual void CancelResourceLocating (string path)
+        protected virtual void CancelResourceLocating<T> (string path)
         {
-            if (!ResourceLocating(path)) return;
+            if (!ResourceLocating<T>(path)) return;
 
-            LocateRunners[path].Cancel();
-            LocateRunners.Remove(path);
+            var locateKey = new Tuple<string, Type>(path, typeof(T));
+
+            LocateRunners[locateKey].Cancel();
+            LocateRunners.Remove(locateKey);
 
             UpdateLoadProgress();
         }
@@ -245,8 +273,18 @@ namespace UnityCommon
 
         protected virtual void HandleResourcesLocated<T> (IEnumerable<Resource<T>> locatedResources, string path) where T : UnityEngine.Object
         {
-            if (LocateRunners.ContainsKey(path))
-                LocateRunners.Remove(path);
+            var locateKey = new Tuple<string, Type>(path, typeof(T));
+            LocateRunners.Remove(locateKey);
+
+            UpdateLoadProgress();
+        }
+
+        protected virtual void HandleFoldersLocated (IEnumerable<Folder> locatedFolders, string path)
+        {
+            var locateKey = new Tuple<string, Type>(path, typeof(Folder));
+            LocateRunners.Remove(locateKey);
+
+            LocatedFolders[path] = locatedFolders.ToList();
 
             UpdateLoadProgress();
         }

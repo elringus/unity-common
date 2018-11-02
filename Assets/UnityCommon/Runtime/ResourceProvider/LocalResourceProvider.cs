@@ -28,12 +28,12 @@ namespace UnityCommon
             converters.Add(typeof(T), converter);
         }
 
-        protected override LoadResourceRunner<T> CreateLoadRunner<T> (Resource<T> resource)
+        protected override LoadResourceRunner<T> CreateLoadResourceRunner<T> (Resource<T> resource)
         {
             return new LocalResourceLoader<T>(RootPath, resource, ResolveConverter<T>(), LogMessage);
         }
 
-        protected override LocateResourcesRunner<T> CreateLocateRunner<T> (string path)
+        protected override LocateResourcesRunner<T> CreateLocateResourcesRunner<T> (string path)
         {
             return new LocalResourceLocator<T>(RootPath, path, ResolveConverter<T>());
         }
