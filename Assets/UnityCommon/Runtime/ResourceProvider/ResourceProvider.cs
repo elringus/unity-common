@@ -176,7 +176,7 @@ namespace UnityCommon
             if (ResourceLocating(path))
             {
                 if (LocateRunners[path].ExpectedResourceType != typeof(T)) CancelResourceLocating(path);
-                else await (LocateRunners[path] as LocateResourcesRunner<T>);
+                else return await (LocateRunners[path] as LocateResourcesRunner<T>);
             }
 
             var locateRunner = CreateLocateRunner<T>(path);
