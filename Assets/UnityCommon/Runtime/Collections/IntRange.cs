@@ -6,10 +6,10 @@ namespace UnityCommon
     /// Both endpoints are considered to be included.
     /// </summary>
     [System.Serializable]
-    public struct IntRange
+    public readonly struct IntRange
     {
-        public int StartIndex;
-        public int EndIndex;
+        public readonly int StartIndex;
+        public readonly int EndIndex;
 
         public IntRange (int startIndex, int endIndex)
         {

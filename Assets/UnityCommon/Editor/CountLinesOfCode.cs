@@ -7,7 +7,7 @@ namespace UnityCommon
 {
     public class CountLinesOfCode : Editor
     {
-        private struct StatFile
+        private readonly struct StatFile
         {
             public readonly string Name;
             public readonly int LinesCount;
