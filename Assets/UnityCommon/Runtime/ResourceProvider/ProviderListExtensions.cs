@@ -127,6 +127,40 @@ namespace UnityCommon
         }
 
         /// <summary>
+        /// Locates all the folders at the provided path from all the providers.
+        /// When a folder is available in multiple providers, will only get the one from the higher-priority provider.
+        /// </summary>
+        public static IEnumerable<Folder> LocateFolders (this List<IResourceProvider> providers, string path)
+        {
+            var result = new List<Folder>();
+            foreach (var provider in providers)
+            {
+                var locatedFolders = provider.LocateFolders(path);
+                foreach (var locatedFolder in locatedFolders)
+                    if (!result.Any(r => r.Path == locatedFolder.Path))
+                        result.Add(locatedFolder);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Locates all the folders at the provided path from all the providers.
+        /// When a folder is available in multiple providers, will only get the one from the higher-priority provider.
+        /// </summary>
+        public static async Task<IEnumerable<Folder>> LocateFoldersAsync (this List<IResourceProvider> providers, string path)
+        {
+            var result = new List<Folder>();
+            foreach (var provider in providers)
+            {
+                var locatedFolders = await provider.LocateFoldersAsync(path);
+                foreach (var locatedFolder in locatedFolders)
+                    if (!result.Any(r => r.Path == locatedFolder.Path))
+                        result.Add(locatedFolder);
+            }
+            return result;
+        }
+
+        /// <summary>
         /// Checks whether a resource at the provided path exists in any of the providers.
         /// </summary>
         public static bool ResourceExists<T> (this List<IResourceProvider> providers, string path) where T : UnityEngine.Object
