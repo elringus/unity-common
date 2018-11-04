@@ -89,5 +89,15 @@ namespace UnityCommon
         {
             return ProjectResourceLocator<T>.LocateProjectResources(path, projectResources);
         }
+
+        protected override IEnumerable<Folder> LocateFoldersBlocking (string path)
+        {
+            return ProjectFolderLocator.LocateProjectFolders(path, projectResources);
+        }
+
+        protected override LocateFoldersRunner CreateLocateFoldersRunner (string path)
+        {
+            return new ProjectFolderLocator(path, projectResources);
+        }
     }
 }

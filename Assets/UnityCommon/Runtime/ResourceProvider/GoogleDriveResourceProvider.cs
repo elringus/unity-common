@@ -131,28 +131,33 @@ namespace UnityCommon
             return await base.LoadResourceAsync<T>(path);
         }
 
-        protected override void RunLoader<T> (LoadResourceRunner<T> loader)
+        protected override void RunResourceLoader<T> (LoadResourceRunner<T> loader)
         {
             if (ConcurrentRequestsLimit > 0 && RequestsCount > ConcurrentRequestsLimit)
-                requestQueue.Enqueue(() => loader.Run());
-            else loader.Run();
+                requestQueue.Enqueue(() => loader.Run().WrapAsync());
+            else base.RunResourceLoader(loader);
         }
 
-        protected override void RunLocator<T> (LocateResourcesRunner<T> locator)
+        protected override void RunResourcesLocator<T> (LocateResourcesRunner<T> locator)
         {
             if (ConcurrentRequestsLimit > 0 && RequestsCount > ConcurrentRequestsLimit)
-                requestQueue.Enqueue(() => locator.Run());
-            else locator.Run();
+                requestQueue.Enqueue(() => locator.Run().WrapAsync());
+            else base.RunResourcesLocator(locator);
         }
 
-        protected override LoadResourceRunner<T> CreateLoadRunner<T> (Resource<T> resource)
+        protected override LoadResourceRunner<T> CreateLoadResourceRunner<T> (Resource<T> resource)
         {
             return new GoogleDriveResourceLoader<T>(DriveRootPath, resource, ResolveConverter<T>(), LogMessage);
         }
 
-        protected override LocateResourcesRunner<T> CreateLocateRunner<T> (string path)
+        protected override LocateResourcesRunner<T> CreateLocateResourcesRunner<T> (string path)
         {
             return new GoogleDriveResourceLocator<T>(DriveRootPath, path, ResolveConverter<T>());
+        }
+
+        protected override LocateFoldersRunner CreateLocateFoldersRunner (string path)
+        {
+            return new GoogleDriveFolderLocator(DriveRootPath, path);
         }
 
         protected override Task UnloadResourceAsync (Resource resource)
@@ -178,9 +183,10 @@ namespace UnityCommon
         }
 
         // TODO: Support blocking mode (?).
-        protected override Resource<T> LoadResourceBlocking<T> (string path) { throw new NotImplementedException(); }
-        protected override IEnumerable<Resource<T>> LocateResourcesBlocking<T> (string path) { throw new NotImplementedException(); }
-        protected override void UnloadResourceBlocking (Resource resource) { throw new NotImplementedException(); }
+        protected override Resource<T> LoadResourceBlocking<T> (string path) => throw new NotImplementedException();
+        protected override IEnumerable<Resource<T>> LocateResourcesBlocking<T> (string path) => throw new NotImplementedException();
+        protected override void UnloadResourceBlocking (Resource resource) => throw new NotImplementedException();
+        protected override IEnumerable<Folder> LocateFoldersBlocking (string path) => throw new NotImplementedException(); 
 
         private IRawConverter<T> ResolveConverter<T> ()
         {

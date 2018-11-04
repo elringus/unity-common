@@ -21,8 +21,8 @@ public class TestResourceProvider : MonoBehaviour
 
     private void Awake ()
     {
-        provider = InitializeProjectResourceProvider();
-        //provider = InitializeGoogleDriveResourceProvider(false);
+        //provider = InitializeProjectResourceProvider();
+        provider = InitializeGoogleDriveResourceProvider(false);
         //provider = InitializeLocalResourceProvider();
     }
 
@@ -104,18 +104,19 @@ public class TestResourceProvider : MonoBehaviour
 
     private async Task ResolveFoldersAsync ()
     {
-        //var resources = await provider.LoadResourcesAsync<Folder>(null);
+        text = "Starting resolving folders...";
+        await Task.Delay(TimeSpan.FromSeconds(1f));
 
-        //text = "completed";
+        var folders = await provider.LocateFoldersAsync(null);
 
-        //foreach (var folderResource in resources)
-        //{
-        //    text = folderResource.Object.Name;
-        //    await Task.Delay(TimeSpan.FromSeconds(1f));
-        //}
+        text = $"Finished resolving folders. Found {folders.Count()} folders.";
+        await Task.Delay(TimeSpan.FromSeconds(1f));
 
-        //foreach (var textResource in resources)
-        //    await provider.UnloadResourceAsync(textResource.Path);
+        foreach (var folder in folders)
+        {
+            text = folder.Name;
+            await Task.Delay(TimeSpan.FromSeconds(1f));
+        }
     }
 
     private async Task TestUnloadAsync ()

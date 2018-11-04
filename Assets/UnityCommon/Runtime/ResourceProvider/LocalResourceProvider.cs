@@ -44,6 +44,16 @@ namespace UnityCommon
             return Task.CompletedTask;
         }
 
+        protected override IEnumerable<Folder> LocateFoldersBlocking (string path)
+        {
+            return LocalFolderLocator.LocateFoldersAtPath(RootPath, path);
+        }
+
+        protected override LocateFoldersRunner CreateLocateFoldersRunner (string path)
+        {
+            return new LocalFolderLocator(RootPath, path);
+        }
+
         // TODO: Support blocking mode (?).
         protected override Resource<T> LoadResourceBlocking<T> (string path) { throw new NotImplementedException(); }
         protected override IEnumerable<Resource<T>> LocateResourcesBlocking<T> (string path) { throw new NotImplementedException(); }

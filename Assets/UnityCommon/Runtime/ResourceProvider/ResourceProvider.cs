@@ -159,7 +159,7 @@ namespace UnityCommon
 
         public virtual IEnumerable<Resource<T>> LocateResources<T> (string path) where T : UnityEngine.Object
         {
-            if (path == null) path = string.Empty;
+            if (path is null) path = string.Empty;
 
             // We're currently locating this resource in async mode; cancel and locate blocking.
             if (ResourceLocating<T>(path)) CancelResourceLocating<T>(path);
@@ -172,7 +172,7 @@ namespace UnityCommon
 
         public virtual async Task<IEnumerable<Resource<T>>> LocateResourcesAsync<T> (string path) where T : UnityEngine.Object
         {
-            if (path == null) path = string.Empty;
+            if (path is null) path = string.Empty;
 
             var locateKey = new Tuple<string, Type>(path, typeof(T));
 
@@ -192,6 +192,8 @@ namespace UnityCommon
 
         public IEnumerable<Folder> LocateFolders (string path)
         {
+            if (path is null) path = string.Empty;
+
             if (LocatedFolders.ContainsKey(path)) return LocatedFolders[path];
 
             // We're currently locating folders at this path in async mode; cancel and locate blocking.
@@ -205,6 +207,8 @@ namespace UnityCommon
 
         public async Task<IEnumerable<Folder>> LocateFoldersAsync (string path)
         {
+            if (path is null) path = string.Empty;
+
             if (LocatedFolders.ContainsKey(path)) return LocatedFolders[path];
 
             var locateKey = new Tuple<string, Type>(path, typeof(Folder));
@@ -234,9 +238,9 @@ namespace UnityCommon
         protected abstract void UnloadResourceBlocking (Resource resource);
         protected abstract Task UnloadResourceAsync (Resource resource);
 
-        protected virtual void RunResourceLoader<T> (LoadResourceRunner<T> loader) where T : UnityEngine.Object => loader.Run();
-        protected virtual void RunResourcesLocator<T> (LocateResourcesRunner<T> locator) where T : UnityEngine.Object => locator.Run();
-        protected virtual void RunFoldersLocator (LocateFoldersRunner locator) => locator.Run();
+        protected virtual void RunResourceLoader<T> (LoadResourceRunner<T> loader) where T : UnityEngine.Object => loader.Run().WrapAsync();
+        protected virtual void RunResourcesLocator<T> (LocateResourcesRunner<T> locator) where T : UnityEngine.Object => locator.Run().WrapAsync();
+        protected virtual void RunFoldersLocator (LocateFoldersRunner locator) => locator.Run().WrapAsync();
 
         protected virtual void CancelResourceLoading (string path)
         {

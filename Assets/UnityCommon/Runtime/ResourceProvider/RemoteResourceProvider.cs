@@ -44,6 +44,16 @@ namespace UnityCommon
             throw new NotImplementedException();
         }
 
+        public IEnumerable<Folder> LocateFolders (string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<Folder>> LocateFoldersAsync (string path)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<bool> ResourceExistsAsync<T> (string path) where T : UnityEngine.Object
         {
             throw new NotImplementedException();
