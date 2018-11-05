@@ -1,4 +1,5 @@
-﻿
+﻿using UnityEngine;
+
 namespace UnityCommon
 {
     /// <summary>
@@ -6,15 +7,18 @@ namespace UnityCommon
     /// Both endpoints are considered to be included.
     /// </summary>
     [System.Serializable]
-    public readonly struct IntRange
+    public struct IntRange
     {
-        public readonly int StartIndex;
-        public readonly int EndIndex;
+        public int StartIndex => startIndex;
+        public int EndIndex => endIndex;
+
+        [SerializeField] private int startIndex;
+        [SerializeField] private int endIndex;
 
         public IntRange (int startIndex, int endIndex)
         {
-            StartIndex = startIndex;
-            EndIndex = endIndex;
+            this.startIndex = startIndex;
+            this.endIndex = endIndex;
         }
 
         public bool Contains (int index)
