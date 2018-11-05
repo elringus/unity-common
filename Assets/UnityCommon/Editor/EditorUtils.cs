@@ -50,6 +50,13 @@ namespace UnityCommon
             serializedProperty.serializedObject.CopyFromSerializedProperty(new SerializedObject(targetObject).FindProperty(serializedProperty.name));
         }
 
+        public static SerializedProperty GetArrayElementAtIndexOrNull (this SerializedProperty serializedProperty, int index)
+        {
+            if (!serializedProperty.isArray) return null;
+            if (index < 0 || index >= serializedProperty.arraySize) return null;
+            return serializedProperty.GetArrayElementAtIndex(index);
+        }
+
         public static Texture2D SaveAsPng (this Texture2D texture, string path, TextureImporterType textureType = TextureImporterType.Default,
             TextureImporterCompression compression = TextureImporterCompression.Uncompressed, bool generateMipmaps = false, bool destroyInitialTextureObject = true)
         {
