@@ -20,14 +20,4 @@ namespace UnityCommon
             this.path = path;
         }
     }
-
-    public static class FolderExtensions
-    {
-        public static IEnumerable<Folder> FindAllAtPath (this IEnumerable<Folder> folders, string path)
-        {
-            if (string.IsNullOrEmpty(path) || path == "/")
-                return folders.Where(f => !f.Path.Contains("/") || string.IsNullOrEmpty(f.Path.GetBeforeLast("/")));
-            return folders.Where(f => f.Path.GetBeforeLast("/") == path || f.Path.GetBeforeLast("/") == $"/{path}");
-        }
-    }
 }

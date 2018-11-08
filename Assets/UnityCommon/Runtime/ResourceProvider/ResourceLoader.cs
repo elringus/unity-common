@@ -12,11 +12,15 @@ namespace UnityCommon
         public abstract bool IsLoadingAny { get; }
 
         protected List<IResourceProvider> Providers { get; }
+        protected VirtualResourceProvider VirtualProvider { get; }
         protected string Prefix { get; }
 
         public ResourceLoader (IList<IResourceProvider> providersList, string resourcePathPrefix = null)
         {
-            Providers = providersList.ToList();
+            Providers = new List<IResourceProvider>();
+            VirtualProvider = new VirtualResourceProvider();
+            Providers.Add(VirtualProvider);
+            Providers.AddRange(providersList);
             Prefix = resourcePathPrefix;
         }
 
@@ -38,31 +42,29 @@ namespace UnityCommon
         public override bool IsLoadingAny => loadCounter > 0;
 
         protected Dictionary<string, TResource> LoadedResources { get; }
-        protected Dictionary<string, TResource> PreloadedResources { get; }
 
         private int loadCounter;
 
-        public ResourceLoader (IList<IResourceProvider> providersList, string resourcePathPrefix = null, IDictionary<string, TResource> preloadedObjects = null)
+        public ResourceLoader (IList<IResourceProvider> providersList, string resourcePathPrefix = null, IDictionary<string, TResource> preloadedResources = null)
             : base(providersList, resourcePathPrefix)
         {
             LoadedResources = new Dictionary<string, TResource>();
-            PreloadedResources = new Dictionary<string, TResource>();
 
-            if (preloadedObjects != null)
-                foreach (var kv in preloadedObjects)
+            if (preloadedResources != null)
+                foreach (var kv in preloadedResources)
                     AddPreloadedResource(kv.Key, kv.Value);
         }
 
         public virtual void AddPreloadedResource (string path, TResource resourceObj, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
-            PreloadedResources[path] = resourceObj;
+            VirtualProvider.AddResource(path, resourceObj);
         }
 
         public virtual void RemovePreloadedResource (string path, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
-            PreloadedResources.Remove(path);
+            VirtualProvider.RemoveResource(path);
         }
 
         public virtual TResource Load (string path, bool isFullPath = false)
@@ -72,7 +74,7 @@ namespace UnityCommon
             IncrementLoadCounter();
             if (!isFullPath) path = BuildFullPath(path);
 
-            var resource = PreloadedResources.ContainsKey(path) ? new Resource<TResource>(path, PreloadedResources[path]) : Providers.LoadResource<TResource>(path);
+            var resource = Providers.LoadResource<TResource>(path);
             AddLoadedResource(resource);
 
             DecrementLoadCounter();
@@ -86,7 +88,7 @@ namespace UnityCommon
             IncrementLoadCounter();
             if (!isFullPath) path = BuildFullPath(path);
 
-            var resource = PreloadedResources.ContainsKey(path) ? new Resource<TResource>(path, PreloadedResources[path]) : await Providers.LoadResourceAsync<TResource>(path);
+            var resource = await Providers.LoadResourceAsync<TResource>(path);
             AddLoadedResource(resource);
 
             DecrementLoadCounter();

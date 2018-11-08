@@ -27,11 +27,7 @@ namespace UnityCommon
 
         public static List<Resource<TResource>> LocateProjectResources (string path, ProjectResources projectResources)
         {
-            path = path ?? string.Empty;
-
-            if (string.IsNullOrWhiteSpace(path))
-                return projectResources.ResourcePaths.Where(p => !p.Contains("/") || string.IsNullOrEmpty(p.GetBeforeLast("/"))).Select(p => new Resource<TResource>(p)).ToList();
-            return projectResources.ResourcePaths.Where(p => p.GetBeforeLast("/").Equals(path) || p.GetBeforeLast("/").Equals("/" + path)).Select(p => new Resource<TResource>(p)).ToList();
+            return projectResources.ResourcePaths.LocateResourcePathsAtFolder(path).Select(p => new Resource<TResource>(p)).ToList();
         }
     }
 }

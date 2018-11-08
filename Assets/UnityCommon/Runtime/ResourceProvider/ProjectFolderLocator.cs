@@ -27,14 +27,7 @@ namespace UnityCommon
 
         public static List<Folder> LocateProjectFolders (string path, ProjectResources projectResources)
         {
-            path = path ?? string.Empty;
-            if (path.StartsWithFast("/")) path = path.GetAfterFirst("/") ?? string.Empty;
-            if (!path.EndsWithFast("/")) path += "/";
-
-            return projectResources.ResourcePaths
-                .Where(p => p.StartsWithFast(path) && p.GetAfterFirst(path).Contains("/"))
-                .Select(p => new Folder(path + p.GetBetween(path, "/")))
-                .DistinctBy(f => f.Path).ToList();
+            return projectResources.ResourcePaths.LocateFolderPathsAtFolder(path).Select(p => new Folder(p)).ToList();
         }
     }
 }
