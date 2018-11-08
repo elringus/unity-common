@@ -24,20 +24,23 @@ namespace UnityCommon
         {
             await base.Run();
 
-            LocatedResources = new List<Resource<TResource>>();
+            LocatedResources = LocateResources(RootPath, ResourcesPath, converter);
+
+            HandleOnCompleted();
+        }
+
+        public static List<Resource<TResource>> LocateResources (string rootPath, string resourcesPath, IRawConverter<TResource> converter)
+        {
+            var locatedResources = new List<Resource<TResource>>();
 
             // 1. Resolving parent folder.
             var folderPath = Application.dataPath;
-            if (!string.IsNullOrEmpty(RootPath) && !string.IsNullOrEmpty(ResourcesPath))
-                folderPath += string.Concat('/', RootPath, '/', ResourcesPath);
-            else if (string.IsNullOrEmpty(RootPath)) folderPath += string.Concat('/', ResourcesPath);
-            else folderPath += string.Concat('/', RootPath);
+            if (!string.IsNullOrEmpty(rootPath) && !string.IsNullOrEmpty(resourcesPath))
+                folderPath += string.Concat('/', rootPath, '/', resourcesPath);
+            else if (string.IsNullOrEmpty(rootPath)) folderPath += string.Concat('/', resourcesPath);
+            else folderPath += string.Concat('/', rootPath);
             var parendFolder = new DirectoryInfo(folderPath);
-            if (!parendFolder.Exists)
-            {
-                HandleOnCompleted();
-                return;
-            }
+            if (!parendFolder.Exists) return locatedResources;
 
             // 2. Searching for the files in the folder.
             var results = new Dictionary<RawDataRepresentation, List<FileInfo>>();
@@ -53,13 +56,13 @@ namespace UnityCommon
                 foreach (var file in result.Value)
                 {
                     var fileName = string.IsNullOrEmpty(result.Key.Extension) ? file.Name : file.Name.GetBeforeLast(".");
-                    var filePath = string.IsNullOrEmpty(ResourcesPath) ? fileName : string.Concat(ResourcesPath, '/', fileName);
+                    var filePath = string.IsNullOrEmpty(resourcesPath) ? fileName : string.Concat(resourcesPath, '/', fileName);
                     var fileResource = new Resource<TResource>(filePath);
-                    LocatedResources.Add(fileResource);
+                    locatedResources.Add(fileResource);
                 }
             }
 
-            HandleOnCompleted();
+            return locatedResources;
         }
     }
 

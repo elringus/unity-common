@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -54,9 +56,43 @@ namespace UnityCommon
             return new LocalFolderLocator(RootPath, path);
         }
 
-        // TODO: Support blocking mode (?).
-        protected override Resource<T> LoadResourceBlocking<T> (string path) { throw new NotImplementedException(); }
-        protected override IEnumerable<Resource<T>> LocateResourcesBlocking<T> (string path) { throw new NotImplementedException(); }
+        protected override Resource<T> LoadResourceBlocking<T> (string path)
+        {
+            var resource = new Resource<T>(path);
+            var converter = ResolveConverter<T>();
+            var rawData = default(byte[]);
+            var startTime = Time.time;
+
+            var filePath = string.IsNullOrEmpty(RootPath) ? path : string.Concat(RootPath, '/', path);
+            filePath = string.Concat(Application.dataPath, "/", filePath);
+
+            foreach (var representation in converter.Representations)
+            {
+                var fullPath = string.Concat(filePath, representation.Extension);
+                if (!File.Exists(fullPath)) continue;
+
+                rawData = File.ReadAllBytes(filePath);
+                break;
+            }
+
+            if (rawData == null)
+            {
+                var usedExtensions = string.Join("/", converter.Representations.Select(r => r.Extension));
+                Debug.LogError($"Failed to load `{filePath}({usedExtensions})` resource using local file system: File not found.");
+            }
+            else
+            {
+                resource.Object = converter.Convert(rawData);
+                LogMessage($"Resource `{resource.Path}` loaded {StringUtils.FormatFileSize(rawData.Length)} over {Time.time - startTime:0.###} seconds.");
+            }
+
+            return resource;
+        }
+
+        protected override IEnumerable<Resource<T>> LocateResourcesBlocking<T> (string path)
+        {
+            return LocalResourceLocator<T>.LocateResources(RootPath, path, ResolveConverter<T>());
+        }
 
         protected override void UnloadResourceBlocking (Resource resource)
         {
