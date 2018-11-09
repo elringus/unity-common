@@ -51,21 +51,16 @@ namespace UnityCommon
     }
 
     #if UNITY_EDITOR
-    public class ProjectResourcesPreprocessor :
-        #if UNITY_2018_1_OR_NEWER
-        UnityEditor.Build.IPreprocessBuildWithReport, UnityEditor.Build.IPostprocessBuildWithReport
-        #else
-        UnityEditor.Build.IPreprocessBuild, UnityEditor.Build.IPostprocessBuild
-        #endif
+    public class ProjectResourcesPreprocessor : UnityEditor.Build.IPreprocessBuildWithReport, UnityEditor.Build.IPostprocessBuildWithReport
     {
-        public int callbackOrder => 0;
+        public int callbackOrder => 100;
 
-        protected string DirectoryPath => "Assets/Resources"; 
+        protected string DirectoryPath => "Assets/TEMP_UNITY_COMMON/Resources"; 
         protected string AssetPath => DirectoryPath + $"/{nameof(ProjectResources)}.asset";
 
         private bool folderCreated;
 
-        public void OnPreprocessBuild (UnityEditor.BuildTarget target, string path)
+        public void OnPreprocessBuild (UnityEditor.Build.Reporting.BuildReport report)
         {
             var asset = ScriptableObject.CreateInstance<ProjectResources>();
             asset.LocateAllResources();
@@ -81,24 +76,12 @@ namespace UnityCommon
             UnityEditor.AssetDatabase.SaveAssets();
         }
 
-        public void OnPostprocessBuild (UnityEditor.BuildTarget target, string path)
+        public void OnPostprocessBuild (UnityEditor.Build.Reporting.BuildReport report)
         {
             UnityEditor.AssetDatabase.DeleteAsset(AssetPath);
             if (folderCreated) UnityEditor.AssetDatabase.DeleteAsset(DirectoryPath);
             UnityEditor.AssetDatabase.SaveAssets();
         }
-
-        #if UNITY_2018_1_OR_NEWER
-        public void OnPreprocessBuild (UnityEditor.Build.Reporting.BuildReport report)
-        {
-            OnPreprocessBuild(report.summary.platform, report.summary.outputPath);
-        }
-
-        public void OnPostprocessBuild (UnityEditor.Build.Reporting.BuildReport report)
-        {
-            OnPostprocessBuild(report.summary.platform, report.summary.outputPath);
-        }
-        #endif
     }
     #endif
 }
