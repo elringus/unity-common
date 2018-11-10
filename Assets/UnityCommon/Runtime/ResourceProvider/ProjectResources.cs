@@ -49,39 +49,4 @@ namespace UnityCommon
         }
         #endif
     }
-
-    #if UNITY_EDITOR
-    public class ProjectResourcesPreprocessor : UnityEditor.Build.IPreprocessBuildWithReport, UnityEditor.Build.IPostprocessBuildWithReport
-    {
-        public int callbackOrder => 100;
-
-        protected string DirectoryPath => "Assets/TEMP_UNITY_COMMON/Resources"; 
-        protected string AssetPath => DirectoryPath + $"/{nameof(ProjectResources)}.asset";
-
-        private bool folderCreated;
-
-        public void OnPreprocessBuild (UnityEditor.Build.Reporting.BuildReport report)
-        {
-            var asset = ScriptableObject.CreateInstance<ProjectResources>();
-            asset.LocateAllResources();
-
-            if (!System.IO.Directory.Exists(DirectoryPath))
-            {
-                System.IO.Directory.CreateDirectory(DirectoryPath);
-                folderCreated = true;
-            }
-            else folderCreated = false;
-
-            UnityEditor.AssetDatabase.CreateAsset(asset, AssetPath);
-            UnityEditor.AssetDatabase.SaveAssets();
-        }
-
-        public void OnPostprocessBuild (UnityEditor.Build.Reporting.BuildReport report)
-        {
-            UnityEditor.AssetDatabase.DeleteAsset(AssetPath);
-            if (folderCreated) UnityEditor.AssetDatabase.DeleteAsset(DirectoryPath);
-            UnityEditor.AssetDatabase.SaveAssets();
-        }
-    }
-    #endif
 }
