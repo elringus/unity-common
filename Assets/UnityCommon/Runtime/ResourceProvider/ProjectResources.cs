@@ -24,28 +24,24 @@ namespace UnityCommon
         {
             #if UNITY_EDITOR
             resourcePaths.Clear();
-            WalkDirectoryTree(new System.IO.DirectoryInfo(Application.dataPath), resourcePaths, false);
+            var dataDir = new System.IO.DirectoryInfo(Application.dataPath);
+            var resourcesDirs = dataDir.GetDirectories("*Resources", System.IO.SearchOption.AllDirectories)
+                .Where(d => d.FullName.EndsWithFast($"{System.IO.Path.DirectorySeparatorChar}Resources")).ToList();
+            foreach (var dir in resourcesDirs)
+                WalkResourcesDirectory(dir, resourcePaths);
             #endif
         }
 
         #if UNITY_EDITOR
-        private static void WalkDirectoryTree (System.IO.DirectoryInfo directory, List<string> outPaths, bool isInsideResources)
+        private static void WalkResourcesDirectory (System.IO.DirectoryInfo directory, List<string> outPaths)
         {
+            var paths = directory.GetFiles().Where(p => !p.FullName.EndsWithFast(".meta"))
+                .Select(p => p.FullName.Replace("\\", "/").GetAfterFirst("/Resources/").GetBeforeLast("."));
+            outPaths.AddRange(paths);
+
             var subDirs = directory.GetDirectories();
             foreach (var dirInfo in subDirs)
-            {
-                if (!isInsideResources && dirInfo.Name != "Resources") continue;
-                if (!isInsideResources && dirInfo.Name == "Resources") WalkDirectoryTree(dirInfo, outPaths, true);
-
-                if (isInsideResources)
-                {
-                    var paths = dirInfo.GetFiles().Where(p => !p.FullName.EndsWithFast(".meta"))
-                        .Select(p => p.FullName.Replace("\\", "/").GetAfterFirst("/Resources/").GetBeforeLast("."));
-                    outPaths.AddRange(paths);
-
-                    WalkDirectoryTree(dirInfo, outPaths, true);
-                }
-            }
+                WalkResourcesDirectory(dirInfo, outPaths);
         }
         #endif
     }

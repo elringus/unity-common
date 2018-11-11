@@ -13,7 +13,7 @@ namespace UnityCommon
             parentFolderPath = parentFolderPath ?? string.Empty;
             if (string.IsNullOrWhiteSpace(parentFolderPath))
                 return source.Where(p => !p.Contains("/") || string.IsNullOrEmpty(p.GetBeforeLast("/")));
-            return source.Where(p => p.GetBeforeLast("/").Equals(parentFolderPath) || p.GetBeforeLast("/").Equals("/" + parentFolderPath));
+            return source.Where(p => p.Contains("/") && (p.GetBeforeLast("/").Equals(parentFolderPath) || p.GetBeforeLast("/").Equals("/" + parentFolderPath)));
         }
 
         /// <summary>
