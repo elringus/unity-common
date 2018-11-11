@@ -20,9 +20,7 @@ namespace UnityCommon
         /// </summary>
         public static string Combine (params string[] paths)
         {
-            var result = Path.Combine(paths);
-            result.Replace("\\", "/");
-            return result;
+            return Path.Combine(paths)?.Replace("\\", "/");
         }
     }
 }
