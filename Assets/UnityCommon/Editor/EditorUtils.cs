@@ -1,23 +1,31 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace UnityCommon
 {
     public static class EditorUtils
     {
-        public static T LoadOrCreateSerializableAsset<T> (string assetPath) where T : ScriptableObject
+        public static ScriptableObject LoadOrCreateSerializableAsset (string assetPath, Type assetType)
         {
-            var existingAsset = AssetDatabase.LoadAssetAtPath<T>(assetPath);
+            var existingAsset = AssetDatabase.LoadAssetAtPath(assetPath, assetType) as ScriptableObject;
             if (existingAsset) return existingAsset;
 
-            var asset = ScriptableObject.CreateInstance<T>();
+            var asset = ScriptableObject.CreateInstance(assetType);
             CreateFolderAsset(Path.GetDirectoryName(assetPath));
             AssetDatabase.CreateAsset(asset, assetPath);
             AssetDatabase.SaveAssets();
             return asset;
+        }
+
+        public static T LoadOrCreateSerializableAsset<T> (string assetPath) where T : ScriptableObject
+        {
+            var assetType = typeof(T);
+            return LoadOrCreateSerializableAsset(assetPath, assetType) as T;
         }
 
         public static T CreateOrReplaceAsset<T> (this Object asset, string path) where T : Object
