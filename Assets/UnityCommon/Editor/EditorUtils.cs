@@ -101,12 +101,6 @@ namespace UnityCommon
             EditorGUI.showMixedValue = false;
         }
 
-        public static string AbsoluteToAssetPath (string absolutePath)
-        {
-            absolutePath = absolutePath.Replace("\\", "/");
-            return "Assets" + absolutePath.Replace(Application.dataPath, string.Empty);
-        }
-
         /// <summary>
         /// Creates a new folder in the project's `Assets` directory. 
         /// Path should be relative to the project (starting with `Assets/`).
