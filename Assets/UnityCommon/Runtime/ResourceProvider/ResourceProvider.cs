@@ -22,8 +22,12 @@ namespace UnityCommon
         protected Dictionary<string, ResourceRunner> LoadRunners = new Dictionary<string, ResourceRunner>();
         protected Dictionary<Tuple<string, Type>, ResourceRunner> LocateRunners = new Dictionary<Tuple<string, Type>, ResourceRunner>();
 
+        public abstract bool SupportsType<T> () where T : UnityEngine.Object;
+
         public virtual Resource<T> LoadResource<T> (string path) where T : UnityEngine.Object
         {
+            if (!SupportsType<T>()) return null;
+
             // We're currently loading this resource in async mode; cancel and load blocking.
             if (ResourceLoading(path)) UnloadResource(path);
 
@@ -41,6 +45,8 @@ namespace UnityCommon
 
         public virtual async Task<Resource<T>> LoadResourceAsync<T> (string path) where T : UnityEngine.Object
         {
+            if (!SupportsType<T>()) return null;
+
             if (ResourceLoading(path))
             {
                 if (LoadRunners[path].ExpectedResourceType != typeof(T)) await UnloadResourceAsync(path);
@@ -67,12 +73,16 @@ namespace UnityCommon
 
         public virtual IEnumerable<Resource<T>> LoadResources<T> (string path) where T : UnityEngine.Object
         {
+            if (!SupportsType<T>()) return null;
+
             var loactedResources = LocateResources<T>(path);
             return LoadLocatedResources(loactedResources);
         }
 
         public virtual async Task<IEnumerable<Resource<T>>> LoadResourcesAsync<T> (string path) where T : UnityEngine.Object
         {
+            if (!SupportsType<T>()) return null;
+
             var loactedResources = await LocateResourcesAsync<T>(path);
             return await LoadLocatedResourcesAsync(loactedResources);
         }
@@ -143,6 +153,7 @@ namespace UnityCommon
 
         public virtual bool ResourceExists<T> (string path) where T : UnityEngine.Object
         {
+            if (!SupportsType<T>()) return false;
             if (ResourceLoaded<T>(path)) return true;
             var folderPath = path.Contains("/") ? path.GetBeforeLast("/") : string.Empty;
             var locatedResources = LocateResources<T>(folderPath);
@@ -151,6 +162,7 @@ namespace UnityCommon
 
         public virtual async Task<bool> ResourceExistsAsync<T> (string path) where T : UnityEngine.Object
         {
+            if (!SupportsType<T>()) return false;
             if (ResourceLoaded<T>(path)) return true;
             var folderPath = path.Contains("/") ? path.GetBeforeLast("/") : string.Empty;
             var locatedResources = await LocateResourcesAsync<T>(folderPath);
@@ -159,6 +171,8 @@ namespace UnityCommon
 
         public virtual IEnumerable<Resource<T>> LocateResources<T> (string path) where T : UnityEngine.Object
         {
+            if (!SupportsType<T>()) return null;
+
             if (path is null) path = string.Empty;
 
             // We're currently locating this resource in async mode; cancel and locate blocking.
@@ -172,6 +186,8 @@ namespace UnityCommon
 
         public virtual async Task<IEnumerable<Resource<T>>> LocateResourcesAsync<T> (string path) where T : UnityEngine.Object
         {
+            if (!SupportsType<T>()) return null;
+
             if (path is null) path = string.Empty;
 
             var locateKey = new Tuple<string, Type>(path, typeof(T));

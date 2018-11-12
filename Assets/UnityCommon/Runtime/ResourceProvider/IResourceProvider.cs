@@ -28,6 +28,11 @@ namespace UnityCommon
         float LoadProgress { get; }
 
         /// <summary>
+        /// Whether the provider can work with resource objects of the provided type.
+        /// </summary>
+        /// <typeparam name="T">Type of the resource object.</typeparam>
+        bool SupportsType<T> () where T : UnityEngine.Object;
+        /// <summary>
         /// Loads resource synchronously (blocking the calling thread).
         /// </summary>
         /// <typeparam name="T">Type of the resource to load.</typeparam>

@@ -27,6 +27,8 @@ namespace UnityCommon
             FolderPaths = new HashSet<string>();
         }
 
+        public bool SupportsType<T> () where T : UnityEngine.Object => true;
+
         public void AddResource (string path, UnityEngine.Object obj)
         {
             Resources[path] = new Resource(path, obj);

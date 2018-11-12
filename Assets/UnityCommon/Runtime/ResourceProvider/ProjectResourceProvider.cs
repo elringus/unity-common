@@ -42,6 +42,8 @@ namespace UnityCommon
             projectResources = ProjectResources.Get();
         }
 
+        public override bool SupportsType<T> () => true;
+
         public void AddRedirector<TSource, TRedirect> (IConverter<TRedirect, TSource> redirectToSourceConverter)
         {
             var sourceType = typeof(TSource);

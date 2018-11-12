@@ -89,6 +89,8 @@ namespace UnityCommon
             if (CachingPolicy == CachingPolicyType.Smart) smartCachingScanPending = true;
         }
 
+        public override bool SupportsType<T> () => converters.ContainsKey(typeof(T));
+
         /// <summary>
         /// Adds a resource type converter.
         /// </summary>
