@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine;
 
 namespace UnityCommon
 {
@@ -10,8 +9,31 @@ namespace UnityCommon
         /// </summary>
         public static bool LEquals (this string content, string comparedString)
         {
-            Debug.Assert(content != null);
             return content.Equals(comparedString, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Performs <see cref="string.Equals(string, string, StringComparison)"/> with <see cref="StringComparison.Ordinal"/>.
+        /// </summary>
+        public static bool EqualsFast (this string content, string comparedString)
+        {
+            return content.Equals(comparedString, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Performs <see cref="string.EndsWith(string, StringComparison)"/> with <see cref="StringComparison.Ordinal"/>.
+        /// </summary>
+        public static bool EndsWithFast (this string content, string match)
+        {
+            return content.EndsWith(match, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Performs <see cref="string.StartsWith(string, StringComparison)"/> with <see cref="StringComparison.Ordinal"/>.
+        /// </summary>
+        public static bool StartsWithFast (this string content, string match)
+        {
+            return content.StartsWith(match, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -22,7 +44,7 @@ namespace UnityCommon
         /// <param name="startIndex">Start index of the subset.</param>
         /// <param name="endIndex">End index of the subset.</param>
         /// <returns>The extracted subset string or <see cref="null"/> if failed.</returns>
-        public static string TrySubset(string source, int startIndex, int endIndex)
+        public static string TrySubset (string source, int startIndex, int endIndex)
         {
             if (string.IsNullOrWhiteSpace(source)) return null;
             if (startIndex < 0 || startIndex >= source.Length) return null;
@@ -34,48 +56,10 @@ namespace UnityCommon
         }
 
         /// <summary>
-        /// More performant version of string.EndsWith method.
-        /// https://docs.unity3d.com/Manual/BestPracticeUnderstandingPerformanceInUnity5.html
-        /// </summary>
-        public static bool EndsWithFast (this string content, string match)
-        {
-            int ap = content.Length - 1;
-            int bp = match.Length - 1;
-
-            while (ap >= 0 && bp >= 0 && content[ap] == match[bp])
-            {
-                ap--;
-                bp--;
-            }
-
-            return (bp < 0 && content.Length >= match.Length) || (ap < 0 && match.Length >= content.Length);
-        }
-
-        /// <summary>
-        /// More performant version of string.StartsWith method.
-        /// https://docs.unity3d.com/Manual/BestPracticeUnderstandingPerformanceInUnity5.html
-        /// </summary>
-        public static bool StartsWithFast (this string content, string match)
-        {
-            int aLen = content.Length;
-            int bLen = match.Length;
-            int ap = 0, bp = 0;
-
-            while (ap < aLen && bp < bLen && content[ap] == match[bp])
-            {
-                ap++;
-                bp++;
-            }
-
-            return (bp == bLen && aLen >= bLen) || (ap == aLen && bLen >= aLen);
-        }
-
-        /// <summary>
         /// Attempts to extract content between the specified matches (on first occurence).
         /// </summary>
         public static string GetBetween (this string content, string startMatchString, string endMatchString)
         {
-            Debug.Assert(content != null);
             if (content.Contains(startMatchString) && content.Contains(endMatchString))
             {
                 var startIndex = content.IndexOf(startMatchString) + startMatchString.Length;
@@ -90,7 +74,6 @@ namespace UnityCommon
         /// </summary>
         public static string GetBefore (this string content, string matchString)
         {
-            Debug.Assert(content != null);
             if (content.Contains(matchString))
             {
                 var endIndex = content.IndexOf(matchString);
@@ -104,7 +87,6 @@ namespace UnityCommon
         /// </summary>
         public static string GetBeforeLast (this string content, string matchString)
         {
-            Debug.Assert(content != null);
             if (content.Contains(matchString))
             {
                 var endIndex = content.LastIndexOf(matchString);
@@ -118,7 +100,6 @@ namespace UnityCommon
         /// </summary>
         public static string GetAfter (this string content, string matchString)
         {
-            Debug.Assert(content != null);
             if (content.Contains(matchString))
             {
                 var startIndex = content.LastIndexOf(matchString) + matchString.Length;
@@ -133,7 +114,6 @@ namespace UnityCommon
         /// </summary>
         public static string GetAfterFirst (this string content, string matchString)
         {
-            Debug.Assert(content != null);
             if (content.Contains(matchString))
             {
                 var startIndex = content.IndexOf(matchString) + matchString.Length;
