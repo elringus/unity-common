@@ -24,6 +24,19 @@ namespace UnityCommon
             Prefix = resourcePathPrefix;
         }
 
+        /// <summary>
+        /// Given a local path to the resource, builds full path using predefined <see cref="Prefix"/>.
+        /// </summary>
+        public virtual string BuildFullPath (string path)
+        {
+            if (!string.IsNullOrWhiteSpace(Prefix))
+            {
+                if (!string.IsNullOrWhiteSpace(path)) return $"{Prefix}/{path}";
+                else return Prefix;
+            }
+            else return path;
+        }
+
         public abstract void Preload (string path, bool isFullPath = false);
         public abstract Task PreloadAsync (string path, bool isFullPath = false);
         public abstract bool IsLoadedByProvider (string path, bool isFullPath = false);
@@ -217,16 +230,6 @@ namespace UnityCommon
             if (!isFullPath) path = BuildFullPath(path);
             if (!IsLoaded(path, true)) return default;
             return LoadedResources[path];
-        }
-
-        protected virtual string BuildFullPath (string path)
-        {
-            if (!string.IsNullOrWhiteSpace(Prefix))
-            {
-                if (!string.IsNullOrWhiteSpace(path)) return $"{Prefix}/{path}";
-                else return Prefix;
-            }
-            else return path;
         }
 
         protected virtual void AddLoadedResources (IEnumerable<Resource<TResource>> resources)
