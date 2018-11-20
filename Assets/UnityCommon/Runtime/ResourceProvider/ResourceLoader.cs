@@ -10,10 +10,10 @@ namespace UnityCommon
     public abstract class ResourceLoader
     {
         public abstract bool IsLoadingAny { get; }
+        public string PathPrefix { get; }
 
         protected List<IResourceProvider> Providers { get; }
         protected VirtualResourceProvider VirtualProvider { get; }
-        protected string Prefix { get; }
 
         public ResourceLoader (IList<IResourceProvider> providersList, string resourcePathPrefix = null)
         {
@@ -21,18 +21,18 @@ namespace UnityCommon
             VirtualProvider = new VirtualResourceProvider();
             Providers.Add(VirtualProvider);
             Providers.AddRange(providersList);
-            Prefix = resourcePathPrefix;
+            PathPrefix = resourcePathPrefix;
         }
 
         /// <summary>
-        /// Given a local path to the resource, builds full path using predefined <see cref="Prefix"/>.
+        /// Given a local path to the resource, builds full path using predefined <see cref="PathPrefix"/>.
         /// </summary>
         public virtual string BuildFullPath (string path)
         {
-            if (!string.IsNullOrWhiteSpace(Prefix))
+            if (!string.IsNullOrWhiteSpace(PathPrefix))
             {
-                if (!string.IsNullOrWhiteSpace(path)) return $"{Prefix}/{path}";
-                else return Prefix;
+                if (!string.IsNullOrWhiteSpace(path)) return $"{PathPrefix}/{path}";
+                else return PathPrefix;
             }
             else return path;
         }
