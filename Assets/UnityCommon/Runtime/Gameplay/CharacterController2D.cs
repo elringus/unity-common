@@ -1,10 +1,11 @@
 ﻿//#define DEBUG_CC2D_RAYS
 
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
 namespace UnityCommon
 {
-    using System;
-    using System.Collections.Generic;
-    using UnityEngine;
 
     public class CharacterCollisionState2D
     {
@@ -13,10 +14,7 @@ namespace UnityCommon
         public bool MovingDownSlope;
         public float SlopeAngle;
 
-        public bool HasCollision ()
-        {
-            return Below || Right || Left || Above;
-        }
+        public bool HasCollision () => Below || Right || Left || Above;
 
         public void Reset ()
         {
@@ -31,14 +29,12 @@ namespace UnityCommon
         }
     }
 
-    [RequireComponent(typeof(BoxCollider2D))]
+    [RequireComponent(typeof(BoxCollider2D)), DisallowMultipleComponent]
     public class CharacterController2D : MonoBehaviour
     {
         public enum MoveDirection2D { Idle, Left, Right }
 
         private struct CharacterRaycastOrigins { public Vector3 TopLeft, BottomRight, BottomLeft; }
-
-        #region Events, properties and fields
 
         private const float SKIN_WIDTH_FUDGE = 0.001f;
 
@@ -59,32 +55,25 @@ namespace UnityCommon
         /// </summary>
         public float SkinWidth
         {
-            get { return _skinWidth; }
+            get { return skinWidth; }
             set
             {
-                _skinWidth = value;
+                skinWidth = value;
                 RecalculateDistanceBetweenRays();
             }
         }
-        public bool IsMoving { get { return Velocity.sqrMagnitude > 1f; } }
-        public bool IsGrounded { get { return collisionState.Below; } }
-        public Vector3 Velocity { get { return velocity; } }
-        public MoveDirection2D MoveDirection
-        {
-            get
-            {
-                return velocity.x > 0 ? MoveDirection2D.Right :
-velocity.x < 0 ? MoveDirection2D.Left : MoveDirection2D.Idle;
-            }
-        }
+        public bool IsMoving => Velocity.sqrMagnitude > 1f;
+        public bool IsGrounded => collisionState.Below;
+        public Vector3 Velocity => velocity;
+        public MoveDirection2D MoveDirection => velocity.x > 0 ? MoveDirection2D.Right : velocity.x < 0 ? MoveDirection2D.Left : MoveDirection2D.Idle;
 
         [Header("Collision")]
         [Tooltip("Mask with all layers that the player should interact with.")]
-        public LayerMask PlatformMask = 0;
+        public LayerMask PlatformMask = ~0;
         [Tooltip("Mask with all layers that should act as one-way platforms.")]
         public LayerMask OneWayPlatformMask = 0;
         [Tooltip("Mask with all layers that trigger events should fire when intersected.")]
-        public LayerMask TriggerMask = 0;
+        public LayerMask TriggerMask = ~0;
         [Range(2, 20)]
         public int TotalHorizontalRays = 8;
         [Range(2, 20)]
@@ -116,7 +105,7 @@ velocity.x < 0 ? MoveDirection2D.Left : MoveDirection2D.Idle;
         private Vector3 inputVelocity;
         private bool ignoreOneWayPlatformsThisFrame;
         private float normalizedHorizontalSpeed;
-        private float _skinWidth = 0.02f;
+        private float skinWidth = 0.02f;
         /// <summary>
         /// This is used to calculate the downward ray that is cast to check for slopes. We use the somewhat arbitrary value 75 degrees
         /// to calculate the length of the ray that checks for slopes.
@@ -146,8 +135,6 @@ velocity.x < 0 ? MoveDirection2D.Left : MoveDirection2D.Idle;
         private MoveDirection2D moveDirectionLastFrame;
         private bool wasMovingLastFrame;
 
-        #endregion
-
         #region Monobehaviour
 
         private void Awake ()
@@ -160,7 +147,7 @@ velocity.x < 0 ? MoveDirection2D.Left : MoveDirection2D.Idle;
             boxCollider = GetComponent<BoxCollider2D>();
 
             // Here, we trigger our properties that have setters with bodies.
-            SkinWidth = _skinWidth;
+            SkinWidth = skinWidth;
 
             // We want to set our CC2D to ignore all collision layers except what is in our triggerMask.
             for (var i = 0; i < 32; i++)
@@ -181,19 +168,19 @@ velocity.x < 0 ? MoveDirection2D.Left : MoveDirection2D.Idle;
 
         private void OnTriggerEnter2D (Collider2D col)
         {
-            OnTriggerEnter.SafeInvoke(col);
+            OnTriggerEnter?.Invoke(col);
         }
 
 
         private void OnTriggerStay2D (Collider2D col)
         {
-            OnTriggerStay.SafeInvoke(col);
+            OnTriggerStay?.Invoke(col);
         }
 
 
         private void OnTriggerExit2D (Collider2D col)
         {
-            OnTriggerExit.SafeInvoke(col);
+            OnTriggerExit?.Invoke(col);
         }
 
         #endregion
@@ -274,11 +261,11 @@ velocity.x < 0 ? MoveDirection2D.Left : MoveDirection2D.Idle;
         {
             // figure out the distance between our rays in both directions
             // horizontal
-            var colliderUseableHeight = boxCollider.size.y * Mathf.Abs(transform.localScale.y) - (2f * _skinWidth);
+            var colliderUseableHeight = boxCollider.size.y * Mathf.Abs(transform.localScale.y) - (2f * skinWidth);
             verticalDistanceBetweenRays = colliderUseableHeight / (TotalHorizontalRays - 1);
 
             // vertical
-            var colliderUseableWidth = boxCollider.size.x * Mathf.Abs(transform.localScale.x) - (2f * _skinWidth);
+            var colliderUseableWidth = boxCollider.size.x * Mathf.Abs(transform.localScale.x) - (2f * skinWidth);
             horizontalDistanceBetweenRays = colliderUseableWidth / (TotalVerticalRays - 1);
         }
 
@@ -296,7 +283,7 @@ velocity.x < 0 ? MoveDirection2D.Left : MoveDirection2D.Idle;
         {
             // our raycasts need to be fired from the bounds inset by the skinWidth
             var modifiedBounds = boxCollider.bounds;
-            modifiedBounds.Expand(-2f * _skinWidth);
+            modifiedBounds.Expand(-2f * skinWidth);
 
             raycastOrigins.TopLeft = new Vector2(modifiedBounds.min.x, modifiedBounds.max.y);
             raycastOrigins.BottomRight = new Vector2(modifiedBounds.max.x, modifiedBounds.min.y);
@@ -313,7 +300,7 @@ velocity.x < 0 ? MoveDirection2D.Left : MoveDirection2D.Idle;
         private void MoveHorizontally (ref Vector3 deltaMovement)
         {
             var isGoingRight = deltaMovement.x > 0;
-            var rayDistance = Mathf.Abs(deltaMovement.x) + _skinWidth;
+            var rayDistance = Mathf.Abs(deltaMovement.x) + skinWidth;
             var rayDirection = isGoingRight ? Vector2.right : -Vector2.right;
             var initialRayOrigin = isGoingRight ? raycastOrigins.BottomRight : raycastOrigins.BottomLeft;
 
@@ -327,8 +314,7 @@ velocity.x < 0 ? MoveDirection2D.Left : MoveDirection2D.Idle;
                 // walk up sloped oneWayPlatforms
                 if (i == 0 && collisionState.WasGroundedLastFrame)
                     raycastHit = Physics2D.Raycast(ray, rayDirection, rayDistance, PlatformMask);
-                else
-                    raycastHit = Physics2D.Raycast(ray, rayDirection, rayDistance, PlatformMask & ~OneWayPlatformMask);
+                else raycastHit = Physics2D.Raycast(ray, rayDirection, rayDistance, PlatformMask & ~OneWayPlatformMask);
 
                 if (raycastHit)
                 {
@@ -346,12 +332,12 @@ velocity.x < 0 ? MoveDirection2D.Left : MoveDirection2D.Idle;
                     // remember to remove the skinWidth from our deltaMovement
                     if (isGoingRight)
                     {
-                        deltaMovement.x -= _skinWidth;
+                        deltaMovement.x -= skinWidth;
                         collisionState.Right = true;
                     }
                     else
                     {
-                        deltaMovement.x += _skinWidth;
+                        deltaMovement.x += skinWidth;
                         collisionState.Left = true;
                     }
 
@@ -359,7 +345,7 @@ velocity.x < 0 ? MoveDirection2D.Left : MoveDirection2D.Idle;
 
                     // we add a small fudge factor for the float operations here. if our rayDistance is smaller
                     // than the width + fudge bail out because we have a direct impact
-                    if (rayDistance < _skinWidth + SKIN_WIDTH_FUDGE)
+                    if (rayDistance < skinWidth + SKIN_WIDTH_FUDGE)
                         break;
                 }
             }
@@ -408,9 +394,9 @@ velocity.x < 0 ? MoveDirection2D.Left : MoveDirection2D.Idle;
                         // we crossed an edge when using Pythagoras calculation, so we set the actual delta movement to the ray hit location
                         deltaMovement = (Vector3)raycastHit.point - ray;
                         if (isGoingRight)
-                            deltaMovement.x -= _skinWidth;
+                            deltaMovement.x -= skinWidth;
                         else
-                            deltaMovement.x += _skinWidth;
+                            deltaMovement.x += skinWidth;
                     }
 
                     isGoingUpSlope = true;
@@ -429,7 +415,7 @@ velocity.x < 0 ? MoveDirection2D.Left : MoveDirection2D.Idle;
         private void MoveVertically (ref Vector3 deltaMovement)
         {
             var isGoingUp = deltaMovement.y > 0;
-            var rayDistance = Mathf.Abs(deltaMovement.y) + _skinWidth;
+            var rayDistance = Mathf.Abs(deltaMovement.y) + skinWidth;
             var rayDirection = isGoingUp ? Vector2.up : -Vector2.up;
             var initialRayOrigin = isGoingUp ? raycastOrigins.TopLeft : raycastOrigins.BottomLeft;
 
@@ -456,12 +442,12 @@ velocity.x < 0 ? MoveDirection2D.Left : MoveDirection2D.Idle;
                     // remember to remove the skinWidth from our deltaMovement
                     if (isGoingUp)
                     {
-                        deltaMovement.y -= _skinWidth;
+                        deltaMovement.y -= skinWidth;
                         collisionState.Above = true;
                     }
                     else
                     {
-                        deltaMovement.y += _skinWidth;
+                        deltaMovement.y += skinWidth;
                         collisionState.Below = true;
                     }
 
@@ -474,7 +460,7 @@ velocity.x < 0 ? MoveDirection2D.Left : MoveDirection2D.Idle;
 
                     // we add a small fudge factor for the float operations here. if our rayDistance is smaller
                     // than the width + fudge bail out because we have a direct impact
-                    if (rayDistance < _skinWidth + SKIN_WIDTH_FUDGE)
+                    if (rayDistance < skinWidth + SKIN_WIDTH_FUDGE)
                         break;
                 }
             }
@@ -534,7 +520,7 @@ velocity.x < 0 ? MoveDirection2D.Left : MoveDirection2D.Idle;
             if (IsGrounded && Input.GetButtonDown(JumpButtonName))
             {
                 inputVelocity.y = Mathf.Sqrt(2f * JumpHeight * -Gravity);
-                OnJumped.SafeInvoke();
+                OnJumped?.Invoke();
             }
 
             // Apply horizontal speed smoothing it. 
@@ -561,23 +547,23 @@ velocity.x < 0 ? MoveDirection2D.Left : MoveDirection2D.Idle;
         private void DetectLanding ()
         {
             if (IsGrounded && !wasGroundedLastFrame)
-                OnLanded.SafeInvoke();
+                OnLanded?.Invoke();
             wasGroundedLastFrame = IsGrounded;
         }
 
         private void DetectMoveDirection ()
         {
             if (moveDirectionLastFrame != MoveDirection)
-                OnMoveDirectionChanged.SafeInvoke(MoveDirection);
+                OnMoveDirectionChanged?.Invoke(MoveDirection);
             moveDirectionLastFrame = MoveDirection;
         }
 
         private void DetectMovement ()
         {
             if (!wasMovingLastFrame && IsMoving)
-                OnStartedMoving.SafeInvoke();
+                OnStartedMoving?.Invoke();
             if (wasMovingLastFrame && !IsMoving)
-                OnStoppedMoving.SafeInvoke();
+                OnStoppedMoving?.Invoke();
             wasMovingLastFrame = IsMoving;
         }
         #endregion
