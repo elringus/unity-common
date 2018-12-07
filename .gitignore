@@ -8,6 +8,7 @@
 /Assets/@Transient*
 /Assets/Resources*
 /Assets/ThirdParty*
+Assembly-CSharp.xml
 
 !/Assets/UnityCommon/Plugins/*.dll
 
