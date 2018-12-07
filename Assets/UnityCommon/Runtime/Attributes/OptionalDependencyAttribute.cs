@@ -5,7 +5,7 @@ using System.Diagnostics;
 /// Adds a define based on presence of specified type in the project.
 /// </summary>
 /// <remarks>
-/// Unity's conditional compilation utility (<see cref="https://github.com/Unity-Technologies/ConditionalCompilationUtility"/>)
+/// Unity's conditional compilation utility (<see href="https://github.com/Unity-Technologies/ConditionalCompilationUtility"/>)
 /// uses this attribute to manage the project defines.
 /// </remarks>
 [Conditional("UNITY_CCU"), AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]

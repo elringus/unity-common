@@ -183,6 +183,7 @@ namespace UnityCommon
         /// <summary>
         /// Unloads resource at the provided path from all the providers in the list.
         /// </summary>
+        /// <param name="providers">Providers list.</param>
         /// <param name="path">Path to the resource location.</param>
         public static void UnloadResource (this List<IResourceProvider> providers, string path)
         {
@@ -193,6 +194,7 @@ namespace UnityCommon
         /// <summary>
         /// Unloads resource at the provided path from all the providers in the list.
         /// </summary>
+        /// <param name="providers">Providers list.</param>
         /// <param name="path">Path to the resource location.</param>
         public static async Task UnloadResourceAsync (this List<IResourceProvider> providers, string path)
         {

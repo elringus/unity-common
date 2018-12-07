@@ -7,7 +7,7 @@ using UnityEngine;
 namespace UnityCommon
 {
     /// <summary>
-    /// Converts <see cref="byte[]"/> raw data of a .mp3 audio file to <see cref="AudioClip"/>.
+    /// Converts <see cref="T:byte[]"/> raw data of a .mp3 audio file to <see cref="AudioClip"/>.
     /// </summary>
     public class Mp3ToAudioClipConverter : IRawConverter<AudioClip>
     {

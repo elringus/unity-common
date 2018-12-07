@@ -12,7 +12,7 @@ namespace UnityCommon
     }
 
     /// <summary>
-    /// Implentation is able to convert <see cref="TSource"/> to <see cref="TResult"/>.
+    /// Implentation is able to convert <typeparamref name="TSource"/> to <typeparamref name="TResult"/>.
     /// </summary>
     public interface IConverter<TSource, TResult> : IConverter
     {

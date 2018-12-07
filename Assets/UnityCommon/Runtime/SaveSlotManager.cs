@@ -31,7 +31,7 @@ namespace UnityCommon
     }
 
     /// <summary>
-    /// Manages serializable <see cref="TData"/> instances (slots) using <see cref="System.IO"/>.
+    /// Manages serializable <typeparamref name="TData"/> instances (slots) using <see cref="System.IO"/>.
     /// </summary>
     public class SaveSlotManager<TData> : SaveSlotManager where TData : new()
     {
@@ -54,7 +54,7 @@ namespace UnityCommon
             if (!SaveSlotExists(slotId))
             {
                 Debug.LogError(string.Format("Slot '{0}' not found when loading '{1}' data.", slotId, typeof(TData)));
-                return default(TData);
+                return default;
             }
 
             var data = await DeserializeDataAsync(slotId);
@@ -64,7 +64,7 @@ namespace UnityCommon
         }
 
         /// <summary>
-        /// Same as <see cref="LoadAsync(string)"/>, but will create a new default <see cref="TData"/> slot in case it doesn't exist.
+        /// Same as <see cref="LoadAsync(string)"/>, but will create a new default <typeparamref name="TData"/> slot in case it doesn't exist.
         /// </summary>
         public async Task<TData> LoadOrDefaultAsync (string slotId)
         {

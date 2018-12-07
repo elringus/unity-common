@@ -4,7 +4,7 @@ using UnityEngine;
 namespace UnityCommon
 {
     /// <summary>
-    /// Converts <see cref="byte[]"/> raw data of a .png image to <see cref="Texture2D"/>.
+    /// Converts <see cref="T:byte[]"/> raw data of a .png image to <see cref="Texture2D"/>.
     /// </summary>
     public class PngToTextureConverter : IRawConverter<Texture2D>
     {

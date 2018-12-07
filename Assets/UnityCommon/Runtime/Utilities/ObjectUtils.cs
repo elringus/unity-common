@@ -42,6 +42,7 @@ namespace UnityCommon
         /// <summary>
         /// Asserts validity of all the required objects.
         /// </summary>
+        /// <param name="unityObject"></param>
         /// <param name="requiredObjects">Objects to check for validity.</param>
         /// <returns>Whether all the required objects are valid.</returns>
         public static bool AssertRequiredObjects (this Object unityObject, params Object[] requiredObjects)

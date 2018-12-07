@@ -277,8 +277,6 @@ namespace UnityCommon
         /// resets the raycastOrigins to the current extents of the box collider inset by the skinWidth. It is inset
         /// to avoid casting a ray from a position directly touching another collider which results in wonky normal data.
         /// </summary>
-        /// <param name="futurePosition">Future position.</param>
-        /// <param name="deltaMovement">Delta movement.</param>
         private void PrimeRaycastOrigins ()
         {
             // our raycasts need to be fired from the bounds inset by the skinWidth

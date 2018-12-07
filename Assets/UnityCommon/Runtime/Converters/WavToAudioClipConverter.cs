@@ -5,7 +5,7 @@ using UnityEngine;
 namespace UnityCommon
 {
     /// <summary>
-    /// Converts <see cref="byte[]"/> raw data of a .wav audio file to <see cref="AudioClip"/>.
+    /// Converts <see cref="T:byte[]"/> raw data of a .wav audio file to <see cref="AudioClip"/>.
     /// Only PCM16 44100Hz stereo wavs are supported.
     /// </summary>
     public class WavToAudioClipConverter : IRawConverter<AudioClip>

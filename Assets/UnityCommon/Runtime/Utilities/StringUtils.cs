@@ -38,12 +38,12 @@ namespace UnityCommon
 
         /// <summary>
         /// Attempts to extract a subset of the provided <paramref name="source"/> string, starting at
-        /// <paramref name="startIndex"/> and ending at <paramref name="endIndex"/>; returns <see cref="null"/> on fail.
+        /// <paramref name="startIndex"/> and ending at <paramref name="endIndex"/>; returns <see langword="null"/> on fail.
         /// </summary>
         /// <param name="source">The string to extract the subset from.</param>
         /// <param name="startIndex">Start index of the subset.</param>
         /// <param name="endIndex">End index of the subset.</param>
-        /// <returns>The extracted subset string or <see cref="null"/> if failed.</returns>
+        /// <returns>The extracted subset string or <see langword="null"/> if failed.</returns>
         public static string TrySubset (string source, int startIndex, int endIndex)
         {
             if (string.IsNullOrWhiteSpace(source)) return null;
@@ -162,7 +162,7 @@ namespace UnityCommon
         }
 
         /// <summary>
-        /// Performes <see cref="string.Trim"/> additionally removing any BOM and other service symbols.
+        /// Performs <see cref="string.Trim()"/> additionally removing any BOM and other service symbols.
         /// </summary>
         public static string TrimFull (this string source)
         {

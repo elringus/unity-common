@@ -4,7 +4,7 @@ using UnityEngine;
 namespace UnityCommon
 {
     /// <summary>
-    /// Converts <see cref="byte[]"/> raw data of a .jpg image to <see cref="Sprite"/>.
+    /// Converts <see cref="T:byte[]"/> raw data of a .jpg image to <see cref="Sprite"/>.
     /// </summary>
     public class JpgToSpriteConverter : IRawConverter<Sprite>
     {
