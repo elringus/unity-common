@@ -13,8 +13,6 @@ namespace UnityCommon
         private static void CountLines ()
         {
             var index = startIndex;
-            var name = fileName + index;
-
             var projectPath = Application.dataPath.Replace("/Assets", string.Empty);
             var dirPath = Path.Combine(projectPath, "Screenshots");
             var filePath = string.Empty;
