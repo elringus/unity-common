@@ -94,7 +94,6 @@
     }
 
     div#spinner {
-      position: absolute;
       height: 18px;
       left: 50%;
       margin-left: -150px;
@@ -158,12 +157,14 @@
 
 	UnityLoader.Error.handler = function(){} // Turn-off warnings for mobiles and old browsers.
 
-    var gameInstance = UnityLoader.instantiate("gameContainer", "%UNITY_WEBGL_BUILD_URL%", {
-      onProgress: UnityProgress,
-      Module: {
-        onRuntimeInitialized: function() { UnityProgress(gameInstance, "complete") }
-      }
-    });
+	window.onload = function () {
+	    var gameInstance = UnityLoader.instantiate("gameContainer", "%UNITY_WEBGL_BUILD_URL%", {
+	      onProgress: UnityProgress,
+	      Module: {
+	        onRuntimeInitialized: function() { UnityProgress(gameInstance, "complete") }
+	      }
+	    });
+	}
   </script>
 </head>
 <body>
