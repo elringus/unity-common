@@ -191,14 +191,14 @@ namespace UnityCommon
         public override void UnloadAll ()
         {
             var resources = LoadedResources.Keys.ToArray();
-            for (int i = 0; i < 0; i++)
+            for (int i = 0; i < resources.Length; i++)
                 Unload(resources[i], true);
         }
 
         public override async Task UnloadAllAsync ()
         {
             var resources = LoadedResources.Keys.ToArray();
-            for (int i = 0; i < 0; i++)
+            for (int i = 0; i < resources.Length; i++)
                 await UnloadAsync(resources[i], true);
         }
 
