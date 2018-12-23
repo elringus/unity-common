@@ -14,7 +14,7 @@ namespace UnityCommon
             if (Application.platform == RuntimePlatform.WebGLPlayer) return File.ReadAllBytes(filePath);
             else
             {
-                using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.None, 4096, true))
+                using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096, true))
                 {
                     var fileData = new byte[fileStream.Length];
                     await fileStream.ReadAsync(fileData, 0, (int)fileStream.Length);
@@ -31,7 +31,7 @@ namespace UnityCommon
             if (Application.platform == RuntimePlatform.WebGLPlayer) File.WriteAllBytes(filePath, fileData);
             else
             {
-                using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, fileData.Length, true))
+                using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite, fileData.Length, true))
                     await fileStream.WriteAsync(fileData, 0, fileData.Length);
             }
             WebGLSyncFs();
