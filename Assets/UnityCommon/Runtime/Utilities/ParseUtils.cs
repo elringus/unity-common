@@ -23,5 +23,29 @@ namespace UnityCommon
         {
             return float.TryParse(str, NumberStyles.Float, CultureInfo.InvariantCulture, out result);
         }
+
+        /// <summary>
+        /// Invokes a <see cref="int.TryParse(string, NumberStyles, System.IFormatProvider, out int)"/> on the provided string,
+        /// using <see cref="CultureInfo.InvariantCulture"/> and <see cref="NumberStyles.Integer"/>.
+        /// </summary>
+        /// <returns>Parsed value when parsing succeeded or null.</returns>
+        public static int? AsInvariantInt (this string str)
+        {
+            if (string.IsNullOrWhiteSpace(str)) return null;
+            var succeeded = TryInvariantInt(str, out var result);
+            return succeeded ? (int?)result : null;
+        }
+
+        /// <summary>
+        /// Invokes a <see cref="float.TryParse(string, NumberStyles, System.IFormatProvider, out float)"/> on the provided string,
+        /// using <see cref="CultureInfo.InvariantCulture"/> and <see cref="NumberStyles.Float"/>.
+        /// </summary>
+        /// <returns>Parsed value when parsing succeeded or null.</returns>
+        public static float? AsInvariantFloat (this string str)
+        {
+            if (string.IsNullOrWhiteSpace(str)) return null;
+            var succeeded = TryInvariantFloat(str, out var result);
+            return succeeded ? (float?)result : null;
+        }
     }
 }
