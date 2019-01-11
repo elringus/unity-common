@@ -37,6 +37,14 @@ namespace UnityCommon
         }
 
         /// <summary>
+        /// Performs <see cref="StartsWithFast(string, string)"/> and <see cref="EndsWithFast(string, string)"/> with the provided match.
+        /// </summary>
+        public static bool WrappedInFast (this string content, string match)
+        {
+            return content.StartsWithFast(match) && content.EndsWithFast(match);
+        }
+
+        /// <summary>
         /// Attempts to extract a subset of the provided <paramref name="source"/> string, starting at
         /// <paramref name="startIndex"/> and ending at <paramref name="endIndex"/>; returns <see langword="null"/> on fail.
         /// </summary>
