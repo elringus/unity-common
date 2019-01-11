@@ -37,11 +37,11 @@ namespace UnityCommon
         }
 
         /// <summary>
-        /// Performs <see cref="StartsWithFast(string, string)"/> and <see cref="EndsWithFast(string, string)"/> with the provided match.
+        /// Performs <see cref="string.StartsWith(string)"/> and <see cref="string.EndsWith(string)"/> with the provided match.
         /// </summary>
-        public static bool WrappedInFast (this string content, string match)
+        public static bool WrappedIn (this string content, string match, StringComparison comp = StringComparison.Ordinal)
         {
-            return content.StartsWithFast(match) && content.EndsWithFast(match);
+            return content.StartsWith(match, comp) && content.EndsWith(match, comp);
         }
 
         /// <summary>
@@ -66,12 +66,12 @@ namespace UnityCommon
         /// <summary>
         /// Attempts to extract content between the specified matches (on first occurence).
         /// </summary>
-        public static string GetBetween (this string content, string startMatch, string endMatch)
+        public static string GetBetween (this string content, string startMatch, string endMatch, StringComparison comp = StringComparison.Ordinal)
         {
             if (content.Contains(startMatch) && content.Contains(endMatch))
             {
-                var startIndex = content.IndexOf(startMatch) + startMatch.Length;
-                var endIndex = content.IndexOf(endMatch, startIndex);
+                var startIndex = content.IndexOf(startMatch, comp) + startMatch.Length;
+                var endIndex = content.IndexOf(endMatch, startIndex, comp);
                 return content.Substring(startIndex, endIndex - startIndex);
             }
             else return null;
@@ -80,19 +80,19 @@ namespace UnityCommon
         /// <summary>
         /// Attempts to extract content wrapped in the specified match (on first occurence).
         /// </summary>
-        public static string GetBetween (this string content, string match)
+        public static string GetBetween (this string content, string match, StringComparison comp = StringComparison.Ordinal)
         {
-            return content.GetBetween(match, match);
+            return content.GetBetween(match, match, comp);
         }
 
         /// <summary>
         /// Attempts to extract content before the specified match (on first occurence).
         /// </summary>
-        public static string GetBefore (this string content, string matchString)
+        public static string GetBefore (this string content, string matchString, StringComparison comp = StringComparison.Ordinal)
         {
             if (content.Contains(matchString))
             {
-                var endIndex = content.IndexOf(matchString);
+                var endIndex = content.IndexOf(matchString, comp);
                 return content.Substring(0, endIndex);
             }
             else return null;
@@ -101,11 +101,11 @@ namespace UnityCommon
         /// <summary>
         /// Attempts to extract content before the specified match (on last occurence).
         /// </summary>
-        public static string GetBeforeLast (this string content, string matchString)
+        public static string GetBeforeLast (this string content, string matchString, StringComparison comp = StringComparison.Ordinal)
         {
             if (content.Contains(matchString))
             {
-                var endIndex = content.LastIndexOf(matchString);
+                var endIndex = content.LastIndexOf(matchString, comp);
                 return content.Substring(0, endIndex);
             }
             else return null;
@@ -114,11 +114,11 @@ namespace UnityCommon
         /// <summary>
         /// Attempts to extract content after the specified match (on last occurence).
         /// </summary>
-        public static string GetAfter (this string content, string matchString)
+        public static string GetAfter (this string content, string matchString, StringComparison comp = StringComparison.Ordinal)
         {
             if (content.Contains(matchString))
             {
-                var startIndex = content.LastIndexOf(matchString) + matchString.Length;
+                var startIndex = content.LastIndexOf(matchString, comp) + matchString.Length;
                 if (content.Length <= startIndex) return string.Empty;
                 return content.Substring(startIndex);
             }
@@ -128,11 +128,11 @@ namespace UnityCommon
         /// <summary>
         /// Attempts to extract content after the specified match (on first occurence).
         /// </summary>
-        public static string GetAfterFirst (this string content, string matchString)
+        public static string GetAfterFirst (this string content, string matchString, StringComparison comp = StringComparison.Ordinal)
         {
             if (content.Contains(matchString))
             {
-                var startIndex = content.IndexOf(matchString) + matchString.Length;
+                var startIndex = content.IndexOf(matchString, comp) + matchString.Length;
                 if (content.Length <= startIndex) return string.Empty;
                 return content.Substring(startIndex);
             }
