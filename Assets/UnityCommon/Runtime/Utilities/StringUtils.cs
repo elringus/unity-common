@@ -66,15 +66,23 @@ namespace UnityCommon
         /// <summary>
         /// Attempts to extract content between the specified matches (on first occurence).
         /// </summary>
-        public static string GetBetween (this string content, string startMatchString, string endMatchString)
+        public static string GetBetween (this string content, string startMatch, string endMatch)
         {
-            if (content.Contains(startMatchString) && content.Contains(endMatchString))
+            if (content.Contains(startMatch) && content.Contains(endMatch))
             {
-                var startIndex = content.IndexOf(startMatchString) + startMatchString.Length;
-                var endIndex = content.IndexOf(endMatchString, startIndex);
+                var startIndex = content.IndexOf(startMatch) + startMatch.Length;
+                var endIndex = content.IndexOf(endMatch, startIndex);
                 return content.Substring(startIndex, endIndex - startIndex);
             }
             else return null;
+        }
+
+        /// <summary>
+        /// Attempts to extract content wrapped in the specified match (on first occurence).
+        /// </summary>
+        public static string GetBetween (this string content, string match)
+        {
+            return content.GetBetween(match, match);
         }
 
         /// <summary>
