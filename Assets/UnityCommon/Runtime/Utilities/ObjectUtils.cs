@@ -58,5 +58,15 @@ namespace UnityCommon
             }
             return !assertFailed;
         }
+
+        /// <summary>
+        /// Invokes the provided action on each descendant (child of any level, recursively) and (optionally) on self.
+        /// </summary>
+        public static void ForEachDescendant (this GameObject gameObject, Action<GameObject> action, bool invokeOnSelf = true)
+        {
+            if (invokeOnSelf) action?.Invoke(gameObject);
+            foreach (Transform childTransform in gameObject.transform)
+                ForEachDescendant(childTransform.gameObject, action, true);
+        }
     }
 }
