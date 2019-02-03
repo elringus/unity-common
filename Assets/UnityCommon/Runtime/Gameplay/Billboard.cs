@@ -7,6 +7,7 @@ namespace UnityCommon
         private Transform cameraTransform;
         private Transform myTransform;
 
+        [SerializeField] private bool disableWhenNotRendered = true;
         [Tooltip("Whether to apply a local z-offset to compensate root disposition with the parent transform.")]
         [SerializeField] private bool applyZOffset = false;
         [Tooltip("Used for the z-offset. Should be equal to the parent transform height, in units.")]
@@ -20,7 +21,8 @@ namespace UnityCommon
 
         private void Start ()
         {
-            enabled = false;
+            if (disableWhenNotRendered)
+                enabled = false;
         }
 
         public void SetLookCamera (Camera camera)
@@ -41,12 +43,14 @@ namespace UnityCommon
 
         private void OnBecameVisible ()
         {
-            enabled = true;
+            if (disableWhenNotRendered)
+                enabled = true;
         }
 
         private void OnBecameInvisible ()
         {
-            enabled = false;
+            if (disableWhenNotRendered)
+                enabled = false;
         }
     }
 }

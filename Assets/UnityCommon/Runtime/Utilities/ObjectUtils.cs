@@ -68,5 +68,15 @@ namespace UnityCommon
             foreach (Transform childTransform in gameObject.transform)
                 ForEachDescendant(childTransform.gameObject, action, true);
         }
+
+        /// <summary>
+        /// Checks if provided reference targets to a valid (not-destoyed) <see cref="GameObject"/>.
+        /// </summary>
+        public static bool IsValid (object obj)
+        {
+            if (obj is UnityEngine.Object unityObject)
+                return unityObject != null && unityObject;
+            else return false;
+        }
     }
 }
