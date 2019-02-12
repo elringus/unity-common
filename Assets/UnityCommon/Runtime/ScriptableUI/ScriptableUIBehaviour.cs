@@ -96,11 +96,13 @@ namespace UnityCommon
 
         public virtual void Show ()
         {
+            if (IsVisible) return;
             SetIsVisibleAsync(true).WrapAsync();
         }
 
         public virtual void Hide ()
         {
+            if (!IsVisible) return;
             SetIsVisibleAsync(false).WrapAsync();
         }
 
