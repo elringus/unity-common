@@ -22,12 +22,36 @@ namespace UnityCommon
             }
         }
 
+        private class CustomYieldInstructionRunner : CoroutineRunner
+        {
+            private readonly CustomYieldInstruction yieldInstruction;
+
+            public CustomYieldInstructionRunner (CustomYieldInstruction yieldInstruction, MonoBehaviour coroutineContainer = null)
+                : base(coroutineContainer) { this.yieldInstruction = yieldInstruction; }
+
+            protected override IEnumerator CoroutineLoop ()
+            {
+                yield return yieldInstruction;
+                HandleOnCompleted();
+            }
+        }
+
         public static TaskAwaiter GetAwaiter (this YieldInstruction yieldInstruction, MonoBehaviour coroutineContainer)
         {
             return new YieldInstructionRunner(yieldInstruction, coroutineContainer).RunAsync().GetAwaiter();
         }
 
         public static TaskAwaiter GetAwaiter (this YieldInstruction yieldInstruction) => GetAwaiter(yieldInstruction, null);
+
+        public static TaskAwaiter GetAwaiter<T> (this T yieldInstruction, MonoBehaviour coroutineContainer) 
+            where T : CustomYieldInstruction
+        {
+            return new CustomYieldInstructionRunner(yieldInstruction, coroutineContainer).RunAsync().GetAwaiter();
+        }
+
+        public static TaskAwaiter GetAwaiter (this WaitUntil yieldInstruction) => GetAwaiter(yieldInstruction, null);
+
+        public static TaskAwaiter GetAwaiter (this WaitWhile yieldInstruction) => GetAwaiter(yieldInstruction, null);
 
         public static TaskAwaiter<AsyncOperation> GetAwaiter (this AsyncOperation asyncOperation)
         {
