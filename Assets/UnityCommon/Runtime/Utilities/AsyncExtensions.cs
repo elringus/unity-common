@@ -107,7 +107,7 @@ namespace UnityCommon
         /// </summary>
         public static IEnumerator<T> AsIEnumerator<T> (this Task<T> task)
         {
-            while (!task.IsCompleted) yield return default(T);
+            while (!task.IsCompleted) yield return default;
             if (task.IsFaulted) ExceptionDispatchInfo.Capture(task.Exception).Throw();
             yield return task.Result;
         }
