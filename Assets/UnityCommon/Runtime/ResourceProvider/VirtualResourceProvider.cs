@@ -10,6 +10,10 @@ namespace UnityCommon
     /// </summary>
     public class VirtualResourceProvider : IResourceProvider
     {
+        /// <summary>
+        /// Whether <see cref="UnloadResource(string)"/> and similar methods should remove the added resources.
+        /// </summary>
+        public bool RemoveResourcesOnUnload { get; set; } = true;
         public bool IsLoading => false;
         public float LoadProgress => 1;
 
@@ -37,6 +41,11 @@ namespace UnityCommon
         public void RemoveResource (string path)
         {
             Resources.Remove(path);
+        }
+
+        public void RemoveAllResources ()
+        {
+            Resources.Clear();
         }
 
         public void AddFolder (string folderPath)
@@ -117,7 +126,8 @@ namespace UnityCommon
 
         public void UnloadResource (string path)
         {
-            Resources.Remove(path);
+            if (RemoveResourcesOnUnload)
+                RemoveResource(path);
         }
 
         public Task UnloadResourceAsync (string path)
@@ -128,7 +138,8 @@ namespace UnityCommon
 
         public void UnloadResources ()
         {
-            Resources.Clear();
+            if (RemoveResourcesOnUnload)
+                RemoveAllResources();
         }
 
         public Task UnloadResourcesAsync ()
