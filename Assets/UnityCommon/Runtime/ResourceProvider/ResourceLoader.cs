@@ -13,13 +13,14 @@ namespace UnityCommon
         public string PathPrefix { get; }
 
         protected List<IResourceProvider> Providers { get; }
-        protected VirtualResourceProvider VirtualProvider { get; }
+        protected VirtualResourceProvider PreloadedResourceProvider { get; }
 
         public ResourceLoader (IList<IResourceProvider> providersList, string resourcePathPrefix = null)
         {
             Providers = new List<IResourceProvider>();
-            VirtualProvider = new VirtualResourceProvider();
-            Providers.Add(VirtualProvider);
+            PreloadedResourceProvider = new VirtualResourceProvider();
+            PreloadedResourceProvider.RemoveResourcesOnUnload = false; // Otherwise, resources are lost on unload.
+            Providers.Add(PreloadedResourceProvider);
             Providers.AddRange(providersList);
             PathPrefix = resourcePathPrefix;
         }
@@ -71,13 +72,13 @@ namespace UnityCommon
         public virtual void AddPreloadedResource (string path, TResource resourceObj, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
-            VirtualProvider.AddResource(path, resourceObj);
+            PreloadedResourceProvider.AddResource(path, resourceObj);
         }
 
         public virtual void RemovePreloadedResource (string path, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
-            VirtualProvider.RemoveResource(path);
+            PreloadedResourceProvider.RemoveResource(path);
         }
 
         public virtual TResource Load (string path, bool isFullPath = false)
