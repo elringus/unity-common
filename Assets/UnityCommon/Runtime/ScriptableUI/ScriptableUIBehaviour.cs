@@ -9,13 +9,13 @@ namespace UnityCommon
     {
         public event Action<bool> OnVisibilityChanged;
 
-        public float FadeTime { get { return fadeTime; } set { fadeTime = value; } }
-        public bool IsVisibleOnAwake { get { return isVisibleOnAwake; } }
-        public virtual bool IsVisible { get { return isVisible; } set { SetIsVisible(value); } }
-        public virtual float CurrentOpacity { get { return GetCurrentOpacity(); } }
+        public float FadeTime { get => fadeTime; set => fadeTime = value; }
+        public bool IsVisibleOnAwake => isVisibleOnAwake; 
+        public virtual bool IsVisible { get => isVisible; set => SetIsVisible(value); }
+        public virtual float CurrentOpacity => GetCurrentOpacity();
         public virtual bool IsInteractable => CanvasGroup ? CanvasGroup.interactable : true;
-        public RectTransform RectTransform { get { return GetRectTransform(); } }
-        public int SortingOrder { get { return GetTopmostCanvas()?.sortingOrder ?? 0; } set { SetSortingOrder(value); } }
+        public RectTransform RectTransform => GetRectTransform(); 
+        public int SortingOrder { get => GetTopmostCanvas()?.sortingOrder ?? 0; set => SetSortingOrder(value); }
 
         protected CanvasGroup CanvasGroup { get; private set; }
 
@@ -28,21 +28,24 @@ namespace UnityCommon
         private RectTransform rectTransform;
         private bool isVisible;
 
-        protected override void Awake ()
-        {
-            base.Awake();
-
-            fadeTweener = new Tweener<FloatTween>(this);
-            CanvasGroup = GetComponent<CanvasGroup>();
-            SetIsVisible(IsVisibleOnAwake);
-        }
-
         public Canvas GetTopmostCanvas ()
         {
             var parentCanvases = gameObject.GetComponentsInParent<Canvas>();
             if (parentCanvases != null && parentCanvases.Length > 0)
                 return parentCanvases[parentCanvases.Length - 1];
             return null;
+        }
+
+        /// <summary>
+        /// Modifies <see cref="Canvas.renderMode"/> and <see cref="Canvas.worldCamera"/> of the topmost <see cref="Canvas"/>.
+        /// </summary>
+        public void SetRenderMode (RenderMode renderMode, Camera camera)
+        {
+            var topmostCanvas = GetTopmostCanvas();
+            if (!ObjectUtils.IsValid(topmostCanvas)) return;
+
+            topmostCanvas.renderMode = renderMode;
+            topmostCanvas.worldCamera = camera;
         }
 
         public virtual async Task SetIsVisibleAsync (bool isVisible, float? fadeTime = null)
@@ -138,6 +141,15 @@ namespace UnityCommon
         {
             if (EventSystem.current)
                 EventSystem.current.SetSelectedGameObject(gameObject);
+        }
+
+        protected override void Awake ()
+        {
+            base.Awake();
+
+            fadeTweener = new Tweener<FloatTween>(this);
+            CanvasGroup = GetComponent<CanvasGroup>();
+            SetIsVisible(IsVisibleOnAwake);
         }
 
         private RectTransform GetRectTransform ()
