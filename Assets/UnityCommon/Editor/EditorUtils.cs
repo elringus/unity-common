@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
@@ -10,6 +11,42 @@ namespace UnityCommon
 {
     public static class EditorUtils
     {
+        /// <summary>
+        /// For the provided editor object, will assign all the readonly <see cref="SerializedProperty"/> fields with the references to the corresponding fields of the edited object
+        /// and static readonly <see cref="GUIContent"/> fields with the value of <see cref="TooltipAttribute"/> assigned to the corresponding fields of the edited object.
+        /// Editor fields should be named after the edited fields (case doesn't matter), but end with `Property` for <see cref="SerializedProperty"/> and `Content` for <see cref="GUIContent"/>.
+        /// </summary>
+        /// <typeparam name="T">Type of the edited object.</typeparam>
+        /// <param name="editor">The editor instance.</param>
+        public static void BindSerializedProperties<T> (Editor editor)
+        {
+            var editorType = editor.GetType();
+            var editedType = typeof(T);
+            if (editedType is null || !(editedType.IsSubclassOf(typeof(MonoBehaviour)) || editedType.IsSubclassOf(typeof(ScriptableObject)))) return;
+
+            var serializedFields = editedType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                .Where(f => f.IsPublic || f.GetCustomAttribute<SerializeField>(true) != null).ToList();
+            var editorSerializedProperties = editorType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                .Where(f => f.IsInitOnly && f.FieldType == typeof(SerializedProperty)).ToList();
+            var editorContentProperties = editorType.GetFields(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+                .Where(f => f.IsInitOnly && f.IsStatic && f.FieldType == typeof(GUIContent)).ToList();
+
+            foreach (var serializedField in serializedFields)
+            {
+                var serializedProperty = editorSerializedProperties.Find(p => p.Name.LEquals(serializedField.Name + "Property"));
+                if (serializedProperty != null)
+                    serializedProperty.SetValue(editor, editor.serializedObject.FindProperty(serializedField.Name));
+
+                var contentProperty = editorContentProperties.Find(p => p.Name.LEquals(serializedField.Name + "Content"));
+                if (contentProperty != null && contentProperty.GetValue(editor) is null)
+                {
+                    var contentText = ObjectNames.NicifyVariableName(serializedField.Name);
+                    var contentTooltip = serializedField.GetCustomAttribute<TooltipAttribute>(true)?.tooltip ?? string.Empty;
+                    contentProperty.SetValue(editor, new GUIContent(contentText, contentTooltip));
+                }
+            }
+        }
+
         public static ScriptableObject LoadOrCreateSerializableAsset (string assetPath, Type assetType)
         {
             var existingAsset = AssetDatabase.LoadAssetAtPath(assetPath, assetType) as ScriptableObject;
