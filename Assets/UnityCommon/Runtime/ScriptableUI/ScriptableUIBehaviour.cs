@@ -14,8 +14,11 @@ namespace UnityCommon
         public virtual bool IsVisible { get => isVisible; set => SetIsVisible(value); }
         public virtual float CurrentOpacity => GetCurrentOpacity();
         public virtual bool IsInteractable => CanvasGroup ? CanvasGroup.interactable : true;
-        public RectTransform RectTransform => GetRectTransform(); 
-        public int SortingOrder { get => GetTopmostCanvas()?.sortingOrder ?? 0; set => SetSortingOrder(value); }
+        public RectTransform RectTransform => GetRectTransform();
+        public Canvas TopmostCanvas => ObjectUtils.IsValid(topmostCanvasCache) ? topmostCanvasCache : (topmostCanvasCache = FindTopmostCanvas());
+        public int SortingOrder { get => ObjectUtils.IsValid(TopmostCanvas) ? TopmostCanvas.sortingOrder : 0; set => SetSortingOrder(value); }
+        public RenderMode RenderMode { get => ObjectUtils.IsValid(TopmostCanvas) ? TopmostCanvas.renderMode : default; set => SetRenderMode(value); }
+        public Camera RenderCamera { get => ObjectUtils.IsValid(TopmostCanvas) ? TopmostCanvas.worldCamera : null; set => SetRenderCamera(value); }
 
         protected CanvasGroup CanvasGroup { get; private set; }
 
@@ -26,27 +29,8 @@ namespace UnityCommon
 
         private Tweener<FloatTween> fadeTweener;
         private RectTransform rectTransform;
+        private Canvas topmostCanvasCache;
         private bool isVisible;
-
-        public Canvas GetTopmostCanvas ()
-        {
-            var parentCanvases = gameObject.GetComponentsInParent<Canvas>();
-            if (parentCanvases != null && parentCanvases.Length > 0)
-                return parentCanvases[parentCanvases.Length - 1];
-            return null;
-        }
-
-        /// <summary>
-        /// Modifies <see cref="Canvas.renderMode"/> and <see cref="Canvas.worldCamera"/> of the topmost <see cref="Canvas"/>.
-        /// </summary>
-        public void SetRenderMode (RenderMode renderMode, Camera camera)
-        {
-            var topmostCanvas = GetTopmostCanvas();
-            if (!ObjectUtils.IsValid(topmostCanvas)) return;
-
-            topmostCanvas.renderMode = renderMode;
-            topmostCanvas.worldCamera = camera;
-        }
 
         public virtual async Task SetIsVisibleAsync (bool isVisible, float? fadeTime = null)
         {
@@ -159,10 +143,30 @@ namespace UnityCommon
             return rectTransform;
         }
 
+        private Canvas FindTopmostCanvas ()
+        {
+            var parentCanvases = gameObject.GetComponentsInParent<Canvas>();
+            if (parentCanvases != null && parentCanvases.Length > 0)
+                return parentCanvases[parentCanvases.Length - 1];
+            return null;
+        }
+
         private void SetSortingOrder (int value)
         {
-            var topmostCanvas = GetTopmostCanvas();
-            if (topmostCanvas) topmostCanvas.sortingOrder = value;
+            if (!ObjectUtils.IsValid(TopmostCanvas)) return;
+            TopmostCanvas.sortingOrder = value;
+        }
+
+        private void SetRenderMode (RenderMode renderMode)
+        {
+            if (!ObjectUtils.IsValid(TopmostCanvas)) return;
+            TopmostCanvas.renderMode = renderMode;
+        }
+
+        private void SetRenderCamera (Camera camera)
+        {
+            if (!ObjectUtils.IsValid(TopmostCanvas)) return;
+            TopmostCanvas.worldCamera = camera;
         }
     }
 }
