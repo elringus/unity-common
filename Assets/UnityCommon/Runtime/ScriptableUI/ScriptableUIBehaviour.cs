@@ -22,6 +22,8 @@ namespace UnityCommon
 
         protected CanvasGroup CanvasGroup { get; private set; }
 
+        [Tooltip("Whether to permamently disable interaction with the object, no matter the visibility.")]
+        [SerializeField] private bool disableInteraction = false;
         [Tooltip("Whether UI element should be visible or hidden on awake.")]
         [SerializeField] private bool isVisibleOnAwake = true;
         [Tooltip("Fade duration (in seconds) when changing visiblity.")]
@@ -43,8 +45,11 @@ namespace UnityCommon
 
             if (!CanvasGroup) return;
 
-            CanvasGroup.interactable = isVisible;
-            CanvasGroup.blocksRaycasts = isVisible;
+            if (!disableInteraction)
+            {
+                CanvasGroup.interactable = isVisible;
+                CanvasGroup.blocksRaycasts = isVisible;
+            }
 
             var fadeDuration = fadeTime ?? FadeTime;
             var targetOpacity = isVisible ? 1f : 0f;
@@ -70,8 +75,11 @@ namespace UnityCommon
 
             if (!CanvasGroup) return;
 
-            CanvasGroup.interactable = isVisible;
-            CanvasGroup.blocksRaycasts = isVisible;
+            if (!disableInteraction)
+            {
+                CanvasGroup.interactable = isVisible;
+                CanvasGroup.blocksRaycasts = isVisible;
+            }
 
             CanvasGroup.alpha = isVisible ? 1f : 0f;
         }
@@ -133,6 +141,13 @@ namespace UnityCommon
 
             fadeTweener = new Tweener<FloatTween>(this);
             CanvasGroup = GetComponent<CanvasGroup>();
+
+            if (disableInteraction)
+            {
+                CanvasGroup.interactable = false;
+                CanvasGroup.blocksRaycasts = false;
+            }
+
             SetIsVisible(IsVisibleOnAwake);
         }
 
