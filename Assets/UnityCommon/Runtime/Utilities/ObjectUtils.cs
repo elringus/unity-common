@@ -52,7 +52,7 @@ namespace UnityCommon
             {
                 if (!requiredObjects[i])
                 {
-                    Debug.LogError(string.Format("Required object of type '{0}' is not valid for '{1}'", requiredObjects[i].GetType().Name, unityObject.name));
+                    Debug.LogError(string.Format("Required object of type '{0}' is not valid for '{1}'", requiredObjects[i]?.GetType()?.Name ?? "Unknown", unityObject.name));
                     assertFailed = true;
                 }
             }
