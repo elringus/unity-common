@@ -142,7 +142,7 @@ namespace UnityCommon
             fadeTweener = new Tweener<FloatTween>(this);
             CanvasGroup = GetComponent<CanvasGroup>();
 
-            if (disableInteraction)
+            if (CanvasGroup && disableInteraction)
             {
                 CanvasGroup.interactable = false;
                 CanvasGroup.blocksRaycasts = false;
