@@ -22,8 +22,13 @@ namespace UnityCommon
         public static IEnumerable<string> LocateFolderPathsAtFolder (this IEnumerable<string> source, string parentFolderPath)
         {
             parentFolderPath = parentFolderPath ?? string.Empty;
-            if (parentFolderPath.StartsWithFast("/")) parentFolderPath = parentFolderPath.GetAfterFirst("/") ?? string.Empty;
-            if (!parentFolderPath.EndsWithFast("/")) parentFolderPath += "/";
+
+            if (parentFolderPath.StartsWithFast("/"))
+                parentFolderPath = parentFolderPath.GetAfterFirst("/") ?? string.Empty;
+
+            if (parentFolderPath.Length > 0 && !parentFolderPath.EndsWithFast("/"))
+                parentFolderPath += "/";
+
             return source.Where(p => p.StartsWithFast(parentFolderPath) && p.GetAfterFirst(parentFolderPath).Contains("/"))
                 .Select(p => parentFolderPath + p.GetBetween(parentFolderPath, "/")).Distinct();
         }
