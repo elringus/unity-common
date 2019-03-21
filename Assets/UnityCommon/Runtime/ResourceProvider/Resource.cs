@@ -8,7 +8,7 @@ namespace UnityCommon
     [System.Serializable]
     public class Resource
     {
-        public string Path { get => path; set => path = value; }
+        public string Path { get => path; private set => path = value; }
         public Object Object { get => obj; set => obj = value; }
         public bool IsValid => Object != null && Object;
 
@@ -39,21 +39,18 @@ namespace UnityCommon
 
         public static implicit operator T (Resource<T> resource) => resource.Object;
 
-        private T CastObject (object obj)
+        private T CastObject (Object obj)
         {
-            if (obj == null)
-            {
-                Debug.LogError($"Resource '{Path}' is null.");
-                return default;
-            }
+            if (!IsValid) return null;
 
-            if (!typeof(T).IsAssignableFrom(obj.GetType()))
+            var castedObj = obj as T;
+            if (castedObj is null)
             {
                 Debug.LogError($"Resource '{Path}' is not of type '{typeof(T).FullName}'.");
-                return default;
+                return null;
             }
 
-            return (T)obj;
+            return castedObj;
         }
     }
 }

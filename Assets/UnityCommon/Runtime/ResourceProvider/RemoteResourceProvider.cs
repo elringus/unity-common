@@ -13,6 +13,7 @@ namespace UnityCommon
 
         public bool IsLoading { get { throw new NotImplementedException(); } }
         public float LoadProgress { get { throw new NotImplementedException(); } }
+        public IEnumerable<Resource> LoadedResources => throw new NotImplementedException();
 
         public bool SupportsType<T> () where T : UnityEngine.Object
         {
@@ -95,6 +96,11 @@ namespace UnityCommon
         }
 
         public bool ResourceLoading (string path)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Resource<T> GetLoadedResourceOrNull<T> (string path) where T : UnityEngine.Object
         {
             throw new NotImplementedException();
         }

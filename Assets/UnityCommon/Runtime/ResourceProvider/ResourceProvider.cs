@@ -16,6 +16,7 @@ namespace UnityCommon
 
         public bool IsLoading => LoadProgress < 1f;
         public float LoadProgress { get; private set; } = 1f;
+        IEnumerable<Resource> IResourceProvider.LoadedResources => LoadedResources.Values;
 
         protected Dictionary<string, Resource> LoadedResources = new Dictionary<string, Resource>();
         protected Dictionary<string, List<Folder>> LocatedFolders = new Dictionary<string, List<Folder>>();
@@ -24,6 +25,19 @@ namespace UnityCommon
 
         public abstract bool SupportsType<T> () where T : UnityEngine.Object;
 
+        public Resource<T> GetLoadedResourceOrNull<T> (string path) where T : UnityEngine.Object
+        {
+            if (!SupportsType<T>() || !ResourceLoaded(path)) return null;
+
+            var loadedResourceType = LoadedResources[path].Object?.GetType();
+            if (loadedResourceType != typeof(T))
+            {
+                Debug.LogError($"Failed to get a loaded resource with path `{path}`: the loaded resource is of type `{loadedResourceType.FullName}`, while the requested type is `{typeof(T).FullName}`.");
+                return null;
+            }
+            else return LoadedResources[path] as Resource<T>;
+        }
+
         public virtual Resource<T> LoadResource<T> (string path) where T : UnityEngine.Object
         {
             if (!SupportsType<T>()) return null;
@@ -31,7 +45,7 @@ namespace UnityCommon
             // We're currently loading this resource in async mode; cancel and load blocking.
             if (ResourceLoading(path)) UnloadResource(path);
 
-            if (LoadedResources.ContainsKey(path))
+            if (ResourceLoaded(path))
             {
                 if (LoadedResources[path].Object?.GetType() != typeof(T)) UnloadResource(path);
                 else return LoadedResources[path] as Resource<T>;
@@ -53,7 +67,7 @@ namespace UnityCommon
                 else return await (LoadRunners[path] as LoadResourceRunner<T>);
             }
 
-            if (LoadedResources.ContainsKey(path))
+            if (ResourceLoaded(path))
             {
                 if (LoadedResources[path].Object?.GetType() != typeof(T)) await UnloadResourceAsync(path);
                 else return LoadedResources[path] as Resource<T>;

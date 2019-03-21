@@ -26,6 +26,10 @@ namespace UnityCommon
         /// Current resources loading progress, in 0.0 to 1.0 range.
         /// </summary>
         float LoadProgress { get; }
+        /// <summary>
+        /// Returns a collection of resources loaded by the provider.
+        /// </summary>
+        IEnumerable<Resource> LoadedResources { get; }
 
         /// <summary>
         /// Whether the provider can work with resource objects of the provided type.
@@ -116,5 +120,9 @@ namespace UnityCommon
         /// Checks whether resource with the provided path is currently being loaded.
         /// </summary>
         bool ResourceLoading (string path);
+        /// <summary>
+        /// Attempts to retrieve a loaded resource with the provided path; returns null if the resource is not loaded.
+        /// </summary>
+        Resource<T> GetLoadedResourceOrNull<T> (string path) where T : UnityEngine.Object;
     }
 }

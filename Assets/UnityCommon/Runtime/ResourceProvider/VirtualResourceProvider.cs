@@ -16,6 +16,7 @@ namespace UnityCommon
         public bool RemoveResourcesOnUnload { get; set; } = true;
         public bool IsLoading => false;
         public float LoadProgress => 1;
+        public IEnumerable<Resource> LoadedResources => Resources?.Select(r => new Resource(r.Key, r.Value));
 
         #pragma warning disable 0067
         public event Action<float> OnLoadProgress;
@@ -146,6 +147,12 @@ namespace UnityCommon
         {
             UnloadResources();
             return Task.CompletedTask;
+        }
+
+        public Resource<T> GetLoadedResourceOrNull<T> (string path) where T : UnityEngine.Object
+        {
+            if (!ResourceLoaded(path)) return null;
+            return LoadResource<T>(path);
         }
     }
 }

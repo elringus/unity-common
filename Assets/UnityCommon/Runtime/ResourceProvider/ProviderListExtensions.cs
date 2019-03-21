@@ -7,6 +7,36 @@ namespace UnityCommon
     public static class ProviderListExtensions
     {
         /// <summary>
+        /// Checks whether any provider in the list is loading resources.
+        /// </summary>
+        public static bool AnyIsLoading (this List<IResourceProvider> providers)
+        {
+            foreach (var provider in providers)
+                if (provider.IsLoading) return true;
+            return false;
+        }
+
+        /// <summary>
+        /// Returns all the resources loaded by all the providers in the list.
+        /// </summary>
+        public static IEnumerable<Resource> GetLoadedResources (this List<IResourceProvider> providers)
+        {
+            return providers.SelectMany(p => p.LoadedResources);
+        }
+
+        /// <summary>
+        /// Attempts to retrieve a loaded resource with the provided path; returns null if the resource is not loaded by any of the provider in the list.
+        /// When resources with equal paths are loaded by multiple providers, will get the one from the higher-priority provider.
+        /// </summary>
+        public static Resource<T> GetLoadedResourceOrNull<T> (this List<IResourceProvider> providers, string path) where T : UnityEngine.Object
+        {
+            foreach (var provider in providers)
+                if (provider.ResourceLoaded(path))
+                    return provider.GetLoadedResourceOrNull<T>(path);
+            return null;
+        }
+
+        /// <summary>
         /// Loads a resource at the provided path.
         /// When resources with equal paths are available in multiple providers, will load the one from the higher-priority provider.
         /// </summary>

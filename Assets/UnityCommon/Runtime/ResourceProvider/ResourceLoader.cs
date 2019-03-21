@@ -1,26 +1,21 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace UnityCommon
 {
     /// <summary>
-    /// Allows working with resources using a prioritized providers list.
+    /// Allows working with resources using a prioritized providers list and local paths.
     /// </summary>
     public abstract class ResourceLoader
     {
-        public abstract bool IsLoadingAny { get; }
+        public bool IsLoadingAny => Providers.AnyIsLoading();
         public string PathPrefix { get; }
 
         protected List<IResourceProvider> Providers { get; }
-        protected VirtualResourceProvider PreloadedResourceProvider { get; }
 
         public ResourceLoader (IList<IResourceProvider> providersList, string resourcePathPrefix = null)
         {
             Providers = new List<IResourceProvider>();
-            PreloadedResourceProvider = new VirtualResourceProvider();
-            PreloadedResourceProvider.RemoveResourcesOnUnload = false; // Otherwise, resources are lost on unload.
-            Providers.Add(PreloadedResourceProvider);
             Providers.AddRange(providersList);
             PathPrefix = resourcePathPrefix;
         }
@@ -40,7 +35,6 @@ namespace UnityCommon
 
         public abstract void Preload (string path, bool isFullPath = false);
         public abstract Task PreloadAsync (string path, bool isFullPath = false);
-        public abstract bool IsLoadedByProvider (string path, bool isFullPath = false);
         public abstract bool IsLoaded (string path, bool isFullPath = false);
         public abstract void Unload (string path, bool isFullPath = false);
         public abstract Task UnloadAsync (string path, bool isFullPath = false);
@@ -49,88 +43,47 @@ namespace UnityCommon
     }
 
     /// <summary>
-    /// Allows working with resources of specific type using a prioritized providers list.
+    /// Allows working with resources of specific type using a prioritized providers list and local paths.
     /// </summary>
     public class ResourceLoader<TResource> : ResourceLoader where TResource : UnityEngine.Object
     {
-        public override bool IsLoadingAny => loadCounter > 0;
+        public ResourceLoader (IList<IResourceProvider> providersList, string resourcePathPrefix = null)
+            : base(providersList, resourcePathPrefix) { }
 
-        protected Dictionary<string, TResource> LoadedResources { get; }
-
-        private int loadCounter;
-
-        public ResourceLoader (IList<IResourceProvider> providersList, string resourcePathPrefix = null, IDictionary<string, TResource> preloadedResources = null)
-            : base(providersList, resourcePathPrefix)
-        {
-            LoadedResources = new Dictionary<string, TResource>();
-
-            if (preloadedResources != null)
-                foreach (var kv in preloadedResources)
-                    AddPreloadedResource(kv.Key, kv.Value);
-        }
-
-        public virtual void AddPreloadedResource (string path, TResource resourceObj, bool isFullPath = false)
+        public override bool IsLoaded (string path, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
-            PreloadedResourceProvider.AddResource(path, resourceObj);
+            return Providers.ResourceLoaded(path);
         }
 
-        public virtual void RemovePreloadedResource (string path, bool isFullPath = false)
+        public virtual Resource<TResource> GetLoadedResourceOrNull (string path, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
-            PreloadedResourceProvider.RemoveResource(path);
+            return Providers.GetLoadedResourceOrNull<TResource>(path);
         }
 
-        public virtual TResource Load (string path, bool isFullPath = false)
+        public virtual Resource<TResource> Load (string path, bool isFullPath = false)
         {
-            if (IsLoaded(path, isFullPath)) return GetLoaded(path, isFullPath);
-
-            IncrementLoadCounter();
             if (!isFullPath) path = BuildFullPath(path);
-
-            var resource = Providers.LoadResource<TResource>(path);
-            AddLoadedResource(resource);
-
-            DecrementLoadCounter();
-            return resource != null && resource.IsValid ? resource.Object : null;
+            return Providers.LoadResource<TResource>(path);
         }
 
-        public virtual async Task<TResource> LoadAsync (string path, bool isFullPath = false)
+        public virtual async Task<Resource<TResource>> LoadAsync (string path, bool isFullPath = false)
         {
-            if (IsLoaded(path, isFullPath)) return GetLoaded(path, isFullPath);
-
-            IncrementLoadCounter();
             if (!isFullPath) path = BuildFullPath(path);
-
-            var resource = await Providers.LoadResourceAsync<TResource>(path);
-            AddLoadedResource(resource);
-
-            DecrementLoadCounter();
-            return resource != null && resource.IsValid ? resource.Object : null;
+            return await Providers.LoadResourceAsync<TResource>(path);
         }
 
         public virtual IEnumerable<Resource<TResource>> LoadAll (string path = null, bool isFullPath = false)
         {
-            IncrementLoadCounter();
             if (!isFullPath) path = BuildFullPath(path);
-
-            var resources = Providers.LoadResources<TResource>(path);
-            AddLoadedResources(resources);
-
-            DecrementLoadCounter();
-            return resources;
+            return Providers.LoadResources<TResource>(path);
         }
-
+        
         public virtual async Task<IEnumerable<Resource<TResource>>> LoadAllAsync (string path = null, bool isFullPath = false)
         {
-            IncrementLoadCounter();
             if (!isFullPath) path = BuildFullPath(path);
-
-            var resources = await Providers.LoadResourcesAsync<TResource>(path);
-            AddLoadedResources(resources);
-
-            DecrementLoadCounter();
-            return resources;
+            return await Providers.LoadResourcesAsync<TResource>(path);
         }
 
         public virtual IEnumerable<Resource<TResource>> LocateResources (string path, bool isFullPath = false)
@@ -147,16 +100,12 @@ namespace UnityCommon
 
         public virtual bool ResourceExists (string path, bool isFullPath = false)
         {
-            if (IsLoaded(path, isFullPath) || IsLoadedByProvider(path, isFullPath)) return true;
-
             if (!isFullPath) path = BuildFullPath(path);
             return Providers.ResourceExists<TResource>(path);
         }
 
         public virtual async Task<bool> ResourceExistsAsync (string path, bool isFullPath = false)
         {
-            if (IsLoaded(path, isFullPath) || IsLoadedByProvider(path, isFullPath)) return true;
-
             if (!isFullPath) path = BuildFullPath(path);
             return await Providers.ResourceExistsAsync<TResource>(path);
         }
@@ -174,85 +123,48 @@ namespace UnityCommon
         public override void Unload (string path, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
-
             Providers.UnloadResource(path);
-
-            RemoveLoadedResource(path);
         }
 
         public override async Task UnloadAsync (string path, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
-
             await Providers.UnloadResourceAsync(path);
-
-            RemoveLoadedResource(path);
         }
 
+        /// <summary>
+        /// Unloads all the resources loaded by all the providers in the list if they start with the <see cref="ResourceLoader.PathPrefix"/>.
+        /// </summary>
         public override void UnloadAll ()
         {
-            var resources = LoadedResources.Keys.ToArray();
-            for (int i = 0; i < resources.Length; i++)
-                Unload(resources[i], true);
+            if (string.IsNullOrWhiteSpace(PathPrefix))
+            {
+                Providers.UnloadResources();
+            }
+            else
+            {
+                foreach (var resource in Providers.GetLoadedResources())
+                    if (resource.Path.StartsWithFast(PathPrefix) || resource.Path.StartsWithFast("/" + PathPrefix))
+                        Providers.UnloadResource(resource.Path);
+            }
         }
 
+        /// <summary>
+        /// Asynchronously unloads all the resources loaded by all the providers in the list if they start with the <see cref="ResourceLoader.PathPrefix"/>.
+        /// </summary>
         public override async Task UnloadAllAsync ()
         {
-            var resources = LoadedResources.Keys.ToArray();
-            for (int i = 0; i < resources.Length; i++)
-                await UnloadAsync(resources[i], true);
+            if (string.IsNullOrWhiteSpace(PathPrefix))
+            {
+                await Providers.UnloadResourcesAsync();
+            }
+            else
+            {
+                foreach (var resource in Providers.GetLoadedResources())
+                    if (resource.Path.StartsWithFast(PathPrefix) || resource.Path.StartsWithFast("/" + PathPrefix))
+                        await Providers.UnloadResourceAsync(resource.Path);
+            }
         }
 
-        /// <summary>
-        /// Whether a resource with the provided path is loaded by any of the available providers.
-        /// </summary>
-        public override bool IsLoadedByProvider (string path, bool isFullPath = false)
-        {
-            if (!isFullPath) path = BuildFullPath(path);
-            return Providers.ResourceLoaded(path);
-        }
-
-        /// <summary>
-        /// Whether a resource with the provided path is already loaded 
-        /// and can be instantly retrieved via <see cref="GetLoaded(string, bool)"/>.
-        /// </summary>
-        public override bool IsLoaded (string path, bool isFullPath = false)
-        {
-            if (!isFullPath) path = BuildFullPath(path);
-            return LoadedResources.ContainsKey(path);
-        }
-
-        /// <summary>
-        /// Returns a loaded resource with the provided path.
-        /// In case the resource is not loaded, will return null.
-        /// </summary>
-        public virtual TResource GetLoaded (string path, bool isFullPath = false)
-        {
-            if (!isFullPath) path = BuildFullPath(path);
-            if (!IsLoaded(path, true)) return default;
-            return LoadedResources[path];
-        }
-
-        protected virtual void AddLoadedResources (IEnumerable<Resource<TResource>> resources)
-        {
-            foreach (var resource in resources)
-                if (resource != null && resource.IsValid)
-                    AddLoadedResource(resource);
-        }
-
-        protected virtual void AddLoadedResource (Resource<TResource> resource)
-        {
-            if (resource != null && resource.IsValid)
-                LoadedResources[resource.Path] = resource.Object;
-        }
-
-        protected virtual void RemoveLoadedResource (string resourcePath)
-        {
-            if (LoadedResources.ContainsKey(resourcePath))
-                LoadedResources.Remove(resourcePath);
-        }
-
-        protected void IncrementLoadCounter () => loadCounter++;
-        protected void DecrementLoadCounter () => loadCounter--;
     }
 }
