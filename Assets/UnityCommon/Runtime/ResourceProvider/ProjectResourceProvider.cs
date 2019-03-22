@@ -35,11 +35,12 @@ namespace UnityCommon
         }
 
         private ProjectResources projectResources;
-        private Dictionary<Type, TypeRedirector> redirectors = new Dictionary<Type, TypeRedirector>();
+        private Dictionary<Type, TypeRedirector> redirectors;
 
         public ProjectResourceProvider ()
         {
             projectResources = ProjectResources.Get();
+            redirectors = new Dictionary<Type, TypeRedirector>();
         }
 
         public override bool SupportsType<T> () => true;
@@ -66,12 +67,22 @@ namespace UnityCommon
 
         protected override void UnloadResourceBlocking (Resource resource)
         {
-            // TODO: We shouldn't destroy asset objects, but it's impossible (?) to tell if the object is an asset.
+            if (!resource.IsValid) return;
+
+            // Non-asset resources could be created when using type redirectors.
+            if (redirectors.Count > 0 && redirectors.ContainsKey(resource.Object.GetType()))
+            {
+                if (!Application.isPlaying) UnityEngine.Object.DestroyImmediate(resource.Object);
+                else UnityEngine.Object.Destroy(resource.Object);
+                return;
+            }
+
+            Resources.UnloadAsset(resource.Object);
         }
 
         protected override Task UnloadResourceAsync (Resource resource)
         {
-            // TODO: Support async unloading (?).
+            // Unity doesn't provide async unload API.
             UnloadResourceBlocking(resource);
             return Task.CompletedTask;
         }
