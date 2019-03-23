@@ -37,7 +37,7 @@ namespace UnityCommon
 
         public Resource (string path, T obj = default) : base(path, obj) { }
 
-        public static implicit operator T (Resource<T> resource) => resource.Object;
+        public static implicit operator T (Resource<T> resource) => resource?.Object;
 
         private T CastObject (Object obj)
         {
