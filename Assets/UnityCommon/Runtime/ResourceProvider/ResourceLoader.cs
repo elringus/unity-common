@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace UnityCommon
@@ -8,15 +9,31 @@ namespace UnityCommon
     /// </summary>
     public abstract class ResourceLoader
     {
+        /// <summary>
+        /// Whether any of the providers used by this loader is currently loading anything.
+        /// </summary>
         public bool IsLoadingAny => Providers.AnyIsLoading();
+        /// <summary>
+        /// Prefix used by this provider to build full resource paths from provided local paths.
+        /// </summary>
         public string PathPrefix { get; }
 
+        /// <summary>
+        /// Prioritized providers list used by this loader.
+        /// </summary>
         protected List<IResourceProvider> Providers { get; }
+        /// <summary>
+        /// Full paths to the resources loaded by this loaded.
+        /// </summary>
+        protected HashSet<string> LoadedResourcePaths { get; }
 
         public ResourceLoader (IList<IResourceProvider> providersList, string resourcePathPrefix = null)
         {
             Providers = new List<IResourceProvider>();
             Providers.AddRange(providersList);
+
+            LoadedResourcePaths = new HashSet<string>();
+
             PathPrefix = resourcePathPrefix;
         }
 
@@ -65,25 +82,39 @@ namespace UnityCommon
         public virtual Resource<TResource> Load (string path, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
-            return Providers.LoadResource<TResource>(path);
+
+            var resource = Providers.LoadResource<TResource>(path);
+            if (resource.IsValid) LoadedResourcePaths.Add(path);
+            return resource;
         }
 
         public virtual async Task<Resource<TResource>> LoadAsync (string path, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
-            return await Providers.LoadResourceAsync<TResource>(path);
+
+            var resource = await Providers.LoadResourceAsync<TResource>(path);
+            if (resource.IsValid) LoadedResourcePaths.Add(path);
+            return resource;
         }
 
         public virtual IEnumerable<Resource<TResource>> LoadAll (string path = null, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
-            return Providers.LoadResources<TResource>(path);
+
+            var resources = Providers.LoadResources<TResource>(path);
+            foreach (var resource in resources)
+                if (resource.IsValid) LoadedResourcePaths.Add(resource.Path);
+            return resources;
         }
         
         public virtual async Task<IEnumerable<Resource<TResource>>> LoadAllAsync (string path = null, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
-            return await Providers.LoadResourcesAsync<TResource>(path);
+
+            var resources = await Providers.LoadResourcesAsync<TResource>(path);
+            foreach (var resource in resources)
+                if (resource.IsValid) LoadedResourcePaths.Add(resource.Path);
+            return resources;
         }
 
         public virtual IEnumerable<Resource<TResource>> LocateResources (string path, bool isFullPath = false)
@@ -133,38 +164,20 @@ namespace UnityCommon
         }
 
         /// <summary>
-        /// Unloads all the resources loaded by all the providers in the list if they start with the <see cref="ResourceLoader.PathPrefix"/>.
+        /// Unloads all the resources previously loaded by this loader.
         /// </summary>
         public override void UnloadAll ()
         {
-            if (string.IsNullOrWhiteSpace(PathPrefix))
-            {
-                Providers.UnloadResources();
-            }
-            else
-            {
-                foreach (var resource in Providers.GetLoadedResources())
-                    if (resource.Path.StartsWithFast(PathPrefix) || resource.Path.StartsWithFast("/" + PathPrefix))
-                        Providers.UnloadResource(resource.Path);
-            }
+            foreach (var path in LoadedResourcePaths)
+                Unload(path, true);
         }
 
         /// <summary>
-        /// Asynchronously unloads all the resources loaded by all the providers in the list if they start with the <see cref="ResourceLoader.PathPrefix"/>.
+        /// Asynchronously unloads all the resources previously loaded by this loader.
         /// </summary>
         public override async Task UnloadAllAsync ()
         {
-            if (string.IsNullOrWhiteSpace(PathPrefix))
-            {
-                await Providers.UnloadResourcesAsync();
-            }
-            else
-            {
-                foreach (var resource in Providers.GetLoadedResources())
-                    if (resource.Path.StartsWithFast(PathPrefix) || resource.Path.StartsWithFast("/" + PathPrefix))
-                        await Providers.UnloadResourceAsync(resource.Path);
-            }
+            await Task.WhenAll(LoadedResourcePaths.Select(path => UnloadAsync(path, true)));
         }
-
     }
 }
