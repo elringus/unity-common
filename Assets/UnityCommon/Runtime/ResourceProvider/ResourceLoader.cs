@@ -23,7 +23,7 @@ namespace UnityCommon
         /// </summary>
         protected List<IResourceProvider> Providers { get; }
         /// <summary>
-        /// Full paths to the resources loaded by this loaded.
+        /// Full paths to the resources loaded by this loader.
         /// </summary>
         protected HashSet<string> LoadedResourcePaths { get; }
 
@@ -84,7 +84,8 @@ namespace UnityCommon
             if (!isFullPath) path = BuildFullPath(path);
 
             var resource = Providers.LoadResource<TResource>(path);
-            if (resource.IsValid) LoadedResourcePaths.Add(path);
+            if (resource != null && resource.IsValid)
+                LoadedResourcePaths.Add(resource.Path);
             return resource;
         }
 
@@ -93,7 +94,8 @@ namespace UnityCommon
             if (!isFullPath) path = BuildFullPath(path);
 
             var resource = await Providers.LoadResourceAsync<TResource>(path);
-            if (resource.IsValid) LoadedResourcePaths.Add(path);
+            if (resource != null && resource.IsValid)
+                LoadedResourcePaths.Add(resource.Path);
             return resource;
         }
 
@@ -103,7 +105,8 @@ namespace UnityCommon
 
             var resources = Providers.LoadResources<TResource>(path);
             foreach (var resource in resources)
-                if (resource.IsValid) LoadedResourcePaths.Add(resource.Path);
+                if (resource != null && resource.IsValid)
+                    LoadedResourcePaths.Add(resource.Path);
             return resources;
         }
         
@@ -113,7 +116,8 @@ namespace UnityCommon
 
             var resources = await Providers.LoadResourcesAsync<TResource>(path);
             foreach (var resource in resources)
-                if (resource.IsValid) LoadedResourcePaths.Add(resource.Path);
+                if (resource != null && resource.IsValid)
+                    LoadedResourcePaths.Add(resource.Path);
             return resources;
         }
 
@@ -154,13 +158,17 @@ namespace UnityCommon
         public override void Unload (string path, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
+
             Providers.UnloadResource(path);
+            LoadedResourcePaths.Remove(path);
         }
 
         public override async Task UnloadAsync (string path, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
+
             await Providers.UnloadResourceAsync(path);
+            LoadedResourcePaths.Remove(path);
         }
 
         /// <summary>
