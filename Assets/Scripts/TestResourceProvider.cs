@@ -7,8 +7,12 @@ using UnityEngine;
 
 public class TestResourceProvider : MonoBehaviour
 {
+    [Serializable]
+    public class PathToObj { public string Path; public UnityEngine.Object Object; }
+
     public SpriteRenderer SpriteRenderer;
     public AudioSource AudioSource;
+    public PathToObj[] EditorResources;
 
     private IResourceProvider provider;
     private string text = "empty";
@@ -22,6 +26,7 @@ public class TestResourceProvider : MonoBehaviour
     private void Awake ()
     {
         provider = InitializeProjectResourceProvider();
+        //provider = InitializeEditorResourceProvider();
         //provider = InitializeGoogleDriveResourceProvider(false);
         //provider = InitializeLocalResourceProvider();
     }
@@ -61,6 +66,21 @@ public class TestResourceProvider : MonoBehaviour
         var result = (await provider.LoadResourcesAsync<TextAsset>("Text")).ToList();
         for (int i = 0; i < result.Count; i++)
             Debug.Log($"{i}: {result[i].Object.text}");
+    }
+
+    private EditorResourceProvider InitializeEditorResourceProvider ()
+    {
+        var provider = new EditorResourceProvider();
+
+        #if UNITY_EDITOR
+        foreach (var resource in EditorResources)
+        {
+            UnityEditor.AssetDatabase.TryGetGUIDAndLocalFileIdentifier(resource.Object, out string guid, out long id);
+            provider.AddResourceGuid(resource.Path, guid);
+        }
+        #endif
+
+        return provider;
     }
 
     private static ProjectResourceProvider InitializeProjectResourceProvider ()
