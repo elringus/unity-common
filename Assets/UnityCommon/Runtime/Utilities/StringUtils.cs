@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace UnityCommon
 {
@@ -232,6 +233,32 @@ namespace UnityCommon
             }
 
             return string.Format("{0:G4} {1}", size, units[unit]);
+        }
+
+        /// <summary>
+        /// Modifies the string by inserting spaces based on camel case scheme; eg, `SomeFancyName` becomes `Some Fancy Name`.
+        /// </summary>
+        /// <param name="source">The source string to modify.</param>
+        /// <param name="preserveAcronyms">Whether to account acronyms; eg when enabled `BBCChannel` will result in `BBC Channel`.</param>
+        public static string InsertCamelSpaces (this string source, bool preserveAcronyms = true)
+        {
+            if (string.IsNullOrWhiteSpace(source) || source.Length < 2)
+                return source;
+
+            var builder = new StringBuilder(source.Length * 2);
+
+            builder.Append(source[0]);
+            for (int i = 1; i < source.Length; i++)
+            {
+                if (char.IsUpper(source[i]))
+                {
+                    if ((source[i - 1] != ' ' && !char.IsUpper(source[i - 1])) || (preserveAcronyms && char.IsUpper(source[i - 1]) && i < source.Length - 1 && !char.IsUpper(source[i + 1])))
+                        builder.Append(' ');
+                }
+                builder.Append(source[i]);
+            }
+
+            return builder.ToString();
         }
     }
 }
