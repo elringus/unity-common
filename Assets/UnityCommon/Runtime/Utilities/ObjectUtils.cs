@@ -70,7 +70,7 @@ namespace UnityCommon
         }
 
         /// <summary>
-        /// Checks if provided reference targets to a valid (not-destoyed) <see cref="GameObject"/>.
+        /// Checks if provided reference targets to a valid (not-destoyed) <see cref="UnityEngine.Object"/>.
         /// </summary>
         public static bool IsValid (object obj)
         {
