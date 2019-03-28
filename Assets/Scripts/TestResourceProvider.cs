@@ -7,6 +7,8 @@ using UnityEngine;
 
 public class TestResourceProvider : MonoBehaviour
 {
+    public static IResourceProvider EditorProvider;
+
     [Serializable]
     public class PathToObj { public string Path; public UnityEngine.Object Object; }
 
@@ -68,19 +70,9 @@ public class TestResourceProvider : MonoBehaviour
             Debug.Log($"{i}: {result[i].Object.text}");
     }
 
-    private EditorResourceProvider InitializeEditorResourceProvider ()
+    private IResourceProvider InitializeEditorResourceProvider ()
     {
-        var provider = new EditorResourceProvider();
-
-        #if UNITY_EDITOR
-        foreach (var resource in EditorResources)
-        {
-            UnityEditor.AssetDatabase.TryGetGUIDAndLocalFileIdentifier(resource.Object, out string guid, out long id);
-            provider.AddResourceGuid(resource.Path, guid);
-        }
-        #endif
-
-        return provider;
+        return EditorProvider;
     }
 
     private static ProjectResourceProvider InitializeProjectResourceProvider ()
