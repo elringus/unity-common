@@ -69,13 +69,18 @@ namespace UnityCommon
         {
             if (!resource.IsValid) return;
 
-            // Non-asset resources could be created when using type redirectors.
+            // Non-asset resources are created when using type redirectors.
             if (redirectors.Count > 0 && redirectors.ContainsKey(resource.Object.GetType()))
             {
+                Debug.Log(resource.Path);
                 if (!Application.isPlaying) UnityEngine.Object.DestroyImmediate(resource.Object);
                 else UnityEngine.Object.Destroy(resource.Object);
                 return;
             }
+
+            // Can't unload prefabs: https://forum.unity.com/threads/393385.
+            // TODO: Replace the project provider with addressable system in Unity 2019?
+            if (resource.Object is GameObject) return;
 
             Resources.UnloadAsset(resource.Object);
         }
@@ -94,7 +99,7 @@ namespace UnityCommon
 
             var resourceType = redirector != null ? redirector.RedirectType : typeof(T);
             var obj = Resources.Load(resource.Path, resourceType);
-            resource.Object = redirector != null ? redirector.ToSource<T>(obj) : (T)obj;
+            resource.Object = redirector != null ? redirector.ToSource<T>(obj) : obj as T;
             return resource;
         }
 

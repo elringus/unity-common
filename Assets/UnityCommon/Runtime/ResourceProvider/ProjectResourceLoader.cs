@@ -26,7 +26,7 @@ namespace UnityCommon
 
             var resourceType = redirector != null ? redirector.RedirectType : typeof(TResource);
             resourceRequest = await Resources.LoadAsync(Resource.Path, resourceType);
-            Resource.Object = redirector != null ? await redirector.ToSourceAsync<TResource>(resourceRequest.asset) : (TResource)(object)resourceRequest.asset;
+            Resource.Object = redirector is null ? resourceRequest.asset as TResource : await redirector.ToSourceAsync<TResource>(resourceRequest.asset);
 
             logAction?.Invoke($"Resource '{Resource.Path}' loaded over {Time.time - startTime:0.###} seconds.");
 
