@@ -2,20 +2,25 @@
 using UnityEditor;
 using UnityEngine;
 
-[InitializeOnLoad]
 public class SetEditorProviderToTestScript
 {
-    static SetEditorProviderToTestScript ()
+    [InitializeOnLoadMethod]
+    private static void InitializeEditorProvider ()
     {
-        var provider = new EditorResourceProvider();
-        var editorResources = Object.FindObjectOfType<TestResourceProvider>().EditorResources;
+        EditorApplication.playModeStateChanged += (PlayModeStateChange playMode) => {
+            if (playMode != PlayModeStateChange.ExitingEditMode) return; // Run before entering play mode.
 
-        foreach (var resource in editorResources)
-        {
-            AssetDatabase.TryGetGUIDAndLocalFileIdentifier(resource.Object, out string guid, out long id);
-            provider.AddResourceGuid(resource.Path, guid);
-        }
+            var provider = new EditorResourceProvider();
+            var testProviderObj = Object.FindObjectOfType<TestResourceProvider>();
+            if (!ObjectUtils.IsValid(testProviderObj)) return;
 
-        TestResourceProvider.EditorProvider = provider;
+            foreach (var resource in testProviderObj.EditorResources)
+            {
+                AssetDatabase.TryGetGUIDAndLocalFileIdentifier(resource.Object, out string guid, out long id);
+                provider.AddResourceGuid(resource.Path, guid);
+            }
+
+            TestResourceProvider.EditorProvider = provider;
+        };
     }
 }

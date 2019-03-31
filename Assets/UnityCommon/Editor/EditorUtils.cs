@@ -12,6 +12,28 @@ namespace UnityCommon
     public static class EditorUtils
     {
         /// <summary>
+        /// Performs <see cref="AssetDatabase.AssetPathToGUID(string)"/> and <see cref="AssetDatabase.LoadAssetAtPath(string, Type)"/>.
+        /// Will return null in case asset with the provided GUID doesn't exist.
+        /// </summary>
+        public static Object LoadAssetByGuid (string guid, Type type)
+        {
+            var path = AssetDatabase.AssetPathToGUID(guid);
+            if (string.IsNullOrEmpty(path)) return null;
+            return AssetDatabase.LoadAssetAtPath(path, type);
+        }
+
+        /// <summary>
+        /// Performs <see cref="AssetDatabase.AssetPathToGUID(string)"/> and <see cref="AssetDatabase.LoadAllAssetsAtPath(string)"/>.
+        /// Will return null in case asset with the provided GUID doesn't exist.
+        /// </summary>
+        public static T LoadAssetByGuid<T> (string guid, Type type) where T : Object
+        {
+            var path = AssetDatabase.AssetPathToGUID(guid);
+            if (string.IsNullOrEmpty(path)) return null;
+            return AssetDatabase.LoadAssetAtPath<T>(path);
+        }
+
+        /// <summary>
         /// For the provided editor object, will assign all the readonly <see cref="SerializedProperty"/> fields with the references to the corresponding fields of the edited object
         /// and static readonly <see cref="GUIContent"/> fields with the value of <see cref="TooltipAttribute"/> assigned to the corresponding fields of the edited object.
         /// Editor fields should be named after the edited fields (case doesn't matter), but end with `Property` for <see cref="SerializedProperty"/> and `Content` for <see cref="GUIContent"/>.
