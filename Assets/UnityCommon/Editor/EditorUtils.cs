@@ -17,7 +17,7 @@ namespace UnityCommon
         /// </summary>
         public static Object LoadAssetByGuid (string guid, Type type)
         {
-            var path = AssetDatabase.AssetPathToGUID(guid);
+            var path = AssetDatabase.GUIDToAssetPath(guid);
             if (string.IsNullOrEmpty(path)) return null;
             return AssetDatabase.LoadAssetAtPath(path, type);
         }
@@ -28,7 +28,7 @@ namespace UnityCommon
         /// </summary>
         public static T LoadAssetByGuid<T> (string guid, Type type) where T : Object
         {
-            var path = AssetDatabase.AssetPathToGUID(guid);
+            var path = AssetDatabase.GUIDToAssetPath(guid);
             if (string.IsNullOrEmpty(path)) return null;
             return AssetDatabase.LoadAssetAtPath<T>(path);
         }
