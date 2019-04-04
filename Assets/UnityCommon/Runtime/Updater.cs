@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Linq;
 using UnityEngine;
 
 namespace UnityCommon
 {
     public class Updater : MonoBehaviour
     {
-        public float UpdateDelay { get { return updateDelay; } set { updateDelay = value; } }
+        public float UpdateDelay { get => updateDelay; set => updateDelay = value; }
 
         [SerializeField] private float updateDelay = 0f;
 
@@ -32,12 +31,12 @@ namespace UnityCommon
 
         public void AddAction (Action action)
         {
-            actions = actions.Append(action);
+            ArrayUtils.Add(ref actions, action);
         }
 
         public void RemoveAction (Action action)
         {
-            actions = actions.Except(new Action[1] { action }).ToArray();
+            ArrayUtils.Remove(ref actions, action);
         }
     }
 }
