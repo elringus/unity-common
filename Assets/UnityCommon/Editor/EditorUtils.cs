@@ -12,18 +12,81 @@ namespace UnityCommon
     public static class EditorUtils
     {
         /// <summary>
+        /// Gets strongly typed value of a <see cref="SerializedPropertyType.Generic"/> <see cref="SerializedProperty"/> using reflection.
+        /// </summary>
+        public static TValue GetGenericValue<TValue> (this SerializedProperty property)
+        {
+            if (property is null || property.propertyType != SerializedPropertyType.Generic)
+                throw new NullReferenceException("The property is null or not generic.");
+
+            var targetObect = property.serializedObject.targetObject as object;
+            var propertyPath = property.propertyPath;
+            var paths = propertyPath.Split('.');
+            var fieldInfo = default(FieldInfo);
+
+            for (int i = 0; i < paths.Length; i++)
+            {
+                var path = paths[i];
+                if (targetObect == null)
+                    throw new NullReferenceException("Can't set a value on a null instance.");
+
+                var type = targetObect.GetType();
+                if (path == "Array")
+                {
+                    path = paths[++i];
+
+                    var array = targetObect as System.Collections.IEnumerable;
+                    if (array is null)
+                        throw new ArgumentException($"Property at path '{propertyPath}' can't be parsed: '{paths[i - 2]}' is not an enumerable.");
+
+                    var indexString = path.Split('[', ']');
+                    var index = -1;
+
+                    if (indexString is null || indexString.Length < 2)
+                        throw new FormatException($"Property path '{propertyPath}' is malformed.");
+
+                    if (!int.TryParse(indexString[1], out index))
+                        throw new FormatException($"Property path '{propertyPath}' is malformed.");
+
+                    if (i == (paths.Length - 1)) // Our property is an array.
+                    {
+                        var targetArray = (System.Collections.IList)targetObect;
+                        return (TValue)targetArray[index];
+                    }
+
+                    var elementIndex = 0; // Continue traversing the path chain over the array.
+                    foreach (var element in array)
+                    {
+                        if (elementIndex == index)
+                        {
+                            targetObect = element;
+                            break;
+                        }
+                        elementIndex++;
+                    }
+                    continue;
+                }
+
+                fieldInfo = type.GetFieldWithInheritence(path, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                if (fieldInfo == null)
+                    throw new MissingFieldException($"The field '{path}' in '{propertyPath}' could not be found.");
+
+                if (i < paths.Length - 1)
+                    targetObect = fieldInfo.GetValue(targetObect);
+            }
+
+            var valueType = typeof(TValue);
+            if (valueType is null || fieldInfo.FieldType is null || !valueType.IsAssignableFrom(fieldInfo.FieldType))
+                throw new InvalidCastException($"Cannot cast '{valueType}' into field type '{fieldInfo.FieldType}'.");
+
+            return (TValue)fieldInfo.GetValue(targetObect);
+        }
+
+        /// <summary>
         /// Sets value to a <see cref="SerializedPropertyType.Generic"/> <see cref="SerializedProperty"/> using reflection.
         /// </summary>
         public static void SetGenericValue (this SerializedProperty property, object value)
         {
-            FieldInfo GetFieldWithInheritence (Type type, string fieldName)
-            {
-                if (type is null) return null;
-                var flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
-                var field = type.GetField(fieldName, flags);
-                return field ?? GetFieldWithInheritence(type.BaseType, fieldName);
-            }
-
             if (property is null || property.propertyType != SerializedPropertyType.Generic)
                 throw new NullReferenceException("The property is null or not generic.");
 
@@ -76,7 +139,7 @@ namespace UnityCommon
                     continue;
                 }
 
-                fieldInfo = GetFieldWithInheritence(type, path);
+                fieldInfo = type.GetFieldWithInheritence(path, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
                 if (fieldInfo == null)
                     throw new MissingFieldException($"The field '{path}' in '{propertyPath}' could not be found.");
 
