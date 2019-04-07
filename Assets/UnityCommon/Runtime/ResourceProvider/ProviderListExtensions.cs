@@ -42,7 +42,7 @@ namespace UnityCommon
         /// </summary>
         public static Resource<T> LoadResource<T> (this List<IResourceProvider> providers, string path) where T : UnityEngine.Object
         {
-            var resource = default(Resource<T>);
+            var resource = new Resource<T>(path);
             if (providers.Count == 1)
                 resource = providers[0].LoadResource<T>(path);
             else
@@ -63,7 +63,7 @@ namespace UnityCommon
         /// </summary>
         public static async Task<Resource<T>> LoadResourceAsync<T> (this List<IResourceProvider> providers, string path) where T : UnityEngine.Object
         {
-            var resource = default(Resource<T>);
+            var resource = new Resource<T>(path);
             if (providers.Count == 1)
                 resource = await providers[0].LoadResourceAsync<T>(path);
             else
