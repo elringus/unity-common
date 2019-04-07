@@ -185,7 +185,8 @@ namespace UnityCommon
         /// </summary>
         public override async Task UnloadAllAsync ()
         {
-            await Task.WhenAll(LoadedResourcePaths.Select(path => UnloadAsync(path, true)));
+            var paths = LoadedResourcePaths.ToList();
+            await Task.WhenAll(paths.Select(path => UnloadAsync(path, true)));
         }
     }
 }

@@ -34,7 +34,7 @@ namespace UnityCommon
         public static T LoadEditorResource<T> (string path, Dictionary<string, string> pathToGuidMap) where T : UnityEngine.Object
         {
             #if UNITY_EDITOR
-            if (string.IsNullOrEmpty(path) || !pathToGuidMap.TryGetValue(path, out var resourceGuid))
+            if (string.IsNullOrEmpty(path) || !pathToGuidMap.TryGetValue(path, out var resourceGuid) || string.IsNullOrEmpty(resourceGuid))
             {
                 Debug.LogError($"Resource '{path}' failed to load: resource path is invalid or wasn't mapped to an editor asset GUID.");
                 return null;
@@ -43,7 +43,7 @@ namespace UnityCommon
             var assetPath = UnityEditor.AssetDatabase.GUIDToAssetPath(resourceGuid);
             if (string.IsNullOrEmpty(assetPath))
             {
-                Debug.LogError($"Resource '{path}' failed to load: AssetDatabase failed to find asset path by the mapped editor asset GUID.");
+                Debug.LogError($"Resource '{path}' failed to load: AssetDatabase failed to find asset path by the mapped editor asset GUID ({resourceGuid}).");
                 return null;
             }
 
