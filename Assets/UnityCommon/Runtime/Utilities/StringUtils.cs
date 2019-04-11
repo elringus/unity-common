@@ -246,14 +246,16 @@ namespace UnityCommon
             if (string.IsNullOrWhiteSpace(source) || source.Length < 2)
                 return source;
 
+            bool IsUpperOrNumber (char ch) => char.IsUpper(ch) || char.IsNumber(ch);
+
             var builder = new StringBuilder(source.Length * 2);
 
             builder.Append(source[0]);
             for (int i = 1; i < source.Length; i++)
             {
-                if (char.IsUpper(source[i]))
+                if (IsUpperOrNumber(source[i]))
                 {
-                    if ((source[i - 1] != insert && !char.IsUpper(source[i - 1])) || (preserveAcronyms && char.IsUpper(source[i - 1]) && i < source.Length - 1 && !char.IsUpper(source[i + 1])))
+                    if ((source[i - 1] != insert && !IsUpperOrNumber(source[i - 1])) || (preserveAcronyms && IsUpperOrNumber(source[i - 1]) && i < source.Length - 1 && !IsUpperOrNumber(source[i + 1])))
                         builder.Append(insert);
                 }
                 builder.Append(source[i]);
