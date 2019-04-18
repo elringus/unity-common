@@ -60,11 +60,14 @@ namespace UnityCommon
                 case SelectionState.Pressed:
                     tintColor = LabelColorBlock.pressedColor;
                     break;
+                case SelectionState.Selected:
+                    tintColor = LabelColorBlock.selectedColor;
+                    break;
                 case SelectionState.Disabled:
                     tintColor = LabelColorBlock.disabledColor;
                     break;
                 default:
-                    tintColor = Color.black;
+                    tintColor = Color.white;
                     break;
             }
 
