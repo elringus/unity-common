@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine;
 
 namespace UnityCommon
 {
@@ -10,25 +9,29 @@ namespace UnityCommon
         public float StartValue { get; set; }
         public float TargetValue { get; set; }
         public float TweenDuration { get; set; }
+        public EasingType EasingType { get; }
         public bool IsTimeScaleIgnored { get; set; }
-        public bool SmoothStep { get; set; }
-        public bool IsTargetValid { get { return OnFloatTween != null; } }
+        public bool IsTargetValid => OnFloatTween != null;
 
-        public FloatTween (float from, float to, float time, Action<float> onTween, bool ignoreTimeScale = false, bool smoothStep = false)
+        private readonly EasingFunction easingFunction;
+
+        public FloatTween (float from, float to, float time, Action<float> onTween, bool ignoreTimeScale = false, EasingType easingType = default)
         {
             StartValue = from;
             TargetValue = to;
             TweenDuration = time;
+            EasingType = easingType;
             IsTimeScaleIgnored = ignoreTimeScale;
-            SmoothStep = smoothStep;
             OnFloatTween = onTween;
+
+            easingFunction = EasingType.GetEasingFunction();
         }
 
         public void TweenValue (float tweenPercent)
         {
             if (!IsTargetValid) return;
 
-            var newValue = SmoothStep ? Mathf.SmoothStep(StartValue, TargetValue, tweenPercent) : Mathf.Lerp(StartValue, TargetValue, tweenPercent);
+            var newValue = easingFunction(StartValue, TargetValue, tweenPercent);
             OnFloatTween.Invoke(newValue);
         }
 
