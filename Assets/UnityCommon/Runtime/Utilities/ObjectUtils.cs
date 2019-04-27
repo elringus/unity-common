@@ -10,6 +10,19 @@ namespace UnityCommon
     public static class ObjectUtils
     {
         /// <summary>
+        /// Invokes <see cref="Object.Destroy(Object)"/> or <see cref="Object.DestroyImmediate(Object)"/>
+        /// depending on whether the application is in play mode.
+        /// </summary>
+        public static void DestroyOrImmediate (Object obj)
+        {
+            if (obj == null) return;
+
+            if (Application.isPlaying)
+                Object.Destroy(obj);
+            else Object.DestroyImmediate(obj);
+        }
+
+        /// <summary>
         /// Wrapper over FindObjectsOfType to allow searching by any type and with predicate.
         /// Be aware this is slow and scales lineary with scene complexity.
         /// </summary>
