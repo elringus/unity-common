@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace UnityCommon
 {
@@ -40,14 +41,32 @@ namespace UnityCommon
         /// <summary>
         /// Given a local path to the resource, builds full path using predefined <see cref="PathPrefix"/>.
         /// </summary>
-        public virtual string BuildFullPath (string path)
+        public string BuildFullPath (string localPath)
         {
             if (!string.IsNullOrWhiteSpace(PathPrefix))
             {
-                if (!string.IsNullOrWhiteSpace(path)) return $"{PathPrefix}/{path}";
+                if (!string.IsNullOrWhiteSpace(localPath)) return $"{PathPrefix}/{localPath}";
                 else return PathPrefix;
             }
-            else return path;
+            else return localPath;
+        }
+
+        /// <summary>
+        /// Given a full path to the resource, builds local path using predefined <see cref="PathPrefix"/>.
+        /// </summary>
+        public string BuildLocalPath (string fullPath)
+        {
+            if (!string.IsNullOrWhiteSpace(PathPrefix))
+            {
+                var prefixAndSlash = $"{PathPrefix}/";
+                if (!fullPath.Contains(prefixAndSlash))
+                {
+                    Debug.LogError($"Failed to buil local path from `{fullPath}`: the provided path doesn't contain `{PathPrefix}` path prefix.");
+                    return null;
+                }
+                return fullPath.GetAfterFirst(prefixAndSlash);
+            }
+            else return fullPath;
         }
 
         public abstract void Preload (string path, bool isFullPath = false);
