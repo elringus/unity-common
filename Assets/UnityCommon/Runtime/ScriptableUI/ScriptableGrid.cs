@@ -38,7 +38,7 @@ namespace UnityCommon
             if (!SlotExists(slotId)) return;
 
             var slot = SlotsMap[slotId];
-            ObjectUtils.DestroyOrImmediate(slot);
+            ObjectUtils.DestroyOrImmediate(slot.gameObject);
             SlotsMap.Remove(slotId);
 
             Paginate();
