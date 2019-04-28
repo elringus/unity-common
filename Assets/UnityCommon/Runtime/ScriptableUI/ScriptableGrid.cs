@@ -9,6 +9,7 @@ namespace UnityCommon
     public abstract class ScriptableGrid<TSlot> : ScriptableUIComponent<GridLayoutGroup> where TSlot : ScriptableGridSlot
     {
         public TSlot SlotPrototype => slotPrototype;
+        public int SlotCount => SlotsMap.Count;
         public int PageCount => Mathf.CeilToInt(transform.childCount / (float)slotsPerPage);
 
         protected Dictionary<string, TSlot> SlotsMap { get; private set; } = new Dictionary<string, TSlot>();
@@ -52,6 +53,8 @@ namespace UnityCommon
         }
 
         public virtual TSlot GetSlot (string slotId) => SlotsMap.TryGetValue(slotId, out var slot) ? slot : null;
+
+        public virtual List<TSlot> GetAllSlots () => SlotsMap.Values.ToList();
 
         public virtual bool SlotExists (string slotId) => SlotsMap.ContainsKey(slotId);
 
