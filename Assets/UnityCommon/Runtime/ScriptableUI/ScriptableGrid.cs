@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -41,6 +42,13 @@ namespace UnityCommon
             SlotsMap.Remove(slotId);
 
             Paginate();
+        }
+
+        public virtual void RemoveAllSlots ()
+        {
+            var slotIds = SlotsMap.Values.Select(slot => slot.Id).ToList();
+            foreach (var slotId in slotIds)
+                RemoveSlot(slotId);
         }
 
         public virtual TSlot GetSlot (string slotId) => SlotsMap.TryGetValue(slotId, out var slot) ? slot : null;
