@@ -14,40 +14,40 @@ namespace UnityCommon
         {
             switch (easingType)
             {
-                case EasingType.Linear:             return Linear;
-                case EasingType.SmoothStep:         return SmoothStep;
-                case EasingType.Spring:             return Spring;
-                case EasingType.EaseInQuad:         return EaseInQuad;
-                case EasingType.EaseOutQuad:        return EaseOutQuad;
-                case EasingType.EaseInOutQuad:      return EaseInOutQuad;
-                case EasingType.EaseInCubic:        return EaseInCubic;
-                case EasingType.EaseOutCubic:       return EaseOutCubic;
-                case EasingType.EaseInOutCubic:     return EaseInOutCubic;
-                case EasingType.EaseInQuart:        return EaseInQuart;
-                case EasingType.EaseOutQuart:       return EaseOutQuart;
-                case EasingType.EaseInOutQuart:     return EaseInOutQuart;
-                case EasingType.EaseInQuint:        return EaseInQuint;
-                case EasingType.EaseOutQuint:       return EaseOutQuint;
-                case EasingType.EaseInOutQuint:     return EaseInOutQuint;
-                case EasingType.EaseInSine:         return EaseInSine;
-                case EasingType.EaseOutSine:        return EaseOutSine;
-                case EasingType.EaseInOutSine:      return EaseInOutSine;
-                case EasingType.EaseInExpo:         return EaseInExpo;
-                case EasingType.EaseOutExpo:        return EaseOutExpo;
-                case EasingType.EaseInOutExpo:      return EaseInOutExpo;
-                case EasingType.EaseInCirc:         return EaseInCirc;
-                case EasingType.EaseOutCirc:        return EaseOutCirc;
-                case EasingType.EaseInOutCirc:      return EaseInOutCirc;
-                case EasingType.EaseInBounce:       return EaseInBounce;
-                case EasingType.EaseOutBounce:      return EaseOutBounce;
-                case EasingType.EaseInOutBounce:    return EaseInOutBounce;
-                case EasingType.EaseInBack:         return EaseInBack;
-                case EasingType.EaseOutBack:        return EaseOutBack;
-                case EasingType.EaseInOutBack:      return EaseInOutBack;
-                case EasingType.EaseInElastic:      return EaseInElastic;
-                case EasingType.EaseOutElastic:     return EaseOutElastic;
-                case EasingType.EaseInOutElastic:   return EaseInOutElastic;
-                default:                            return null;
+                case EasingType.Linear: return Linear;
+                case EasingType.SmoothStep: return SmoothStep;
+                case EasingType.Spring: return Spring;
+                case EasingType.EaseInQuad: return EaseInQuad;
+                case EasingType.EaseOutQuad: return EaseOutQuad;
+                case EasingType.EaseInOutQuad: return EaseInOutQuad;
+                case EasingType.EaseInCubic: return EaseInCubic;
+                case EasingType.EaseOutCubic: return EaseOutCubic;
+                case EasingType.EaseInOutCubic: return EaseInOutCubic;
+                case EasingType.EaseInQuart: return EaseInQuart;
+                case EasingType.EaseOutQuart: return EaseOutQuart;
+                case EasingType.EaseInOutQuart: return EaseInOutQuart;
+                case EasingType.EaseInQuint: return EaseInQuint;
+                case EasingType.EaseOutQuint: return EaseOutQuint;
+                case EasingType.EaseInOutQuint: return EaseInOutQuint;
+                case EasingType.EaseInSine: return EaseInSine;
+                case EasingType.EaseOutSine: return EaseOutSine;
+                case EasingType.EaseInOutSine: return EaseInOutSine;
+                case EasingType.EaseInExpo: return EaseInExpo;
+                case EasingType.EaseOutExpo: return EaseOutExpo;
+                case EasingType.EaseInOutExpo: return EaseInOutExpo;
+                case EasingType.EaseInCirc: return EaseInCirc;
+                case EasingType.EaseOutCirc: return EaseOutCirc;
+                case EasingType.EaseInOutCirc: return EaseInOutCirc;
+                case EasingType.EaseInBounce: return EaseInBounce;
+                case EasingType.EaseOutBounce: return EaseOutBounce;
+                case EasingType.EaseInOutBounce: return EaseInOutBounce;
+                case EasingType.EaseInBack: return EaseInBack;
+                case EasingType.EaseOutBack: return EaseOutBack;
+                case EasingType.EaseInOutBack: return EaseInOutBack;
+                case EasingType.EaseInElastic: return EaseInElastic;
+                case EasingType.EaseOutElastic: return EaseOutElastic;
+                case EasingType.EaseInOutElastic: return EaseInOutElastic;
+                default: return null;
             }
         }
 

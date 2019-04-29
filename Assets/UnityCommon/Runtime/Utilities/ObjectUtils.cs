@@ -23,6 +23,16 @@ namespace UnityCommon
         }
 
         /// <summary>
+        /// Invokes <see cref="DestroyOrImmediate(Object)"/> on each direct descendent of the provided transform.
+        /// </summary>
+        public static void DestroyAllChilds (Transform trs)
+        {
+            var childCount = trs.childCount;
+            for (int i = 0; i < childCount; i++)
+                DestroyOrImmediate(trs.GetChild(i).gameObject);
+        }
+
+        /// <summary>
         /// Wrapper over FindObjectsOfType to allow searching by any type and with predicate.
         /// Be aware this is slow and scales lineary with scene complexity.
         /// </summary>
