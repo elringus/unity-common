@@ -6,19 +6,19 @@ namespace UnityCommon
     public static class StringUtils
     {
         /// <summary>
-        /// Whether compared string is literally-equal (independent of case).
-        /// </summary>
-        public static bool LEquals (this string content, string comparedString)
-        {
-            return content.Equals(comparedString, StringComparison.OrdinalIgnoreCase);
-        }
-
-        /// <summary>
         /// Performs <see cref="string.Equals(string, string, StringComparison)"/> with <see cref="StringComparison.Ordinal"/>.
         /// </summary>
         public static bool EqualsFast (this string content, string comparedString)
         {
             return content.Equals(comparedString, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Performs <see cref="string.Equals(string, string, StringComparison)"/> with <see cref="StringComparison.OrdinalIgnoreCase"/>.
+        /// </summary>
+        public static bool EqualsFastIgnoreCase (this string content, string comparedString)
+        {
+            return content.Equals(comparedString, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>

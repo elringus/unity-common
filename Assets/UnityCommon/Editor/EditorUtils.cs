@@ -198,11 +198,11 @@ namespace UnityCommon
 
             foreach (var serializedField in serializedFields)
             {
-                var serializedProperty = editorSerializedProperties.Find(p => p.Name.LEquals(serializedField.Name + "Property"));
+                var serializedProperty = editorSerializedProperties.Find(p => p.Name.EqualsFastIgnoreCase(serializedField.Name + "Property"));
                 if (serializedProperty != null)
                     serializedProperty.SetValue(editor, editor.serializedObject.FindProperty(serializedField.Name));
 
-                var contentProperty = editorContentProperties.Find(p => p.Name.LEquals(serializedField.Name + "Content"));
+                var contentProperty = editorContentProperties.Find(p => p.Name.EqualsFastIgnoreCase(serializedField.Name + "Content"));
                 if (contentProperty != null && contentProperty.GetValue(editor) is null)
                 {
                     var contentText = ObjectNames.NicifyVariableName(serializedField.Name);
