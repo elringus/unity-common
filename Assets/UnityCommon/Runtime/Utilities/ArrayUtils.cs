@@ -1,11 +1,37 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 namespace UnityCommon
 {
     public static class ArrayUtils
     {
+        public static Vector2 ToVector2 (float?[] array, Vector2 @default = default)
+        {
+            return new Vector2(
+                array?.ElementAtOrDefault(0) ?? @default.x,
+                array?.ElementAtOrDefault(1) ?? @default.y);
+        }
+
+        public static Vector3 ToVector3 (float?[] array, Vector3 @default = default)
+        {
+            return new Vector3(
+                array?.ElementAtOrDefault(0) ?? @default.x,
+                array?.ElementAtOrDefault(1) ?? @default.y,
+                array?.ElementAtOrDefault(2) ?? @default.z);
+        }
+
+        public static Vector4 ToVector4 (float?[] array, Vector4 @default = default)
+        {
+            return new Vector4(
+                array?.ElementAtOrDefault(0) ?? @default.x,
+                array?.ElementAtOrDefault(1) ?? @default.y,
+                array?.ElementAtOrDefault(2) ?? @default.z,
+                array?.ElementAtOrDefault(3) ?? @default.w);
+        }
+
         /// <summary>
         /// Appends <paramref name="item"/> to the end of <paramref name="array"/>.
         /// </summary>
