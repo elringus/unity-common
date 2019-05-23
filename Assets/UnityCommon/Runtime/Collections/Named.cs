@@ -6,12 +6,12 @@ namespace UnityCommon
     /// </summary>
     /// <typeparam name="TValue">Type of the value</typeparam>
     [System.Serializable]
-    public class NamedValue<TValue> : Pair<string, TValue>
+    public class Named<TValue> : Pair<string, TValue>
     {
         public string Name { get => Item1; set => Item1 = value; }
         public TValue Value { get => Item2; set => Item2 = value; }
 
-        public NamedValue (string name, TValue value)
+        public Named (string name, TValue value)
             : base(name, value) { }
     }
 }
