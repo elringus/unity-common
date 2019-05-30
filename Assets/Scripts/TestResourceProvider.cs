@@ -27,9 +27,9 @@ public class TestResourceProvider : MonoBehaviour
 
     private void Awake ()
     {
-        provider = InitializeProjectResourceProvider();
+        //provider = InitializeProjectResourceProvider();
         //provider = InitializeEditorResourceProvider();
-        //provider = InitializeGoogleDriveResourceProvider(false);
+        provider = InitializeGoogleDriveResourceProvider(false);
         //provider = InitializeLocalResourceProvider();
     }
 
