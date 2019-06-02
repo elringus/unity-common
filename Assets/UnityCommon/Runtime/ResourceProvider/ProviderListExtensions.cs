@@ -42,19 +42,17 @@ namespace UnityCommon
         /// </summary>
         public static Resource<T> LoadResource<T> (this List<IResourceProvider> providers, string path) where T : UnityEngine.Object
         {
-            var resource = new Resource<T>(path);
             if (providers.Count == 1)
-                resource = providers[0].LoadResource<T>(path);
+                return providers[0].LoadResource<T>(path);
             else
             {
                 foreach (var provider in providers)
                 {
                     if (!provider.ResourceExists<T>(path)) continue;
-                    resource = provider.LoadResource<T>(path);
-                    break;
+                    return provider.LoadResource<T>(path);
                 }
             }
-            return resource;
+            return new Resource<T>(path, null, null);
         }
 
         /// <summary>
@@ -63,19 +61,17 @@ namespace UnityCommon
         /// </summary>
         public static async Task<Resource<T>> LoadResourceAsync<T> (this List<IResourceProvider> providers, string path) where T : UnityEngine.Object
         {
-            var resource = new Resource<T>(path);
             if (providers.Count == 1)
-                resource = await providers[0].LoadResourceAsync<T>(path);
+                return await providers[0].LoadResourceAsync<T>(path);
             else
             {
                 foreach (var provider in providers)
                 {
                     if (!await provider.ResourceExistsAsync<T>(path)) continue;
-                    resource = await provider.LoadResourceAsync<T>(path);
-                    break;
+                    return await provider.LoadResourceAsync<T>(path);
                 }
             }
-            return resource;
+            return new Resource<T>(path, null, null);
         }
 
         /// <summary>
@@ -91,10 +87,10 @@ namespace UnityCommon
             {
                 foreach (var provider in providers)
                 {
-                    var locatedResources =  provider.LocateResources<T>(path);
-                    foreach (var locatedResource in locatedResources)
-                        if (!resources.Any(r => r.Path == locatedResource.Path))
-                            resources.Add( provider.LoadResource<T>(locatedResource.Path));
+                    var locatedResourcePaths = provider.LocateResources<T>(path);
+                    foreach (var locatedResourcePath in locatedResourcePaths)
+                        if (!resources.Any(r => r.Path.EqualsFast(locatedResourcePath)))
+                            resources.Add(provider.LoadResource<T>(locatedResourcePath));
                 }
             }
             return resources;
@@ -113,10 +109,10 @@ namespace UnityCommon
             {
                 foreach (var provider in providers)
                 {
-                    var locatedResources = await provider.LocateResourcesAsync<T>(path);
-                    foreach (var locatedResource in locatedResources)
-                        if (!resources.Any(r => r.Path == locatedResource.Path))
-                            resources.Add(await provider.LoadResourceAsync<T>(locatedResource.Path));
+                    var locatedResourcePaths = await provider.LocateResourcesAsync<T>(path);
+                    foreach (var locatedResourcePath in locatedResourcePaths)
+                        if (!resources.Any(r => r.Path.EqualsFast(locatedResourcePath)))
+                            resources.Add(await provider.LoadResourceAsync<T>(locatedResourcePath));
                 }
             }
             return resources;
@@ -126,15 +122,15 @@ namespace UnityCommon
         /// Locates all the resources at the provided path from all the providers.
         /// When a resource is available in multiple providers, will only get the one from the higher-priority provider.
         /// </summary>
-        public static IEnumerable<Resource<T>> LocateResources<T> (this List<IResourceProvider> providers, string path) where T : UnityEngine.Object
+        public static IEnumerable<string> LocateResources<T> (this List<IResourceProvider> providers, string path) where T : UnityEngine.Object
         {
-            var result = new List<Resource<T>>();
+            var result = new List<string>();
             foreach (var provider in providers)
             {
-                var locatedResources =  provider.LocateResources<T>(path);
-                foreach (var locatedResource in locatedResources)
-                    if (!result.Any(r => r.Path == locatedResource.Path))
-                        result.Add(locatedResource);
+                var locatedResourcePaths = provider.LocateResources<T>(path);
+                foreach (var locatedResourcePath in locatedResourcePaths)
+                    if (!result.Any(p => p.EqualsFast(locatedResourcePath)))
+                        result.Add(locatedResourcePath);
             }
             return result;
         }
@@ -143,15 +139,15 @@ namespace UnityCommon
         /// Locates all the resources at the provided path from all the providers.
         /// When a resource is available in multiple providers, will only get the one from the higher-priority provider.
         /// </summary>
-        public static async Task<IEnumerable<Resource<T>>> LocateResourcesAsync<T> (this List<IResourceProvider> providers, string path) where T : UnityEngine.Object
+        public static async Task<IEnumerable<string>> LocateResourcesAsync<T> (this List<IResourceProvider> providers, string path) where T : UnityEngine.Object
         {
-            var result = new List<Resource<T>>();
+            var result = new List<string>();
             foreach (var provider in providers)
             {
-                var locatedResources = await provider.LocateResourcesAsync<T>(path);
-                foreach (var locatedResource in locatedResources)
-                    if (!result.Any(r => r.Path == locatedResource.Path))
-                        result.Add(locatedResource);
+                var locatedResourcePaths = await provider.LocateResourcesAsync<T>(path);
+                foreach (var locatedResourcePath in locatedResourcePaths)
+                    if (!result.Any(p => p.EqualsFast(locatedResourcePath)))
+                        result.Add(locatedResourcePath);
             }
             return result;
         }
@@ -167,7 +163,7 @@ namespace UnityCommon
             {
                 var locatedFolders = provider.LocateFolders(path);
                 foreach (var locatedFolder in locatedFolders)
-                    if (!result.Any(r => r.Path == locatedFolder.Path))
+                    if (!result.Any(f => f.Path.EqualsFast(locatedFolder.Path)))
                         result.Add(locatedFolder);
             }
             return result;
@@ -184,7 +180,7 @@ namespace UnityCommon
             {
                 var locatedFolders = await provider.LocateFoldersAsync(path);
                 foreach (var locatedFolder in locatedFolders)
-                    if (!result.Any(r => r.Path == locatedFolder.Path))
+                    if (!result.Any(r => r.Path.EqualsFast(locatedFolder.Path)))
                         result.Add(locatedFolder);
             }
             return result;

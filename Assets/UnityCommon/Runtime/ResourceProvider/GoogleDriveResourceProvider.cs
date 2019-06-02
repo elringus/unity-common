@@ -55,25 +55,26 @@ namespace UnityCommon
         /// String used to replace slashes in file paths.
         /// </summary>
         public const string SlashReplace = "@@";
+
         /// <summary>
         /// Path to the drive folder where resources are located.
         /// </summary>
-        public string DriveRootPath { get; private set; }
+        public readonly string DriveRootPath;
         /// <summary>
         /// Limits concurrent requests count using queueing.
         /// </summary>
-        public int ConcurrentRequestsLimit { get; private set; }
+        public readonly int ConcurrentRequestsLimit;
         /// <summary>
         /// Caching policy to use.
         /// </summary>
-        public CachingPolicyType CachingPolicy { get; private set; }
+        public readonly CachingPolicyType CachingPolicy;
         /// <summary>
         /// Current pending concurrent requests count.
         /// </summary>
         public int RequestsCount => LoadRunners.Count + LocateRunners.Count;
 
-        private Dictionary<Type, IConverter> converters = new Dictionary<Type, IConverter>();
-        private Queue<Action> requestQueue = new Queue<Action>();
+        private readonly Dictionary<Type, IConverter> converters = new Dictionary<Type, IConverter>();
+        private readonly Queue<Action> requestQueue = new Queue<Action>();
         private bool smartCachingScanPending;
 
         public GoogleDriveResourceProvider (string driveRootPath, CachingPolicyType cachingPolicy, int concurrentRequestsLimit)
@@ -136,39 +137,35 @@ namespace UnityCommon
         protected override void RunResourceLoader<T> (LoadResourceRunner<T> loader)
         {
             if (ConcurrentRequestsLimit > 0 && RequestsCount > ConcurrentRequestsLimit)
-                requestQueue.Enqueue(() => loader.Run().WrapAsync());
+                requestQueue.Enqueue(() => loader.RunAsync().WrapAsync());
             else base.RunResourceLoader(loader);
         }
 
         protected override void RunResourcesLocator<T> (LocateResourcesRunner<T> locator)
         {
             if (ConcurrentRequestsLimit > 0 && RequestsCount > ConcurrentRequestsLimit)
-                requestQueue.Enqueue(() => locator.Run().WrapAsync());
+                requestQueue.Enqueue(() => locator.RunAsync().WrapAsync());
             else base.RunResourcesLocator(locator);
         }
 
-        protected override LoadResourceRunner<T> CreateLoadResourceRunner<T> (Resource<T> resource)
+        protected override LoadResourceRunner<T> CreateLoadResourceRunner<T> (string path)
         {
-            return new GoogleDriveResourceLoader<T>(DriveRootPath, resource, ResolveConverter<T>(), LogMessage);
+            return new GoogleDriveResourceLoader<T>(this, DriveRootPath, path, ResolveConverter<T>(), LogMessage);
         }
 
         protected override LocateResourcesRunner<T> CreateLocateResourcesRunner<T> (string path)
         {
-            return new GoogleDriveResourceLocator<T>(DriveRootPath, path, ResolveConverter<T>());
+            return new GoogleDriveResourceLocator<T>(this, DriveRootPath, path, ResolveConverter<T>());
         }
 
         protected override LocateFoldersRunner CreateLocateFoldersRunner (string path)
         {
-            return new GoogleDriveFolderLocator(DriveRootPath, path);
+            return new GoogleDriveFolderLocator(this, DriveRootPath, path);
         }
 
         protected override Task UnloadResourceAsync (Resource resource)
         {
-            if (resource.IsValid)
-            {
-                if (!Application.isPlaying) UnityEngine.Object.DestroyImmediate(resource.Object);
-                else UnityEngine.Object.Destroy(resource.Object);
-            }
+            UnloadResourceBlocking(resource);
             return Task.CompletedTask;
         }
 
@@ -178,16 +175,21 @@ namespace UnityCommon
             ProcessLoadQueue();
         }
 
-        protected override void HandleResourcesLocated<T> (IEnumerable<Resource<T>> locatedResources, string path)
+        protected override void HandleResourcesLocated<T> (IEnumerable<string> locatedResourcePaths, string path)
         {
-            base.HandleResourcesLocated(locatedResources, path);
+            base.HandleResourcesLocated<T>(locatedResourcePaths, path);
             ProcessLoadQueue();
+        }
+
+        protected override void UnloadResourceBlocking (Resource resource)
+        {
+            if (!resource.IsValid) return;
+            ObjectUtils.DestroyOrImmediate(resource.Object);
         }
 
         // TODO: Support blocking mode (?).
         protected override Resource<T> LoadResourceBlocking<T> (string path) => throw new NotImplementedException();
-        protected override IEnumerable<Resource<T>> LocateResourcesBlocking<T> (string path) => throw new NotImplementedException();
-        protected override void UnloadResourceBlocking (Resource resource) => throw new NotImplementedException();
+        protected override IEnumerable<string> LocateResourcesBlocking<T> (string path) => throw new NotImplementedException();
         protected override IEnumerable<Folder> LocateFoldersBlocking (string path) => throw new NotImplementedException(); 
 
         private IRawConverter<T> ResolveConverter<T> ()

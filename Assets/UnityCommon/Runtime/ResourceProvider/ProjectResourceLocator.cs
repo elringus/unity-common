@@ -1,33 +1,29 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace UnityCommon
 {
-    public class ProjectResourceLocator<TResource> : LocateResourcesRunner<TResource> where TResource : UnityEngine.Object
+    public class ProjectResourceLocator<TResource> : LocateResourcesRunner<TResource> 
+        where TResource : UnityEngine.Object
     {
-        public string ResourcesPath { get; private set; }
+        private readonly ProjectResources projectResources;
 
-        private ProjectResources projectResources;
-
-        public ProjectResourceLocator (string resourcesPath, ProjectResources projectResources)
+        public ProjectResourceLocator (IResourceProvider provider, string resourcesPath, 
+            ProjectResources projectResources) : base (provider, resourcesPath ?? string.Empty)
         {
-            ResourcesPath = resourcesPath ?? string.Empty;
             this.projectResources = projectResources;
         }
 
-        public override async Task Run ()
+        public override Task RunAsync ()
         {
-            await base.Run();
-
-            LocatedResources = LocateProjectResources(ResourcesPath, projectResources);
-
-            HandleOnCompleted();
+            var locatedResourcePaths = LocateProjectResources(Path, projectResources);
+            SetResult(locatedResourcePaths);
+            return Task.CompletedTask;
         }
 
-        public static List<Resource<TResource>> LocateProjectResources (string path, ProjectResources projectResources)
+        public static IEnumerable<string> LocateProjectResources (string path, ProjectResources projectResources)
         {
-            return projectResources.ResourcePaths.LocateResourcePathsAtFolder(path).Select(p => new Resource<TResource>(p)).ToList();
+            return projectResources.ResourcePaths.LocateResourcePathsAtFolder(path);
         }
     }
 }

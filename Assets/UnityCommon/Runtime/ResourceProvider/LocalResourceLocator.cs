@@ -6,32 +6,30 @@ using UnityEngine;
 
 namespace UnityCommon
 {
-    public class LocalResourceLocator<TResource> : LocateResourcesRunner<TResource> where TResource : UnityEngine.Object
+    public class LocalResourceLocator<TResource> : LocateResourcesRunner<TResource> 
+        where TResource : UnityEngine.Object
     {
-        public string RootPath { get; private set; }
-        public string ResourcesPath { get; private set; }
+        public readonly string RootPath;
 
         private IRawConverter<TResource> converter;
 
-        public LocalResourceLocator (string rootPath, string resourcesPath, IRawConverter<TResource> converter)
+        public LocalResourceLocator (IResourceProvider provider, string rootPath, string resourcesPath, 
+            IRawConverter<TResource> converter) : base (provider, resourcesPath)
         {
             RootPath = rootPath;
-            ResourcesPath = resourcesPath;
             this.converter = converter;
         }
 
-        public override async Task Run ()
+        public override Task RunAsync ()
         {
-            await base.Run();
-
-            LocatedResources = LocateResources(RootPath, ResourcesPath, converter);
-
-            HandleOnCompleted();
+            var locatedResourcePaths = LocateResources(RootPath, Path, converter);
+            SetResult(locatedResourcePaths);
+            return Task.CompletedTask;
         }
 
-        public static List<Resource<TResource>> LocateResources (string rootPath, string resourcesPath, IRawConverter<TResource> converter)
+        public static List<string> LocateResources (string rootPath, string resourcesPath, IRawConverter<TResource> converter)
         {
-            var locatedResources = new List<Resource<TResource>>();
+            var locatedResources = new List<string>();
 
             // 1. Resolving parent folder.
             var folderPath = Application.dataPath;
@@ -57,13 +55,11 @@ namespace UnityCommon
                 {
                     var fileName = string.IsNullOrEmpty(result.Key.Extension) ? file.Name : file.Name.GetBeforeLast(".");
                     var filePath = string.IsNullOrEmpty(resourcesPath) ? fileName : string.Concat(resourcesPath, '/', fileName);
-                    var fileResource = new Resource<TResource>(filePath);
-                    locatedResources.Add(fileResource);
+                    locatedResources.Add(filePath);
                 }
             }
 
             return locatedResources;
         }
     }
-
 }

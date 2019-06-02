@@ -2,109 +2,72 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using UnityEngine;
 
 namespace UnityCommon
 {
     public abstract class ResourceRunner
     {
-        public enum RunnerState { Created, Running, Completed, Canceled }
+        public readonly IResourceProvider Provider;
+        public readonly string Path;
+        public readonly Type ResourceType;
 
-        public virtual RunnerState State { get; protected set; }
-        public Type ExpectedResourceType { get; protected set; }
-
-        private TaskCompletionSource<object> completionSource = new TaskCompletionSource<object>();
-
-        public virtual Task Run ()
+        public ResourceRunner (IResourceProvider provider, string path, Type resourceType)
         {
-            if (State != RunnerState.Created) Debug.LogWarning($"Resource runner started to run with state '{State}'.");
-            State = RunnerState.Running;
-            return Task.CompletedTask;
+            Provider = provider;
+            Path = path;
+            ResourceType = resourceType;
         }
 
-        public virtual void Cancel ()
-        {
-            State = RunnerState.Canceled;
-            completionSource.TrySetCanceled();
-        }
+        public TaskAwaiter GetAwaiter () => GetAwaiterImpl();
 
-        public TaskAwaiter GetAwaiter () => (completionSource.Task as Task).GetAwaiter();
+        public abstract Task RunAsync ();
+        public abstract void Cancel ();
 
-        protected virtual void HandleOnCompleted ()
-        {
-            State = RunnerState.Completed;
-            completionSource.TrySetResult(null);
-        }
+        protected abstract TaskAwaiter GetAwaiterImpl ();
     }
 
-    public class ResourceRunner<TResource> : ResourceRunner
+    public abstract class ResourceRunner<TResult> : ResourceRunner
     {
-        public ResourceRunner ()
-        {
-            ExpectedResourceType = typeof(TResource);
-        }
-    }
+        public TResult Result { get; private set; }
 
-    public class LoadResourceRunner<TResource> : ResourceRunner<TResource> where TResource : UnityEngine.Object
-    {
-        public Resource<TResource> Resource { get; protected set; }
+        private TaskCompletionSource<TResult> completionSource = new TaskCompletionSource<TResult>();
 
-        private TaskCompletionSource<Resource<TResource>> completionSource = new TaskCompletionSource<Resource<TResource>>();
+        public ResourceRunner (IResourceProvider provider, string path, Type resourceType)
+            : base(provider, path, resourceType) { }
 
-        public new TaskAwaiter<Resource<TResource>> GetAwaiter () => completionSource.Task.GetAwaiter();
+        public new TaskAwaiter<TResult> GetAwaiter () => completionSource.Task.GetAwaiter();
 
         public override void Cancel ()
         {
-            base.Cancel();
             completionSource.TrySetCanceled();
         }
 
-        protected override void HandleOnCompleted ()
+        protected void SetResult (TResult result)
         {
-            base.HandleOnCompleted();
-            completionSource.TrySetResult(Resource);
+            Result = result;
+            completionSource.TrySetResult(Result);
         }
+
+        protected override TaskAwaiter GetAwaiterImpl () => ((Task)completionSource.Task).GetAwaiter();
     }
 
-    public class LocateResourcesRunner<TResource> : ResourceRunner<TResource> where TResource : UnityEngine.Object
+    public abstract class LocateResourcesRunner<TResource> : ResourceRunner<IEnumerable<string>> 
+        where TResource : UnityEngine.Object
     {
-        public List<Resource<TResource>> LocatedResources { get; protected set; } = new List<Resource<TResource>>();
-
-        private TaskCompletionSource<List<Resource<TResource>>> completionSource = new TaskCompletionSource<List<Resource<TResource>>>();
-
-        public new TaskAwaiter<List<Resource<TResource>>> GetAwaiter () => completionSource.Task.GetAwaiter();
-
-        public override void Cancel ()
-        {
-            base.Cancel();
-            completionSource.TrySetCanceled();
-        }
-
-        protected override void HandleOnCompleted ()
-        {
-            base.HandleOnCompleted();
-            completionSource.TrySetResult(LocatedResources);
-        }
+        public LocateResourcesRunner (IResourceProvider provider, string path)
+            : base(provider, path, typeof(TResource)) { }
     }
 
-    public class LocateFoldersRunner : ResourceRunner<Folder>
+    public abstract class LoadResourceRunner<TResource> : ResourceRunner<Resource<TResource>> 
+        where TResource : UnityEngine.Object
     {
-        public List<Folder> LocatedFolders { get; protected set; } = new List<Folder>();
+        public LoadResourceRunner (IResourceProvider provider, string path)
+            : base(provider, path, typeof(TResource)) { }
+    }
 
-        private TaskCompletionSource<List<Folder>> completionSource = new TaskCompletionSource<List<Folder>>();
-
-        public new TaskAwaiter<List<Folder>> GetAwaiter () => completionSource.Task.GetAwaiter();
-
-        public override void Cancel ()
-        {
-            base.Cancel();
-            completionSource.TrySetCanceled();
-        }
-
-        protected override void HandleOnCompleted ()
-        {
-            base.HandleOnCompleted();
-            completionSource.TrySetResult(LocatedFolders);
-        }
+    public abstract class LocateFoldersRunner : ResourceRunner<IEnumerable<Folder>>
+    {
+        public LocateFoldersRunner (IResourceProvider provider, string path)
+            : base(provider, path, typeof(Folder)) { }
     }
 }

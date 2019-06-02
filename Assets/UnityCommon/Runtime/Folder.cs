@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace UnityCommon
 {
@@ -10,7 +8,7 @@ namespace UnityCommon
     [System.Serializable]
     public class Folder
     {
-        public string Path { get => path; private set => path = value; }
+        public string Path => path;
         public string Name => Path.Contains("/") ? Path.GetAfter("/") : Path;
 
         [SerializeField] string path = null;

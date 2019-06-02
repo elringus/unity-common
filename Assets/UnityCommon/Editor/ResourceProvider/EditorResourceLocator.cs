@@ -1,35 +1,29 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace UnityCommon
 {
-    public class EditorResourceLocator<TResource> : LocateResourcesRunner<TResource> where TResource : UnityEngine.Object
+    public class EditorResourceLocator<TResource> : LocateResourcesRunner<TResource> 
+        where TResource : UnityEngine.Object
     {
-        public string ResourcesPath { get; private set; }
+        private readonly IEnumerable<string> editorResourcePaths;
 
-        private IEnumerable<string> editorResourcePaths;
-
-        public EditorResourceLocator (string resourcesPath, IEnumerable<string> editorResourcePaths)
+        public EditorResourceLocator (IResourceProvider provider, string resourcesPath, 
+            IEnumerable<string> editorResourcePaths) : base (provider, resourcesPath ?? string.Empty)
         {
-            ResourcesPath = resourcesPath ?? string.Empty;
             this.editorResourcePaths = editorResourcePaths;
         }
 
-        public override async Task Run ()
+        public override Task RunAsync ()
         {
-            await base.Run();
-
-            LocatedResources = LocateProjectResources(ResourcesPath, editorResourcePaths);
-
-            HandleOnCompleted();
+            var locatedResourcePaths = LocateProjectResources(Path, editorResourcePaths);
+            SetResult(locatedResourcePaths);
+            return Task.CompletedTask;
         }
 
-        public static List<Resource<TResource>> LocateProjectResources (string path, IEnumerable<string> editorResourcePaths)
+        public static IEnumerable<string> LocateProjectResources (string path, IEnumerable<string> editorResourcePaths)
         {
-            return editorResourcePaths.LocateResourcePathsAtFolder(path)
-                .Select(p => new Resource<TResource>(p)).ToList();
+            return editorResourcePaths.LocateResourcePathsAtFolder(path);
         }
     }
-
 }

@@ -5,30 +5,28 @@ using UnityEngine;
 
 namespace UnityCommon
 {
-    public class EditorResourceLoader<TResource> : LoadResourceRunner<TResource> where TResource : UnityEngine.Object
+    public class EditorResourceLoader<TResource> : LoadResourceRunner<TResource> 
+        where TResource : UnityEngine.Object
     {
-        private Dictionary<string, string> pathToGuidMap;
-        private Action<string> logAction;
+        private readonly Dictionary<string, string> pathToGuidMap;
+        private readonly Action<string> logAction;
 
-        public EditorResourceLoader (Resource<TResource> resource, Dictionary<string, string> pathToGuidMap, Action<string> logAction)
+        public EditorResourceLoader (IResourceProvider provider, string resourcePath,
+            Dictionary<string, string> pathToGuidMap, Action<string> logAction) : base (provider, resourcePath)
         {
-            Resource = resource;
             this.pathToGuidMap = pathToGuidMap;
             this.logAction = logAction;
         }
 
-        public override async Task Run ()
+        public override Task RunAsync ()
         {
-            await base.Run();
-
             var startTime = Time.time;
-
-            Resource.Object = LoadEditorResource<TResource>(Resource?.Path, pathToGuidMap);
-
-            if (Resource.IsValid)
-                logAction?.Invoke($"Resource '{Resource.Path}' loaded over {Time.time - startTime:0.###} seconds.");
-
-            HandleOnCompleted();
+            var obj = LoadEditorResource<TResource>(Path, pathToGuidMap);
+            if (ObjectUtils.IsValid(obj))
+                logAction?.Invoke($"Resource '{Path}' loaded over {Time.time - startTime:0.###} seconds.");
+            var result = new Resource<TResource>(Path, obj, Provider);
+            SetResult(result);
+            return Task.CompletedTask;
         }
 
         public static T LoadEditorResource<T> (string path, Dictionary<string, string> pathToGuidMap) where T : UnityEngine.Object

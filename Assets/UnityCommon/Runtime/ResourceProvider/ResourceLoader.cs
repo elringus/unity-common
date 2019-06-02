@@ -140,13 +140,13 @@ namespace UnityCommon
             return resources;
         }
 
-        public virtual IEnumerable<Resource<TResource>> LocateResources (string path, bool isFullPath = false)
+        public virtual IEnumerable<string> LocateResources (string path, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
             return Providers.LocateResources<TResource>(path);
         }
 
-        public virtual async Task<IEnumerable<Resource<TResource>>> LocateResourcesAsync (string path, bool isFullPath = false)
+        public virtual async Task<IEnumerable<string>> LocateResourcesAsync (string path, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
             return await Providers.LocateResourcesAsync<TResource>(path);

@@ -34,8 +34,8 @@ namespace UnityCommon
             }
         }
 
-        private ProjectResources projectResources;
-        private Dictionary<Type, TypeRedirector> redirectors;
+        private readonly ProjectResources projectResources;
+        private readonly Dictionary<Type, TypeRedirector> redirectors;
 
         public ProjectResourceProvider ()
         {
@@ -55,14 +55,14 @@ namespace UnityCommon
             }
         }
 
-        protected override LoadResourceRunner<T> CreateLoadResourceRunner<T> (Resource<T> resource)
+        protected override LoadResourceRunner<T> CreateLoadResourceRunner<T> (string path)
         {
-            return new ProjectResourceLoader<T>(resource, redirectors.ContainsKey(typeof(T)) ? redirectors[typeof(T)] : null, LogMessage);
+            return new ProjectResourceLoader<T>(this, path, redirectors.ContainsKey(typeof(T)) ? redirectors[typeof(T)] : null, LogMessage);
         }
 
         protected override LocateResourcesRunner<T> CreateLocateResourcesRunner<T> (string path)
         {
-            return new ProjectResourceLocator<T>(path, projectResources);
+            return new ProjectResourceLocator<T>(this, path, projectResources);
         }
 
         protected override void UnloadResourceBlocking (Resource resource)
@@ -72,9 +72,7 @@ namespace UnityCommon
             // Non-asset resources are created when using type redirectors.
             if (redirectors.Count > 0 && redirectors.ContainsKey(resource.Object.GetType()))
             {
-                Debug.Log(resource.Path);
-                if (!Application.isPlaying) UnityEngine.Object.DestroyImmediate(resource.Object);
-                else UnityEngine.Object.Destroy(resource.Object);
+                ObjectUtils.DestroyOrImmediate(resource.Object);
                 return;
             }
 
@@ -94,16 +92,14 @@ namespace UnityCommon
 
         protected override Resource<T> LoadResourceBlocking<T> (string path)
         {
-            var resource = new Resource<T>(path);
             var redirector = redirectors.ContainsKey(typeof(T)) ? redirectors[typeof(T)] : null;
-
             var resourceType = redirector != null ? redirector.RedirectType : typeof(T);
-            var obj = Resources.Load(resource.Path, resourceType);
-            resource.Object = redirector != null ? redirector.ToSource<T>(obj) : obj as T;
-            return resource;
+            var obj = Resources.Load(path, resourceType);
+            var castedObj = redirector != null ? redirector.ToSource<T>(obj) : obj as T;
+            return new Resource<T>(path, castedObj, this);
         }
 
-        protected override IEnumerable<Resource<T>> LocateResourcesBlocking<T> (string path)
+        protected override IEnumerable<string> LocateResourcesBlocking<T> (string path)
         {
             return ProjectResourceLocator<T>.LocateProjectResources(path, projectResources);
         }
@@ -115,7 +111,7 @@ namespace UnityCommon
 
         protected override LocateFoldersRunner CreateLocateFoldersRunner (string path)
         {
-            return new ProjectFolderLocator(path, projectResources);
+            return new ProjectFolderLocator(this, path, projectResources);
         }
     }
 }

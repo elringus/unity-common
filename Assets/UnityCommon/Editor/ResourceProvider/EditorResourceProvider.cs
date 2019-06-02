@@ -9,7 +9,7 @@ namespace UnityCommon
     /// </summary>
     public class EditorResourceProvider : ResourceProvider
     {
-        private Dictionary<string, string> pathToGuidMap = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> pathToGuidMap = new Dictionary<string, string>();
 
         public void AddResourceGuid (string path, string guid)
         {
@@ -23,28 +23,28 @@ namespace UnityCommon
 
         public override bool SupportsType<T> () => true;
 
-        protected override LoadResourceRunner<T> CreateLoadResourceRunner<T> (Resource<T> resource)
+        protected override LoadResourceRunner<T> CreateLoadResourceRunner<T> (string path)
         {
-            return new EditorResourceLoader<T>(resource, pathToGuidMap, LogMessage);
+            return new EditorResourceLoader<T>(this, path, pathToGuidMap, LogMessage);
         }
 
         protected override LocateResourcesRunner<T> CreateLocateResourcesRunner<T> (string path)
         {
-            return new EditorResourceLocator<T>(path, pathToGuidMap.Keys);
+            return new EditorResourceLocator<T>(this, path, pathToGuidMap.Keys);
         }
 
         protected override LocateFoldersRunner CreateLocateFoldersRunner (string path)
         {
-            return new EditorFolderLocator(path, pathToGuidMap.Keys);
+            return new EditorFolderLocator(this, path, pathToGuidMap.Keys);
         }
 
         protected override Resource<T> LoadResourceBlocking<T> (string path)
         {
             var obj = EditorResourceLoader<T>.LoadEditorResource<T>(path, pathToGuidMap);
-            return ObjectUtils.IsValid(obj) ? new Resource<T>(path, obj) : null;
+            return ObjectUtils.IsValid(obj) ? new Resource<T>(path, obj, this) : null;
         }
 
-        protected override IEnumerable<Resource<T>> LocateResourcesBlocking<T> (string path)
+        protected override IEnumerable<string> LocateResourcesBlocking<T> (string path)
         {
             return EditorResourceLocator<T>.LocateProjectResources(path, pathToGuidMap.Keys);
         }
@@ -59,8 +59,7 @@ namespace UnityCommon
             if (!resource.IsValid) return;
             #if UNITY_EDITOR
             if (UnityEditor.AssetDatabase.Contains(resource.Object)) Resources.UnloadAsset(resource.Object);
-            else if (!Application.isPlaying) Object.DestroyImmediate(resource.Object);
-            else Object.Destroy(resource.Object);
+            else ObjectUtils.DestroyOrImmediate(resource.Object);
             #endif
         }
 

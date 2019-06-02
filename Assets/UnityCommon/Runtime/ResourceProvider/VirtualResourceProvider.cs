@@ -16,19 +16,19 @@ namespace UnityCommon
         public bool RemoveResourcesOnUnload { get; set; } = true;
         public bool IsLoading => false;
         public float LoadProgress => 1;
-        public IEnumerable<Resource> LoadedResources => Resources?.Select(r => new Resource(r.Key, r.Value));
+        public IEnumerable<Resource> LoadedResources => Resources?.Values;
 
         #pragma warning disable 0067
         public event Action<float> OnLoadProgress;
         public event Action<string> OnMessage;
         #pragma warning restore 0067
 
-        protected Dictionary<string, UnityEngine.Object> Resources;
-        protected HashSet<string> FolderPaths;
+        protected readonly Dictionary<string, Resource> Resources;
+        protected readonly HashSet<string> FolderPaths;
 
         public VirtualResourceProvider ()
         {
-            Resources = new Dictionary<string, UnityEngine.Object>();
+            Resources = new Dictionary<string, Resource>();
             FolderPaths = new HashSet<string>();
         }
 
@@ -36,7 +36,7 @@ namespace UnityCommon
 
         public void AddResource (string path, UnityEngine.Object obj)
         {
-            Resources[path] = new Resource(path, obj);
+            Resources[path] = new Resource(path, obj, this);
         }
 
         public void RemoveResource (string path)
@@ -61,8 +61,7 @@ namespace UnityCommon
 
         public Resource<T> LoadResource<T> (string path) where T : UnityEngine.Object
         {
-            Resources.TryGetValue(path, out var obj);
-            return new Resource<T>(path, obj as T);
+            return Resources.TryGetValue(path, out var resource) ? resource as Resource<T> : null;
         }
 
         public Task<Resource<T>> LoadResourceAsync<T> (string path) where T : UnityEngine.Object
@@ -93,12 +92,12 @@ namespace UnityCommon
             return Task.FromResult(folders);
         }
 
-        public IEnumerable<Resource<T>> LocateResources<T> (string path) where T : UnityEngine.Object
+        public IEnumerable<string> LocateResources<T> (string path) where T : UnityEngine.Object
         {
-            return Resources.Where(kv => kv.Value is T).Select(kv => kv.Key).LocateResourcePathsAtFolder(path).Select(p => new Resource<T>(p));
+            return Resources.Where(kv => kv.Value is T).Select(kv => kv.Key).LocateResourcePathsAtFolder(path);
         }
 
-        public Task<IEnumerable<Resource<T>>> LocateResourcesAsync<T> (string path) where T : UnityEngine.Object
+        public Task<IEnumerable<string>> LocateResourcesAsync<T> (string path) where T : UnityEngine.Object
         {
             var resources = LocateResources<T>(path);
             return Task.FromResult(resources);

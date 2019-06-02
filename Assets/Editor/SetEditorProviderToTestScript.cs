@@ -7,20 +7,17 @@ public class SetEditorProviderToTestScript
     [InitializeOnLoadMethod]
     private static void InitializeEditorProvider ()
     {
-        EditorApplication.playModeStateChanged += (PlayModeStateChange playMode) => {
-            if (playMode != PlayModeStateChange.ExitingEditMode) return; // Run before entering play mode.
+        // Also executes when entering play mode.
+        var provider = new EditorResourceProvider();
+        var testProviderObj = Object.FindObjectOfType<TestResourceProvider>();
+        if (!ObjectUtils.IsValid(testProviderObj)) return;
 
-            var provider = new EditorResourceProvider();
-            var testProviderObj = Object.FindObjectOfType<TestResourceProvider>();
-            if (!ObjectUtils.IsValid(testProviderObj)) return;
+        foreach (var resource in testProviderObj.EditorResources)
+        {
+            AssetDatabase.TryGetGUIDAndLocalFileIdentifier(resource.Object, out string guid, out long id);
+            provider.AddResourceGuid(resource.Path, guid);
+        }
 
-            foreach (var resource in testProviderObj.EditorResources)
-            {
-                AssetDatabase.TryGetGUIDAndLocalFileIdentifier(resource.Object, out string guid, out long id);
-                provider.AddResourceGuid(resource.Path, guid);
-            }
-
-            TestResourceProvider.EditorProvider = provider;
-        };
+        TestResourceProvider.EditorProvider = provider;
     }
 }

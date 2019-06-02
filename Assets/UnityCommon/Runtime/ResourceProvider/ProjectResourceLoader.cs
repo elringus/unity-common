@@ -4,33 +4,31 @@ using UnityEngine;
 
 namespace UnityCommon
 {
-    public class ProjectResourceLoader<TResource> : LoadResourceRunner<TResource> where TResource : UnityEngine.Object
+    public class ProjectResourceLoader<TResource> : LoadResourceRunner<TResource> 
+        where TResource : UnityEngine.Object
     {
-        private Action<string> logAction;
-        private ResourceRequest resourceRequest;
-        private ProjectResourceProvider.TypeRedirector redirector;
+        private readonly Action<string> logAction;
+        private readonly ProjectResourceProvider.TypeRedirector redirector;
 
-        public ProjectResourceLoader (Resource<TResource> resource,
-            ProjectResourceProvider.TypeRedirector redirector, Action<string> logAction)
+        public ProjectResourceLoader (IResourceProvider provider, string resourcePath, 
+            ProjectResourceProvider.TypeRedirector redirector, Action<string> logAction) : base (provider, resourcePath)
         {
-            Resource = resource;
             this.redirector = redirector;
             this.logAction = logAction;
         }
 
-        public override async Task Run ()
+        public override async Task RunAsync ()
         {
-            await base.Run();
-
             var startTime = Time.time;
 
             var resourceType = redirector != null ? redirector.RedirectType : typeof(TResource);
-            resourceRequest = await Resources.LoadAsync(Resource.Path, resourceType);
-            Resource.Object = redirector is null ? resourceRequest.asset as TResource : await redirector.ToSourceAsync<TResource>(resourceRequest.asset);
+            var resourceRequest = await Resources.LoadAsync(Path, resourceType);
+            var obj = redirector is null ? resourceRequest.asset as TResource : await redirector.ToSourceAsync<TResource>(resourceRequest.asset);
 
-            logAction?.Invoke($"Resource '{Resource.Path}' loaded over {Time.time - startTime:0.###} seconds.");
+            var result = new Resource<TResource>(Path, obj, Provider);
+            SetResult(result);
 
-            HandleOnCompleted();
+            logAction?.Invoke($"Resource '{Path}' loaded over {Time.time - startTime:0.###} seconds.");
         }
     }
 }

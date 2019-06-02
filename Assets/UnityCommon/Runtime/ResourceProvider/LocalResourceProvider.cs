@@ -12,9 +12,9 @@ namespace UnityCommon
         /// <summary>
         /// Path to the folder where resources are located (realtive to <see cref="Application.dataPath"/>).
         /// </summary>
-        public string RootPath { get; private set; }
+        public readonly string RootPath;
 
-        private Dictionary<Type, IConverter> converters = new Dictionary<Type, IConverter>();
+        private readonly Dictionary<Type, IConverter> converters = new Dictionary<Type, IConverter>();
 
         public LocalResourceProvider (string rootPath)
         {
@@ -32,14 +32,14 @@ namespace UnityCommon
             converters.Add(typeof(T), converter);
         }
 
-        protected override LoadResourceRunner<T> CreateLoadResourceRunner<T> (Resource<T> resource)
+        protected override LoadResourceRunner<T> CreateLoadResourceRunner<T> (string path)
         {
-            return new LocalResourceLoader<T>(RootPath, resource, ResolveConverter<T>(), LogMessage);
+            return new LocalResourceLoader<T>(this, RootPath, path, ResolveConverter<T>(), LogMessage);
         }
 
         protected override LocateResourcesRunner<T> CreateLocateResourcesRunner<T> (string path)
         {
-            return new LocalResourceLocator<T>(RootPath, path, ResolveConverter<T>());
+            return new LocalResourceLocator<T>(this, RootPath, path, ResolveConverter<T>());
         }
 
         protected override Task UnloadResourceAsync (Resource resource)
@@ -55,12 +55,11 @@ namespace UnityCommon
 
         protected override LocateFoldersRunner CreateLocateFoldersRunner (string path)
         {
-            return new LocalFolderLocator(RootPath, path);
+            return new LocalFolderLocator(this, RootPath, path);
         }
 
         protected override Resource<T> LoadResourceBlocking<T> (string path)
         {
-            var resource = new Resource<T>(path);
             var converter = ResolveConverter<T>();
             var rawData = default(byte[]);
             var startTime = Time.time;
@@ -77,32 +76,28 @@ namespace UnityCommon
                 break;
             }
 
-            if (rawData == null)
+            if (rawData is null)
             {
                 var usedExtensions = string.Join("/", converter.Representations.Select(r => r.Extension));
                 Debug.LogError($"Failed to load `{filePath}({usedExtensions})` resource using local file system: File not found.");
-            }
-            else
-            {
-                resource.Object = converter.Convert(rawData);
-                LogMessage($"Resource `{resource.Path}` loaded {StringUtils.FormatFileSize(rawData.Length)} over {Time.time - startTime:0.###} seconds.");
+                return new Resource<T>(path, null, this);
             }
 
-            return resource;
+            LogMessage($"Resource `{path}` loaded {StringUtils.FormatFileSize(rawData.Length)} over {Time.time - startTime:0.###} seconds.");
+
+            var obj = converter.Convert(rawData);
+            return new Resource<T>(path, obj, this);
         }
 
-        protected override IEnumerable<Resource<T>> LocateResourcesBlocking<T> (string path)
+        protected override IEnumerable<string> LocateResourcesBlocking<T> (string path)
         {
             return LocalResourceLocator<T>.LocateResources(RootPath, path, ResolveConverter<T>());
         }
 
         protected override void UnloadResourceBlocking (Resource resource)
         {
-            if (resource.IsValid)
-            {
-                if (!Application.isPlaying) UnityEngine.Object.DestroyImmediate(resource.Object);
-                else UnityEngine.Object.Destroy(resource.Object);
-            }
+            if (!resource.IsValid) return;
+            ObjectUtils.DestroyOrImmediate(resource.Object);
         }
 
         private IRawConverter<T> ResolveConverter<T> ()

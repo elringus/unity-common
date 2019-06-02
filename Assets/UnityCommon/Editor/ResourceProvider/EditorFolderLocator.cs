@@ -6,23 +6,19 @@ namespace UnityCommon
 {
     public class EditorFolderLocator : LocateFoldersRunner
     {
-        public string ResourcesPath { get; private set; }
+        private readonly IEnumerable<string> editorResourcePaths;
 
-        private IEnumerable<string> editorResourcePaths;
-
-        public EditorFolderLocator (string resourcesPath, IEnumerable<string> editorResourcePaths)
+        public EditorFolderLocator (IResourceProvider provider, string resourcesPath, IEnumerable<string> editorResourcePaths)
+            : base (provider, resourcesPath ?? string.Empty)
         {
-            ResourcesPath = resourcesPath ?? string.Empty;
             this.editorResourcePaths = editorResourcePaths;
         }
 
-        public override async Task Run ()
+        public override Task RunAsync ()
         {
-            await base.Run();
-
-            LocatedFolders = LocateEditorFolders(ResourcesPath, editorResourcePaths);
-
-            HandleOnCompleted();
+            var locatedFolders = LocateEditorFolders(Path, editorResourcePaths);
+            SetResult(locatedFolders);
+            return Task.CompletedTask;
         }
 
         public static List<Folder> LocateEditorFolders (string path, IEnumerable<string> editorResourcePaths)

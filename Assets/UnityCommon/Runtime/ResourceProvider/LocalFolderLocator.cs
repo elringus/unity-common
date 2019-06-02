@@ -7,23 +7,19 @@ namespace UnityCommon
 {
     public class LocalFolderLocator : LocateFoldersRunner
     {
-        public string RootPath { get; private set; }
-        public string ResourcesPath { get; private set; }
+        public readonly string RootPath;
 
-        public LocalFolderLocator (string rootPath, string resourcesPath)
+        public LocalFolderLocator (IResourceProvider provider, string rootPath, string resourcesPath)
+            : base (provider, resourcesPath)
         {
             RootPath = rootPath;
-            ResourcesPath = resourcesPath;
         }
 
-        public override async Task Run ()
+        public override Task RunAsync ()
         {
-            await base.Run();
-
-            LocatedFolders = LocateFoldersAtPath(RootPath, ResourcesPath);
-
-            HandleOnCompleted();
-            return;
+            var locatedFolders = LocateFoldersAtPath(RootPath, Path);
+            SetResult(locatedFolders);
+            return Task.CompletedTask;
         }
 
         public static List<Folder> LocateFoldersAtPath (string rootPath, string resourcesPath)

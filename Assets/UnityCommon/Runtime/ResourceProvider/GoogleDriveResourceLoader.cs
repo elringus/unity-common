@@ -11,12 +11,14 @@ using UnityGoogleDrive;
 
 namespace UnityCommon
 {
-    public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource> where TResource : UnityEngine.Object
+    public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource> 
+        where TResource : UnityEngine.Object
     {
-        public string RootPath { get; private set; }
+        public readonly string RootPath;
 
-        private readonly Type[] nativeRequestTypes = new[] { typeof(AudioClip), typeof(Texture2D) };
+        private static readonly Type[] nativeRequestTypes = new[] { typeof(AudioClip), typeof(Texture2D) };
 
+        private TResource loadedObject;
         private bool useNativeRequests;
         private Action<string> logAction;
         private GoogleDriveRequest downloadRequest;
@@ -25,11 +27,10 @@ namespace UnityCommon
         private GoogleDriveResourceProvider.CacheManifest cacheManifest;
         private byte[] rawData;
 
-        public GoogleDriveResourceLoader (string rootPath, Resource<TResource> resource,
-            IRawConverter<TResource> converter, Action<string> logAction)
+        public GoogleDriveResourceLoader (IResourceProvider provider, string rootPath, string resourcePath,
+            IRawConverter<TResource> converter, Action<string> logAction) : base (provider, resourcePath)
         {
             RootPath = rootPath;
-            Resource = resource;
             useNativeRequests = nativeRequestTypes.Contains(typeof(TResource));
             this.logAction = logAction;
 
@@ -43,38 +44,46 @@ namespace UnityCommon
             usedRepresentation = new RawDataRepresentation();
         }
 
-        public override async Task Run ()
+        public override async Task RunAsync ()
         {
-            await base.Run();
-
             var startTime = Time.time;
             var usedCache = false;
 
             // Check if cached version of the file could be used.
-            rawData = await TryLoadFileCacheAsync(Resource.Path);
+            rawData = await TryLoadFileCacheAsync(Path);
 
             // Cached version is not valid or doesn't exist; download or export the file.
-            if (rawData == null)
+            if (rawData is null)
             {
                 // 4. Load file metadata from Google Drive.
-                var filePath = string.IsNullOrEmpty(RootPath) ? Resource.Path : string.Concat(RootPath, '/', Resource.Path);
+                var filePath = string.IsNullOrEmpty(RootPath) ? Path : string.Concat(RootPath, '/', Path);
                 var fileMeta = await GetFileMetaAsync(filePath);
-                if (fileMeta == null) { Debug.LogError($"Failed to resolve '{filePath}' Google Drive metadata."); HandleOnCompleted(); return; }
+                if (fileMeta is null)
+                {
+                    Debug.LogError($"Failed to resolve '{filePath}' Google Drive metadata.");
+                    SetResult(new Resource<TResource>(Path, null, Provider));
+                    return;
+                }
 
                 if (converter is IGoogleDriveConverter<TResource>) rawData = await ExportFileAsync(fileMeta);
                 else rawData = await DownloadFileAsync(fileMeta);
 
                 // 5. Cache the downloaded file.
-                await WriteFileCacheAsync(Resource.Path, fileMeta.Id, rawData);
+                await WriteFileCacheAsync(Path, fileMeta.Id, rawData);
             }
             else usedCache = true;
 
             // In case we used native requests the resource will already be set, so no need to use converters.
-            if (!Resource.IsValid) Resource.Object = await converter.ConvertAsync(rawData);
+            if (!ObjectUtils.IsValid(loadedObject))
+                loadedObject = await converter.ConvertAsync(rawData);
 
-            logAction?.Invoke($"Resource '{Resource.Path}' loaded {StringUtils.FormatFileSize(rawData.Length)} over {Time.time - startTime:0.###} seconds from " + (usedCache ? "cache." : "Google Drive."));
+            var result = new Resource<TResource>(Path, loadedObject, Provider);
+            SetResult(result);
 
-            HandleOnCompleted();
+            logAction?.Invoke($"Resource '{Path}' loaded {StringUtils.FormatFileSize(rawData.Length)} over {Time.time - startTime:0.###} seconds from " + (usedCache ? "cache." : "Google Drive."));
+
+            if (downloadRequest != null)
+                downloadRequest.Dispose();
         }
 
         public override void Cancel ()
@@ -88,13 +97,6 @@ namespace UnityCommon
             }
         }
 
-        protected override void HandleOnCompleted ()
-        {
-            if (downloadRequest != null) downloadRequest.Dispose();
-
-            base.HandleOnCompleted();
-        }
-
         private async Task<UnityGoogleDrive.Data.File> GetFileMetaAsync (string filePath)
         {
             foreach (var representation in converter.Representations)
@@ -105,7 +107,7 @@ namespace UnityCommon
                 if (files.Count > 0) { usedRepresentation = representation; return files[0]; }
             }
 
-            Debug.LogError($"Failed to retrieve '{Resource.Path}' resource from Google Drive.");
+            Debug.LogError($"Failed to retrieve '{Path}' resource from Google Drive.");
             return null;
         }
 
@@ -121,14 +123,14 @@ namespace UnityCommon
             await downloadRequest.SendNonGeneric();
             if (downloadRequest.IsError || downloadRequest.GetResponseData<UnityGoogleDrive.Data.File>().Content == null)
             {
-                Debug.LogError($"Failed to download {Resource.Path}{usedRepresentation.Extension} resource from Google Drive.");
+                Debug.LogError($"Failed to download {Path}{usedRepresentation.Extension} resource from Google Drive.");
                 return null;
             }
 
             if (useNativeRequests)
             {
-                if (typeof(TResource) == typeof(AudioClip)) (Resource as Resource<AudioClip>).Object = downloadRequest.GetResponseData<UnityGoogleDrive.Data.AudioFile>().AudioClip;
-                else if (typeof(TResource) == typeof(Texture2D)) (Resource as Resource<Texture2D>).Object = downloadRequest.GetResponseData<UnityGoogleDrive.Data.TextureFile>().Texture;
+                if (typeof(TResource) == typeof(AudioClip)) loadedObject = downloadRequest.GetResponseData<UnityGoogleDrive.Data.AudioFile>().AudioClip as TResource;
+                else if (typeof(TResource) == typeof(Texture2D)) loadedObject = downloadRequest.GetResponseData<UnityGoogleDrive.Data.TextureFile>().Texture as TResource;
             }
 
             return downloadRequest.GetResponseData<UnityGoogleDrive.Data.File>().Content;
@@ -144,7 +146,7 @@ namespace UnityCommon
             await downloadRequest.SendNonGeneric();
             if (downloadRequest.IsError || downloadRequest.GetResponseData<UnityGoogleDrive.Data.File>().Content == null)
             {
-                Debug.LogError($"Failed to export '{Resource.Path}' resource from Google Drive.");
+                Debug.LogError($"Failed to export '{Path}' resource from Google Drive.");
                 return null;
             }
             return downloadRequest.GetResponseData<UnityGoogleDrive.Data.File>().Content;
@@ -176,8 +178,8 @@ namespace UnityCommon
                 {
                     await request.SendWebRequest();
 
-                    if (typeof(TResource) == typeof(AudioClip)) (Resource as Resource<AudioClip>).Object = DownloadHandlerAudioClip.GetContent(request);
-                    else if (typeof(TResource) == typeof(Texture2D)) (Resource as Resource<Texture2D>).Object = DownloadHandlerTexture.GetContent(request);
+                    if (typeof(TResource) == typeof(AudioClip)) loadedObject = DownloadHandlerAudioClip.GetContent(request) as TResource;
+                    else if (typeof(TResource) == typeof(Texture2D)) loadedObject = DownloadHandlerTexture.GetContent(request) as TResource;
                     return request.downloadHandler.data;
                 }
             }

@@ -1,7 +1,6 @@
 ﻿#if UNITY_GOOGLE_DRIVE_AVAILABLE
 
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using UnityGoogleDrive;
 
@@ -9,32 +8,29 @@ namespace UnityCommon
 {
     public class GoogleDriveFolderLocator : LocateFoldersRunner
     {
-        public string RootPath { get; private set; }
-        public string ResourcesPath { get; private set; }
+        public readonly string RootPath;
 
-        public GoogleDriveFolderLocator (string rootPath, string resourcesPath)
+        public GoogleDriveFolderLocator (IResourceProvider provider, string rootPath, string resourcesPath)
+            : base (provider, resourcesPath)
         {
             RootPath = rootPath;
-            ResourcesPath = resourcesPath;
         }
 
-        public override async Task Run ()
+        public override async Task RunAsync ()
         {
-            await base.Run();
+            var result = new List<Folder>();
 
-            LocatedFolders = new List<Folder>();
-
-            var fullpath = Path.Combine(RootPath, ResourcesPath) + "/";
+            var fullpath = PathUtils.Combine(RootPath, Path) + "/";
             var gFolders = await Helpers.FindFilesByPathAsync(fullpath, fields: new List<string> { "files(name)" }, mime: "application/vnd.google-apps.folder");
 
             foreach (var gFolder in gFolders)
             {
-                var folderPath = string.IsNullOrEmpty(ResourcesPath) ? gFolder.Name : string.Concat(ResourcesPath, '/', gFolder.Name);
+                var folderPath = string.IsNullOrEmpty(Path) ? gFolder.Name : string.Concat(Path, '/', gFolder.Name);
                 var folder = new Folder(folderPath);
-                LocatedFolders.Add(folder);
+                result.Add(folder);
             }
 
-            HandleOnCompleted();
+            SetResult(result);
         }
     }
 }

@@ -29,8 +29,8 @@ public class TestResourceProvider : MonoBehaviour
     {
         //provider = InitializeProjectResourceProvider();
         //provider = InitializeEditorResourceProvider();
-        provider = InitializeGoogleDriveResourceProvider(false);
         //provider = InitializeLocalResourceProvider();
+        provider = InitializeGoogleDriveResourceProvider(false);
     }
 
     private async void Start ()
