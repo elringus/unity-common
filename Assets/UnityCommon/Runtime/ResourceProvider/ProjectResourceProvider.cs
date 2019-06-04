@@ -65,7 +65,7 @@ namespace UnityCommon
             return new ProjectResourceLocator<T>(this, path, projectResources);
         }
 
-        protected override void UnloadResourceBlocking (Resource resource)
+        protected override void DisposeResource (Resource resource)
         {
             if (!resource.IsValid) return;
 
@@ -81,32 +81,6 @@ namespace UnityCommon
             if (resource.Object is GameObject) return;
 
             Resources.UnloadAsset(resource.Object);
-        }
-
-        protected override Task UnloadResourceAsync (Resource resource)
-        {
-            // Unity doesn't provide async unload API.
-            UnloadResourceBlocking(resource);
-            return Task.CompletedTask;
-        }
-
-        protected override Resource<T> LoadResourceBlocking<T> (string path)
-        {
-            var redirector = redirectors.ContainsKey(typeof(T)) ? redirectors[typeof(T)] : null;
-            var resourceType = redirector != null ? redirector.RedirectType : typeof(T);
-            var obj = Resources.Load(path, resourceType);
-            var castedObj = redirector != null ? redirector.ToSource<T>(obj) : obj as T;
-            return new Resource<T>(path, castedObj, this);
-        }
-
-        protected override IEnumerable<string> LocateResourcesBlocking<T> (string path)
-        {
-            return ProjectResourceLocator<T>.LocateProjectResources(path, projectResources);
-        }
-
-        protected override IEnumerable<Folder> LocateFoldersBlocking (string path)
-        {
-            return ProjectFolderLocator.LocateProjectFolders(path, projectResources);
         }
 
         protected override LocateFoldersRunner CreateLocateFoldersRunner (string path)

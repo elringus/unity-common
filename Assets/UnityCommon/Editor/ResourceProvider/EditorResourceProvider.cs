@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace UnityCommon
@@ -38,35 +37,14 @@ namespace UnityCommon
             return new EditorFolderLocator(this, path, pathToGuidMap.Keys);
         }
 
-        protected override Resource<T> LoadResourceBlocking<T> (string path)
-        {
-            var obj = EditorResourceLoader<T>.LoadEditorResource<T>(path, pathToGuidMap);
-            return ObjectUtils.IsValid(obj) ? new Resource<T>(path, obj, this) : null;
-        }
-
-        protected override IEnumerable<string> LocateResourcesBlocking<T> (string path)
-        {
-            return EditorResourceLocator<T>.LocateProjectResources(path, pathToGuidMap.Keys);
-        }
-
-        protected override IEnumerable<Folder> LocateFoldersBlocking (string path)
-        {
-            return EditorFolderLocator.LocateEditorFolders(path, pathToGuidMap.Keys);
-        }
-
-        protected override void UnloadResourceBlocking (Resource resource)
+        protected override void DisposeResource (Resource resource)
         {
             if (!resource.IsValid) return;
             #if UNITY_EDITOR
-            if (UnityEditor.AssetDatabase.Contains(resource.Object)) Resources.UnloadAsset(resource.Object);
+            if (UnityEditor.AssetDatabase.Contains(resource.Object))
+                Resources.UnloadAsset(resource.Object);
             else ObjectUtils.DestroyOrImmediate(resource.Object);
             #endif
-        }
-
-        protected override Task UnloadResourceAsync (Resource resource)
-        {
-            UnloadResourceBlocking(resource);
-            return Task.CompletedTask;
         }
     }
 }

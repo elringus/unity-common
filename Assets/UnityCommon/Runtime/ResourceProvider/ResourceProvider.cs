@@ -38,38 +38,19 @@ namespace UnityCommon
             else return LoadedResources[path] as Resource<T>;
         }
 
-        public virtual Resource<T> LoadResource<T> (string path) where T : UnityEngine.Object
-        {
-            if (!SupportsType<T>()) return null;
-
-            // We're currently loading this resource in async mode; cancel and load blocking.
-            if (ResourceLoading(path)) UnloadResource(path);
-
-            if (ResourceLoaded(path))
-            {
-                if (LoadedResources[path].Object?.GetType() != typeof(T)) UnloadResource(path);
-                else return LoadedResources[path] as Resource<T>;
-            }
-
-            var resource = LoadResourceBlocking<T>(path);
-
-            HandleResourceLoaded(resource);
-            return resource;
-        }
-
         public virtual async Task<Resource<T>> LoadResourceAsync<T> (string path) where T : UnityEngine.Object
         {
             if (!SupportsType<T>()) return null;
 
             if (ResourceLoading(path))
             {
-                if (LoadRunners[path].ResourceType != typeof(T)) await UnloadResourceAsync(path);
+                if (LoadRunners[path].ResourceType != typeof(T)) UnloadResource(path);
                 else return await (LoadRunners[path] as LoadResourceRunner<T>);
             }
 
             if (ResourceLoaded(path))
             {
-                if (LoadedResources[path].Object?.GetType() != typeof(T)) await UnloadResourceAsync(path);
+                if (LoadedResources[path].Object?.GetType() != typeof(T)) UnloadResource(path);
                 else return LoadedResources[path] as Resource<T>;
             }
 
@@ -82,13 +63,6 @@ namespace UnityCommon
 
             HandleResourceLoaded(resource);
             return resource;
-        }
-
-        public virtual IEnumerable<Resource<T>> LoadResources<T> (string path) where T : UnityEngine.Object
-        {
-            if (!SupportsType<T>()) return null;
-
-            return LocateResources<T>(path).Select(p => LoadResource<T>(p));
         }
 
         public virtual async Task<IEnumerable<Resource<T>>> LoadResourcesAsync<T> (string path) where T : UnityEngine.Object
@@ -109,23 +83,7 @@ namespace UnityCommon
             var resource = LoadedResources[path];
             LoadedResources.Remove(path);
 
-            UnloadResourceBlocking(resource);
-
-            LogMessage($"Resource '{path}' unloaded.");
-        }
-
-        public virtual async Task UnloadResourceAsync (string path)
-        {
-
-            if (ResourceLoading(path))
-                CancelResourceLoading(path);
-
-            if (!ResourceLoaded(path)) return;
-
-            var resource = LoadedResources[path];
-            LoadedResources.Remove(path);
-
-            await UnloadResourceAsync(resource);
+            DisposeResource(resource);
 
             LogMessage($"Resource '{path}' unloaded.");
         }
@@ -137,20 +95,9 @@ namespace UnityCommon
                 UnloadResource(path);
         }
 
-        public virtual async Task UnloadResourcesAsync ()
-        {
-            var loadedPaths = LoadedResources.Values.Select(r => r.Path).ToList();
-            await Task.WhenAll(loadedPaths.Select(path => UnloadResourceAsync(path)));
-        }
-
         public virtual bool ResourceLoaded (string path)
         {
             return LoadedResources.ContainsKey(path);
-        }
-
-        public virtual bool ResourceLoaded<T> (string path) where T : UnityEngine.Object
-        {
-            return ResourceLoaded(path) && LoadedResources[path].Object.GetType() == typeof(T);
         }
 
         public virtual bool ResourceLoading (string path)
@@ -163,15 +110,6 @@ namespace UnityCommon
             return LocateRunners.ContainsKey(new Tuple<string, Type>(path, typeof(T)));
         }
 
-        public virtual bool ResourceExists<T> (string path) where T : UnityEngine.Object
-        {
-            if (!SupportsType<T>()) return false;
-            if (ResourceLoaded<T>(path)) return true;
-            var folderPath = path.Contains("/") ? path.GetBeforeLast("/") : string.Empty;
-            var locatedResourcePaths = LocateResources<T>(folderPath);
-            return locatedResourcePaths.Any(p => p.EqualsFast(path));
-        }
-
         public virtual async Task<bool> ResourceExistsAsync<T> (string path) where T : UnityEngine.Object
         {
             if (!SupportsType<T>()) return false;
@@ -179,21 +117,6 @@ namespace UnityCommon
             var folderPath = path.Contains("/") ? path.GetBeforeLast("/") : string.Empty;
             var locatedResourcePaths = await LocateResourcesAsync<T>(folderPath);
             return locatedResourcePaths.Any(p => p.EqualsFast(path));
-        }
-
-        public virtual IEnumerable<string> LocateResources<T> (string path) where T : UnityEngine.Object
-        {
-            if (!SupportsType<T>()) return null;
-
-            if (path is null) path = string.Empty;
-
-            // We're currently locating this resource in async mode; cancel and locate blocking.
-            if (ResourceLocating<T>(path)) CancelResourceLocating<T>(path);
-
-            var locatedResources = LocateResourcesBlocking<T>(path);
-
-            HandleResourcesLocated<T>(locatedResources, path);
-            return locatedResources;
         }
 
         public virtual async Task<IEnumerable<string>> LocateResourcesAsync<T> (string path) where T : UnityEngine.Object
@@ -216,21 +139,6 @@ namespace UnityCommon
             var locatedResourcePaths = await locateRunner;
             HandleResourcesLocated<T>(locatedResourcePaths, path);
             return locatedResourcePaths;
-        }
-
-        public IEnumerable<Folder> LocateFolders (string path)
-        {
-            if (path is null) path = string.Empty;
-
-            if (LocatedFolders.ContainsKey(path)) return LocatedFolders[path];
-
-            // We're currently locating folders at this path in async mode; cancel and locate blocking.
-            if (ResourceLocating<Folder>(path)) CancelResourceLocating<Folder>(path);
-
-            var locatedFolders = LocateFoldersBlocking(path);
-
-            HandleFoldersLocated(locatedFolders, path);
-            return locatedFolders;
         }
 
         public async Task<IEnumerable<Folder>> LocateFoldersAsync (string path)
@@ -257,18 +165,19 @@ namespace UnityCommon
 
         public void LogMessage (string message) => OnMessage?.Invoke(message);
 
-        protected abstract Resource<T> LoadResourceBlocking<T> (string path) where T : UnityEngine.Object;
         protected abstract LoadResourceRunner<T> CreateLoadResourceRunner<T> (string path) where T : UnityEngine.Object;
-        protected abstract IEnumerable<string> LocateResourcesBlocking<T> (string path) where T : UnityEngine.Object;
         protected abstract LocateResourcesRunner<T> CreateLocateResourcesRunner<T> (string path) where T : UnityEngine.Object;
-        protected abstract IEnumerable<Folder> LocateFoldersBlocking (string path);
         protected abstract LocateFoldersRunner CreateLocateFoldersRunner (string path);
-        protected abstract void UnloadResourceBlocking (Resource resource);
-        protected abstract Task UnloadResourceAsync (Resource resource);
+        protected abstract void DisposeResource (Resource resource);
 
         protected virtual void RunResourceLoader<T> (LoadResourceRunner<T> loader) where T : UnityEngine.Object => loader.RunAsync().WrapAsync();
         protected virtual void RunResourcesLocator<T> (LocateResourcesRunner<T> locator) where T : UnityEngine.Object => locator.RunAsync().WrapAsync();
         protected virtual void RunFoldersLocator (LocateFoldersRunner locator) => locator.RunAsync().WrapAsync();
+
+        protected virtual bool ResourceLoaded<T> (string path) where T : UnityEngine.Object
+        {
+            return ResourceLoaded(path) && LoadedResources[path].Object.GetType() == typeof(T);
+        }
 
         protected virtual void CancelResourceLoading (string path)
         {

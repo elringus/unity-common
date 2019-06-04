@@ -29,8 +29,8 @@ public class TestResourceProvider : MonoBehaviour
     {
         //provider = InitializeProjectResourceProvider();
         //provider = InitializeEditorResourceProvider();
-        //provider = InitializeLocalResourceProvider();
-        provider = InitializeGoogleDriveResourceProvider(false);
+        provider = InitializeLocalResourceProvider();
+        //provider = InitializeGoogleDriveResourceProvider(false);
     }
 
     private async void Start ()
@@ -141,7 +141,7 @@ public class TestResourceProvider : MonoBehaviour
             await Task.Delay(TimeSpan.FromSeconds(.5f));
 
             foreach (var resource in resources)
-                await provider.UnloadResourceAsync(resource.Path);
+                provider.UnloadResource(resource.Path);
             text = "Total memory used after unload: " + Mathf.CeilToInt(System.GC.GetTotalMemory(true) * .000001f) + "Mb";
 
             await Task.Delay(TimeSpan.FromSeconds(.5f));
@@ -160,7 +160,7 @@ public class TestResourceProvider : MonoBehaviour
         }
 
         foreach (var audioResource in resources)
-            await provider.UnloadResourceAsync(audioResource.Path);
+            provider.UnloadResource(audioResource.Path);
     }
 
     private async Task ResolveTextByPathAsync ()
@@ -174,7 +174,7 @@ public class TestResourceProvider : MonoBehaviour
         }
 
         foreach (var textResource in resources)
-            await provider.UnloadResourceAsync(textResource.Path);
+            provider.UnloadResource(textResource.Path);
     }
 
     private async Task TestResourceExistsAsync ()
@@ -200,7 +200,7 @@ public class TestResourceProvider : MonoBehaviour
         await Task.Delay(TimeSpan.FromSeconds(1.5f));
 
         foreach (var res in resources)
-            await provider.UnloadResourceAsync(res);
+            provider.UnloadResource(res);
 
         await Task.Delay(TimeSpan.FromSeconds(1.5f));
 

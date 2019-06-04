@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -69,13 +68,9 @@ namespace UnityCommon
             else return fullPath;
         }
 
-        public abstract void Preload (string path, bool isFullPath = false);
-        public abstract Task PreloadAsync (string path, bool isFullPath = false);
         public abstract bool IsLoaded (string path, bool isFullPath = false);
         public abstract void Unload (string path, bool isFullPath = false);
-        public abstract Task UnloadAsync (string path, bool isFullPath = false);
         public abstract void UnloadAll ();
-        public abstract Task UnloadAllAsync ();
     }
 
     /// <summary>
@@ -98,16 +93,6 @@ namespace UnityCommon
             return Providers.GetLoadedResourceOrNull<TResource>(path);
         }
 
-        public virtual Resource<TResource> Load (string path, bool isFullPath = false)
-        {
-            if (!isFullPath) path = BuildFullPath(path);
-
-            var resource = Providers.LoadResource<TResource>(path);
-            if (resource != null && resource.IsValid)
-                LoadedResourcePaths.Add(resource.Path);
-            return resource;
-        }
-
         public virtual async Task<Resource<TResource>> LoadAsync (string path, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
@@ -118,17 +103,6 @@ namespace UnityCommon
             return resource;
         }
 
-        public virtual IEnumerable<Resource<TResource>> LoadAll (string path = null, bool isFullPath = false)
-        {
-            if (!isFullPath) path = BuildFullPath(path);
-
-            var resources = Providers.LoadResources<TResource>(path);
-            foreach (var resource in resources)
-                if (resource != null && resource.IsValid)
-                    LoadedResourcePaths.Add(resource.Path);
-            return resources;
-        }
-        
         public virtual async Task<IEnumerable<Resource<TResource>>> LoadAllAsync (string path = null, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
@@ -140,38 +114,16 @@ namespace UnityCommon
             return resources;
         }
 
-        public virtual IEnumerable<string> LocateResources (string path, bool isFullPath = false)
-        {
-            if (!isFullPath) path = BuildFullPath(path);
-            return Providers.LocateResources<TResource>(path);
-        }
-
         public virtual async Task<IEnumerable<string>> LocateResourcesAsync (string path, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
             return await Providers.LocateResourcesAsync<TResource>(path);
         }
 
-        public virtual bool ResourceExists (string path, bool isFullPath = false)
-        {
-            if (!isFullPath) path = BuildFullPath(path);
-            return Providers.ResourceExists<TResource>(path);
-        }
-
         public virtual async Task<bool> ResourceExistsAsync (string path, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
             return await Providers.ResourceExistsAsync<TResource>(path);
-        }
-
-        public override void Preload (string path, bool isFullPath = false)
-        {
-            Load(path, isFullPath);
-        }
-
-        public override async Task PreloadAsync (string path, bool isFullPath = false)
-        {
-            await LoadAsync(path, isFullPath);
         }
 
         public override void Unload (string path, bool isFullPath = false)
@@ -182,14 +134,6 @@ namespace UnityCommon
             LoadedResourcePaths.Remove(path);
         }
 
-        public override async Task UnloadAsync (string path, bool isFullPath = false)
-        {
-            if (!isFullPath) path = BuildFullPath(path);
-
-            await Providers.UnloadResourceAsync(path);
-            LoadedResourcePaths.Remove(path);
-        }
-
         /// <summary>
         /// Unloads all the resources previously loaded by this loader.
         /// </summary>
@@ -197,15 +141,6 @@ namespace UnityCommon
         {
             foreach (var path in LoadedResourcePaths)
                 Unload(path, true);
-        }
-
-        /// <summary>
-        /// Asynchronously unloads all the resources previously loaded by this loader.
-        /// </summary>
-        public override async Task UnloadAllAsync ()
-        {
-            var paths = LoadedResourcePaths.ToList();
-            await Task.WhenAll(paths.Select(path => UnloadAsync(path, true)));
         }
     }
 }

@@ -163,12 +163,6 @@ namespace UnityCommon
             return new GoogleDriveFolderLocator(this, DriveRootPath, path);
         }
 
-        protected override Task UnloadResourceAsync (Resource resource)
-        {
-            UnloadResourceBlocking(resource);
-            return Task.CompletedTask;
-        }
-
         protected override void HandleResourceLoaded<T> (Resource<T> resource)
         {
             base.HandleResourceLoaded(resource);
@@ -181,16 +175,11 @@ namespace UnityCommon
             ProcessLoadQueue();
         }
 
-        protected override void UnloadResourceBlocking (Resource resource)
+        protected override void DisposeResource (Resource resource)
         {
             if (!resource.IsValid) return;
             ObjectUtils.DestroyOrImmediate(resource.Object);
         }
-
-        // TODO: Support blocking mode (?).
-        protected override Resource<T> LoadResourceBlocking<T> (string path) => throw new NotImplementedException();
-        protected override IEnumerable<string> LocateResourcesBlocking<T> (string path) => throw new NotImplementedException();
-        protected override IEnumerable<Folder> LocateFoldersBlocking (string path) => throw new NotImplementedException(); 
 
         private IRawConverter<T> ResolveConverter<T> ()
         {
