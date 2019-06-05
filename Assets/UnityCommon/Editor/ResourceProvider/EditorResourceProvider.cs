@@ -42,7 +42,12 @@ namespace UnityCommon
             if (!resource.IsValid) return;
             #if UNITY_EDITOR
             if (UnityEditor.AssetDatabase.Contains(resource.Object))
+            {
+                // Can't unload prefabs: https://forum.unity.com/threads/393385.
+                // TODO: Replace the project provider with addressable system in Unity 2019?
+                if (resource.Object is GameObject || resource.Object is Component) return;
                 Resources.UnloadAsset(resource.Object);
+            }
             else ObjectUtils.DestroyOrImmediate(resource.Object);
             #endif
         }
