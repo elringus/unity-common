@@ -47,8 +47,9 @@ namespace UnityCommon
 
         /// <summary>
         /// Registers the provided object as a holder of the resource.
-        /// The resource won't be unloaded by <see cref="Release(object)"/> while it's held by at least one object.
+        /// The resource won't be unloaded by <see cref="Release(object, bool)"/> while it's held by at least one object.
         /// </summary>
+        /// <param name="holder">The object that is going to hold the resource.</param>
         public void Hold (object holder)
         {
             var holderRef = new WeakReference(holder);
@@ -57,12 +58,14 @@ namespace UnityCommon
 
         /// <summary>
         /// Removes the provided object from the holders set.
-        /// Will also unload the resource in case no object is currently holding it.
+        /// Will (optionally) unload the resource after the release in case no other objects are holding it.
         /// </summary>
-        public void Release (object holder)
+        /// <param name="holder">The object that is no longer holding the resource.</param>
+        /// <param name="unload">Whether to also unload the resource in case no other objects are holding it.</param>
+        public void Release (object holder, bool unload = true)
         {
             holders.RemoveWhere(hr => !hr.IsAlive || hr.Target == holder);
-            if (holders.Count == 0)
+            if (unload && holders.Count == 0)
                 Provider.UnloadResource(Path);
         }
     }
