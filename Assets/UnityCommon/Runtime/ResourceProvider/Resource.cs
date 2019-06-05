@@ -27,6 +27,10 @@ namespace UnityCommon
         /// on both managed and unmanaged sides of the engine.
         /// </summary>
         public bool IsValid => ObjectUtils.IsValid(Object);
+        /// <summary>
+        /// How many objects are currently holding (using) the resource.
+        /// </summary>
+        public int HoldersCount => holders.Count;
 
         private readonly HashSet<WeakReference> holders = new HashSet<WeakReference>();
 
