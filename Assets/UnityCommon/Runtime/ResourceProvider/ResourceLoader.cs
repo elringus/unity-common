@@ -140,7 +140,8 @@ namespace UnityCommon
         public override void UnloadAll ()
         {
             foreach (var path in LoadedResourcePaths)
-                Unload(path, true);
+                Providers.UnloadResource(path);
+            LoadedResourcePaths.Clear();
         }
     }
 }
