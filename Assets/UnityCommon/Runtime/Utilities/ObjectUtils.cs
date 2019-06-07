@@ -11,11 +11,11 @@ namespace UnityCommon
     {
         /// <summary>
         /// Invokes <see cref="Object.Destroy(Object)"/> or <see cref="Object.DestroyImmediate(Object)"/>
-        /// depending on whether the application is in play mode.
+        /// depending on whether the application is in play mode. Won't have effect if the object is not valid.
         /// </summary>
         public static void DestroyOrImmediate (Object obj)
         {
-            if (obj == null) return;
+            if (!IsValid(obj)) return;
 
             if (Application.isPlaying)
                 Object.Destroy(obj);
