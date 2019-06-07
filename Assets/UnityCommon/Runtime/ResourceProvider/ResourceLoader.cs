@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -22,17 +23,11 @@ namespace UnityCommon
         /// Prioritized providers list used by this loader.
         /// </summary>
         protected List<IResourceProvider> Providers { get; }
-        /// <summary>
-        /// Full paths to the resources loaded by this loader.
-        /// </summary>
-        protected HashSet<string> LoadedResourcePaths { get; }
 
         public ResourceLoader (IList<IResourceProvider> providersList, string resourcePathPrefix = null)
         {
             Providers = new List<IResourceProvider>();
             Providers.AddRange(providersList);
-
-            LoadedResourcePaths = new HashSet<string>();
 
             PathPrefix = resourcePathPrefix;
         }
@@ -78,6 +73,11 @@ namespace UnityCommon
     /// </summary>
     public class ResourceLoader<TResource> : ResourceLoader where TResource : UnityEngine.Object
     {
+        /// <summary>
+        /// Resources loaded by this loader.
+        /// </summary>
+        protected readonly List<Resource<TResource>> LoadedResources = new List<Resource<TResource>>();
+
         public ResourceLoader (IList<IResourceProvider> providersList, string resourcePathPrefix = null)
             : base(providersList, resourcePathPrefix) { }
 
@@ -87,7 +87,7 @@ namespace UnityCommon
             return Providers.ResourceLoaded(path);
         }
 
-        public virtual Resource<TResource> GetLoadedResourceOrNull (string path, bool isFullPath = false)
+        public virtual Resource<TResource> GetLoadedOrNull (string path, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
             return Providers.GetLoadedResourceOrNull<TResource>(path);
@@ -99,7 +99,7 @@ namespace UnityCommon
 
             var resource = await Providers.LoadResourceAsync<TResource>(path);
             if (resource != null && resource.IsValid)
-                LoadedResourcePaths.Add(resource.Path);
+                LoadedResources.Add(resource);
             return resource;
         }
 
@@ -110,17 +110,17 @@ namespace UnityCommon
             var resources = await Providers.LoadResourcesAsync<TResource>(path);
             foreach (var resource in resources)
                 if (resource != null && resource.IsValid)
-                    LoadedResourcePaths.Add(resource.Path);
+                    LoadedResources.Add(resource);
             return resources;
         }
 
-        public virtual async Task<IEnumerable<string>> LocateResourcesAsync (string path, bool isFullPath = false)
+        public virtual async Task<IEnumerable<string>> LocateAsync (string path, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
             return await Providers.LocateResourcesAsync<TResource>(path);
         }
 
-        public virtual async Task<bool> ResourceExistsAsync (string path, bool isFullPath = false)
+        public virtual async Task<bool> ExistsAsync (string path, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
             return await Providers.ResourceExistsAsync<TResource>(path);
@@ -131,7 +131,7 @@ namespace UnityCommon
             if (!isFullPath) path = BuildFullPath(path);
 
             Providers.UnloadResource(path);
-            LoadedResourcePaths.Remove(path);
+            LoadedResources.RemoveAll(r => r is null || r.Path.EqualsFast(path));
         }
 
         /// <summary>
@@ -139,9 +139,14 @@ namespace UnityCommon
         /// </summary>
         public override void UnloadAll ()
         {
-            foreach (var path in LoadedResourcePaths)
-                Providers.UnloadResource(path);
-            LoadedResourcePaths.Clear();
+            foreach (var resource in LoadedResources)
+                resource.Provider.UnloadResource(resource.Path);
+            LoadedResources.Clear();
         }
+
+        /// <summary>
+        /// Retrieves all the resources loaded by this loader.
+        /// </summary>
+        public virtual List<Resource<TResource>> GetAllLoaded () => LoadedResources.Where(r => r != null).ToList();
     }
 }
