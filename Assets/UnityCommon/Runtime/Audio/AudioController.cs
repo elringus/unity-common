@@ -48,7 +48,7 @@ namespace UnityCommon
         }
 
         public void PlayClip (AudioClip clip, AudioSource audioSource = null, float volume = 1f, 
-            bool loop = false, AudioMixerGroup mixerGroup = null)
+            bool loop = false, AudioMixerGroup mixerGroup = null, AudioClip introClip = null)
         {
             if (!clip) return;
 
@@ -59,13 +59,13 @@ namespace UnityCommon
             if (audioSource && IsOwnedByController(audioSource)) audioSource = null;
             if (!audioSource) audioSource = GetPooledSource();
 
-            var track = new AudioTrack(clip, audioSource, this, volume, loop, mixerGroup);
+            var track = new AudioTrack(clip, audioSource, this, volume, loop, mixerGroup, introClip);
             audioTracks.Add(clip, track);
             track.Play();
         }
 
         public async Task PlayClipAsync (AudioClip clip, float fadeInTime, AudioSource audioSource = null, float volume = 1f,
-            bool loop = false, AudioMixerGroup mixerGroup = null)
+            bool loop = false, AudioMixerGroup mixerGroup = null, AudioClip introClip = null)
         {
             if (!clip) return;
 
@@ -76,7 +76,7 @@ namespace UnityCommon
             if (audioSource && IsOwnedByController(audioSource)) audioSource = null;
             if (!audioSource) audioSource = GetPooledSource();
 
-            var track = new AudioTrack(clip, audioSource, this, volume, loop, mixerGroup);
+            var track = new AudioTrack(clip, audioSource, this, volume, loop, mixerGroup, introClip);
             audioTracks.Add(clip, track);
             await track.PlayAsync(fadeInTime);
         }

@@ -11,6 +11,7 @@ namespace UnityCommon
     {
         public string Name => Clip.name;
         public AudioClip Clip { get; private set; }
+        public AudioClip IntroClip { get; private set; }
         public AudioSource Source { get; private set; }
         public bool IsValid => Clip && Source;
         public bool IsLooped { get => IsValid ? Source.loop : false; set { if (IsValid) Source.loop = value; } }
@@ -22,9 +23,10 @@ namespace UnityCommon
         private Timer stopTimer;
 
         public AudioTrack (AudioClip clip, AudioSource source, MonoBehaviour behaviourContainer = null,
-            float volume = 1f, bool loop = false, AudioMixerGroup mixerGroup = null)
+            float volume = 1f, bool loop = false, AudioMixerGroup mixerGroup = null, AudioClip introClip = null)
         {
             Clip = clip;
+            IntroClip = introClip;
             Source = source;
             Source.clip = Clip;
             Source.volume = volume;
@@ -40,7 +42,12 @@ namespace UnityCommon
             if (!IsValid) return;
             CompleteAllRunners();
 
-            Source.Play();
+            if (ObjectUtils.IsValid(IntroClip))
+            {
+                Source.PlayOneShot(IntroClip);
+                Source.PlayScheduled(AudioSettings.dspTime + IntroClip.length);
+            }
+            else Source.Play();
         }
 
         public async Task PlayAsync (float fadeInTime)
