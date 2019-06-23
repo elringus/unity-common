@@ -9,14 +9,14 @@ namespace UnityCommon
     /// </summary>
     public class AudioTrack
     {
-        public string Name { get { return Clip.name; } }
+        public string Name => Clip.name;
         public AudioClip Clip { get; private set; }
         public AudioSource Source { get; private set; }
-        public bool IsValid { get { return Clip && Source; } }
-        public bool IsLooped { get { return IsValid ? Source.loop : false; } set { if (IsValid) Source.loop = value; } }
-        public bool IsPlaying { get { return IsValid ? Source.isPlaying : false; } }
-        public bool IsMuted { get { return IsValid ? Source.mute : false; } set { if (IsValid) Source.mute = value; } }
-        public float Volume { get { return IsValid ? Source.volume : 0f; } set { if (IsValid) Source.volume = value; } }
+        public bool IsValid => Clip && Source;
+        public bool IsLooped { get => IsValid ? Source.loop : false; set { if (IsValid) Source.loop = value; } }
+        public bool IsPlaying => IsValid ? Source.isPlaying : false;
+        public bool IsMuted { get => IsValid ? Source.mute : false; set { if (IsValid) Source.mute = value; } }
+        public float Volume { get => IsValid ? Source.volume : 0f; set { if (IsValid) Source.volume = value; } }
 
         private Tweener<FloatTween> volumeTweener;
         private Timer stopTimer;
