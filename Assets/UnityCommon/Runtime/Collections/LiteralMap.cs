@@ -9,6 +9,7 @@ namespace UnityCommon
     public class LiteralMap<TValue> : Dictionary<string, TValue>
     {
         public LiteralMap () : base(StringComparer.OrdinalIgnoreCase) { }
+        public LiteralMap (IDictionary<string, TValue> dictionary) : base(dictionary, StringComparer.OrdinalIgnoreCase) { }
     }
 
     /// <summary>
@@ -18,5 +19,6 @@ namespace UnityCommon
     public class SerializableLiteralStringMap : SerializableMap<string, string>
     {
         public SerializableLiteralStringMap () : base(StringComparer.OrdinalIgnoreCase) { }
+        public SerializableLiteralStringMap (IDictionary<string, string> dictionary) : base(dictionary, StringComparer.OrdinalIgnoreCase) { }
     }
 }

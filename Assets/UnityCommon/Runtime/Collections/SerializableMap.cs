@@ -13,6 +13,7 @@ namespace UnityCommon
             public Dictionary () { }
             public Dictionary (IEqualityComparer<TKey> comparer) : base(comparer) { }
             public Dictionary (IDictionary<TKey, TValue> dict) : base(dict) { }
+            public Dictionary (IDictionary<TKey, TValue> dict, IEqualityComparer<TKey> comparer) : base(dict, comparer) { }
             public Dictionary (SerializationInfo info, StreamingContext context) : base(info, context) { }
         }
     }
@@ -46,6 +47,11 @@ namespace UnityCommon
         public SerializableMap (IDictionary<TKey, TValue> dict)
         {
             dictionary = new Dictionary<TKey, TValue>(dict);
+        }
+
+        public SerializableMap (IDictionary<TKey, TValue> dict, IEqualityComparer<TKey> comparer)
+        {
+            dictionary = new Dictionary<TKey, TValue>(dict, comparer);
         }
 
         #region ISerializationCallbackReceiver
