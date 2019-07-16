@@ -1,5 +1,9 @@
 ﻿using System;
+using System.IO;
+using System.IO.Compression;
 using System.Text;
+using System.Threading.Tasks;
+using UnityEngine;
 
 namespace UnityCommon
 {
@@ -262,6 +266,72 @@ namespace UnityCommon
             }
 
             return builder.ToString();
+        }
+
+        public static byte[] ZipString (string content)
+        {
+            using (var output = new MemoryStream())
+            {
+                using (var gzip = new DeflateStream(output, CompressionMode.Compress))
+                {
+                    using (var writer = new StreamWriter(gzip, Encoding.UTF8))
+                    {
+                        writer.Write(content);
+                    }
+                }
+
+                return output.ToArray();
+            }
+        }
+
+        public static string UnzipString (byte[] content)
+        {
+            using (var inputStream = new MemoryStream(content))
+            {
+                using (var gzip = new DeflateStream(inputStream, CompressionMode.Decompress))
+                {
+                    using (var reader = new StreamReader(gzip, Encoding.UTF8))
+                    {
+                        return reader.ReadToEnd();
+                    }
+                }
+            }
+        }
+
+        public static async Task<byte[]> ZipStringAsync (string content)
+        {
+            if (Application.platform == RuntimePlatform.WebGLPlayer)
+                return ZipString(content);
+
+            using (var output = new MemoryStream())
+            {
+                using (var gzip = new DeflateStream(output, CompressionMode.Compress))
+                {
+                    using (var writer = new StreamWriter(gzip, Encoding.UTF8))
+                    {
+                        await writer.WriteAsync(content);
+                    }
+                }
+
+                return output.ToArray();
+            }
+        }
+
+        public static async Task<string> UnzipStringAsync (byte[] content)
+        {
+            if (Application.platform == RuntimePlatform.WebGLPlayer)
+                return UnzipString(content);
+
+            using (var inputStream = new MemoryStream(content))
+            {
+                using (var gzip = new DeflateStream(inputStream, CompressionMode.Decompress))
+                {
+                    using (var reader = new StreamReader(gzip, Encoding.UTF8))
+                    {
+                        return await reader.ReadToEndAsync();
+                    }
+                }
+            }
         }
     }
 }
