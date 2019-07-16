@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -33,6 +34,7 @@ namespace UnityCommon
         protected YieldInstruction YieldInstruction { get; set; }
         protected int CoroutineTickCount { get; private set; }
         protected Task CompletionTask => completionSource.Task;
+        protected CancellationToken CancellationToken { get; private set; }
 
         private TaskCompletionSource<CoroutineRunner> completionSource;
         private MonoBehaviour coroutineContainer;
@@ -49,7 +51,7 @@ namespace UnityCommon
         /// Starts the coroutine execution. 
         /// If the coroutine is already running or completed will <see cref="Reset"/> before running.
         /// </summary>
-        public virtual void Run ()
+        public virtual void Run (CancellationToken cancellationToken = default)
         {
             if (IsRunning || IsCompleted) Reset();
 
@@ -59,13 +61,14 @@ namespace UnityCommon
                 return;
             }
 
+            CancellationToken = cancellationToken;
             coroutine = CoroutineLoop();
             coroutineContainer.StartCoroutine(coroutine);
         }
 
-        public virtual async Task RunAsync ()
+        public virtual async Task RunAsync (CancellationToken cancellationToken = default)
         {
-            Run();
+            Run(cancellationToken);
             await CompletionTask;
         }
 
@@ -120,7 +123,7 @@ namespace UnityCommon
 
         protected virtual bool LoopCondition ()
         {
-            return CoroutineTickCount == 0;
+            return !CancellationToken.IsCancellationRequested && CoroutineTickCount == 0;
         }
 
         protected virtual void OnCoroutineTick ()

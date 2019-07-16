@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Audio;
 
@@ -50,14 +51,14 @@ namespace UnityCommon
             else Source.Play();
         }
 
-        public async Task PlayAsync (float fadeInTime)
+        public async Task PlayAsync (float fadeInTime, CancellationToken cancellationToken = default)
         {
             if (!IsValid) return;
             CompleteAllRunners();
 
             if (!IsPlaying) Play();
             var tween = new FloatTween(0, Volume, fadeInTime, volume => Volume = volume);
-            await volumeTweener.RunAsync(tween);
+            await volumeTweener.RunAsync(tween, cancellationToken);
         }
 
         public void Stop ()
@@ -68,23 +69,23 @@ namespace UnityCommon
             Source.Stop();
         }
 
-        public async Task StopAsync (float fadeOutTime)
+        public async Task StopAsync (float fadeOutTime, CancellationToken cancellationToken = default)
         {
             if (!IsValid) return;
             CompleteAllRunners();
 
             var tween = new FloatTween(Volume, 0, fadeOutTime, volume => Volume = volume);
             stopTimer.Run(fadeOutTime);
-            await volumeTweener.RunAsync(tween);
+            await volumeTweener.RunAsync(tween, cancellationToken);
         }
 
-        public async Task FadeAsync (float volume, float fadeTime)
+        public async Task FadeAsync (float volume, float fadeTime, CancellationToken cancellationToken = default)
         {
             if (!IsValid) return;
             CompleteAllRunners();
 
             var tween = new FloatTween(Volume, volume, fadeTime, v => Volume = v);
-            await volumeTweener.RunAsync(tween);
+            await volumeTweener.RunAsync(tween, cancellationToken);
         }
 
         private void CompleteAllRunners ()

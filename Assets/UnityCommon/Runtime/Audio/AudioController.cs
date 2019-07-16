@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -65,7 +66,7 @@ namespace UnityCommon
         }
 
         public async Task PlayClipAsync (AudioClip clip, float fadeInTime, AudioSource audioSource = null, float volume = 1f,
-            bool loop = false, AudioMixerGroup mixerGroup = null, AudioClip introClip = null)
+            bool loop = false, AudioMixerGroup mixerGroup = null, AudioClip introClip = null, CancellationToken cancellationToken = default)
         {
             if (!clip) return;
 
@@ -78,7 +79,7 @@ namespace UnityCommon
 
             var track = new AudioTrack(clip, audioSource, this, volume, loop, mixerGroup, introClip);
             audioTracks.Add(clip, track);
-            await track.PlayAsync(fadeInTime);
+            await track.PlayAsync(fadeInTime, cancellationToken);
         }
 
         public void StopClip (AudioClip clip)
@@ -93,15 +94,15 @@ namespace UnityCommon
                 track.Stop();
         }
 
-        public async Task StopClipAsync (AudioClip clip, float fadeOutTime)
+        public async Task StopClipAsync (AudioClip clip, float fadeOutTime, CancellationToken cancellationToken = default)
         {
             if (!clip || !IsClipPlaying(clip)) return;
-            await GetTrack(clip).StopAsync(fadeOutTime);
+            await GetTrack(clip).StopAsync(fadeOutTime, cancellationToken);
         }
 
-        public async Task StopAllClipsAsync (float fadeOutTime)
+        public async Task StopAllClipsAsync (float fadeOutTime, CancellationToken cancellationToken = default)
         {
-            await Task.WhenAll(audioTracks.Values.Select(t => t.StopAsync(fadeOutTime)));
+            await Task.WhenAll(audioTracks.Values.Select(t => t.StopAsync(fadeOutTime, cancellationToken)));
         }
 
         public AudioTrack GetTrack (AudioClip clip)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -27,7 +28,7 @@ namespace UnityCommon
             TweenValue = tweenValue;
         }
 
-        public override void Run ()
+        public override void Run (CancellationToken cancellationToken = default)
         {
             elapsedTime = 0f;
 
@@ -37,24 +38,24 @@ namespace UnityCommon
                 return;
             }
 
-            base.Run();
+            base.Run(cancellationToken);
         }
 
-        public void Run (TTweenValue tweenValue)
+        public void Run (TTweenValue tweenValue, CancellationToken cancellationToken = default)
         {
             TweenValue = tweenValue;
-            Run();
+            Run(cancellationToken);
         }
 
-        public async Task RunAsync (TTweenValue tweenValue)
+        public async Task RunAsync (TTweenValue tweenValue, CancellationToken cancellationToken = default)
         {
-            Run(tweenValue);
+            Run(tweenValue, cancellationToken);
             await CompletionTask;
         }
 
         protected override bool LoopCondition ()
         {
-            return elapsedTime <= TweenValue.TweenDuration;
+            return !CancellationToken.IsCancellationRequested && elapsedTime <= TweenValue.TweenDuration;
         }
 
         protected override void OnCoroutineTick ()

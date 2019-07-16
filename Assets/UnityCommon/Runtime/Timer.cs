@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using UnityEngine;
 
 namespace UnityCommon
@@ -24,17 +25,17 @@ namespace UnityCommon
             if (onLoop != null) OnLoop += onLoop;
         }
 
-        public void Run (float duration, bool loop = false, bool ignoreTimeScale = false)
+        public void Run (float duration, bool loop = false, bool ignoreTimeScale = false, CancellationToken cancellationToken = default)
         {
             ElapsedTime = 0f;
             Duration = duration;
             Loop = loop;
             IsTimeScaleIgnored = ignoreTimeScale;
 
-            base.Run();
+            base.Run(cancellationToken);
         }
 
-        public override void Run () => Run(Duration, Loop, IsTimeScaleIgnored);
+        public override void Run (CancellationToken cancellationToken = default) => Run(Duration, Loop, IsTimeScaleIgnored, cancellationToken);
 
         public override void Stop ()
         {
@@ -45,7 +46,7 @@ namespace UnityCommon
 
         protected override bool LoopCondition ()
         {
-            return ElapsedTime < Duration;
+            return !CancellationToken.IsCancellationRequested && ElapsedTime < Duration;
         }
 
         protected override void OnCoroutineTick ()
