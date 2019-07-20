@@ -1,0 +1,21 @@
+{
+    "name": "Elringus.UnityCommon.Runtime",
+    "references": [
+        "GUID:26c3782e36cc1874587ef07692accab2"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.elringus.unitygoogledrive",
+            "expression": "",
+            "define": "UNITY_GOOGLE_DRIVE_AVAILABLE"
+        }
+    ]
+}

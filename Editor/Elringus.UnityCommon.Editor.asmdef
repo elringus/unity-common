@@ -1,0 +1,17 @@
+{
+    "name": "Elringus.UnityCommon.Editor",
+    "references": [
+        "GUID:87e2381f93a6a0348b03f5df7fdac208"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": []
+}
