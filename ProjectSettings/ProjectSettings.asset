@@ -516,7 +516,7 @@ PlayerSettings:
   webGLThreadsSupport: 0
   webGLWasmStreaming: 0
   scriptingDefineSymbols:
-    1: UNITY_CCU;UNITY_GOOGLE_DRIVE_AVAILABLE
+    1: UNITY_CCU
   platformArchitecture: {}
   scriptingBackend: {}
   il2cppCompilerConfiguration: {}
