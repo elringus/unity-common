@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.elringus.unitygoogledrive": "https://github.com/Elringus/UnityGoogleDrive.git#package",
     "com.unity.package-manager-ui": "2.1.2",
     "com.unity.modules.ai": "1.0.0",
     "com.unity.modules.animation": "1.0.0",
@@ -31,5 +32,11 @@
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0"
+  },
+  "lock": {
+    "com.elringus.unitygoogledrive": {
+      "hash": "92c3ca7ddba6dffea6160969067e4e728bd67e97",
+      "revision": "package"
+    }
   }
 }
