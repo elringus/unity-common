@@ -68,7 +68,7 @@ namespace UnityCommon
         private async Task<List<IResourceLocation>> LoadAllLocations ()
         {
             var locations = await Addressables.LoadResourceLocationsAsync(AssetsLabel).Task;
-            return locations.ToList();
+            return locations?.ToList() ?? new List<IResourceLocation>();
         }
     }
 }
