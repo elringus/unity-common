@@ -27,10 +27,11 @@ public class TestResourceProvider : MonoBehaviour
 
     private void Awake ()
     {
-        provider = InitializeProjectResourceProvider();
+        //provider = InitializeProjectResourceProvider();
         //provider = InitializeEditorResourceProvider();
         //provider = InitializeLocalResourceProvider();
         //provider = InitializeGoogleDriveResourceProvider(false);
+        provider = InitializeAddresableResourceProvider();
     }
 
     private async void Start ()
@@ -45,7 +46,7 @@ public class TestResourceProvider : MonoBehaviour
         await TestUnloadAsync();
         await TestTextureResources();
         await TestTextureByDir();
-        //await TestNullPropagation();
+        await TestNullPropagation();
     }
 
     private void OnGUI ()
@@ -111,6 +112,12 @@ public class TestResourceProvider : MonoBehaviour
         provider.AddConverter(new WavToAudioClipConverter());
         //provider.AddConverter(new Mp3ToAudioClipConverter());
 
+        return provider;
+    }
+
+    private static AddressableResourceProvider InitializeAddresableResourceProvider ()
+    {
+        var provider = new AddressableResourceProvider();
         return provider;
     }
 
