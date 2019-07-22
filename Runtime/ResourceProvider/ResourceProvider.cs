@@ -141,7 +141,7 @@ namespace UnityCommon
             return locatedResourcePaths;
         }
 
-        public async Task<IEnumerable<Folder>> LocateFoldersAsync (string path)
+        public virtual async Task<IEnumerable<Folder>> LocateFoldersAsync (string path)
         {
             if (path is null) path = string.Empty;
 
