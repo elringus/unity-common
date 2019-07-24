@@ -11,6 +11,11 @@ namespace UnityCommon
     public class Resource
     {
         /// <summary>
+        /// A cached invalid resource.
+        /// </summary>
+        public static readonly Resource Invalid = new Resource(null, null, null);
+
+        /// <summary>
         /// Full path to the resource location; also serves as an ID within the provider.
         /// </summary>
         public readonly string Path;
