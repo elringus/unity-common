@@ -28,6 +28,8 @@ namespace UnityCommon
         [SerializeField] private bool isVisibleOnAwake = true;
         [Tooltip("Fade duration (in seconds) when changing visiblity.")]
         [SerializeField] private float fadeTime = .3f;
+        [Tooltip("When assigned, will make the object focused (for keyboard or gamepad control) when the UI becomes visible.")]
+        [SerializeField] private GameObject focusObject = default;
 
         private Tweener<FloatTween> fadeTweener;
         private RectTransform rectTransform;
@@ -158,6 +160,9 @@ namespace UnityCommon
         protected virtual void HandleVisibilityChanged (bool visible)
         {
             OnVisibilityChanged?.Invoke(visible);
+
+            if (focusObject && visible && EventSystem.current)
+                EventSystem.current.SetSelectedGameObject(focusObject);
         }
 
         private RectTransform GetRectTransform ()
