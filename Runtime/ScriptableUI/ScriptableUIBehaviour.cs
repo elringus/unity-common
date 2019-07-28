@@ -41,7 +41,7 @@ namespace UnityCommon
 
             this.isVisible = isVisible;
 
-            OnVisibilityChanged.SafeInvoke(isVisible);
+            HandleVisibilityChanged(isVisible);
 
             if (!CanvasGroup) return;
 
@@ -71,7 +71,7 @@ namespace UnityCommon
 
             this.isVisible = isVisible;
 
-            OnVisibilityChanged.SafeInvoke(isVisible);
+            HandleVisibilityChanged(isVisible);
 
             if (!CanvasGroup) return;
 
@@ -149,6 +149,15 @@ namespace UnityCommon
             }
 
             SetIsVisible(IsVisibleOnAwake);
+        }
+
+        /// <summary>
+        /// Invoked when visibility of the UI is changed.
+        /// </summary>
+        /// <param name="visible">The new visibility of the UI.</param>
+        protected virtual void HandleVisibilityChanged (bool visible)
+        {
+            OnVisibilityChanged?.Invoke(visible);
         }
 
         private RectTransform GetRectTransform ()
