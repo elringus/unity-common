@@ -24,6 +24,8 @@ namespace UnityCommon
 
         [Tooltip("Whether to permamently disable interaction with the object, no matter the visibility.")]
         [SerializeField] private bool disableInteraction = false;
+        [Tooltip("When assigned, will make the object focused (for keyboard or gamepad control) when the UI becomes visible.")]
+        [SerializeField] private GameObject focusObject = default;
         [Tooltip("Whether UI element should be visible or hidden on awake.")]
         [SerializeField] private bool isVisibleOnAwake = true;
         [Tooltip("Fade duration (in seconds) when changing visiblity.")]
@@ -158,6 +160,9 @@ namespace UnityCommon
         protected virtual void HandleVisibilityChanged (bool visible)
         {
             OnVisibilityChanged?.Invoke(visible);
+
+            if (focusObject && visible && EventSystem.current)
+                EventSystem.current.SetSelectedGameObject(focusObject);
         }
 
         private RectTransform GetRectTransform ()
