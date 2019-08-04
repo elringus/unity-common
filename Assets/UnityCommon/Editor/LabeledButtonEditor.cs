@@ -3,7 +3,7 @@ using UnityEditor.UI;
 
 namespace UnityCommon
 {
-    [CustomEditor(typeof(LabeledButton), true)]
+    [CustomEditor(typeof(LabeledButton), true), CanEditMultipleObjects]
     public class LabeledButtonEditor : ButtonEditor
     {
         SerializedProperty labelTextProperty;
