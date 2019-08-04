@@ -9,7 +9,7 @@ namespace UnityCommon
         public ColorBlock LabelColorBlock => labelColors;
         public Color LabelColorMultiplier
         {
-            get { return labelColorMultiplier; }
+            get => labelColorMultiplier; 
             set { labelColorMultiplier = value; DoStateTransition(currentSelectionState, false); }
         }
 
