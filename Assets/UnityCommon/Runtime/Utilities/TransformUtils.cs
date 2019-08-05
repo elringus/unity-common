@@ -36,5 +36,22 @@ namespace UnityCommon
             if (local) trs.localPosition = new Vector3(trs.localPosition.x, trs.localPosition.y, z);
             else trs.position = new Vector3(trs.position.x, trs.position.y, z);
         }
+
+        public static Transform FindRecursive (this Transform trs, string name)
+        {
+            if (trs.childCount == 0)
+                return null;
+
+            var result = default(Transform);
+            for (int i = 0; i < trs.childCount; i++)
+            {
+                var child = trs.GetChild(i);
+                if (child.name == name)
+                    return child;
+                result = FindRecursive(child, name);
+            }
+
+            return result;
+        }
     }
 }
