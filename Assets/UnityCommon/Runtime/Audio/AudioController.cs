@@ -9,11 +9,11 @@ namespace UnityCommon
 {
     public class AudioController : MonoBehaviour
     {
-        public AudioListener Listener { get { return audioListener ?? FindOrAddListener(); } }
-        public float Volume { get { return AudioListener.volume; } set { AudioListener.volume = value; } }
-        public bool IsMuted { get { return AudioListener.pause; } set { AudioListener.pause = value; } }
+        public AudioListener Listener => listenerCache ? listenerCache : FindOrAddListener();
+        public float Volume { get => AudioListener.volume; set => AudioListener.volume = value; }
+        public bool IsMuted { get => AudioListener.pause; set => AudioListener.pause = value; } 
 
-        private AudioListener audioListener;
+        private AudioListener listenerCache;
         private Tweener<FloatTween> listenerVolumeTweener;
         private Dictionary<AudioClip, AudioTrack> audioTracks = new Dictionary<AudioClip, AudioTrack>();
         private Stack<AudioSource> sourcesPool = new Stack<AudioSource>();
@@ -118,9 +118,9 @@ namespace UnityCommon
 
         private AudioListener FindOrAddListener ()
         {
-            audioListener = FindObjectOfType<AudioListener>();
-            if (!audioListener) audioListener = gameObject.AddComponent<AudioListener>();
-            return audioListener;
+            listenerCache = FindObjectOfType<AudioListener>();
+            if (!listenerCache) listenerCache = gameObject.AddComponent<AudioListener>();
+            return listenerCache;
         }
 
         private bool IsOwnedByController (AudioSource audioSource)
