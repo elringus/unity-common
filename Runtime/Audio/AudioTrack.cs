@@ -20,8 +20,7 @@ namespace UnityCommon
         public bool IsMuted { get => IsValid ? Source.mute : false; set { if (IsValid) Source.mute = value; } }
         public float Volume { get => IsValid ? Source.volume : 0f; set { if (IsValid) Source.volume = value; } }
 
-        private Tweener<FloatTween> volumeTweener;
-        private Timer stopTimer;
+        private readonly Tweener<FloatTween> volumeTweener;
 
         public AudioTrack (AudioClip clip, AudioSource source, MonoBehaviour behaviourContainer = null,
             float volume = 1f, bool loop = false, AudioMixerGroup mixerGroup = null, AudioClip introClip = null)
@@ -35,7 +34,6 @@ namespace UnityCommon
             Source.outputAudioMixerGroup = mixerGroup;
 
             volumeTweener = new Tweener<FloatTween>(behaviourContainer);
-            stopTimer = new Timer(coroutineContainer: behaviourContainer, onCompleted: Stop);
         }
 
         public void Play ()
@@ -75,8 +73,9 @@ namespace UnityCommon
             CompleteAllRunners();
 
             var tween = new FloatTween(Volume, 0, fadeOutTime, volume => Volume = volume);
-            stopTimer.Run(fadeOutTime);
             await volumeTweener.RunAsync(tween, cancellationToken);
+            if (cancellationToken.IsCancellationRequested) return;
+            Stop();
         }
 
         public async Task FadeAsync (float volume, float fadeTime, CancellationToken cancellationToken = default)
@@ -92,8 +91,6 @@ namespace UnityCommon
         {
             if (volumeTweener.IsRunning)
                 volumeTweener.CompleteInstantly();
-            if (stopTimer.IsRunning)
-                stopTimer.CompleteInstantly();
         }
     }
 }
