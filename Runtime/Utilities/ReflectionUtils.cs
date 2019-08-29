@@ -7,9 +7,12 @@ namespace UnityCommon
 {
     public static class ReflectionUtils
     {
-        public static IEnumerable<Type> ExportedDomainTypes { get { return cachedDomainTypes ?? (cachedDomainTypes = GetExportedDomainTypes()); } }
+        /// <summary>
+        /// Cached domain exported types from the non-dynamic assemblies.
+        /// </summary>
+        public static HashSet<Type> ExportedDomainTypes => cachedDomainTypes ?? (cachedDomainTypes = GetExportedDomainTypes());
 
-        private static IEnumerable<Type> cachedDomainTypes;
+        private static HashSet<Type> cachedDomainTypes;
 
         public static bool IsDynamicAssembly (Assembly assembly)
         {
@@ -20,15 +23,19 @@ namespace UnityCommon
             #endif
         }
 
-        public static IEnumerable<Assembly> GetDomainAssemblies (bool excludeDynamic = true)
+        public static HashSet<Assembly> GetDomainAssemblies (bool excludeDynamic = true)
         {
+            var result = new HashSet<Assembly>();
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            return excludeDynamic ? assemblies.Where(a => !IsDynamicAssembly(a)) : assemblies;
+            result.UnionWith(excludeDynamic ? assemblies.Where(a => !IsDynamicAssembly(a)) : assemblies);
+            return result;
         }
 
-        public static IEnumerable<Type> GetExportedDomainTypes ()
+        public static HashSet<Type> GetExportedDomainTypes ()
         {
-            return GetDomainAssemblies().SelectMany(a => a.GetExportedTypes());
+            var result = new HashSet<Type>();
+            result.UnionWith(GetDomainAssemblies().SelectMany(a => a.GetExportedTypes()));
+            return result;
         }
 
         /// <summary>
