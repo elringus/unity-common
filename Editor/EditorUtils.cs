@@ -155,6 +155,24 @@ namespace UnityCommon
         }
 
         /// <summary>
+        /// Checks whether asset with the provided GUID exists.
+        /// </summary>
+        public static bool AssetExistsByGuid (string guid)
+        {
+            var assetPath = AssetDatabase.GUIDToAssetPath(guid);
+            return AssetExistsByPath(assetPath);
+        }
+
+        /// <summary>
+        /// Checks whether asset with the provided relative project asset path (`Assets/...`) exists.
+        /// </summary>
+        public static bool AssetExistsByPath (string path)
+        {
+            // Using GUIDToAssetPath() is not enough, as it could still return a path of a deleted asset.
+            return AssetDatabase.GetMainAssetTypeAtPath(path) != null;
+        }
+
+        /// <summary>
         /// Performs <see cref="AssetDatabase.AssetPathToGUID(string)"/> and <see cref="AssetDatabase.LoadAssetAtPath(string, Type)"/>.
         /// Will return null in case asset with the provided GUID doesn't exist.
         /// </summary>
