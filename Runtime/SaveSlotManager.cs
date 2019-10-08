@@ -43,12 +43,22 @@ namespace UnityCommon
         protected override bool Binary => false;
         protected override string Extension => "json";
 
+        private static readonly WaitForEndOfFrame waitForEndOfFrame = new WaitForEndOfFrame();
+        private bool saveInProgress;
+
         public async Task SaveAsync (string slotId, TData data)
         {
+            while (saveInProgress && Application.isPlaying)
+                await waitForEndOfFrame;
+
+            saveInProgress = true;
+
             InvokeOnBeforeSave();
 
             await SerializeDataAsync(slotId, data);
             InvokeOnSaved();
+
+            saveInProgress = false;
         }
 
         public async Task<TData> LoadAsync (string slotId)
@@ -57,7 +67,7 @@ namespace UnityCommon
 
             if (!SaveSlotExists(slotId))
             {
-                Debug.LogError(string.Format("Slot '{0}' not found when loading '{1}' data.", slotId, typeof(TData)));
+                Debug.LogError($"Slot '{slotId}' not found when loading '{typeof(TData)}' data.");
                 return default;
             }
 
