@@ -117,6 +117,7 @@ namespace UnityCommon
 
         protected virtual void HandleOnCompleted ()
         {
+            coroutine = null;
             completionSource.TrySetResult(this);
             OnCompleted?.Invoke();
         }
