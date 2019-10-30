@@ -30,6 +30,8 @@ namespace UnityCommon
         [SerializeField] private bool disableInteraction = false;
         [Tooltip("Whether UI element should be visible or hidden on awake.")]
         [SerializeField] private bool isVisibleOnAwake = true;
+        [Tooltip("Whether to disable the topmost canvas component when the UI is hidden.")]
+        [SerializeField] private bool disableCanvasOnHide = false;
         [Tooltip("Fade duration (in seconds) when changing visiblity.")]
         [SerializeField] private float fadeTime = .3f;
         [Tooltip("When assigned, will make the object focused (for keyboard or gamepad control) when the UI becomes visible.")]
@@ -49,9 +51,11 @@ namespace UnityCommon
 
             this.isVisible = isVisible;
 
-            HandleVisibilityChanged(isVisible);
-
-            if (!CanvasGroup) return;
+            if (!CanvasGroup)
+            {
+                HandleVisibilityChanged(isVisible);
+                return;
+            }
 
             if (!disableInteraction)
             {
@@ -69,7 +73,11 @@ namespace UnityCommon
             }
 
             var tween = new FloatTween(CanvasGroup.alpha, targetOpacity, fadeDuration, alpha => CanvasGroup.alpha = alpha);
-            await fadeTweener.RunAsync(tween);
+            var tweenTask = fadeTweener.RunAsync(tween);
+
+            HandleVisibilityChanged(isVisible);
+
+            await tweenTask;
         }
 
         public virtual void SetIsVisible (bool isVisible)
@@ -79,9 +87,11 @@ namespace UnityCommon
 
             this.isVisible = isVisible;
 
-            HandleVisibilityChanged(isVisible);
-
-            if (!CanvasGroup) return;
+            if (!CanvasGroup)
+            {
+                HandleVisibilityChanged(isVisible);
+                return;
+            }
 
             if (!disableInteraction)
             {
@@ -90,6 +100,8 @@ namespace UnityCommon
             }
 
             CanvasGroup.alpha = isVisible ? 1f : 0f;
+
+            HandleVisibilityChanged(isVisible);
         }
 
         public virtual void ToggleVisibility ()
@@ -170,6 +182,22 @@ namespace UnityCommon
 
             if (focusObject && visible && EventSystem.current)
                 EventSystem.current.SetSelectedGameObject(focusObject);
+
+            if (disableCanvasOnHide)
+            {
+                void DisableCanvasDelayed () => TopmostCanvas.enabled = false;
+
+                if (visible) TopmostCanvas.enabled = true;
+                else
+                {
+                    if (fadeTweener.IsRunning)
+                    {
+                        fadeTweener.OnCompleted -= DisableCanvasDelayed;
+                        fadeTweener.OnCompleted += DisableCanvasDelayed;
+                    }
+                    else TopmostCanvas.enabled = false;
+                }
+            }
         }
 
         private RectTransform GetRectTransform ()
