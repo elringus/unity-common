@@ -185,7 +185,7 @@ namespace UnityCommon
 
             if (disableCanvasOnHide)
             {
-                void DisableCanvasDelayed () => TopmostCanvas.enabled = false;
+                void DisableCanvasDelayed () { if (!IsVisible) TopmostCanvas.enabled = false; }
 
                 if (visible) TopmostCanvas.enabled = true;
                 else
