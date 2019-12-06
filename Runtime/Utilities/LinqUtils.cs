@@ -29,12 +29,12 @@ namespace UnityCommon
             return array.Length > 0 && index >= 0 && index < array.Length;
         }
 
-        public static bool IsIndexValid<T> (this List<T> list, int index)
+        public static bool IsIndexValid<T> (this IList<T> list, int index)
         {
             return list.Count > 0 && index >= 0 && index < list.Count;
         }
 
-        public static T Random<T> (this List<T> list)
+        public static T Random<T> (this IList<T> list)
         {
             if (list == null || list.Count == 0) return default;
             var randomIndex = UnityEngine.Random.Range(0, list.Count);
@@ -54,7 +54,7 @@ namespace UnityCommon
             return items.Distinct(comparer);
         }
 
-        public static float ProgressOf<T> (this List<T> list, T currentItem)
+        public static float ProgressOf<T> (this IList<T> list, T currentItem)
         {
             return list.IndexOf(currentItem) / (float)list.Count;
         }
