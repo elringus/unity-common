@@ -33,6 +33,11 @@ namespace UnityCommon
             return nullable is null ? default(TValue) : nullable.Value;
         }
 
+        public static implicit operator Nullable<TValue> (TValue value)
+        {
+            return new Nullable<TValue> { Value = value };
+        }
+
         public override bool Equals (object obj)
         {
             return Equals(obj as Nullable<TValue>);
@@ -89,33 +94,72 @@ namespace UnityCommon
     /// <summary>
     /// Represents a serializable <see cref="System.Nullable"/> <see cref="string"/>.
     /// </summary>
-    [Serializable] public class NullableString : Nullable<string> { }
+    [Serializable]
+    public class NullableString : Nullable<string>
+    {
+        public static implicit operator NullableString (string value) => new NullableString { Value = value };
+    }
+
     /// <summary>
     /// Represents a serializable <see cref="System.Nullable"/> <see cref="int"/>.
     /// </summary>
-    [Serializable] public class NullableInteger : Nullable<int> { }
+    [Serializable]
+    public class NullableInteger : Nullable<int>
+    {
+        public static implicit operator NullableInteger (int value) => new NullableInteger { Value = value };
+    }
+
     /// <summary>
     /// Represents a serializable <see cref="System.Nullable"/> <see cref="float"/>.
     /// </summary>
-    [Serializable] public class NullableFloat : Nullable<float> { }
+    [Serializable]
+    public class NullableFloat : Nullable<float>
+    {
+        public static implicit operator NullableFloat (float value) => new NullableFloat { Value = value };
+    }
+
     /// <summary>
     /// Represents a serializable <see cref="System.Nullable"/> <see cref="bool"/>.
     /// </summary>
-    [Serializable] public class NullableBoolean : Nullable<bool> { }
+    [Serializable]
+    public class NullableBoolean : Nullable<bool>
+    {
+        public static implicit operator NullableBoolean (bool value) => new NullableBoolean { Value = value };
+    }
+
     /// <summary>
     /// Represents a serializable <see cref="System.Nullable"/> <see cref="Vector2"/>.
     /// </summary>
-    [Serializable] public class NullableVector2 : Nullable<Vector2> { }
+    [Serializable]
+    public class NullableVector2 : Nullable<Vector2>
+    {
+        public static implicit operator NullableVector2 (Vector2 value) => new NullableVector2 { Value = value };
+    }
+
     /// <summary>
     /// Represents a serializable <see cref="System.Nullable"/> <see cref="Vector3"/>.
     /// </summary>
-    [Serializable] public class NullableVector3 : Nullable<Vector3> { }
+    [Serializable]
+    public class NullableVector3 : Nullable<Vector3>
+    {
+        public static implicit operator NullableVector3 (Vector3 value) => new NullableVector3 { Value = value };
+    }
+
     /// <summary>
     /// Represents a serializable <see cref="System.Nullable"/> <see cref="Vector4"/>.
     /// </summary>
-    [Serializable] public class NullableVector4 : Nullable<Vector4> { }
+    [Serializable]
+    public class NullableVector4 : Nullable<Vector4>
+    {
+        public static implicit operator NullableVector4 (Vector4 value) => new NullableVector4 { Value = value };
+    }
+
     /// <summary>
     /// Represents a serializable <see cref="System.Nullable"/> <see cref="Quaternion"/>.
     /// </summary>
-    [Serializable] public class NullableQuaternion : Nullable<Quaternion> { }
+    [Serializable]
+    public class NullableQuaternion : Nullable<Quaternion>
+    {
+        public static implicit operator NullableQuaternion (Quaternion value) => new NullableQuaternion { Value = value };
+    }
 }
