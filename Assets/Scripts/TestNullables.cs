@@ -7,7 +7,7 @@ public class TestNullables : MonoBehaviour
 {
     public NullableFloat Float;
     public NullableString String;
-    public NullableBool Bool;
+    public NullableBoolean Bool;
     public NullableVector3 Vector3;
     public List<NullableVector3> Vector3List;
 
