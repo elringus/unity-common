@@ -28,6 +28,11 @@ namespace UnityCommon
         [SerializeField] private TValue value = default;
         [SerializeField] private bool hasValue = default;
 
+        public static implicit operator TValue (Nullable<TValue> nullable)
+        {
+            return nullable is null ? default(TValue) : nullable.Value;
+        }
+
         public override bool Equals (object obj)
         {
             return Equals(obj as Nullable<TValue>);
