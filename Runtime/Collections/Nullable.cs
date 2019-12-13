@@ -162,4 +162,76 @@ namespace UnityCommon
     {
         public static implicit operator NullableQuaternion (Quaternion value) => new NullableQuaternion { Value = value };
     }
+
+    /// <summary>
+    /// Represents a serializable <see cref="System.Nullable"/> <see cref="NamedString"/>.
+    /// </summary>
+    [Serializable]
+    public class NullableNamedString : Nullable<NamedString>
+    {
+        public static implicit operator NullableNamedString (NamedString value) => new NullableNamedString { Value = value };
+    }
+
+    /// <summary>
+    /// Represents a serializable <see cref="System.Nullable"/> <see cref="NamedInteger"/>.
+    /// </summary>
+    [Serializable]
+    public class NullableNamedInteger : Nullable<NamedInteger>
+    {
+        public static implicit operator NullableNamedInteger (NamedInteger value) => new NullableNamedInteger { Value = value };
+    }
+
+    /// <summary>
+    /// Represents a serializable <see cref="System.Nullable"/> <see cref="NamedFloat"/>.
+    /// </summary>
+    [Serializable]
+    public class NullableNamedFloat : Nullable<NamedFloat>
+    {
+        public static implicit operator NullableNamedFloat (NamedFloat value) => new NullableNamedFloat { Value = value };
+    }
+
+    /// <summary>
+    /// Represents a serializable <see cref="System.Nullable"/> <see cref="NamedBoolean"/>.
+    /// </summary>
+    [Serializable]
+    public class NullableNamedBoolean : Nullable<NamedBoolean>
+    {
+        public static implicit operator NullableNamedBoolean (NamedBoolean value) => new NullableNamedBoolean { Value = value };
+    }
+
+    /// <summary>
+    /// Represents a serializable <see cref="System.Nullable"/> <see cref="NamedVector2"/>.
+    /// </summary>
+    [Serializable]
+    public class NullableNamedVector2 : Nullable<NamedVector2>
+    {
+        public static implicit operator NullableNamedVector2 (NamedVector2 value) => new NullableNamedVector2 { Value = value };
+    }
+
+    /// <summary>
+    /// Represents a serializable <see cref="System.Nullable"/> <see cref="NamedVector3"/>.
+    /// </summary>
+    [Serializable]
+    public class NullableNamedVector3 : Nullable<NamedVector3>
+    {
+        public static implicit operator NullableNamedVector3 (NamedVector3 value) => new NullableNamedVector3 { Value = value };
+    }
+
+    /// <summary>
+    /// Represents a serializable <see cref="System.Nullable"/> <see cref="NamedVector4"/>.
+    /// </summary>
+    [Serializable]
+    public class NullableNamedVector4 : Nullable<NamedVector4>
+    {
+        public static implicit operator NullableNamedVector4 (NamedVector4 value) => new NullableNamedVector4 { Value = value };
+    }
+
+    /// <summary>
+    /// Represents a serializable <see cref="System.Nullable"/> <see cref="NamedQuaternion"/>.
+    /// </summary>
+    [Serializable]
+    public class NullableNamedQuaternion : Nullable<NamedQuaternion>
+    {
+        public static implicit operator NullableNamedQuaternion (NamedQuaternion value) => new NullableNamedQuaternion { Value = value };
+    }
 }
