@@ -77,7 +77,7 @@ namespace UnityCommon
         {
             this.value = value;
 
-            HasValue = IsValueType || EqualityComparer<TValue>.Default.Equals(value, default);
+            HasValue = IsValueType || !EqualityComparer<TValue>.Default.Equals(value, default);
         }
 
         protected virtual bool GetHasValue ()
