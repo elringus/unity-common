@@ -13,15 +13,15 @@ namespace UnityCommon
     public class Named<TValue> : IEquatable<Named<TValue>>
     {
         /// <summary>
-        /// Name of the item.
+        /// Name of the item; underlying serialized type supports null values (via <see cref="NullableString"/>).
         /// </summary>
-        public string Name { get => name; set => name = value; }
+        public string Name { get => name.HasValue ? name : null; set => name = value; }
         /// <summary>
         /// Value of the item.
         /// </summary>
         public TValue Value { get => value; set => this.value = value; }
 
-        [SerializeField] private string name = default;
+        [SerializeField] private NullableString name = default;
         [SerializeField] private TValue value = default;
 
         public override bool Equals (object obj)
@@ -32,14 +32,14 @@ namespace UnityCommon
         public bool Equals (Named<TValue> other)
         {
             return other != null &&
-                   name == other.name &&
+                   EqualityComparer<NullableString>.Default.Equals(name, other.name) &&
                    EqualityComparer<TValue>.Default.Equals(value, other.value);
         }
 
         public override int GetHashCode ()
         {
             var hashCode = 1477024672;
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(name);
+            hashCode = hashCode * -1521134295 + EqualityComparer<NullableString>.Default.GetHashCode(name);
             hashCode = hashCode * -1521134295 + EqualityComparer<TValue>.Default.GetHashCode(value);
             return hashCode;
         }
