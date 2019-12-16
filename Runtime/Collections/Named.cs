@@ -16,12 +16,23 @@ namespace UnityCommon
     }
 
     /// <summary>
+    /// Implementation is able to represent container for a named value of type <typeparamref name="TValue"/>.
+    /// </summary>
+    public interface INamed<TValue> : INamedValue
+    {
+        /// <summary>
+        /// Value of the item.
+        /// </summary>
+        TValue Value { get; set; }
+    }
+
+    /// <summary>
     /// Represents container for a <see cref="string"/> (name) and a generic value 
     /// with support for Unity serialization (for derived non-generic types).
     /// </summary>
     /// <typeparam name="TValue">Type of the value; should be natively supported by the Unity serialization system.</typeparam> 
     [Serializable]
-    public class Named<TValue> : INamedValue, IEquatable<Named<TValue>>
+    public class Named<TValue> : INamed<TValue>, IEquatable<Named<TValue>>
     {
         /// <summary>
         /// Name of the value; underlying serialized type supports null values (via <see cref="NullableString"/>).
