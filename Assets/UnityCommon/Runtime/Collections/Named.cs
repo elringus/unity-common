@@ -5,16 +5,18 @@ using UnityEngine;
 namespace UnityCommon
 {
     /// <summary>
-    /// Implementation is able to represent a container for a <see cref="string"/> (name) and a generic value 
-    /// with support for Unity serialization (for derived non-generic types).
+    /// Implementation is able to represent container for a named value.
     /// </summary>
     public interface INamedValue
     {
+        /// <summary>
+        /// Name of the value.
+        /// </summary>
         string Name { get; set; }
     }
 
     /// <summary>
-    /// Represents a container for a <see cref="string"/> (name) and a generic value 
+    /// Represents container for a <see cref="string"/> (name) and a generic value 
     /// with support for Unity serialization (for derived non-generic types).
     /// </summary>
     /// <typeparam name="TValue">Type of the value; should be natively supported by the Unity serialization system.</typeparam> 
@@ -22,7 +24,7 @@ namespace UnityCommon
     public class Named<TValue> : INamedValue, IEquatable<Named<TValue>>
     {
         /// <summary>
-        /// Name of the item; underlying serialized type supports null values (via <see cref="NullableString"/>).
+        /// Name of the value; underlying serialized type supports null values (via <see cref="NullableString"/>).
         /// </summary>
         public string Name { get => name.HasValue ? name : null; set => name = value; }
         /// <summary>
