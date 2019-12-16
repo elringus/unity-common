@@ -92,6 +92,23 @@ namespace UnityCommon
     }
 
     /// <summary>
+    /// Represents a <see cref="Nullable"/> <see cref="Named{TValue}"/> with support for Unity serialization (for derived non-generic types).
+    /// </summary>
+    public abstract class NullableNamed<TNamed, TNamedValue> : Nullable<TNamed>
+        where TNamed : INamed<TNamedValue>
+        where TNamedValue : class
+    {
+        /// <summary>
+        /// Name component of the value or null when value is not assigned.
+        /// </summary>
+        public string Name => HasValue ? Value.Name : null;
+        /// <summary>
+        /// Value component of the value or null when value is not assigned.
+        /// </summary>
+        public TNamedValue NamedValue => HasValue ? Value.Value : null;
+    }
+
+    /// <summary>
     /// Represents a serializable <see cref="System.Nullable"/> <see cref="string"/>.
     /// </summary>
     [Serializable]
@@ -175,7 +192,7 @@ namespace UnityCommon
     /// Represents a serializable <see cref="System.Nullable"/> <see cref="NamedString"/>.
     /// </summary>
     [Serializable]
-    public class NullableNamedString : Nullable<NamedString>
+    public class NullableNamedString : NullableNamed<NamedString, NullableString>
     {
         public static implicit operator NullableNamedString (NamedString value) => new NullableNamedString { Value = value };
         public static implicit operator NamedString (NullableNamedString nullable) => (nullable is null || !nullable.HasValue) ? null : nullable.Value;
@@ -185,7 +202,7 @@ namespace UnityCommon
     /// Represents a serializable <see cref="System.Nullable"/> <see cref="NamedInteger"/>.
     /// </summary>
     [Serializable]
-    public class NullableNamedInteger : Nullable<NamedInteger>
+    public class NullableNamedInteger : NullableNamed<NamedInteger, NullableInteger>
     {
         public static implicit operator NullableNamedInteger (NamedInteger value) => new NullableNamedInteger { Value = value };
         public static implicit operator NamedInteger (NullableNamedInteger nullable) => (nullable is null || !nullable.HasValue) ? null : nullable.Value;
@@ -195,7 +212,7 @@ namespace UnityCommon
     /// Represents a serializable <see cref="System.Nullable"/> <see cref="NamedFloat"/>.
     /// </summary>
     [Serializable]
-    public class NullableNamedFloat : Nullable<NamedFloat>
+    public class NullableNamedFloat : NullableNamed<NamedFloat, NullableFloat>
     {
         public static implicit operator NullableNamedFloat (NamedFloat value) => new NullableNamedFloat { Value = value };
         public static implicit operator NamedFloat (NullableNamedFloat nullable) => (nullable is null || !nullable.HasValue) ? null : nullable.Value;
@@ -205,7 +222,7 @@ namespace UnityCommon
     /// Represents a serializable <see cref="System.Nullable"/> <see cref="NamedBoolean"/>.
     /// </summary>
     [Serializable]
-    public class NullableNamedBoolean : Nullable<NamedBoolean>
+    public class NullableNamedBoolean : NullableNamed<NamedBoolean, NullableBoolean>
     {
         public static implicit operator NullableNamedBoolean (NamedBoolean value) => new NullableNamedBoolean { Value = value };
         public static implicit operator NamedBoolean (NullableNamedBoolean nullable) => (nullable is null || !nullable.HasValue) ? null : nullable.Value;
@@ -215,7 +232,7 @@ namespace UnityCommon
     /// Represents a serializable <see cref="System.Nullable"/> <see cref="NamedVector2"/>.
     /// </summary>
     [Serializable]
-    public class NullableNamedVector2 : Nullable<NamedVector2>
+    public class NullableNamedVector2 : NullableNamed<NamedVector2, NullableVector2>
     {
         public static implicit operator NullableNamedVector2 (NamedVector2 value) => new NullableNamedVector2 { Value = value };
         public static implicit operator NamedVector2 (NullableNamedVector2 nullable) => (nullable is null || !nullable.HasValue) ? null : nullable.Value;
@@ -225,7 +242,7 @@ namespace UnityCommon
     /// Represents a serializable <see cref="System.Nullable"/> <see cref="NamedVector3"/>.
     /// </summary>
     [Serializable]
-    public class NullableNamedVector3 : Nullable<NamedVector3>
+    public class NullableNamedVector3 : NullableNamed<NamedVector3, NullableVector3>
     {
         public static implicit operator NullableNamedVector3 (NamedVector3 value) => new NullableNamedVector3 { Value = value };
         public static implicit operator NamedVector3 (NullableNamedVector3 nullable) => (nullable is null || !nullable.HasValue) ? null : nullable.Value;
@@ -235,7 +252,7 @@ namespace UnityCommon
     /// Represents a serializable <see cref="System.Nullable"/> <see cref="NamedVector4"/>.
     /// </summary>
     [Serializable]
-    public class NullableNamedVector4 : Nullable<NamedVector4>
+    public class NullableNamedVector4 : NullableNamed<NamedVector4, NullableVector4>
     {
         public static implicit operator NullableNamedVector4 (NamedVector4 value) => new NullableNamedVector4 { Value = value };
         public static implicit operator NamedVector4 (NullableNamedVector4 nullable) => (nullable is null || !nullable.HasValue) ? null : nullable.Value;
@@ -245,7 +262,7 @@ namespace UnityCommon
     /// Represents a serializable <see cref="System.Nullable"/> <see cref="NamedQuaternion"/>.
     /// </summary>
     [Serializable]
-    public class NullableNamedQuaternion : Nullable<NamedQuaternion>
+    public class NullableNamedQuaternion : NullableNamed<NamedQuaternion, NullableQuaternion>
     {
         public static implicit operator NullableNamedQuaternion (NamedQuaternion value) => new NullableNamedQuaternion { Value = value };
         public static implicit operator NamedQuaternion (NullableNamedQuaternion nullable) => (nullable is null || !nullable.HasValue) ? null : nullable.Value;
