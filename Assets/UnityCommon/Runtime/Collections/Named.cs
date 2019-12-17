@@ -54,6 +54,8 @@ namespace UnityCommon
             Value = value;
         }
 
+        public override string ToString () => $"{Name ?? "null"}.{Value?.ToString() ?? "null"}";
+
         public override bool Equals (object obj)
         {
             return Equals(obj as Named<TValue>);
