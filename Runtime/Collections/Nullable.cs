@@ -5,11 +5,33 @@ using UnityEngine;
 namespace UnityCommon
 {
     /// <summary>
+    /// Implementation is able to represent a <see cref="Nullable"/> value.
+    /// </summary>
+    public interface INullableValue
+    {
+        /// <summary>
+        /// Whether value is assigned.
+        /// </summary>
+        bool HasValue { get; }
+    }
+
+    /// <summary>
+    /// Implementation is able to represent a <see cref="Nullable"/> value of type <typeparamref name="TValue"/>.
+    /// </summary>
+    public interface INullable<TValue> : INullableValue
+    {
+        /// <summary>
+        /// Value of the item.
+        /// </summary>
+        TValue Value { get; set; }
+    }
+
+    /// <summary>
     /// Represents a <see cref="Nullable"/> with support for Unity serialization (for derived non-generic types).
     /// </summary>
     /// <typeparam name="TValue">Type of the value; should be natively supported by the Unity serialization system.</typeparam>
     [Serializable]
-    public class Nullable<TValue> : IEquatable<Nullable<TValue>>
+    public class Nullable<TValue> : IEquatable<Nullable<TValue>>, INullable<TValue>
     {
         /// <summary>
         /// Current value when <see cref="HasValue"/>, default otherwise.
@@ -27,6 +49,8 @@ namespace UnityCommon
 
         [SerializeField] private TValue value = default;
         [SerializeField] private bool hasValue = default;
+
+        public override string ToString () => HasValue ? Value.ToString() : "null";
 
         public static implicit operator TValue (Nullable<TValue> nullable)
         {
