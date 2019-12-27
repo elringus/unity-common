@@ -14,10 +14,10 @@ namespace UnityCommon
         public event Action<bool> OnVisibilityChanged;
 
         public float FadeTime { get => fadeTime; set => fadeTime = value; }
-        public bool IsVisibleOnAwake => isVisibleOnAwake; 
-        public virtual bool IsVisible { get => isVisible; set => SetIsVisible(value); }
+        public bool VisibleOnAwake => visibleOnAwake; 
+        public virtual bool Visible { get => visible; set => SetVisibility(value); }
         public virtual float CurrentOpacity => GetCurrentOpacity();
-        public virtual bool IsInteractable => CanvasGroup ? CanvasGroup.interactable : true;
+        public virtual bool Interactable => CanvasGroup ? CanvasGroup.interactable : true;
         public RectTransform RectTransform => GetRectTransform();
         public Canvas TopmostCanvas => ObjectUtils.IsValid(topmostCanvasCache) ? topmostCanvasCache : (topmostCanvasCache = FindTopmostCanvas());
         public int SortingOrder { get => ObjectUtils.IsValid(TopmostCanvas) ? TopmostCanvas.sortingOrder : 0; set => SetSortingOrder(value); }
@@ -29,7 +29,7 @@ namespace UnityCommon
         [Tooltip("Whether to permamently disable interaction with the object, no matter the visibility.")]
         [SerializeField] private bool disableInteraction = false;
         [Tooltip("Whether UI element should be visible or hidden on awake.")]
-        [SerializeField] private bool isVisibleOnAwake = true;
+        [SerializeField] private bool visibleOnAwake = true;
         [Tooltip("Fade duration (in seconds) when changing visiblity.")]
         [SerializeField] private float fadeTime = .3f;
         [Tooltip("When assigned, will make the object focused (for keyboard or gamepad control) when the UI becomes visible.")]
@@ -40,27 +40,27 @@ namespace UnityCommon
         private Tweener<FloatTween> fadeTweener;
         private RectTransform rectTransform;
         private Canvas topmostCanvasCache;
-        private bool isVisible;
+        private bool visible;
 
-        public virtual async Task SetIsVisibleAsync (bool isVisible, float? fadeTime = null)
+        public virtual async Task SetVisibilityAsync (bool visible, float? fadeTime = null)
         {
             if (fadeTweener.IsRunning)
                 fadeTweener.Stop();
 
-            this.isVisible = isVisible;
+            this.visible = visible;
 
-            HandleVisibilityChanged(isVisible);
+            HandleVisibilityChanged(visible);
 
             if (!CanvasGroup) return;
 
             if (!disableInteraction)
             {
-                CanvasGroup.interactable = isVisible;
-                CanvasGroup.blocksRaycasts = isVisible;
+                CanvasGroup.interactable = visible;
+                CanvasGroup.blocksRaycasts = visible;
             }
 
             var fadeDuration = fadeTime ?? FadeTime;
-            var targetOpacity = isVisible ? 1f : 0f;
+            var targetOpacity = visible ? 1f : 0f;
 
             if (fadeDuration == 0f)
             {
@@ -72,41 +72,41 @@ namespace UnityCommon
             await fadeTweener.RunAsync(tween);
         }
 
-        public virtual void SetIsVisible (bool isVisible)
+        public virtual void SetVisibility (bool visible)
         {
             if (fadeTweener.IsRunning)
                 fadeTweener.Stop();
 
-            this.isVisible = isVisible;
+            this.visible = visible;
 
-            HandleVisibilityChanged(isVisible);
+            HandleVisibilityChanged(visible);
 
             if (!CanvasGroup) return;
 
             if (!disableInteraction)
             {
-                CanvasGroup.interactable = isVisible;
-                CanvasGroup.blocksRaycasts = isVisible;
+                CanvasGroup.interactable = visible;
+                CanvasGroup.blocksRaycasts = visible;
             }
 
-            CanvasGroup.alpha = isVisible ? 1f : 0f;
+            CanvasGroup.alpha = visible ? 1f : 0f;
         }
 
         public virtual void ToggleVisibility ()
         {
-            SetIsVisibleAsync(!IsVisible).WrapAsync();
+            SetVisibilityAsync(!Visible).WrapAsync();
         }
 
         public virtual void Show ()
         {
-            if (IsVisible) return;
-            SetIsVisibleAsync(true).WrapAsync();
+            if (Visible) return;
+            SetVisibilityAsync(true).WrapAsync();
         }
 
         public virtual void Hide ()
         {
-            if (!IsVisible) return;
-            SetIsVisibleAsync(false).WrapAsync();
+            if (!Visible) return;
+            SetVisibilityAsync(false).WrapAsync();
         }
 
         public virtual float GetCurrentOpacity ()
@@ -122,11 +122,11 @@ namespace UnityCommon
             CanvasGroup.alpha = opacity;
         }
 
-        public virtual void SetIsInteractable (bool isInteractable)
+        public virtual void SetInteractable (bool interactable)
         {
             if (!CanvasGroup) return;
 
-            CanvasGroup.interactable = isInteractable;
+            CanvasGroup.interactable = interactable;
         }
 
         public void ClearFocus ()
@@ -156,7 +156,7 @@ namespace UnityCommon
                 CanvasGroup.blocksRaycasts = false;
             }
 
-            SetIsVisible(IsVisibleOnAwake);
+            SetVisibility(VisibleOnAwake);
         }
 
         /// <summary>

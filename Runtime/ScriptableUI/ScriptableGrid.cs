@@ -85,8 +85,8 @@ namespace UnityCommon
                 slot.gameObject.SetActive(isActive);
             }
 
-            previousPageButton.SetIsInteractable(CurrentPage > 1);
-            nextPageButton.SetIsInteractable(CurrentPage < PageCount);
+            previousPageButton.SetInteractable(CurrentPage > 1);
+            nextPageButton.SetInteractable(CurrentPage < PageCount);
         }
 
         protected virtual void SelectPreviousPage ()

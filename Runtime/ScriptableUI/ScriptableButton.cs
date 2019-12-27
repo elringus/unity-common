@@ -7,12 +7,12 @@ namespace UnityCommon
     {
         public event Action OnButtonClicked;
 
-        public override bool IsInteractable => CanvasGroup ? base.IsInteractable : UIComponent.interactable;
+        public override bool Interactable => CanvasGroup ? base.Interactable : UIComponent.interactable;
 
-        public override void SetIsInteractable (bool isInteractable)
+        public override void SetInteractable (bool interactable)
         {
-            if (CanvasGroup) base.SetIsInteractable(isInteractable);
-            else UIComponent.interactable = isInteractable;
+            if (CanvasGroup) base.SetInteractable(interactable);
+            else UIComponent.interactable = interactable;
         }
 
         protected override void BindUIEvents ()
