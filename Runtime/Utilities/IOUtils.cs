@@ -74,6 +74,17 @@ namespace UnityCommon
         }
 
         /// <summary>
+        /// Moves a file from <paramref name="sourceFilePath"/> to <paramref name="destFilePath"/>.
+        /// Will overwrite the <paramref name="destFilePath"/> in case it exists.
+        /// </summary>
+        public static void MoveFile (string sourceFilePath, string destFilePath)
+        {
+            File.Delete(destFilePath);
+            File.Move(sourceFilePath, destFilePath);
+            WebGLSyncFs();
+        }
+
+        /// <summary>
         /// Creates a new directory at the provided path. Will insure for correct IO on specific plaforms.
         /// </summary>
         public static void CreateDirectory (string path)

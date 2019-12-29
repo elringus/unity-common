@@ -50,6 +50,13 @@ namespace UnityCommon
         /// </summary>
         /// <param name="slotId">Unique identifier (name) of the save slot.</param>
         void DeleteSaveSlot (string slotId);
+        /// <summary>
+        /// Renames a save slot from <paramref name="sourceSlotId"/> to <paramref name="destSlotId"/>.
+        /// Will overwrite <paramref name="destSlotId"/> slot in case it exists.
+        /// </summary>
+        /// <param name="sourceSlotId">ID of the slot to rename.</param>
+        /// <param name="destSlotId">New ID of the slot.</param>
+        void RenameSaveSlot (string sourceSlotId, string destSlotId);
     }
 
     /// <summary>
@@ -94,6 +101,7 @@ namespace UnityCommon
         public abstract bool SaveSlotExists (string slotId);
         public abstract bool AnySaveExists ();
         public abstract void DeleteSaveSlot (string slotId);
+        public abstract void RenameSaveSlot (string sourceSlotId, string destSlotId);
 
         protected abstract bool PrettifyJson { get; }
         protected abstract bool Binary { get; }
@@ -170,6 +178,15 @@ namespace UnityCommon
         {
             if (!SaveSlotExists(slotId)) return;
             IOUtils.DeleteFile(SlotIdToFilePath(slotId));
+        }
+
+        public override void RenameSaveSlot (string sourceSlotId, string destSlotId)
+        {
+            if (!SaveSlotExists(sourceSlotId)) return;
+
+            var sourceFilePath = SlotIdToFilePath(sourceSlotId);
+            var destFilePath = SlotIdToFilePath(destSlotId);
+            IOUtils.MoveFile(sourceFilePath, destFilePath);
         }
 
         public virtual string SlotIdToFilePath (string slotId) => string.Concat(SaveDataPath, "/", slotId, $".{Extension}");
