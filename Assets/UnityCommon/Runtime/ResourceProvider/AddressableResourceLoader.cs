@@ -12,6 +12,8 @@ namespace UnityCommon
     public class AddressableResourceLoader<TResource> : LoadResourceRunner<TResource> 
         where TResource : UnityEngine.Object
     {
+        private static readonly WaitForEndOfFrame waitForEndOfFrame = new WaitForEndOfFrame();
+
         private readonly List<IResourceLocation> locations;
         private readonly Action<string> logAction;
         private readonly string resourceAddress;
@@ -31,7 +33,12 @@ namespace UnityCommon
 
             // Checking the location first (it throws an exception when loading non-existent assets).
             if (locations.Exists(l => l.PrimaryKey.EqualsFast(resourceAddress)))
-                asset = await Addressables.LoadAssetAsync<TResource>(resourceAddress).Task;
+            {
+                var task = Addressables.LoadAssetAsync<TResource>(resourceAddress);
+                while (!task.IsDone) // When awaiting the method directly it fails on WebGL (they're using mutlithreaded Task fot GetAwaiter)
+                    await waitForEndOfFrame;
+                asset = task.Result;
+            }
 
             var result = new Resource<TResource>(Path, asset, Provider);
             SetResult(result);
