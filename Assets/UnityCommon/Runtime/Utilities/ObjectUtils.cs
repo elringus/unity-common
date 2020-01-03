@@ -70,16 +70,15 @@ namespace UnityCommon
         /// <returns>Whether all the required objects are valid.</returns>
         public static bool AssertRequiredObjects (this Object unityObject, params Object[] requiredObjects)
         {
-            var assertFailed = false;
             for (int i = 0; i < requiredObjects.Length; ++i)
             {
                 if (!requiredObjects[i])
                 {
-                    Debug.LogError(string.Format("Required object of type '{0}' is not valid for '{1}'", requiredObjects[i]?.GetType()?.Name ?? "Unknown", unityObject.name));
-                    assertFailed = true;
+                    Debug.LogError($"Object `{unityObject.name}` is missing a required reference. Make sure all the required fields are assigned in the inspector.");
+                    return false;
                 }
             }
-            return !assertFailed;
+            return true;
         }
 
         /// <summary>

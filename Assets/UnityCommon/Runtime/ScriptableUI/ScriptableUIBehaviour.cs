@@ -143,6 +143,29 @@ namespace UnityCommon
                 EventSystem.current.SetSelectedGameObject(gameObject);
         }
 
+        public void SetFont (Font font)
+        {
+            foreach (var text in GetComponentsInChildren<UnityEngine.UI.Text>(true))
+                text.font = font;
+
+            #if TMPRO_AVAILABLE
+            var fontAsset = TMPro.TMP_FontAsset.CreateFontAsset(font);
+            foreach (var text in GetComponentsInChildren<TMPro.TextMeshProUGUI>(true))
+                text.font = fontAsset;
+            #endif
+        }
+
+        public void SetFontSize (int size)
+        {
+            foreach (var text in GetComponentsInChildren<UnityEngine.UI.Text>(true))
+                text.fontSize = size;
+
+            #if TMPRO_AVAILABLE
+            foreach (var text in GetComponentsInChildren<TMPro.TextMeshProUGUI>(true))
+                text.fontSize = size;
+            #endif
+        }
+
         protected override void Awake ()
         {
             base.Awake();
