@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.ResourceLocations;
 
@@ -15,6 +16,8 @@ namespace UnityCommon
         /// also their addresses are expected to start with the label followed by a slash.
         /// </summary>
         public readonly string AssetsLabel;
+
+        private static readonly WaitForEndOfFrame waitForEndOfFrame = new WaitForEndOfFrame();
 
         private List<IResourceLocation> locations;
 
@@ -67,7 +70,10 @@ namespace UnityCommon
 
         private async Task<List<IResourceLocation>> LoadAllLocations ()
         {
-            var locations = await Addressables.LoadResourceLocationsAsync(AssetsLabel).Task;
+            var task = Addressables.LoadResourceLocationsAsync(AssetsLabel);
+            while (!task.IsDone) // When awaiting the method directly it fails on WebGL (they're using mutlithreaded Task fot GetAwaiter)
+                await waitForEndOfFrame;
+            var locations = task.Result;
             return locations?.ToList() ?? new List<IResourceLocation>();
         }
     }
