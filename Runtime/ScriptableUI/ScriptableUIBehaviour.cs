@@ -145,11 +145,16 @@ namespace UnityCommon
 
         public void SetFont (Font font)
         {
+            if (!ObjectUtils.IsValid(font)) return;
+
             foreach (var text in GetComponentsInChildren<UnityEngine.UI.Text>(true))
                 text.font = font;
 
             #if TMPRO_AVAILABLE
             var fontAsset = TMPro.TMP_FontAsset.CreateFontAsset(font);
+            if (!ObjectUtils.IsValid(fontAsset)) return;
+            DontDestroyOnLoad(fontAsset);
+            fontAsset.hideFlags = HideFlags.HideAndDontSave;
             foreach (var text in GetComponentsInChildren<TMPro.TextMeshProUGUI>(true))
                 text.font = fontAsset;
             #endif
