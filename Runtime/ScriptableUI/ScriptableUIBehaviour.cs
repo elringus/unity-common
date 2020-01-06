@@ -151,12 +151,24 @@ namespace UnityCommon
                 text.font = font;
 
             #if TMPRO_AVAILABLE
-            var fontAsset = TMPro.TMP_FontAsset.CreateFontAsset(font);
+            var tmroComponents = GetComponentsInChildren<TMPro.TextMeshProUGUI>(true);
+            if (tmroComponents.Length == 0) return;
+            // TMPro requires font with a full path, while Unity doesn't store it by default; trying to guess it from the font name.
+            var fontPath = default(string);
+            var localFonts = Font.GetPathsToOSFonts();
+            for (int i = 0; i < localFonts.Length; i++)
+                if (localFonts[i].Replace("-", " ").Contains(font.name)) { fontPath = localFonts[i]; break; }
+            if (string.IsNullOrEmpty(fontPath)) return;
+            var localFont = new Font(fontPath);
+            var fontAsset = TMPro.TMP_FontAsset.CreateFontAsset(localFont);
             if (!ObjectUtils.IsValid(fontAsset)) return;
-            DontDestroyOnLoad(fontAsset);
-            fontAsset.hideFlags = HideFlags.HideAndDontSave;
-            foreach (var text in GetComponentsInChildren<TMPro.TextMeshProUGUI>(true))
+            foreach (var text in tmroComponents)
+            {
+                var shader = text.font.material.shader;
                 text.font = fontAsset;
+                foreach (var mat in text.fontMaterials)
+                    mat.shader = shader; // Transfer custom material shaders to the new font.
+            }
             #endif
         }
 
