@@ -31,7 +31,7 @@ namespace UnityCommon
     /// </summary>
     /// <typeparam name="TValue">Type of the value; should be natively supported by the Unity serialization system.</typeparam>
     [Serializable]
-    public class Nullable<TValue> : IEquatable<Nullable<TValue>>, INullable<TValue>
+    public class Nullable<TValue> : INullable<TValue>, IEquatable<Nullable<TValue>>
     {
         /// <summary>
         /// Current value when <see cref="HasValue"/>, default otherwise.
@@ -62,26 +62,6 @@ namespace UnityCommon
             return new Nullable<TValue> { Value = value };
         }
 
-        public override bool Equals (object obj)
-        {
-            return Equals(obj as Nullable<TValue>);
-        }
-
-        public bool Equals (Nullable<TValue> other)
-        {
-            return other != null &&
-                   EqualityComparer<TValue>.Default.Equals(value, other.value) &&
-                   hasValue == other.hasValue;
-        }
-
-        public override int GetHashCode ()
-        {
-            var hashCode = 1753382938;
-            hashCode = hashCode * -1521134295 + EqualityComparer<TValue>.Default.GetHashCode(value);
-            hashCode = hashCode * -1521134295 + hasValue.GetHashCode();
-            return hashCode;
-        }
-
         public static bool operator == (Nullable<TValue> left, Nullable<TValue> right)
         {
             return EqualityComparer<Nullable<TValue>>.Default.Equals(left, right);
@@ -90,6 +70,24 @@ namespace UnityCommon
         public static bool operator != (Nullable<TValue> left, Nullable<TValue> right)
         {
             return !(left == right);
+        }
+
+        public override bool Equals (object obj)
+        {
+            return Equals(obj as Nullable<TValue>);
+        }
+
+        public bool Equals (Nullable<TValue> other)
+        {
+            if (!hasValue) return other == null;
+
+            return other != null &&
+                   EqualityComparer<TValue>.Default.Equals(value, other.value);
+        }
+
+        public override int GetHashCode ()
+        {
+            return -1584136870 + EqualityComparer<TValue>.Default.GetHashCode(value);
         }
 
         protected virtual TValue GetValue ()
