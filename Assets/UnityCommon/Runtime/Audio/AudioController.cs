@@ -45,7 +45,7 @@ namespace UnityCommon
         public bool IsClipPlaying (AudioClip clip)
         {
             if (!clip) return false;
-            return audioTracks.ContainsKey(clip) && audioTracks[clip].IsPlaying;
+            return audioTracks.ContainsKey(clip) && audioTracks[clip].Playing;
         }
 
         public void PlayClip (AudioClip clip, AudioSource audioSource = null, float volume = 1f, 
@@ -137,7 +137,7 @@ namespace UnityCommon
         private void PoolUnusedSources ()
         {
             foreach (var track in audioTracks.Values.ToList())
-                if (!track.IsPlaying)
+                if (!track.Playing)
                 {
                     if (IsOwnedByController(track.Source))
                         sourcesPool.Push(track.Source);
