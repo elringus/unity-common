@@ -7,28 +7,67 @@ using UnityEngine.Audio;
 namespace UnityCommon
 {
     /// <summary>
-    /// Represents and audio source with attached clip.
+    /// Implementation is able to represent a playable audio track.
     /// </summary>
-    public class AudioTrack
+    public interface IAudioTrack
     {
         /// <summary>
         /// Invoked when the track has started playing.
         /// </summary>
-        public event Action OnPlay;
+        event Action OnPlay;
         /// <summary>
         /// Invoked when the track has finished playing or was stopped.
         /// </summary>
+        event Action OnStop;
+
+        /// <summary>
+        /// Name of the audio track.
+        /// </summary>
+        string Name { get; }
+        /// <summary>
+        /// Whether the track is currently playing.
+        /// </summary>
+        bool Playing { get; }
+        /// <summary>
+        /// Whether the track is looped (starts playing from start when finished).
+        /// </summary>
+        bool Loop { get; set; }
+        /// <summary>
+        /// Whether the track is muted (audio output is disabled, no matter <see cref="Volume"/> value).
+        /// </summary>
+        bool Mute { get; set; }
+        /// <summary>
+        /// Current volume of the track, in 0.0 to 1.0 range.
+        /// </summary>
+        float Volume { get; set; }
+
+        /// <summary>
+        /// Starts playing the track.
+        /// </summary>
+        void Play ();
+        /// <summary>
+        /// Stops playing the track.
+        /// </summary>
+        void Stop ();
+    }
+
+    /// <summary>
+    /// Represents and audio source with attached clip.
+    /// </summary>
+    public class AudioTrack : IAudioTrack
+    {
+        public event Action OnPlay;
         public event Action OnStop;
 
         public string Name => Clip.name;
         public AudioClip Clip { get; private set; }
         public AudioClip IntroClip { get; private set; }
         public AudioSource Source { get; private set; }
-        public bool IsValid => Clip && Source;
-        public bool IsLooped { get => IsValid ? Source.loop : false; set { if (IsValid) Source.loop = value; } }
-        public bool IsPlaying => IsValid ? Source.isPlaying : false;
-        public bool IsMuted { get => IsValid ? Source.mute : false; set { if (IsValid) Source.mute = value; } }
-        public float Volume { get => IsValid ? Source.volume : 0f; set { if (IsValid) Source.volume = value; } }
+        public bool Valid => Clip && Source;
+        public bool Loop { get => Valid ? Source.loop : false; set { if (Valid) Source.loop = value; } }
+        public bool Playing => Valid ? Source.isPlaying : false;
+        public bool Mute { get => Valid ? Source.mute : false; set { if (Valid) Source.mute = value; } }
+        public float Volume { get => Valid ? Source.volume : 0f; set { if (Valid) Source.volume = value; } }
 
         private readonly Tweener<FloatTween> volumeTweener;
         private readonly Timer stopTimer;
@@ -51,18 +90,18 @@ namespace UnityCommon
         public void Play ()
         {
             CompleteAllRunners();
-            if (!IsValid) return;
+            if (!Valid) return;
 
             if (ObjectUtils.IsValid(IntroClip))
             {
                 Source.PlayOneShot(IntroClip);
                 Source.PlayScheduled(AudioSettings.dspTime + IntroClip.length);
-                if (!IsLooped) stopTimer.Run(IntroClip.length + Clip.length);
+                if (!Loop) stopTimer.Run(IntroClip.length + Clip.length);
             }
             else
             {
                 Source.Play();
-                if (!IsLooped) stopTimer.Run(Clip.length);
+                if (!Loop) stopTimer.Run(Clip.length);
             }
 
             OnPlay?.Invoke();
@@ -71,9 +110,9 @@ namespace UnityCommon
         public async Task PlayAsync (float fadeInTime, CancellationToken cancellationToken = default)
         {
             CompleteAllRunners();
-            if (!IsValid) return;
+            if (!Valid) return;
 
-            if (!IsPlaying) Play();
+            if (!Playing) Play();
             var tween = new FloatTween(0, Volume, fadeInTime, volume => Volume = volume);
             await volumeTweener.RunAsync(tween, cancellationToken);
         }
@@ -81,7 +120,7 @@ namespace UnityCommon
         public void Stop ()
         {
             CompleteAllRunners();
-            if (!IsValid) return;
+            if (!Valid) return;
 
             Source.Stop();
 
@@ -91,7 +130,7 @@ namespace UnityCommon
         public async Task StopAsync (float fadeOutTime, CancellationToken cancellationToken = default)
         {
             CompleteAllRunners();
-            if (!IsValid) return;
+            if (!Valid) return;
 
             var tween = new FloatTween(Volume, 0, fadeOutTime, volume => Volume = volume);
             await volumeTweener.RunAsync(tween, cancellationToken);
@@ -102,7 +141,7 @@ namespace UnityCommon
         public async Task FadeAsync (float volume, float fadeTime, CancellationToken cancellationToken = default)
         {
             CompleteAllRunners();
-            if (!IsValid) return;
+            if (!Valid) return;
 
             var tween = new FloatTween(Volume, volume, fadeTime, v => Volume = v);
             await volumeTweener.RunAsync(tween, cancellationToken);
