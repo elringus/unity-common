@@ -256,7 +256,7 @@ namespace UnityCommon
                     scriptText += originalScriptText;
 
                     if (!isImportedScript && !string.IsNullOrEmpty(OverrideNamespace))
-                        scriptText = scriptText.Replace($"{Environment.NewLine}namespace {PackageName}{Environment.NewLine}{{", $"{Environment.NewLine}namespace {OverrideNamespace}{Environment.NewLine}{{");
+                        scriptText = scriptText.Replace($"namespace {PackageName}{Environment.NewLine}{{", $"namespace {OverrideNamespace}{Environment.NewLine}{{");
 
                     File.WriteAllText(fullpath, scriptText, Encoding.UTF8);
 
