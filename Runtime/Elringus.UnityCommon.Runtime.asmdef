@@ -9,8 +9,10 @@
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "NLayer.dll"
+    ],
     "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [
