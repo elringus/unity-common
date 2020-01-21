@@ -56,8 +56,12 @@ namespace UnityCommon
         private static readonly GUIContent warningIconConflict = IconContent("console.warnicon.sml", "Conflicting key, this entry will be lost");
         private static readonly GUIContent warningIconOther = IconContent("console.infoicon.sml", "Conflicting key");
         private static readonly GUIContent warningIconNull = IconContent("console.warnicon.sml", "Null key, this entry will be lost");
+        private static readonly GUIContent emptyHelp = new GUIContent("Press \"+\" button at the upper-right corner to add an entry.");
         private static readonly GUIContent tempContent = new GUIContent();
         private static readonly GUIStyle buttonStyle = GUIStyle.none;
+        private static readonly GUIStyle helpBoxStyle = GUI.skin.GetStyle("helpbox");
+
+        private float helpBoxHeight => helpBoxStyle.CalcHeight(emptyHelp, EditorGUIUtility.currentViewWidth);
 
         private static Dictionary<PropertyIdentity, ConflictState> conflictStateMap;
         private static Dictionary<SerializedPropertyType, PropertyInfo> serializedPropertyValueAccessorsMap;
@@ -146,6 +150,13 @@ namespace UnityCommon
                 var linePosition = position;
                 linePosition.y += EditorGUIUtility.singleLineHeight;
                 linePosition.xMax -= buttonWidth;
+
+                if (keyArrayProperty.arraySize == 0)
+                {
+                    var helpBoxPosition = linePosition;
+                    helpBoxPosition.height = helpBoxHeight;
+                    EditorGUI.HelpBox(helpBoxPosition, emptyHelp.text, MessageType.None);
+                }
 
                 foreach (var entry in EnumerateEntries(keyArrayProperty, valueArrayProperty))
                 {
@@ -257,6 +268,9 @@ namespace UnityCommon
                 var keysProperty = property.FindPropertyRelative(keysFieldName);
                 var valuesProperty = property.FindPropertyRelative(valuesFieldName);
 
+                if (keysProperty.arraySize == 0)
+                    propertyHeight += helpBoxHeight;
+
                 foreach (var entry in EnumerateEntries(keysProperty, valuesProperty))
                 {
                     var keyProperty = entry.KeyProperty;
@@ -268,7 +282,6 @@ namespace UnityCommon
                 }
 
                 var conflictState = GetConflictState(property);
-
                 if (conflictState.ConflictIndex != -1)
                     propertyHeight += conflictState.ConflictLineHeight;
             }
