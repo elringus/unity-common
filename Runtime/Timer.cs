@@ -8,9 +8,9 @@ namespace UnityCommon
     {
         public event Action OnLoop;
 
-        public override bool CanBeInstantlyCompleted => true;
+        public override bool CanInstantlyComplete => true;
         public bool Loop { get; private set; }
-        public bool IsTimeScaleIgnored { get; private set; }
+        public bool TimeScaleIgnored { get; private set; }
         public float Duration { get; private set; }
         public float ElapsedTime { get; private set; }
 
@@ -19,7 +19,7 @@ namespace UnityCommon
         {
             Duration = duration;
             Loop = loop;
-            IsTimeScaleIgnored = ignoreTimeScale;
+            TimeScaleIgnored = ignoreTimeScale;
 
             if (onCompleted != null) OnCompleted += onCompleted;
             if (onLoop != null) OnLoop += onLoop;
@@ -30,12 +30,12 @@ namespace UnityCommon
             ElapsedTime = 0f;
             Duration = duration;
             Loop = loop;
-            IsTimeScaleIgnored = ignoreTimeScale;
+            TimeScaleIgnored = ignoreTimeScale;
 
             base.Run(cancellationToken);
         }
 
-        public override void Run (CancellationToken cancellationToken = default) => Run(Duration, Loop, IsTimeScaleIgnored, cancellationToken);
+        public override void Run (CancellationToken cancellationToken = default) => Run(Duration, Loop, TimeScaleIgnored, cancellationToken);
 
         public override void Stop ()
         {
@@ -53,7 +53,7 @@ namespace UnityCommon
         {
             base.OnCoroutineTick();
 
-            ElapsedTime += IsTimeScaleIgnored ? Time.unscaledDeltaTime : Time.deltaTime;
+            ElapsedTime += TimeScaleIgnored ? Time.unscaledDeltaTime : Time.deltaTime;
         }
 
         protected override void HandleOnCompleted ()

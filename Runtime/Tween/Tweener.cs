@@ -10,20 +10,21 @@ namespace UnityCommon
     /// </summary>
     public class Tweener<TTweenValue> : CoroutineRunner where TTweenValue : struct, ITweenValue
     {
-        public override bool CanBeInstantlyCompleted => true;
+        public override bool CanInstantlyComplete => true;
 
         public TTweenValue TweenValue { get; private set; }
 
         private float elapsedTime;
 
-        public Tweener (MonoBehaviour coroutineContainer = null,
-            Action onCompleted = null) : base(coroutineContainer)
+        public Tweener (MonoBehaviour coroutineContainer = null, Action onCompleted = null) 
+            : base(coroutineContainer)
         {
-            if (onCompleted != null) OnCompleted += onCompleted;
+            if (onCompleted != null) 
+                OnCompleted += onCompleted;
         }
 
-        public Tweener (TTweenValue tweenValue, MonoBehaviour coroutineContainer = null,
-            Action onCompleted = null) : this(coroutineContainer, onCompleted)
+        public Tweener (TTweenValue tweenValue, MonoBehaviour coroutineContainer = null, Action onCompleted = null) 
+            : this(coroutineContainer, onCompleted)
         {
             TweenValue = tweenValue;
         }
@@ -62,7 +63,7 @@ namespace UnityCommon
         {
             base.OnCoroutineTick();
 
-            elapsedTime += TweenValue.IsTimeScaleIgnored ? Time.unscaledDeltaTime : Time.deltaTime;
+            elapsedTime += TweenValue.TimeScaleIgnored ? Time.unscaledDeltaTime : Time.deltaTime;
             var tweenPercent = Mathf.Clamp01(elapsedTime / TweenValue.TweenDuration);
             TweenValue.TweenValue(tweenPercent);
         }

@@ -7,16 +7,19 @@ using UnityEngine.Audio;
 
 namespace UnityCommon
 {
+    /// <summary>
+    /// Manages <see cref="AudioTrack"/> objects.
+    /// </summary>
     public class AudioController : MonoBehaviour
     {
         public AudioListener Listener => listenerCache ? listenerCache : FindOrAddListener();
         public float Volume { get => AudioListener.volume; set => AudioListener.volume = value; }
-        public bool IsMuted { get => AudioListener.pause; set => AudioListener.pause = value; } 
+        public bool Mute { get => AudioListener.pause; set => AudioListener.pause = value; }
 
+        private readonly Dictionary<AudioClip, AudioTrack> audioTracks = new Dictionary<AudioClip, AudioTrack>();
+        private readonly Stack<AudioSource> sourcesPool = new Stack<AudioSource>();
         private AudioListener listenerCache;
         private Tweener<FloatTween> listenerVolumeTweener;
-        private Dictionary<AudioClip, AudioTrack> audioTracks = new Dictionary<AudioClip, AudioTrack>();
-        private Stack<AudioSource> sourcesPool = new Stack<AudioSource>();
 
         private void Awake ()
         {
@@ -35,14 +38,14 @@ namespace UnityCommon
 
         public void FadeVolume (float volume, float time)
         {
-            if (listenerVolumeTweener.IsRunning)
+            if (listenerVolumeTweener.Running)
                 listenerVolumeTweener.CompleteInstantly();
 
             var tween = new FloatTween(Volume, volume, time, value => Volume = value, ignoreTimeScale: true);
             listenerVolumeTweener.Run(tween);
         }
 
-        public bool IsClipPlaying (AudioClip clip)
+        public bool ClipPlaying (AudioClip clip)
         {
             if (!clip) return false;
             return audioTracks.ContainsKey(clip) && audioTracks[clip].Playing;
@@ -84,7 +87,7 @@ namespace UnityCommon
 
         public void StopClip (AudioClip clip)
         {
-            if (!clip || !IsClipPlaying(clip)) return;
+            if (!clip || !ClipPlaying(clip)) return;
             GetTrack(clip).Stop();
         }
 
@@ -96,7 +99,7 @@ namespace UnityCommon
 
         public async Task StopClipAsync (AudioClip clip, float fadeOutTime, CancellationToken cancellationToken = default)
         {
-            if (!clip || !IsClipPlaying(clip)) return;
+            if (!clip || !ClipPlaying(clip)) return;
             await GetTrack(clip).StopAsync(fadeOutTime, cancellationToken);
         }
 

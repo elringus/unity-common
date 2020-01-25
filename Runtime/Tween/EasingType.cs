@@ -1,5 +1,8 @@
 ﻿namespace UnityCommon
 {
+    /// <summary>
+    /// Represents an animation easing function type.
+    /// </summary>
     public enum EasingType
     {
         Linear = 0,

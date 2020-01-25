@@ -149,9 +149,9 @@ namespace UnityCommon
 
         private void CompleteAllRunners ()
         {
-            if (volumeTweener.IsRunning)
+            if (volumeTweener.Running)
                 volumeTweener.CompleteInstantly();
-            if (stopTimer.IsRunning)
+            if (stopTimer.Running)
                 stopTimer.CompleteInstantly();
         }
 

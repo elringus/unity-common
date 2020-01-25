@@ -4,9 +4,9 @@ namespace UnityCommon
 {
     public class ApplicationBehaviour : MonoBehaviour
     {
-        public static ApplicationBehaviour Singleton => singleton ?? CreateSingleton();
+        public static ApplicationBehaviour Instance => ObjectUtils.IsValid(instanceCache) ? instanceCache : CreateSingleton();
 
-        private static ApplicationBehaviour singleton;
+        private static ApplicationBehaviour instanceCache;
 
         private static ApplicationBehaviour CreateSingleton ()
         {
@@ -16,15 +16,15 @@ namespace UnityCommon
                 return null;
             }
 
-            singleton = new GameObject("ApplicationBehaviour").AddComponent<ApplicationBehaviour>();
-            singleton.gameObject.hideFlags = HideFlags.DontSave;
-            DontDestroyOnLoad(singleton.gameObject);
-            return singleton;
+            instanceCache = new GameObject("ApplicationBehaviour").AddComponent<ApplicationBehaviour>();
+            instanceCache.gameObject.hideFlags = HideFlags.DontSave;
+            DontDestroyOnLoad(instanceCache.gameObject);
+            return instanceCache;
         }
 
         private void OnDestroy ()
         {
-            singleton = null;
+            instanceCache = null;
         }
     }
 }
