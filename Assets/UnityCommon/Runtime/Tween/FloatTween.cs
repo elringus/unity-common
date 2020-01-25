@@ -10,8 +10,8 @@ namespace UnityCommon
         public float TargetValue { get; set; }
         public float TweenDuration { get; set; }
         public EasingType EasingType { get; }
-        public bool IsTimeScaleIgnored { get; set; }
-        public bool IsTargetValid => OnFloatTween != null;
+        public bool TimeScaleIgnored { get; set; }
+        public bool TargetValid => OnFloatTween != null;
 
         private readonly EasingFunction easingFunction;
 
@@ -21,7 +21,7 @@ namespace UnityCommon
             TargetValue = to;
             TweenDuration = time;
             EasingType = easingType;
-            IsTimeScaleIgnored = ignoreTimeScale;
+            TimeScaleIgnored = ignoreTimeScale;
             OnFloatTween = onTween;
 
             easingFunction = EasingType.GetEasingFunction();
@@ -29,7 +29,7 @@ namespace UnityCommon
 
         public void TweenValue (float tweenPercent)
         {
-            if (!IsTargetValid) return;
+            if (!TargetValid) return;
 
             var newValue = easingFunction(StartValue, TargetValue, tweenPercent);
             OnFloatTween.Invoke(newValue);

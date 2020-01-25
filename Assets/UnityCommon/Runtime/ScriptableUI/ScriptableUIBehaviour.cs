@@ -6,22 +6,63 @@ using UnityEngine.EventSystems;
 
 namespace UnityCommon
 {
+    /// <summary>
+    /// A wrapper over <see cref="UIBehaviour"/> providing various scripting utility APIs.
+    /// </summary>
     public class ScriptableUIBehaviour : UIBehaviour
     {
         [System.Serializable]
         private class VisibilityChangedEvent : UnityEvent<bool> { }
 
+        /// <summary>
+        /// Event invoked when visibility of the UI changes.
+        /// </summary>
         public event Action<bool> OnVisibilityChanged;
 
+        /// <summary>
+        /// Fade duration (in seconds) when changing visiblity of the UI;
+        /// requires a <see cref="UnityEngine.CanvasGroup"/> on the same game object.
+        /// </summary>
         public float FadeTime { get => fadeTime; set => fadeTime = value; }
-        public bool VisibleOnAwake => visibleOnAwake; 
+        /// <summary>
+        /// Whether the UI element should be visible or hidden on awake.
+        /// requires a <see cref="UnityEngine.CanvasGroup"/> on the same game object.
+        /// </summary>
+        public bool VisibleOnAwake => visibleOnAwake;
+        /// <summary>
+        /// Whether the UI is currently visible.
+        /// requires a <see cref="UnityEngine.CanvasGroup"/> on the same game object.
+        /// </summary>
         public virtual bool Visible { get => visible; set => SetVisibility(value); }
-        public virtual float CurrentOpacity => GetCurrentOpacity();
+        /// <summary>
+        /// Current opacity (alpha) of the UI element, in 0.0 to 1.0 range.
+        /// requires a <see cref="UnityEngine.CanvasGroup"/> on the same game object, will always return 1.0 otherwise.
+        /// </summary>
+        public virtual float Opacity => CanvasGroup ? CanvasGroup.alpha : 1f;
+        /// <summary>
+        /// Whether the UI is currently interctable.
+        /// requires a <see cref="UnityEngine.CanvasGroup"/> on the same game object.
+        /// </summary>
         public virtual bool Interactable => CanvasGroup ? CanvasGroup.interactable : true;
+        /// <summary>
+        /// Transform used by the UI element.
+        /// </summary>
         public RectTransform RectTransform => GetRectTransform();
+        /// <summary>
+        /// Topmost parent (in the game object hierarchy) canvas component.
+        /// </summary>
         public Canvas TopmostCanvas => ObjectUtils.IsValid(topmostCanvasCache) ? topmostCanvasCache : (topmostCanvasCache = FindTopmostCanvas());
+        /// <summary>
+        /// Current sort order of the UI element, as per <see cref="TopmostCanvas"/>.
+        /// </summary>
         public int SortingOrder { get => ObjectUtils.IsValid(TopmostCanvas) ? TopmostCanvas.sortingOrder : 0; set => SetSortingOrder(value); }
+        /// <summary>
+        /// Current render mode of the UI element, as per <see cref="TopmostCanvas"/>.
+        /// </summary>
         public RenderMode RenderMode { get => ObjectUtils.IsValid(TopmostCanvas) ? TopmostCanvas.renderMode : default; set => SetRenderMode(value); }
+        /// <summary>
+        /// Current render camera of the UI element, as per <see cref="TopmostCanvas"/>.
+        /// </summary>
         public Camera RenderCamera { get => ObjectUtils.IsValid(TopmostCanvas) ? TopmostCanvas.worldCamera : null; set => SetRenderCamera(value); }
 
         protected CanvasGroup CanvasGroup { get; private set; }
@@ -42,9 +83,12 @@ namespace UnityCommon
         private Canvas topmostCanvasCache;
         private bool visible;
 
+        /// <summary>
+        /// Changes <see cref="Visible"/> over specified time.
+        /// </summary>
         public virtual async Task SetVisibilityAsync (bool visible, float? fadeTime = null)
         {
-            if (fadeTweener.IsRunning)
+            if (fadeTweener.Running)
                 fadeTweener.Stop();
 
             this.visible = visible;
@@ -72,9 +116,12 @@ namespace UnityCommon
             await fadeTweener.RunAsync(tween);
         }
 
+        /// <summary>
+        /// Changes <see cref="Visible"/>.
+        /// </summary>
         public virtual void SetVisibility (bool visible)
         {
-            if (fadeTweener.IsRunning)
+            if (fadeTweener.Running)
                 fadeTweener.Stop();
 
             this.visible = visible;
@@ -92,43 +139,55 @@ namespace UnityCommon
             CanvasGroup.alpha = visible ? 1f : 0f;
         }
 
+        /// <summary>
+        /// Toggles <see cref="Visible"/>.
+        /// </summary>
         public virtual void ToggleVisibility ()
         {
             SetVisibilityAsync(!Visible).WrapAsync();
         }
 
+        /// <summary>
+        /// Reveals the UI over <see cref="FadeTime"/>.
+        /// </summary>
         public virtual void Show ()
         {
             if (Visible) return;
             SetVisibilityAsync(true).WrapAsync();
         }
 
+        /// <summary>
+        /// Hides the UI over <see cref="FadeTime"/>.
+        /// </summary>
         public virtual void Hide ()
         {
             if (!Visible) return;
             SetVisibilityAsync(false).WrapAsync();
         }
 
-        public virtual float GetCurrentOpacity ()
-        {
-            if (CanvasGroup) return CanvasGroup.alpha;
-            return 1f;
-        }
-
+        /// <summary>
+        /// Changes <see cref="Opacity"/>; 
+        /// has no effect when <see cref="CanvasGroup"/> is missing on the same game object.
+        /// </summary>
         public virtual void SetOpacity (float opacity)
         {
             if (!CanvasGroup) return;
-
             CanvasGroup.alpha = opacity;
         }
 
+        /// <summary>
+        /// Changes <see cref="Interactable"/>; 
+        /// has no effect when <see cref="CanvasGroup"/> is missing on the same game object.
+        /// </summary>
         public virtual void SetInteractable (bool interactable)
         {
             if (!CanvasGroup) return;
-
             CanvasGroup.interactable = interactable;
         }
 
+        /// <summary>
+        /// Removes input focus from the UI element.
+        /// </summary>
         public void ClearFocus ()
         {
             if (EventSystem.current &&
@@ -137,12 +196,19 @@ namespace UnityCommon
                 EventSystem.current.SetSelectedGameObject(null);
         }
 
+        /// <summary>
+        /// Applies input focus to the UI element.
+        /// </summary>
         public void SetFocus ()
         {
             if (EventSystem.current)
                 EventSystem.current.SetSelectedGameObject(gameObject);
         }
 
+        /// <summary>
+        /// Applies provided font to all the <see cref="UnityEngine.UI.Text"/>
+        /// and TMPro text components inside the UI element.
+        /// </summary>
         public void SetFont (Font font)
         {
             if (!ObjectUtils.IsValid(font)) return;
@@ -172,6 +238,10 @@ namespace UnityCommon
             #endif
         }
 
+        /// <summary>
+        /// Applies provided font size to all the <see cref="UnityEngine.UI.Text"/>
+        /// and TMPro text components inside the UI element.
+        /// </summary>
         public void SetFontSize (int size)
         {
             foreach (var text in GetComponentsInChildren<UnityEngine.UI.Text>(true))

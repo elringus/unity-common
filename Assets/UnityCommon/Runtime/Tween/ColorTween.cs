@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace UnityCommon
 {
+    /// <summary>
+    /// Represents available tween modes for <see cref="Color"/> values.
+    /// </summary>
     public enum ColorTweenMode { All, RGB, Alpha }
 
     public struct ColorTween : ITweenValue
@@ -14,8 +17,8 @@ namespace UnityCommon
         public ColorTweenMode TweenMode { get; set; }
         public EasingType EasingType { get; }
         public float TweenDuration { get; set; }
-        public bool IsTimeScaleIgnored { get; set; }
-        public bool IsTargetValid => OnColorTween != null;
+        public bool TimeScaleIgnored { get; set; }
+        public bool TargetValid => OnColorTween != null;
 
         private readonly EasingFunction easingFunction;
 
@@ -26,7 +29,7 @@ namespace UnityCommon
             TweenMode = mode;
             TweenDuration = time;
             EasingType = easingType;
-            IsTimeScaleIgnored = ignoreTimeScale;
+            TimeScaleIgnored = ignoreTimeScale;
             OnColorTween = onTween;
 
             easingFunction = EasingType.GetEasingFunction();
@@ -34,7 +37,7 @@ namespace UnityCommon
 
         public void TweenValue (float tweenPercent)
         {
-            if (!IsTargetValid) return;
+            if (!TargetValid) return;
 
             var newColor = default(Color);
             newColor.r = TweenMode == ColorTweenMode.Alpha ? StartColor.r : easingFunction(StartColor.r, TargetColor.r, tweenPercent);

@@ -48,15 +48,15 @@ namespace UnityCommon
 
         public virtual void OnPointerEnter (PointerEventData eventData)
         {
-            if (fadeTweener.IsRunning) fadeTweener.CompleteInstantly();
-            var tween = new FloatTween(CurrentOpacity, 1f, FadeTime, SetOpacity, true);
+            if (fadeTweener.Running) fadeTweener.CompleteInstantly();
+            var tween = new FloatTween(Opacity, 1f, FadeTime, SetOpacity, true);
             fadeTweener.Run(tween);
         }
 
         public virtual void OnPointerExit (PointerEventData eventData)
         {
-            if (fadeTweener.IsRunning) fadeTweener.CompleteInstantly();
-            var tween = new FloatTween(CurrentOpacity, 1f - hoverOpacityFade, FadeTime, SetOpacity, true);
+            if (fadeTweener.Running) fadeTweener.CompleteInstantly();
+            var tween = new FloatTween(Opacity, 1f - hoverOpacityFade, FadeTime, SetOpacity, true);
             fadeTweener.Run(tween);
         }
 

@@ -7,7 +7,7 @@ public class TestApplicationBehaviour : MonoBehaviour
     private void Awake ()
     {
         DontDestroyOnLoad(gameObject);
-        ApplicationBehaviour.Singleton.StartCoroutine(Coroutine());
+        ApplicationBehaviour.Instance.StartCoroutine(Coroutine());
     }
 
     private IEnumerator Coroutine ()

@@ -20,30 +20,30 @@ namespace UnityCommon
         /// <summary>
         /// Whether the coroutine has completed execution.
         /// </summary>
-        public virtual bool IsCompleted => CompletionTask.IsCompleted;
+        public virtual bool Completed => CompletionTask.IsCompleted;
         /// <summary>
         /// Whether the coroutine is currently running.
         /// </summary>
-        public virtual bool IsRunning => coroutine != null;
+        public virtual bool Running => coroutine != null;
         /// <summary>
         /// Whether the coroutine can instantly complete execution and use <see cref="CompleteInstantly"/>.
         /// </summary>
-        public virtual bool CanBeInstantlyCompleted => true;
-        public override bool keepWaiting => !IsCompleted;
+        public virtual bool CanInstantlyComplete => true;
+        public override bool keepWaiting => !Completed;
 
         protected YieldInstruction YieldInstruction { get; set; }
         protected int CoroutineTickCount { get; private set; }
         protected Task CompletionTask => completionSource.Task;
         protected CancellationToken CancellationToken { get; private set; }
 
+        private readonly MonoBehaviour coroutineContainer;
         private TaskCompletionSource<CoroutineRunner> completionSource;
-        private MonoBehaviour coroutineContainer;
         private IEnumerator coroutine;
 
         public CoroutineRunner (MonoBehaviour coroutineContainer = null, YieldInstruction yieldInstruction = null)
         {
             completionSource = new TaskCompletionSource<CoroutineRunner>();
-            this.coroutineContainer = coroutineContainer ?? ApplicationBehaviour.Singleton;
+            this.coroutineContainer = ObjectUtils.IsValid(coroutineContainer) ? coroutineContainer : ApplicationBehaviour.Instance;
             YieldInstruction = yieldInstruction;
         }
 
@@ -53,7 +53,7 @@ namespace UnityCommon
         /// </summary>
         public virtual void Run (CancellationToken cancellationToken = default)
         {
-            if (IsRunning || IsCompleted) Reset();
+            if (Running || Completed) Reset();
 
             if (!coroutineContainer || !coroutineContainer.gameObject || !coroutineContainer.gameObject.activeInHierarchy)
             {
@@ -87,7 +87,7 @@ namespace UnityCommon
         /// </summary>
         public virtual void Stop ()
         {
-            if (!IsRunning) return;
+            if (!Running) return;
 
             if (coroutineContainer)
                 coroutineContainer.StopCoroutine(coroutine);
@@ -96,11 +96,11 @@ namespace UnityCommon
 
         /// <summary>
         /// Forces the coroutine to complete instantly.
-        /// Works only when <see cref="CanBeInstantlyCompleted"/>.
+        /// Works only when <see cref="CanInstantlyComplete"/>.
         /// </summary>
         public virtual void CompleteInstantly ()
         {
-            if (!CanBeInstantlyCompleted || IsCompleted) return;
+            if (!CanInstantlyComplete || Completed) return;
             Stop();
             HandleOnCompleted();
         }

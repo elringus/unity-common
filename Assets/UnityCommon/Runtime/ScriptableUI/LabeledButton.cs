@@ -73,7 +73,7 @@ namespace UnityCommon
 
             if (instant)
             {
-                if (tintTweener != null && tintTweener.IsRunning) tintTweener.CompleteInstantly();
+                if (tintTweener != null && tintTweener.Running) tintTweener.CompleteInstantly();
                 Label.color = tintColor * LabelColorBlock.colorMultiplier * LabelColorMultiplier;
             }
             else if (tintTweener != null)
