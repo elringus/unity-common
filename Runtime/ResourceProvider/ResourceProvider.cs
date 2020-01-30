@@ -170,9 +170,9 @@ namespace UnityCommon
         protected abstract LocateFoldersRunner CreateLocateFoldersRunner (string path);
         protected abstract void DisposeResource (Resource resource);
 
-        protected virtual void RunResourceLoader<T> (LoadResourceRunner<T> loader) where T : UnityEngine.Object => loader.RunAsync().WrapAsync();
-        protected virtual void RunResourcesLocator<T> (LocateResourcesRunner<T> locator) where T : UnityEngine.Object => locator.RunAsync().WrapAsync();
-        protected virtual void RunFoldersLocator (LocateFoldersRunner locator) => locator.RunAsync().WrapAsync();
+        protected virtual void RunResourceLoader<T> (LoadResourceRunner<T> loader) where T : UnityEngine.Object => loader.RunAsync().Forget();
+        protected virtual void RunResourcesLocator<T> (LocateResourcesRunner<T> locator) where T : UnityEngine.Object => locator.RunAsync().Forget();
+        protected virtual void RunFoldersLocator (LocateFoldersRunner locator) => locator.RunAsync().Forget();
 
         protected virtual bool ResourceLoaded<T> (string path) where T : UnityEngine.Object
         {

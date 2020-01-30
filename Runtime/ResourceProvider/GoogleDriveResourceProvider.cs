@@ -137,14 +137,14 @@ namespace UnityCommon
         protected override void RunResourceLoader<T> (LoadResourceRunner<T> loader)
         {
             if (ConcurrentRequestsLimit > 0 && RequestsCount > ConcurrentRequestsLimit)
-                requestQueue.Enqueue(() => loader.RunAsync().WrapAsync());
+                requestQueue.Enqueue(() => loader.RunAsync().Forget());
             else base.RunResourceLoader(loader);
         }
 
         protected override void RunResourcesLocator<T> (LocateResourcesRunner<T> locator)
         {
             if (ConcurrentRequestsLimit > 0 && RequestsCount > ConcurrentRequestsLimit)
-                requestQueue.Enqueue(() => locator.RunAsync().WrapAsync());
+                requestQueue.Enqueue(() => locator.RunAsync().Forget());
             else base.RunResourcesLocator(locator);
         }
 

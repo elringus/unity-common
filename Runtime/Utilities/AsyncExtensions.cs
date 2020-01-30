@@ -113,9 +113,9 @@ namespace UnityCommon
         }
 
         /// <summary>
-        /// Allows to properly execute async methods from sync methods without waiting for <see cref="Task"/>.
+        /// Allows to properly execute async methods from sync methods without waiting for <see cref="Task"/>, aka "fire and forget".
         /// Required to receive exceptions from the underlying async method (otherwise it will fail silently).
         /// </summary>
-        public static async void WrapAsync (this Task task) => await task;
+        public static async void Forget (this Task task) => await task;
     }
 }
