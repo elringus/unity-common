@@ -24,6 +24,6 @@ public class TestAsync : MonoBehaviour
 
     private async void CustomYeild ()
     {
-        await eternalYeild;
+        //await eternalYeild;
     }
 }
