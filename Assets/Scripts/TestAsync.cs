@@ -9,11 +9,12 @@ public class TestAsync : MonoBehaviour
     }
 
     private readonly WaitForEndOfFrame waitForEndOfFrame = new WaitForEndOfFrame();
-    private readonly EternalYeild eternalYeild = new EternalYeild();
+    private readonly WaitWhile waitEvenTime = new WaitWhile(() => Time.time % 2 == 0);
 
     private void Start ()
     {
         EndOfFrame();
+        CustomYeild();
     }
 
     private async void EndOfFrame ()
@@ -24,6 +25,7 @@ public class TestAsync : MonoBehaviour
 
     private async void CustomYeild ()
     {
-        //await eternalYeild;
+        while (Application.isPlaying)
+            await waitEvenTime;
     }
 }
