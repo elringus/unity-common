@@ -12,7 +12,7 @@
     "overrideReferences": true,
     "precompiledReferences": [
         "NLayer.dll",
-        "UnityTask.dll"
+        "UniTask.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],
