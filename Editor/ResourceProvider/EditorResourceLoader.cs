@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using UniRx.Async;
 using UnityEngine;
 
 namespace UnityCommon
@@ -18,7 +18,7 @@ namespace UnityCommon
             this.logAction = logAction;
         }
 
-        public override Task RunAsync ()
+        public override UniTask RunAsync ()
         {
             var startTime = Time.time;
             var obj = LoadEditorResource<TResource>(Path, pathToGuidMap);
@@ -26,7 +26,7 @@ namespace UnityCommon
                 logAction?.Invoke($"Resource '{Path}' loaded over {Time.time - startTime:0.###} seconds.");
             var result = new Resource<TResource>(Path, obj, Provider);
             SetResult(result);
-            return Task.CompletedTask;
+            return UniTask.CompletedTask;
         }
 
         public static T LoadEditorResource<T> (string path, Dictionary<string, string> pathToGuidMap) where T : UnityEngine.Object

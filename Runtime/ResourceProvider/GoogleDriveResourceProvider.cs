@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
+using UniRx.Async;
 using UnityEngine;
 using UnityGoogleDrive;
 
@@ -25,7 +25,7 @@ namespace UnityCommon
             private const string startTokenKey = "GDRIVE_CACHE_START_TOKEN";
             private static readonly string filePath = string.Concat(CacheDirPath, "/CacheManifest");
 
-            public static async Task<CacheManifest> ReadOrCreateAsync ()
+            public static async UniTask<CacheManifest> ReadOrCreateAsync ()
             {
                 if (!File.Exists(filePath))
                 {
@@ -38,7 +38,7 @@ namespace UnityCommon
                 return JsonUtility.FromJson<CacheManifest>(manifestJson);
             }
 
-            public async Task WriteAsync ()
+            public async UniTask WriteAsync ()
             {
                 var manifestJson = JsonUtility.ToJson(this);
                 await IOUtils.WriteTextFileAsync(filePath, manifestJson);
@@ -128,7 +128,7 @@ namespace UnityCommon
             IOUtils.WebGLSyncFs();
         }
 
-        public override async Task<Resource<T>> LoadResourceAsync<T> (string path)
+        public override async UniTask<Resource<T>> LoadResourceAsync<T> (string path)
         {
             if (smartCachingScanPending) await RunSmartCachingScanAsync();
             return await base.LoadResourceAsync<T>(path);
@@ -199,7 +199,7 @@ namespace UnityCommon
             requestQueue.Dequeue()();
         }
 
-        private async Task RunSmartCachingScanAsync ()
+        private async UniTask RunSmartCachingScanAsync ()
         {
             smartCachingScanPending = false;
 
@@ -217,7 +217,7 @@ namespace UnityCommon
             LogMessage($"Finished smart caching scan in {(DateTime.Now - startTime).TotalSeconds:0.###} seconds.");
         }
 
-        private async Task ProcessChangesListAsync (CacheManifest manifest)
+        private async UniTask ProcessChangesListAsync (CacheManifest manifest)
         {
             var changeList = await GoogleDriveChanges.List(manifest.StartToken).Send();
             foreach (var change in changeList.Changes)

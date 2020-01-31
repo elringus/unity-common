@@ -2,7 +2,7 @@
 using System.IO;
 using System.IO.Compression;
 using System.Text;
-using System.Threading.Tasks;
+using UniRx.Async;
 using UnityEngine;
 
 namespace UnityCommon
@@ -298,7 +298,7 @@ namespace UnityCommon
             }
         }
 
-        public static async Task<byte[]> ZipStringAsync (string content)
+        public static async UniTask<byte[]> ZipStringAsync (string content)
         {
             if (Application.platform == RuntimePlatform.WebGLPlayer)
                 return ZipString(content);
@@ -317,7 +317,7 @@ namespace UnityCommon
             }
         }
 
-        public static async Task<string> UnzipStringAsync (byte[] content)
+        public static async UniTask<string> UnzipStringAsync (byte[] content)
         {
             if (Application.platform == RuntimePlatform.WebGLPlayer)
                 return UnzipString(content);

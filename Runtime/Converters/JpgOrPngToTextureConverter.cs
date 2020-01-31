@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+﻿using UniRx.Async;
 using UnityEngine;
 
 namespace UnityCommon
@@ -20,14 +20,14 @@ namespace UnityCommon
             return texture;
         }
 
-        public Task<Texture2D> ConvertAsync (byte[] obj)
+        public UniTask<Texture2D> ConvertAsync (byte[] obj)
         {
             var texture = Convert(obj);
-            return Task.FromResult(texture);
+            return UniTask.FromResult(texture);
         }
 
         public object Convert (object obj) => Convert(obj as byte[]);
 
-        public async Task<object> ConvertAsync (object obj) => await ConvertAsync(obj as byte[]);
+        public async UniTask<object> ConvertAsync (object obj) => await ConvertAsync(obj as byte[]);
     }
 }

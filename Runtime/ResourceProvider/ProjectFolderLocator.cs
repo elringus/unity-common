@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using UniRx.Async;
 
 namespace UnityCommon
 {
@@ -14,11 +14,11 @@ namespace UnityCommon
             this.projectResources = projectResources;
         }
 
-        public override Task RunAsync ()
+        public override UniTask RunAsync ()
         {
             var locatedFolders = LocateProjectFolders(Path, projectResources);
             SetResult(locatedFolders);
-            return Task.CompletedTask;
+            return UniTask.CompletedTask;
         }
 
         public static List<Folder> LocateProjectFolders (string path, ProjectResources projectResources)

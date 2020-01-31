@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Threading.Tasks;
+using UniRx.Async;
 using UnityEngine;
 
 namespace UnityCommon
@@ -17,13 +17,13 @@ namespace UnityCommon
             this.logAction = logAction;
         }
 
-        public override async Task RunAsync ()
+        public override async UniTask RunAsync ()
         {
             var startTime = Time.time;
 
             var resourceType = redirector != null ? redirector.RedirectType : typeof(TResource);
-            var resourceRequest = await Resources.LoadAsync(Path, resourceType);
-            var obj = redirector is null ? resourceRequest.asset as TResource : await redirector.ToSourceAsync<TResource>(resourceRequest.asset);
+            var asset = await Resources.LoadAsync(Path, resourceType);
+            var obj = redirector is null ? asset as TResource : await redirector.ToSourceAsync<TResource>(asset);
 
             var result = new Resource<TResource>(Path, obj, Provider);
             SetResult(result);

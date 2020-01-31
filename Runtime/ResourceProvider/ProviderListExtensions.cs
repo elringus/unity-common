@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using UniRx.Async;
 
 namespace UnityCommon
 {
@@ -40,7 +40,7 @@ namespace UnityCommon
         /// Loads a resource at the provided path.
         /// When resources with equal paths are available in multiple providers, will load the one from the higher-priority provider.
         /// </summary>
-        public static async Task<Resource<T>> LoadResourceAsync<T> (this List<IResourceProvider> providers, string path) where T : UnityEngine.Object
+        public static async UniTask<Resource<T>> LoadResourceAsync<T> (this List<IResourceProvider> providers, string path) where T : UnityEngine.Object
         {
             if (providers.Count == 1)
                 return await providers[0].LoadResourceAsync<T>(path);
@@ -59,7 +59,7 @@ namespace UnityCommon
         /// Loads all the resources at the provided path from all the providers.
         /// When a resource is available in multiple providers, will only load the one from the higher-priority provider.
         /// </summary>
-        public static async Task<IEnumerable<Resource<T>>> LoadResourcesAsync<T> (this List<IResourceProvider> providers, string path) where T : UnityEngine.Object
+        public static async UniTask<IEnumerable<Resource<T>>> LoadResourcesAsync<T> (this List<IResourceProvider> providers, string path) where T : UnityEngine.Object
         {
             var resources = new List<Resource<T>>();
             if (providers.Count == 1)
@@ -81,7 +81,7 @@ namespace UnityCommon
         /// Locates all the resources at the provided path from all the providers.
         /// When a resource is available in multiple providers, will only get the one from the higher-priority provider.
         /// </summary>
-        public static async Task<IEnumerable<string>> LocateResourcesAsync<T> (this List<IResourceProvider> providers, string path) where T : UnityEngine.Object
+        public static async UniTask<IEnumerable<string>> LocateResourcesAsync<T> (this List<IResourceProvider> providers, string path) where T : UnityEngine.Object
         {
             var result = new List<string>();
             foreach (var provider in providers)
@@ -98,7 +98,7 @@ namespace UnityCommon
         /// Locates all the folders at the provided path from all the providers.
         /// When a folder is available in multiple providers, will only get the one from the higher-priority provider.
         /// </summary>
-        public static async Task<IEnumerable<Folder>> LocateFoldersAsync (this List<IResourceProvider> providers, string path)
+        public static async UniTask<IEnumerable<Folder>> LocateFoldersAsync (this List<IResourceProvider> providers, string path)
         {
             var result = new List<Folder>();
             foreach (var provider in providers)
@@ -114,7 +114,7 @@ namespace UnityCommon
         /// <summary>
         /// Checks whether a resource at the provided path exists in any of the providers.
         /// </summary>
-        public static async Task<bool> ResourceExistsAsync<T> (this List<IResourceProvider> providers, string path) where T : UnityEngine.Object
+        public static async UniTask<bool> ResourceExistsAsync<T> (this List<IResourceProvider> providers, string path) where T : UnityEngine.Object
         {
             foreach (var provider in providers)
                 if (await provider.ResourceExistsAsync<T>(path)) return true;

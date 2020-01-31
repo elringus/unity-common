@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+using UniRx.Async;
 
 namespace UnityCommon
 {
@@ -14,11 +14,11 @@ namespace UnityCommon
             this.editorResourcePaths = editorResourcePaths;
         }
 
-        public override Task RunAsync ()
+        public override UniTask RunAsync ()
         {
             var locatedResourcePaths = LocateProjectResources(Path, editorResourcePaths);
             SetResult(locatedResourcePaths);
-            return Task.CompletedTask;
+            return UniTask.CompletedTask;
         }
 
         public static IEnumerable<string> LocateProjectResources (string path, IEnumerable<string> editorResourcePaths)

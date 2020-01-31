@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Threading.Tasks;
+using UniRx.Async;
 using UnityEngine;
 
 namespace UnityCommon
@@ -70,19 +70,19 @@ namespace UnityCommon
         /// </summary>
         /// <param name="slotId">Unique identifier (name) of the save slot.</param>
         /// <param name="data">Data to serialize.</param>
-        Task SaveAsync (string slotId, TData data);
+        UniTask SaveAsync (string slotId, TData data);
         /// <summary>
         /// Loads (de-serializes) a save slot with the provided ID;
         /// returns null in case requested save slot doesn't exist.
         /// </summary>
         /// <param name="slotId">Unique identifier (name) of the save slot.</param>
-        Task<TData> LoadAsync (string slotId);
+        UniTask<TData> LoadAsync (string slotId);
         /// <summary>
         /// Loads (de-serializes) a save slot with the provided ID; 
         /// will create a new default <typeparamref name="TData"/> and save it under the provided slot ID in case it doesn't exist.
         /// </summary>
         /// <param name="slotId">Unique identifier (name) of the save slot.</param>
-        Task<TData> LoadOrDefaultAsync (string slotId);
+        UniTask<TData> LoadOrDefaultAsync (string slotId);
     }
 
     /// <summary>
@@ -124,13 +124,12 @@ namespace UnityCommon
         protected override bool Binary => false;
         protected override string Extension => "json";
 
-        private static readonly WaitForEndOfFrame waitForEndOfFrame = new WaitForEndOfFrame();
         private bool saveInProgress;
 
-        public async Task SaveAsync (string slotId, TData data)
+        public async UniTask SaveAsync (string slotId, TData data)
         {
             while (saveInProgress && Application.isPlaying)
-                await waitForEndOfFrame;
+                await AsyncUtils.WaitEndOfFrame;
 
             saveInProgress = true;
 
@@ -142,7 +141,7 @@ namespace UnityCommon
             saveInProgress = false;
         }
 
-        public async Task<TData> LoadAsync (string slotId)
+        public async UniTask<TData> LoadAsync (string slotId)
         {
             InvokeOnBeforeLoad();
 
@@ -158,7 +157,7 @@ namespace UnityCommon
             return data;
         }
 
-        public async Task<TData> LoadOrDefaultAsync (string slotId)
+        public async UniTask<TData> LoadOrDefaultAsync (string slotId)
         {
             if (!SaveSlotExists(slotId))
                 await SerializeDataAsync(slotId, new TData());
@@ -191,7 +190,7 @@ namespace UnityCommon
 
         public virtual string SlotIdToFilePath (string slotId) => string.Concat(SaveDataPath, "/", slotId, $".{Extension}");
 
-        protected virtual async Task SerializeDataAsync (string slotId, TData data)
+        protected virtual async UniTask SerializeDataAsync (string slotId, TData data)
         {
             var jsonData = JsonUtility.ToJson(data, PrettifyJson);
             var filePath = SlotIdToFilePath(slotId);
@@ -205,7 +204,7 @@ namespace UnityCommon
             else await IOUtils.WriteTextFileAsync(filePath, jsonData);
         }
 
-        protected virtual async Task<TData> DeserializeDataAsync (string slotId)
+        protected virtual async UniTask<TData> DeserializeDataAsync (string slotId)
         {
             var filePath = SlotIdToFilePath(slotId);
             var jsonData = default(string);

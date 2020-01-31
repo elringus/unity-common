@@ -2,7 +2,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using UniRx.Async;
 using UnityEngine.ResourceManagement.ResourceLocations;
 
 namespace UnityCommon
@@ -18,7 +18,7 @@ namespace UnityCommon
             this.locations = locations;
         }
 
-        public override Task RunAsync ()
+        public override UniTask RunAsync ()
         {
             var locatedResourcePaths = locations
                 .Where(l => l.ResourceType == typeof(TResource))
@@ -26,7 +26,7 @@ namespace UnityCommon
                 .LocateResourcePathsAtFolder(Path);
             SetResult(locatedResourcePaths);
 
-            return Task.CompletedTask;
+            return UniTask.CompletedTask;
         }
     }
 }

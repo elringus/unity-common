@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using UniRx.Async;
 
 namespace UnityCommon
 {
@@ -41,31 +41,31 @@ namespace UnityCommon
         /// </summary>
         /// <typeparam name="T">Type of the resource to load.</typeparam>
         /// <param name="path">Path to the resource location.</param>
-        Task<Resource<T>> LoadResourceAsync<T> (string path) where T : UnityEngine.Object;
+        UniTask<Resource<T>> LoadResourceAsync<T> (string path) where T : UnityEngine.Object;
         /// <summary>
         /// Loads all available resources at the provided path.
         /// </summary>
         /// <typeparam name="T">Type of the resources to load.</typeparam>
         /// <param name="path">Path to the resources location.</param>
-        Task<IEnumerable<Resource<T>>> LoadResourcesAsync<T> (string path) where T : UnityEngine.Object;
+        UniTask<IEnumerable<Resource<T>>> LoadResourcesAsync<T> (string path) where T : UnityEngine.Object;
         /// <summary>
         /// Locates all available resources at the provided path.
         /// </summary>
         /// <typeparam name="T">Type of the resources to locate.</typeparam>
         /// <param name="path">Path (root) to the resources location.</param>
         /// <returns>Collection of the located resource paths.</returns>
-        Task<IEnumerable<string>> LocateResourcesAsync<T> (string path) where T : UnityEngine.Object;
+        UniTask<IEnumerable<string>> LocateResourcesAsync<T> (string path) where T : UnityEngine.Object;
         /// <summary>
         /// Locates all available folders at the provided path.
         /// </summary>
         /// <param name="path">Path to the parent folder or empty string if none.</param>
-        Task<IEnumerable<Folder>> LocateFoldersAsync (string path);
+        UniTask<IEnumerable<Folder>> LocateFoldersAsync (string path);
         /// <summary>
         /// Checks whether resource with the provided type and path is available.
         /// </summary>
         /// <typeparam name="T">Type of the resource to look for.</typeparam>
         /// <param name="path">Path to the resource location.</param>
-        Task<bool> ResourceExistsAsync<T> (string path) where T : UnityEngine.Object;
+        UniTask<bool> ResourceExistsAsync<T> (string path) where T : UnityEngine.Object;
         /// <summary>
         /// Unloads resource at the provided path (in case it was previously loaded by the provider).
         /// </summary>

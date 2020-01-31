@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
+using UniRx.Async;
 using UnityEngine;
 
 namespace UnityCommon
@@ -23,7 +23,7 @@ namespace UnityCommon
             this.converter = converter;
         }
 
-        public override async Task RunAsync ()
+        public override async UniTask RunAsync ()
         {
             var startTime = Time.time;
 

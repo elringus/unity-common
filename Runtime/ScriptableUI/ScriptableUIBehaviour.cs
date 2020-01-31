@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Threading.Tasks;
+using UniRx.Async;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -86,7 +86,7 @@ namespace UnityCommon
         /// <summary>
         /// Changes <see cref="Visible"/> over specified time.
         /// </summary>
-        public virtual async Task SetVisibilityAsync (bool visible, float? fadeTime = null)
+        public virtual async UniTask SetVisibilityAsync (bool visible, float? fadeTime = null)
         {
             if (fadeTweener.Running)
                 fadeTweener.Stop();

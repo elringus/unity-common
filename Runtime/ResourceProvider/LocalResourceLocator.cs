@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
+using UniRx.Async;
 using UnityEngine;
 
 namespace UnityCommon
@@ -20,11 +20,11 @@ namespace UnityCommon
             this.converter = converter;
         }
 
-        public override Task RunAsync ()
+        public override UniTask RunAsync ()
         {
             var locatedResourcePaths = LocateResources(RootPath, Path, converter);
             SetResult(locatedResourcePaths);
-            return Task.CompletedTask;
+            return UniTask.CompletedTask;
         }
 
         public static List<string> LocateResources (string rootPath, string resourcesPath, IRawConverter<TResource> converter)

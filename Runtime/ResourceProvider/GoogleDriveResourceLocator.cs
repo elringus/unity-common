@@ -2,7 +2,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using UniRx.Async;
 using UnityGoogleDrive;
 
 namespace UnityCommon
@@ -21,7 +21,7 @@ namespace UnityCommon
             this.converter = converter;
         }
 
-        public override async Task RunAsync ()
+        public override async UniTask RunAsync ()
         {
             var result = new List<string>();
 

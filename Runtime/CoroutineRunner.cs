@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections;
-using System.Runtime.CompilerServices;
 using System.Threading;
-using System.Threading.Tasks;
+using UniRx.Async;
 using UnityEngine;
 
 namespace UnityCommon
@@ -33,16 +32,16 @@ namespace UnityCommon
 
         protected YieldInstruction YieldInstruction { get; set; }
         protected int CoroutineTickCount { get; private set; }
-        protected Task CompletionTask => completionSource.Task;
+        protected UniTask CompletionTask => completionSource.Task;
         protected CancellationToken CancellationToken { get; private set; }
 
         private readonly MonoBehaviour coroutineContainer;
-        private TaskCompletionSource<CoroutineRunner> completionSource;
+        private UniTaskCompletionSource<CoroutineRunner> completionSource;
         private IEnumerator coroutine;
 
         public CoroutineRunner (MonoBehaviour coroutineContainer = null, YieldInstruction yieldInstruction = null)
         {
-            completionSource = new TaskCompletionSource<CoroutineRunner>();
+            completionSource = new UniTaskCompletionSource<CoroutineRunner>();
             this.coroutineContainer = ObjectUtils.IsValid(coroutineContainer) ? coroutineContainer : ApplicationBehaviour.Instance;
             YieldInstruction = yieldInstruction;
         }
@@ -66,7 +65,7 @@ namespace UnityCommon
             coroutineContainer.StartCoroutine(coroutine);
         }
 
-        public virtual async Task RunAsync (CancellationToken cancellationToken = default)
+        public virtual async UniTask RunAsync (CancellationToken cancellationToken = default)
         {
             Run(cancellationToken);
             await CompletionTask;
@@ -78,7 +77,7 @@ namespace UnityCommon
         public virtual new void Reset ()
         {
             Stop();
-            completionSource = new TaskCompletionSource<CoroutineRunner>();
+            completionSource = new UniTaskCompletionSource<CoroutineRunner>();
             base.Reset();
         }
 
@@ -113,7 +112,7 @@ namespace UnityCommon
             OnCompleted = null;
         }
 
-        public TaskAwaiter<CoroutineRunner> GetAwaiter () => completionSource.Task.GetAwaiter();
+        public UniTask<CoroutineRunner>.Awaiter GetAwaiter () => completionSource.Task.GetAwaiter();
 
         protected virtual void HandleOnCompleted ()
         {

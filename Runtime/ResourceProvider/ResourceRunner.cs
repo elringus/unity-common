@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
+using UniRx.Async;
 
 namespace UnityCommon
 {
@@ -18,24 +17,24 @@ namespace UnityCommon
             ResourceType = resourceType;
         }
 
-        public TaskAwaiter GetAwaiter () => GetAwaiterImpl();
+        public UniTask.Awaiter GetAwaiter () => GetAwaiterImpl();
 
-        public abstract Task RunAsync ();
+        public abstract UniTask RunAsync ();
         public abstract void Cancel ();
 
-        protected abstract TaskAwaiter GetAwaiterImpl ();
+        protected abstract UniTask.Awaiter GetAwaiterImpl ();
     }
 
     public abstract class ResourceRunner<TResult> : ResourceRunner
     {
         public TResult Result { get; private set; }
 
-        private TaskCompletionSource<TResult> completionSource = new TaskCompletionSource<TResult>();
+        private UniTaskCompletionSource<TResult> completionSource = new UniRx.Async.UniTaskCompletionSource<TResult>();
 
         public ResourceRunner (IResourceProvider provider, string path, Type resourceType)
             : base(provider, path, resourceType) { }
 
-        public new TaskAwaiter<TResult> GetAwaiter () => completionSource.Task.GetAwaiter();
+        public new UniTask<TResult>.Awaiter GetAwaiter () => completionSource.Task.GetAwaiter();
 
         public override void Cancel ()
         {
@@ -48,7 +47,7 @@ namespace UnityCommon
             completionSource.TrySetResult(Result);
         }
 
-        protected override TaskAwaiter GetAwaiterImpl () => ((Task)completionSource.Task).GetAwaiter();
+        protected override UniTask.Awaiter GetAwaiterImpl () => ((UniTask)completionSource.Task).GetAwaiter();
     }
 
     public abstract class LocateResourcesRunner<TResource> : ResourceRunner<IEnumerable<string>> 

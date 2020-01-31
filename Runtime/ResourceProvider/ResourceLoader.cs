@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using UniRx.Async;
 using UnityEngine;
 
 namespace UnityCommon
@@ -93,7 +93,7 @@ namespace UnityCommon
             return Providers.GetLoadedResourceOrNull<TResource>(path);
         }
 
-        public virtual async Task<Resource<TResource>> LoadAsync (string path, bool isFullPath = false)
+        public virtual async UniTask<Resource<TResource>> LoadAsync (string path, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
 
@@ -103,7 +103,7 @@ namespace UnityCommon
             return resource;
         }
 
-        public virtual async Task<IEnumerable<Resource<TResource>>> LoadAllAsync (string path = null, bool isFullPath = false)
+        public virtual async UniTask<IEnumerable<Resource<TResource>>> LoadAllAsync (string path = null, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
 
@@ -114,13 +114,13 @@ namespace UnityCommon
             return resources;
         }
 
-        public virtual async Task<IEnumerable<string>> LocateAsync (string path, bool isFullPath = false)
+        public virtual async UniTask<IEnumerable<string>> LocateAsync (string path, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
             return await Providers.LocateResourcesAsync<TResource>(path);
         }
 
-        public virtual async Task<bool> ExistsAsync (string path, bool isFullPath = false)
+        public virtual async UniTask<bool> ExistsAsync (string path, bool isFullPath = false)
         {
             if (!isFullPath) path = BuildFullPath(path);
             return await Providers.ResourceExistsAsync<TResource>(path);

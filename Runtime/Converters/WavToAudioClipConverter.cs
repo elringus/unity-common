@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Threading.Tasks;
+using UniRx.Async;
 using UnityEngine;
 
 namespace UnityCommon
@@ -24,9 +24,9 @@ namespace UnityCommon
             return audioClip;
         }
 
-        public async Task<AudioClip> ConvertAsync (byte[] obj)
+        public async UniTask<AudioClip> ConvertAsync (byte[] obj)
         {
-            var floatArr = await Task.Run(() => Pcm16ToFloatArray(obj));
+            var floatArr = await UniTask.Run(() => Pcm16ToFloatArray(obj));
 
             var audioClip = AudioClip.Create("Generated WAV Audio", floatArr.Length / 2, 2, 44100, false);
             audioClip.SetData(floatArr, 0);
@@ -36,7 +36,7 @@ namespace UnityCommon
 
         public object Convert (object obj) => Convert(obj as byte[]);
 
-        public async Task<object> ConvertAsync (object obj) => await ConvertAsync(obj as byte[]);
+        public async UniTask<object> ConvertAsync (object obj) => await ConvertAsync(obj as byte[]);
 
         private static float[] Pcm16ToFloatArray (byte[] input)
         {

@@ -2,7 +2,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using UniRx.Async;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.ResourceLocations;
@@ -12,8 +12,6 @@ namespace UnityCommon
     public class AddressableResourceLoader<TResource> : LoadResourceRunner<TResource> 
         where TResource : UnityEngine.Object
     {
-        private static readonly WaitForEndOfFrame waitForEndOfFrame = new WaitForEndOfFrame();
-
         private readonly List<IResourceLocation> locations;
         private readonly Action<string> logAction;
         private readonly string resourceAddress;
@@ -26,7 +24,7 @@ namespace UnityCommon
             resourceAddress = $"{provider.AssetsLabel}/{Path}";
         }
 
-        public override async Task RunAsync ()
+        public override async UniTask RunAsync ()
         {
             var startTime = Time.time;
             var asset = default(TResource);
@@ -36,7 +34,7 @@ namespace UnityCommon
             {
                 var task = Addressables.LoadAssetAsync<TResource>(resourceAddress);
                 while (!task.IsDone) // When awaiting the method directly it fails on WebGL (they're using mutlithreaded Task fot GetAwaiter)
-                    await waitForEndOfFrame;
+                    await AsyncUtils.WaitEndOfFrame;
                 asset = task.Result;
             }
 
