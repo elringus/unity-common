@@ -10,7 +10,7 @@
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
-        "UnityTask.dll"
+        "UniTask.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],
