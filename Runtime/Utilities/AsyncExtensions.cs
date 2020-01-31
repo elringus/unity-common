@@ -24,9 +24,9 @@ namespace UnityCommon
 
         private class CustomYieldInstructionRunner : CoroutineRunner
         {
-            private readonly CustomYieldInstruction yieldInstruction;
+            private readonly IEnumerator yieldInstruction;
 
-            public CustomYieldInstructionRunner (CustomYieldInstruction yieldInstruction, MonoBehaviour coroutineContainer = null)
+            public CustomYieldInstructionRunner (IEnumerator yieldInstruction, MonoBehaviour coroutineContainer = null)
                 : base(coroutineContainer) { this.yieldInstruction = yieldInstruction; }
 
             protected override IEnumerator CoroutineLoop ()
@@ -41,13 +41,12 @@ namespace UnityCommon
             return new YieldInstructionRunner(yieldInstruction, coroutineContainer).RunAsync().GetAwaiter();
         }
 
-        public static TaskAwaiter GetAwaiter (this YieldInstruction yieldInstruction) => GetAwaiter(yieldInstruction, null);
-
-        public static TaskAwaiter GetAwaiter<T> (this T yieldInstruction, MonoBehaviour coroutineContainer) 
-            where T : CustomYieldInstruction
+        public static TaskAwaiter GetAwaiter (this IEnumerator yieldInstruction, MonoBehaviour coroutineContainer) 
         {
             return new CustomYieldInstructionRunner(yieldInstruction, coroutineContainer).RunAsync().GetAwaiter();
         }
+
+        public static TaskAwaiter GetAwaiter (this YieldInstruction yieldInstruction) => GetAwaiter(yieldInstruction, null);
 
         public static TaskAwaiter GetAwaiter (this WaitUntil yieldInstruction) => GetAwaiter(yieldInstruction, null);
 
