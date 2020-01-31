@@ -1,9 +1,10 @@
 {
   "dependencies": {
+    "com.elringus.unitask": "https://github.com/Elringus/UniTask.git#package",
     "com.elringus.unitygoogledrive": "https://github.com/Elringus/UnityGoogleDrive.git#package",
     "com.unity.2d.sprite": "1.0.0",
     "com.unity.2d.tilemap": "1.0.0",
-    "com.unity.addressables": "1.1.10",
+    "com.unity.addressables": "1.6.0",
     "com.unity.ext.nunit": "1.0.0",
     "com.unity.ide.rider": "1.1.4",
     "com.unity.test-framework": "1.1.9",
@@ -42,6 +43,10 @@
     "com.unity.modules.xr": "1.0.0"
   },
   "lock": {
+    "com.elringus.unitask": {
+      "revision": "package",
+      "hash": "5fae3e70c1b78237cbe63a38f75fc04a2392dd40"
+    },
     "com.elringus.unitygoogledrive": {
       "revision": "package",
       "hash": "92c3ca7ddba6dffea6160969067e4e728bd67e97"

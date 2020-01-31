@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using UniRx.Async;
 using UnityEngine;
 
 namespace UnityCommon
@@ -23,7 +23,7 @@ namespace UnityCommon
                 RedirectToSourceConverter = redirectToSourceConverter;
             }
 
-            public async Task<TSource> ToSourceAsync<TSource> (object obj)
+            public async UniTask<TSource> ToSourceAsync<TSource> (object obj)
             {
                 return (TSource)await RedirectToSourceConverter.ConvertAsync(obj);
             }

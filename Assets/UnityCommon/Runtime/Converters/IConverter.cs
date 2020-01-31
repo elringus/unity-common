@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+﻿using UniRx.Async;
 
 namespace UnityCommon
 {
@@ -8,7 +8,8 @@ namespace UnityCommon
     public interface IConverter
     {
         object Convert (object obj);
-        Task<object> ConvertAsync (object obj);
+
+        UniTask<object> ConvertAsync (object obj);
     }
 
     /// <summary>
@@ -17,6 +18,7 @@ namespace UnityCommon
     public interface IConverter<TSource, TResult> : IConverter
     {
         TResult Convert (TSource obj);
-        Task<TResult> ConvertAsync (TSource obj);
+
+        UniTask<TResult> ConvertAsync (TSource obj);
     }
 }

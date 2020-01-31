@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using System.Threading.Tasks;
+using UniRx.Async;
 using UnityEngine;
 
 namespace UnityCommon
@@ -12,10 +12,10 @@ namespace UnityCommon
 
         public TextAsset Convert (byte[] obj) => new TextAsset(Encoding.UTF8.GetString(obj));
 
-        public Task<TextAsset> ConvertAsync (byte[] obj) => Task.FromResult(new TextAsset(Encoding.UTF8.GetString(obj)));
+        public UniTask<TextAsset> ConvertAsync (byte[] obj) => UniTask.FromResult(new TextAsset(Encoding.UTF8.GetString(obj)));
 
         public object Convert (object obj) => Convert(obj as byte[]);
 
-        public async Task<object> ConvertAsync (object obj) => await ConvertAsync(obj as byte[]);
+        public async UniTask<object> ConvertAsync (object obj) => await ConvertAsync(obj as byte[]);
     }
 }

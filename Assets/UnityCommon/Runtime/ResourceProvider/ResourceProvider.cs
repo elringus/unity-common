@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using UniRx.Async;
 using UnityEngine;
 
 namespace UnityCommon
@@ -38,7 +38,7 @@ namespace UnityCommon
             else return LoadedResources[path] as Resource<T>;
         }
 
-        public virtual async Task<Resource<T>> LoadResourceAsync<T> (string path) where T : UnityEngine.Object
+        public virtual async UniTask<Resource<T>> LoadResourceAsync<T> (string path) where T : UnityEngine.Object
         {
             if (!SupportsType<T>()) return null;
 
@@ -65,12 +65,12 @@ namespace UnityCommon
             return resource;
         }
 
-        public virtual async Task<IEnumerable<Resource<T>>> LoadResourcesAsync<T> (string path) where T : UnityEngine.Object
+        public virtual async UniTask<IEnumerable<Resource<T>>> LoadResourcesAsync<T> (string path) where T : UnityEngine.Object
         {
             if (!SupportsType<T>()) return null;
 
             var locatedResourcePaths = await LocateResourcesAsync<T>(path);
-            return await Task.WhenAll(locatedResourcePaths.Select(p => LoadResourceAsync<T>(p)));
+            return await UniTask.WhenAll(locatedResourcePaths.Select(p => LoadResourceAsync<T>(p)));
         }
 
         public virtual void UnloadResource (string path)
@@ -110,7 +110,7 @@ namespace UnityCommon
             return LocateRunners.ContainsKey(new Tuple<string, Type>(path, typeof(T)));
         }
 
-        public virtual async Task<bool> ResourceExistsAsync<T> (string path) where T : UnityEngine.Object
+        public virtual async UniTask<bool> ResourceExistsAsync<T> (string path) where T : UnityEngine.Object
         {
             if (!SupportsType<T>()) return false;
             if (ResourceLoaded<T>(path)) return true;
@@ -119,7 +119,7 @@ namespace UnityCommon
             return locatedResourcePaths.Any(p => p.EqualsFast(path));
         }
 
-        public virtual async Task<IEnumerable<string>> LocateResourcesAsync<T> (string path) where T : UnityEngine.Object
+        public virtual async UniTask<IEnumerable<string>> LocateResourcesAsync<T> (string path) where T : UnityEngine.Object
         {
             if (!SupportsType<T>()) return null;
 
@@ -141,7 +141,7 @@ namespace UnityCommon
             return locatedResourcePaths;
         }
 
-        public virtual async Task<IEnumerable<Folder>> LocateFoldersAsync (string path)
+        public virtual async UniTask<IEnumerable<Folder>> LocateFoldersAsync (string path)
         {
             if (path is null) path = string.Empty;
 

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using UniRx.Async;
 
 namespace UnityCommon
 {
@@ -14,11 +14,11 @@ namespace UnityCommon
             this.editorResourcePaths = editorResourcePaths;
         }
 
-        public override Task RunAsync ()
+        public override UniTask RunAsync ()
         {
             var locatedFolders = LocateEditorFolders(Path, editorResourcePaths);
             SetResult(locatedFolders);
-            return Task.CompletedTask;
+            return UniTask.CompletedTask;
         }
 
         public static List<Folder> LocateEditorFolders (string path, IEnumerable<string> editorResourcePaths)

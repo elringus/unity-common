@@ -1,5 +1,5 @@
 ﻿using System.IO;
-using System.Threading.Tasks;
+using UniRx.Async;
 using UnityEngine;
 
 namespace UnityCommon
@@ -9,7 +9,7 @@ namespace UnityCommon
         /// <summary>
         /// Reads a file with the provided path using async or sync IO depending on the platform.
         /// </summary>
-        public static async Task<byte[]> ReadFileAsync (string filePath)
+        public static async UniTask<byte[]> ReadFileAsync (string filePath)
         {
             if (Application.platform == RuntimePlatform.WebGLPlayer) return File.ReadAllBytes(filePath);
             else
@@ -26,7 +26,7 @@ namespace UnityCommon
         /// <summary>
         /// Writes a file's data to the provided path using async or sync IO depending on the platform.
         /// </summary>
-        public static async Task WriteFileAsync (string filePath, byte[] fileData)
+        public static async UniTask WriteFileAsync (string filePath, byte[] fileData)
         {
             if (Application.platform == RuntimePlatform.WebGLPlayer) File.WriteAllBytes(filePath, fileData);
             else
@@ -40,7 +40,7 @@ namespace UnityCommon
         /// <summary>
         /// Reads a text file with the provided path using async or sync IO depending on the platform.
         /// </summary>
-        public static async Task<string> ReadTextFileAsync (string filePath)
+        public static async UniTask<string> ReadTextFileAsync (string filePath)
         {
             if (Application.platform == RuntimePlatform.WebGLPlayer) return File.ReadAllText(filePath);
             else
@@ -53,7 +53,7 @@ namespace UnityCommon
         /// <summary>
         /// Writes a text file's data to the provided path using async or sync IO depending on the platform.
         /// </summary>
-        public static async Task WriteTextFileAsync (string filePath, string fileText)
+        public static async UniTask WriteTextFileAsync (string filePath, string fileText)
         {
             if (Application.platform == RuntimePlatform.WebGLPlayer) File.WriteAllText(filePath, fileText);
             else

@@ -2,7 +2,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using UniRx.Async;
 using UnityEngine.ResourceManagement.ResourceLocations;
 
 namespace UnityCommon
@@ -17,7 +17,7 @@ namespace UnityCommon
             this.locations = locations;
         }
 
-        public override Task RunAsync ()
+        public override UniTask RunAsync ()
         {
             var locatedResourcePaths = locations
                 .Select(l => l.PrimaryKey.GetAfterFirst("/")) // Remove the addressables prefix.
@@ -25,7 +25,7 @@ namespace UnityCommon
                 .Select(p => new Folder(p));
             SetResult(locatedResourcePaths);
 
-            return Task.CompletedTask;
+            return UniTask.CompletedTask;
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿#if UNITY_GOOGLE_DRIVE_AVAILABLE
 
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using UniRx.Async;
 using UnityGoogleDrive;
 
 namespace UnityCommon
@@ -16,7 +16,7 @@ namespace UnityCommon
             RootPath = rootPath;
         }
 
-        public override async Task RunAsync ()
+        public override async UniTask RunAsync ()
         {
             var result = new List<Folder>();
 

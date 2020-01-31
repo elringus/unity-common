@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+﻿using UniRx.Async;
 using UnityEngine;
 
 namespace UnityCommon
@@ -21,14 +21,14 @@ namespace UnityCommon
             return sprite;
         }
 
-        public Task<Sprite> ConvertAsync (byte[] obj)
+        public UniTask<Sprite> ConvertAsync (byte[] obj)
         {
             var sprite = Convert(obj);
-            return Task.FromResult(sprite);
+            return UniTask.FromResult(sprite);
         }
 
         public object Convert (object obj) => Convert(obj as byte[]);
 
-        public async Task<object> ConvertAsync (object obj) => await ConvertAsync(obj as byte[]);
+        public async UniTask<object> ConvertAsync (object obj) => await ConvertAsync(obj as byte[]);
     }
 }

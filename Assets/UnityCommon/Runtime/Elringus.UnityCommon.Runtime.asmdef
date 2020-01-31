@@ -11,7 +11,8 @@
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
-        "NLayer.dll"
+        "NLayer.dll",
+        "UnityTask.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
+using UniRx.Async;
 using UnityEngine;
 
 namespace UnityCommon
@@ -15,11 +15,11 @@ namespace UnityCommon
             RootPath = rootPath;
         }
 
-        public override Task RunAsync ()
+        public override UniTask RunAsync ()
         {
             var locatedFolders = LocateFoldersAtPath(RootPath, Path);
             SetResult(locatedFolders);
-            return Task.CompletedTask;
+            return UniTask.CompletedTask;
         }
 
         public static List<Folder> LocateFoldersAtPath (string rootPath, string resourcesPath)

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using UnityCommon;
 using UnityEngine;
+using UniRx.Async;
 
 public class TestResourceProvider : MonoBehaviour
 {
@@ -36,7 +36,7 @@ public class TestResourceProvider : MonoBehaviour
 
     private async void Start ()
     {
-        await new WaitForEndOfFrame();
+        await AsyncUtils.WaitEndOfFrame;
 
         await ResolveByFullPathAsync();
         await ResolveTextByPathAsync();
@@ -64,7 +64,7 @@ public class TestResourceProvider : MonoBehaviour
         TestEditorAsync().Forget();
     }
 
-    private async Task TestEditorAsync ()
+    private async UniTask TestEditorAsync ()
     {
         var result = (await provider.LoadResourcesAsync<TextAsset>("Text")).ToList();
         for (int i = 0; i < result.Count; i++)
@@ -121,48 +121,48 @@ public class TestResourceProvider : MonoBehaviour
         return provider;
     }
 
-    private async Task ResolveFoldersAsync ()
+    private async UniTask ResolveFoldersAsync ()
     {
         text = "Starting resolving folders...";
-        await Task.Delay(TimeSpan.FromSeconds(1f));
+        await UniTask.Delay(TimeSpan.FromSeconds(1f));
 
         var folders = await provider.LocateFoldersAsync(null);
 
         text = $"Finished resolving folders. Found {folders.Count()} folders.";
-        await Task.Delay(TimeSpan.FromSeconds(1f));
+        await UniTask.Delay(TimeSpan.FromSeconds(1f));
 
         foreach (var folder in folders)
         {
             text = folder.Name;
-            await Task.Delay(TimeSpan.FromSeconds(1f));
+            await UniTask.Delay(TimeSpan.FromSeconds(1f));
         }
     }
 
-    private async Task TestUnloadAsync ()
+    private async UniTask TestUnloadAsync ()
     {
         for (int i = 0; i < 10; i++)
         {
             var resources = await provider.LoadResourcesAsync<Texture2D>("Sprites");
             text = "Total memory used after load: " + Mathf.CeilToInt(System.GC.GetTotalMemory(true) * .000001f) + "Mb";
 
-            await Task.Delay(TimeSpan.FromSeconds(.5f));
+            await UniTask.Delay(TimeSpan.FromSeconds(.5f));
 
             foreach (var resource in resources)
                 provider.UnloadResource(resource.Path);
             text = "Total memory used after unload: " + Mathf.CeilToInt(System.GC.GetTotalMemory(true) * .000001f) + "Mb";
 
-            await Task.Delay(TimeSpan.FromSeconds(.5f));
+            await UniTask.Delay(TimeSpan.FromSeconds(.5f));
         }
     }
 
-    private async Task TestAudioAsync ()
+    private async UniTask TestAudioAsync ()
     {
         var resources = await provider.LoadResourcesAsync<AudioClip>("Audio");
 
         foreach (var audioResource in resources)
         {
             AudioSource.PlayOneShot(audioResource.Object);
-            await Task.Delay(TimeSpan.FromSeconds(5));
+            await UniTask.Delay(TimeSpan.FromSeconds(5));
             AudioSource.Stop();
         }
 
@@ -170,21 +170,21 @@ public class TestResourceProvider : MonoBehaviour
             provider.UnloadResource(audioResource.Path);
     }
 
-    private async Task ResolveTextByPathAsync ()
+    private async UniTask ResolveTextByPathAsync ()
     {
         var resources = await provider.LoadResourcesAsync<TextAsset>("Text");
 
         foreach (var textResource in resources)
         {
             text = textResource.Object.text;
-            await Task.Delay(TimeSpan.FromSeconds(1f));
+            await UniTask.Delay(TimeSpan.FromSeconds(1f));
         }
 
         foreach (var textResource in resources)
             provider.UnloadResource(textResource.Path);
     }
 
-    private async Task TestResourceExistsAsync ()
+    private async UniTask TestResourceExistsAsync ()
     {
         foreach (var res in resources)
         {
@@ -193,7 +193,7 @@ public class TestResourceProvider : MonoBehaviour
         }
     }
 
-    private async Task ResolveByFullPathAsync ()
+    private async UniTask ResolveByFullPathAsync ()
     {
         foreach (var res in resources)
             await provider.LoadResourceAsync<Sprite>(res);
@@ -201,15 +201,15 @@ public class TestResourceProvider : MonoBehaviour
         foreach (var res in resources)
         {
             SpriteRenderer.sprite = (await provider.LoadResourceAsync<Sprite>(res)).Object;
-            await Task.Delay(TimeSpan.FromSeconds(.5f));
+            await UniTask.Delay(TimeSpan.FromSeconds(.5f));
         }
 
-        await Task.Delay(TimeSpan.FromSeconds(1.5f));
+        await UniTask.Delay(TimeSpan.FromSeconds(1.5f));
 
         foreach (var res in resources)
             provider.UnloadResource(res);
 
-        await Task.Delay(TimeSpan.FromSeconds(1.5f));
+        await UniTask.Delay(TimeSpan.FromSeconds(1.5f));
 
         foreach (var res in resources)
             await provider.LoadResourceAsync<Sprite>(res);
@@ -217,11 +217,11 @@ public class TestResourceProvider : MonoBehaviour
         foreach (var res in resources)
         {
             SpriteRenderer.sprite = (await provider.LoadResourceAsync<Sprite>(res)).Object;
-            await Task.Delay(TimeSpan.FromSeconds(.5f));
+            await UniTask.Delay(TimeSpan.FromSeconds(.5f));
         }
     }
 
-    private async Task TestTextureResources ()
+    private async UniTask TestTextureResources ()
     {
         foreach (var res in resources)
             await provider.LoadResourceAsync<Texture2D>(res);
@@ -230,11 +230,11 @@ public class TestResourceProvider : MonoBehaviour
         {
             var texture = (await provider.LoadResourceAsync<Texture2D>(res)).Object;
             SpriteRenderer.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.one * .5f);
-            await Task.Delay(TimeSpan.FromSeconds(.5f));
+            await UniTask.Delay(TimeSpan.FromSeconds(.5f));
         }
     }
 
-    private async Task TestTextureByDir ()
+    private async UniTask TestTextureByDir ()
     {
         var resources = await provider.LoadResourcesAsync<Texture2D>("Sprites");
 
@@ -242,11 +242,11 @@ public class TestResourceProvider : MonoBehaviour
         {
             var texture = res.Object;
             SpriteRenderer.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.one * .5f);
-            await Task.Delay(TimeSpan.FromSeconds(.5f));
+            await UniTask.Delay(TimeSpan.FromSeconds(.5f));
         }
     }
 
-    private async Task TestNullPropagation ()
+    private async UniTask TestNullPropagation ()
     {
         var loader = new ResourceLoader<Texture2D>(new List<IResourceProvider> { provider }, "Sprites");
         var image = await loader.LoadAsync("Image09");

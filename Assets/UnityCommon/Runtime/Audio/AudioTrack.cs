@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading;
-using System.Threading.Tasks;
+using UniRx.Async;
 using UnityEngine;
 using UnityEngine.Audio;
 
@@ -107,7 +107,7 @@ namespace UnityCommon
             OnPlay?.Invoke();
         }
 
-        public async Task PlayAsync (float fadeInTime, CancellationToken cancellationToken = default)
+        public async UniTask PlayAsync (float fadeInTime, CancellationToken cancellationToken = default)
         {
             CompleteAllRunners();
             if (!Valid) return;
@@ -127,7 +127,7 @@ namespace UnityCommon
             OnStop?.Invoke();
         }
 
-        public async Task StopAsync (float fadeOutTime, CancellationToken cancellationToken = default)
+        public async UniTask StopAsync (float fadeOutTime, CancellationToken cancellationToken = default)
         {
             CompleteAllRunners();
             if (!Valid) return;
@@ -138,7 +138,7 @@ namespace UnityCommon
             Stop();
         }
 
-        public async Task FadeAsync (float volume, float fadeTime, CancellationToken cancellationToken = default)
+        public async UniTask FadeAsync (float volume, float fadeTime, CancellationToken cancellationToken = default)
         {
             CompleteAllRunners();
             if (!Valid) return;

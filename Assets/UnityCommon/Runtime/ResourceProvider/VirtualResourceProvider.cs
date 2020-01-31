@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using UniRx.Async;
 
 namespace UnityCommon
 {
@@ -64,10 +64,10 @@ namespace UnityCommon
             return Resources.TryGetValue(path, out var resource) ? resource as Resource<T> : null;
         }
 
-        public Task<Resource<T>> LoadResourceAsync<T> (string path) where T : UnityEngine.Object
+        public UniTask<Resource<T>> LoadResourceAsync<T> (string path) where T : UnityEngine.Object
         {
             var resource = LoadResource<T>(path);
-            return Task.FromResult(resource);
+            return UniTask.FromResult(resource);
         }
 
         public IEnumerable<Resource<T>> LoadResources<T> (string path) where T : UnityEngine.Object
@@ -75,10 +75,10 @@ namespace UnityCommon
             return Resources.Where(kv => kv.Value is T).Select(kv => kv.Key).LocateResourcePathsAtFolder(path).Select(p => LoadResource<T>(p));
         }
 
-        public Task<IEnumerable<Resource<T>>> LoadResourcesAsync<T> (string path) where T : UnityEngine.Object
+        public UniTask<IEnumerable<Resource<T>>> LoadResourcesAsync<T> (string path) where T : UnityEngine.Object
         {
             var resoucres = LoadResources<T>(path);
-            return Task.FromResult(resoucres);
+            return UniTask.FromResult(resoucres);
         }
 
         public IEnumerable<Folder> LocateFolders (string path)
@@ -86,10 +86,10 @@ namespace UnityCommon
             return FolderPaths.LocateFolderPathsAtFolder(path).Select(p => new Folder(p));
         }
 
-        public Task<IEnumerable<Folder>> LocateFoldersAsync (string path)
+        public UniTask<IEnumerable<Folder>> LocateFoldersAsync (string path)
         {
             var folders = LocateFolders(path);
-            return Task.FromResult(folders);
+            return UniTask.FromResult(folders);
         }
 
         public IEnumerable<string> LocateResources<T> (string path) where T : UnityEngine.Object
@@ -97,10 +97,10 @@ namespace UnityCommon
             return Resources.Where(kv => kv.Value is T).Select(kv => kv.Key).LocateResourcePathsAtFolder(path);
         }
 
-        public Task<IEnumerable<string>> LocateResourcesAsync<T> (string path) where T : UnityEngine.Object
+        public UniTask<IEnumerable<string>> LocateResourcesAsync<T> (string path) where T : UnityEngine.Object
         {
             var resources = LocateResources<T>(path);
-            return Task.FromResult(resources);
+            return UniTask.FromResult(resources);
         }
 
         public bool ResourceExists<T> (string path) where T : UnityEngine.Object
@@ -108,10 +108,10 @@ namespace UnityCommon
             return Resources.ContainsKey(path) && Resources[path] is T;
         }
 
-        public Task<bool> ResourceExistsAsync<T> (string path) where T : UnityEngine.Object
+        public UniTask<bool> ResourceExistsAsync<T> (string path) where T : UnityEngine.Object
         {
             var result = ResourceExists<T>(path);
-            return Task.FromResult(result);
+            return UniTask.FromResult(result);
         }
 
         public bool ResourceLoaded (string path)
@@ -130,10 +130,10 @@ namespace UnityCommon
                 RemoveResource(path);
         }
 
-        public Task UnloadResourceAsync (string path)
+        public UniTask UnloadResourceAsync (string path)
         {
             UnloadResource(path);
-            return Task.CompletedTask;
+            return UniTask.CompletedTask;
         }
 
         public void UnloadResources ()
@@ -142,10 +142,10 @@ namespace UnityCommon
                 RemoveAllResources();
         }
 
-        public Task UnloadResourcesAsync ()
+        public UniTask UnloadResourcesAsync ()
         {
             UnloadResources();
-            return Task.CompletedTask;
+            return UniTask.CompletedTask;
         }
 
         public Resource<T> GetLoadedResourceOrNull<T> (string path) where T : UnityEngine.Object

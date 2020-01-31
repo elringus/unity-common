@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading;
-using System.Threading.Tasks;
+using UniRx.Async;
 using UnityEngine;
 
 namespace UnityCommon
@@ -48,7 +48,7 @@ namespace UnityCommon
             Run(cancellationToken);
         }
 
-        public async Task RunAsync (TTweenValue tweenValue, CancellationToken cancellationToken = default)
+        public async UniTask RunAsync (TTweenValue tweenValue, CancellationToken cancellationToken = default)
         {
             Run(tweenValue, cancellationToken);
             await CompletionTask;

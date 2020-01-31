@@ -1,7 +1,7 @@
 ﻿using NLayer;
 using System;
 using System.IO;
-using System.Threading.Tasks;
+using UniRx.Async;
 using UnityEngine;
 
 namespace UnityCommon
@@ -34,9 +34,9 @@ namespace UnityCommon
             return audioClip;
         }
 
-        public async Task<AudioClip> ConvertAsync (byte[] obj)
+        public async UniTask<AudioClip> ConvertAsync (byte[] obj)
         {
-            await Task.Delay(TimeSpan.FromSeconds(1));
+            await UniTask.Yield();
 
             var mpegFile = new MpegFile(new MemoryStream(obj));
             var audioClip = AudioClip.Create("Generated MP3 Audio", (int)mpegFile.SampleCount, mpegFile.Channels, mpegFile.SampleRate, false);
@@ -56,7 +56,7 @@ namespace UnityCommon
 
         public object Convert (object obj) => Convert(obj as byte[]);
 
-        public async Task<object> ConvertAsync (object obj) => await ConvertAsync(obj as byte[]);
+        public async UniTask<object> ConvertAsync (object obj) => await ConvertAsync(obj as byte[]);
 
         private void DecodeMpeg (MpegFile mpegFile, AudioClip audioClip)
         {
@@ -66,11 +66,11 @@ namespace UnityCommon
             audioClip.SetData(samples, 0);
         }
 
-        private async Task DecodeMpegAsync (MpegFile mpegFile, AudioClip audioClip)
+        private async UniTask DecodeMpegAsync (MpegFile mpegFile, AudioClip audioClip)
         {
             var samplesCount = (int)mpegFile.SampleCount * mpegFile.Channels;
             var samples = new float[samplesCount];
-            await Task.Run(() => mpegFile.ReadSamples(samples, 0, samplesCount));
+            await UniTask.Run(() => mpegFile.ReadSamples(samples, 0, samplesCount));
             audioClip.SetData(samples, 0);
         }
 
@@ -89,14 +89,14 @@ namespace UnityCommon
             }
         }
 
-        private async Task DecodeMpegBufferedAsync (MpegFile mpegFile, AudioClip audioClip)
+        private async UniTask DecodeMpegBufferedAsync (MpegFile mpegFile, AudioClip audioClip)
         {
             var bufferLength = mpegFile.SampleRate;
             var samplesBuffer = new float[bufferLength];
             var sampleOffset = 0;
             while (mpegFile.Position < mpegFile.Length)
             {
-                var samplesRead = await Task.Run(() => mpegFile.ReadSamples(samplesBuffer, 0, bufferLength));
+                var samplesRead = await UniTask.Run(() => mpegFile.ReadSamples(samplesBuffer, 0, bufferLength));
                 if (samplesRead < bufferLength) Array.Resize(ref samplesBuffer, samplesRead);
                 audioClip.SetData(samplesBuffer, (sampleOffset / sizeof(float)) * mpegFile.Channels);
                 if (samplesRead < bufferLength) break;

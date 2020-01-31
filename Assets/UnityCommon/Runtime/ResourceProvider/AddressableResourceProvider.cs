@@ -2,8 +2,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using UnityEngine;
+using UniRx.Async;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.ResourceLocations;
 
@@ -17,8 +16,6 @@ namespace UnityCommon
         /// </summary>
         public readonly string AssetsLabel;
 
-        private static readonly WaitForEndOfFrame waitForEndOfFrame = new WaitForEndOfFrame();
-
         private List<IResourceLocation> locations;
 
         public AddressableResourceProvider (string assetsLabel = "UNITY_COMMON")
@@ -28,19 +25,19 @@ namespace UnityCommon
 
         public override bool SupportsType<T> () => true;
 
-        public override async Task<Resource<T>> LoadResourceAsync<T> (string path)
+        public override async UniTask<Resource<T>> LoadResourceAsync<T> (string path)
         {
             if (locations is null) locations = await LoadAllLocations();
             return await base.LoadResourceAsync<T>(path);
         }
 
-        public override async Task<IEnumerable<string>> LocateResourcesAsync<T> (string path)
+        public override async UniTask<IEnumerable<string>> LocateResourcesAsync<T> (string path)
         {
             if (locations is null) locations = await LoadAllLocations();
             return await base.LocateResourcesAsync<T>(path);
         }
 
-        public override async Task<IEnumerable<Folder>> LocateFoldersAsync (string path)
+        public override async UniTask<IEnumerable<Folder>> LocateFoldersAsync (string path)
         {
             if (locations is null) locations = await LoadAllLocations();
             return await base.LocateFoldersAsync(path);
@@ -68,11 +65,11 @@ namespace UnityCommon
             Addressables.Release(resource.Object);
         }
 
-        private async Task<List<IResourceLocation>> LoadAllLocations ()
+        private async UniTask<List<IResourceLocation>> LoadAllLocations ()
         {
             var task = Addressables.LoadResourceLocationsAsync(AssetsLabel);
             while (!task.IsDone) // When awaiting the method directly it fails on WebGL (they're using mutlithreaded Task fot GetAwaiter)
-                await waitForEndOfFrame;
+                await AsyncUtils.WaitEndOfFrame;
             var locations = task.Result;
             return locations?.ToList() ?? new List<IResourceLocation>();
         }
