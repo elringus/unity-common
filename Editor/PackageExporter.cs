@@ -251,7 +251,7 @@ namespace UnityCommon
 
                     var copyright = isImportedScript || string.IsNullOrEmpty(Copyright) ? string.Empty : "// " + Copyright;
                     if (!string.IsNullOrEmpty(copyright) && !isImportedScript)
-                        scriptText += copyright + "\r\n\r\n";
+                        scriptText += copyright + Environment.NewLine + Environment.NewLine;
 
                     scriptText += originalScriptText;
 
