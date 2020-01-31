@@ -144,7 +144,7 @@ namespace UnityCommon
         /// </summary>
         public virtual void ToggleVisibility ()
         {
-            SetVisibilityAsync(!Visible).WrapAsync();
+            SetVisibilityAsync(!Visible).Forget();
         }
 
         /// <summary>
@@ -153,7 +153,7 @@ namespace UnityCommon
         public virtual void Show ()
         {
             if (Visible) return;
-            SetVisibilityAsync(true).WrapAsync();
+            SetVisibilityAsync(true).Forget();
         }
 
         /// <summary>
@@ -162,7 +162,7 @@ namespace UnityCommon
         public virtual void Hide ()
         {
             if (!Visible) return;
-            SetVisibilityAsync(false).WrapAsync();
+            SetVisibilityAsync(false).Forget();
         }
 
         /// <summary>

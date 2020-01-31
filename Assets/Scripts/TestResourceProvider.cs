@@ -61,7 +61,7 @@ public class TestResourceProvider : MonoBehaviour
     private void TestEditor ()
     {
         provider = InitializeGoogleDriveResourceProvider(false);
-        TestEditorAsync().WrapAsync();
+        TestEditorAsync().Forget();
     }
 
     private async Task TestEditorAsync ()

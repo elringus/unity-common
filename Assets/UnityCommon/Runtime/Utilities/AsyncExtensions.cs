@@ -24,9 +24,9 @@ namespace UnityCommon
 
         private class CustomYieldInstructionRunner : CoroutineRunner
         {
-            private readonly CustomYieldInstruction yieldInstruction;
+            private readonly IEnumerator yieldInstruction;
 
-            public CustomYieldInstructionRunner (CustomYieldInstruction yieldInstruction, MonoBehaviour coroutineContainer = null)
+            public CustomYieldInstructionRunner (IEnumerator yieldInstruction, MonoBehaviour coroutineContainer = null)
                 : base(coroutineContainer) { this.yieldInstruction = yieldInstruction; }
 
             protected override IEnumerator CoroutineLoop ()
@@ -41,13 +41,12 @@ namespace UnityCommon
             return new YieldInstructionRunner(yieldInstruction, coroutineContainer).RunAsync().GetAwaiter();
         }
 
-        public static TaskAwaiter GetAwaiter (this YieldInstruction yieldInstruction) => GetAwaiter(yieldInstruction, null);
-
-        public static TaskAwaiter GetAwaiter<T> (this T yieldInstruction, MonoBehaviour coroutineContainer) 
-            where T : CustomYieldInstruction
+        public static TaskAwaiter GetAwaiter (this IEnumerator yieldInstruction, MonoBehaviour coroutineContainer) 
         {
             return new CustomYieldInstructionRunner(yieldInstruction, coroutineContainer).RunAsync().GetAwaiter();
         }
+
+        public static TaskAwaiter GetAwaiter (this YieldInstruction yieldInstruction) => GetAwaiter(yieldInstruction, null);
 
         public static TaskAwaiter GetAwaiter (this WaitUntil yieldInstruction) => GetAwaiter(yieldInstruction, null);
 
@@ -113,9 +112,9 @@ namespace UnityCommon
         }
 
         /// <summary>
-        /// Allows to properly execute async methods from sync methods without waiting for <see cref="Task"/>.
+        /// Allows to properly execute async methods from sync methods without waiting for <see cref="Task"/>, aka "fire and forget".
         /// Required to receive exceptions from the underlying async method (otherwise it will fail silently).
         /// </summary>
-        public static async void WrapAsync (this Task task) => await task;
+        public static async void Forget (this Task task) => await task;
     }
 }
