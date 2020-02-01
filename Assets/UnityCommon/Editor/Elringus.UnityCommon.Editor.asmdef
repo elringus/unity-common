@@ -1,7 +1,8 @@
 {
     "name": "Elringus.UnityCommon.Editor",
     "references": [
-        "GUID:87e2381f93a6a0348b03f5df7fdac208"
+        "GUID:87e2381f93a6a0348b03f5df7fdac208",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23"
     ],
     "includePlatforms": [
         "Editor"
@@ -9,9 +10,7 @@
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
-    "precompiledReferences": [
-        "UniTask.dll"
-    ],
+    "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [],
