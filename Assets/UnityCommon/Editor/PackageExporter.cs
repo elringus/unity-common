@@ -242,20 +242,20 @@ namespace UnityCommon
                 foreach (var path in unignoredPaths)
                 {
                     if (!path.EndsWith(".cs") && !path.EndsWith(".shader") && !path.EndsWith(".cginc")) continue;
+                    if (path.Contains("ThirdParty")) continue;
 
                     var fullpath = Application.dataPath.Replace("Assets", string.Empty) + path;
                     var originalScriptText = File.ReadAllText(fullpath, Encoding.UTF8);
 
                     string scriptText = string.Empty;
-                    var isImportedScript = path.Contains("ThirdParty");
 
-                    var copyright = isImportedScript || string.IsNullOrEmpty(Copyright) ? string.Empty : "// " + Copyright;
-                    if (!string.IsNullOrEmpty(copyright) && !isImportedScript)
+                    var copyright = string.IsNullOrEmpty(Copyright) ? string.Empty : "// " + Copyright;
+                    if (!string.IsNullOrEmpty(copyright))
                         scriptText += copyright + Environment.NewLine + Environment.NewLine;
 
                     scriptText += originalScriptText;
 
-                    if (!isImportedScript && !string.IsNullOrEmpty(OverrideNamespace))
+                    if (!string.IsNullOrEmpty(OverrideNamespace))
                         scriptText = scriptText.Replace($"namespace {PackageName}{Environment.NewLine}{{", $"namespace {OverrideNamespace}{Environment.NewLine}{{");
 
                     File.WriteAllText(fullpath, scriptText, Encoding.UTF8);
