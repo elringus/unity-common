@@ -7,9 +7,9 @@ namespace UnityCommon
     /// </summary>
     public interface IConverter
     {
-        object Convert (object obj);
+        object Convert (object obj, string name);
 
-        UniTask<object> ConvertAsync (object obj);
+        UniTask<object> ConvertAsync (object obj, string name);
     }
 
     /// <summary>
@@ -17,8 +17,8 @@ namespace UnityCommon
     /// </summary>
     public interface IConverter<TSource, TResult> : IConverter
     {
-        TResult Convert (TSource obj);
+        TResult Convert (TSource obj, string name);
 
-        UniTask<TResult> ConvertAsync (TSource obj);
+        UniTask<TResult> ConvertAsync (TSource obj, string name);
     }
 }

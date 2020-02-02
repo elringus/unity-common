@@ -75,7 +75,7 @@ namespace UnityCommon
 
             // In case we used native requests the resource will already be set, so no need to use converters.
             if (!ObjectUtils.IsValid(loadedObject))
-                loadedObject = await converter.ConvertAsync(rawData);
+                loadedObject = await converter.ConvertAsync(rawData, System.IO.Path.GetFileNameWithoutExtension(Path));
 
             var result = new Resource<TResource>(Path, loadedObject, Provider);
             SetResult(result);

@@ -14,29 +14,31 @@ namespace UnityCommon
             new RawDataRepresentation(".wav", "audio/wav")
         }; } }
 
-        public AudioClip Convert (byte[] obj)
+        public AudioClip Convert (byte[] obj, string name)
         {
             var floatArr = Pcm16ToFloatArray(obj);
 
             var audioClip = AudioClip.Create("Generated WAV Audio", floatArr.Length / 2, 2, 44100, false);
+            audioClip.name = name;
             audioClip.SetData(floatArr, 0);
 
             return audioClip;
         }
 
-        public async UniTask<AudioClip> ConvertAsync (byte[] obj)
+        public async UniTask<AudioClip> ConvertAsync (byte[] obj, string name)
         {
             var floatArr = await UniTask.Run(() => Pcm16ToFloatArray(obj));
 
             var audioClip = AudioClip.Create("Generated WAV Audio", floatArr.Length / 2, 2, 44100, false);
+            audioClip.name = name;
             audioClip.SetData(floatArr, 0);
 
             return audioClip;
         }
 
-        public object Convert (object obj) => Convert(obj as byte[]);
+        public object Convert (object obj, string name) => Convert(obj as byte[], name);
 
-        public async UniTask<object> ConvertAsync (object obj) => await ConvertAsync(obj as byte[]);
+        public async UniTask<object> ConvertAsync (object obj, string name) => await ConvertAsync(obj as byte[], name);
 
         private static float[] Pcm16ToFloatArray (byte[] input)
         {

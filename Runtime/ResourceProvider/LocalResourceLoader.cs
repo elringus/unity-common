@@ -47,7 +47,7 @@ namespace UnityCommon
                 return;
             }
 
-            var obj = await converter.ConvertAsync(rawData);
+            var obj = await converter.ConvertAsync(rawData, System.IO.Path.GetFileNameWithoutExtension(Path));
             var result = new Resource<TResource>(Path, obj, Provider);
 
             SetResult(result);

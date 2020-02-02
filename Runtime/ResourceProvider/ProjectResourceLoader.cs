@@ -23,7 +23,8 @@ namespace UnityCommon
 
             var resourceType = redirector != null ? redirector.RedirectType : typeof(TResource);
             var asset = await Resources.LoadAsync(Path, resourceType);
-            var obj = redirector is null ? asset as TResource : await redirector.ToSourceAsync<TResource>(asset);
+            var assetName = System.IO.Path.GetFileNameWithoutExtension(Path);
+            var obj = redirector is null ? asset as TResource : await redirector.ToSourceAsync<TResource>(asset, assetName);
 
             var result = new Resource<TResource>(Path, obj, Provider);
             SetResult(result);

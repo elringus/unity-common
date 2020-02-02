@@ -13,21 +13,18 @@ namespace UnityCommon
             new RawDataRepresentation(".jpg", "image/jpeg")
         }; } }
 
-        public Texture2D Convert (byte[] obj)
+        public Texture2D Convert (byte[] obj, string name)
         {
             var texture = new Texture2D(2, 2);
+            texture.name = name;
             texture.LoadImage(obj, true);
             return texture;
         }
 
-        public UniTask<Texture2D> ConvertAsync (byte[] obj)
-        {
-            var texture = Convert(obj);
-            return UniTask.FromResult(texture);
-        }
+        public UniTask<Texture2D> ConvertAsync (byte[] obj, string name) => UniTask.FromResult(Convert(obj, name));
 
-        public object Convert (object obj) => Convert(obj as byte[]);
+        public object Convert (object obj, string name) => Convert(obj as byte[], name);
 
-        public async UniTask<object> ConvertAsync (object obj) => await ConvertAsync(obj as byte[]);
+        public async UniTask<object> ConvertAsync (object obj, string name) => await ConvertAsync(obj as byte[], name);
     }
 }
