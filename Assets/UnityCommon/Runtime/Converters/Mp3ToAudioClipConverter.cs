@@ -16,10 +16,11 @@ namespace UnityCommon
             new RawDataRepresentation(".mp3", "audio/mp3")      //... but Chrome uses this one when uploading an mp3.
         }; } }
 
-        public AudioClip Convert (byte[] obj)
+        public AudioClip Convert (byte[] obj, string name)
         {
             var mpegFile = new MpegFile(new MemoryStream(obj));
             var audioClip = AudioClip.Create("Generated MP3 Audio", (int)mpegFile.SampleCount, mpegFile.Channels, mpegFile.SampleRate, false);
+            audioClip.name = name;
 
             // AudioClip.SetData with offset is not supported on WebGL, thus we can't use buffering while decoding.
             // Issue: https://trello.com/c/iWL6eBrV/82-webgl-audio-resources-limitation
@@ -34,12 +35,13 @@ namespace UnityCommon
             return audioClip;
         }
 
-        public async UniTask<AudioClip> ConvertAsync (byte[] obj)
+        public async UniTask<AudioClip> ConvertAsync (byte[] obj, string name)
         {
             await UniTask.Yield();
 
             var mpegFile = new MpegFile(new MemoryStream(obj));
             var audioClip = AudioClip.Create("Generated MP3 Audio", (int)mpegFile.SampleCount, mpegFile.Channels, mpegFile.SampleRate, false);
+            audioClip.name = name;
 
             // AudioClip.SetData with offset is not supported on WebGL, thus we can't use buffering while decoding.
             // Issue: https://trello.com/c/iWL6eBrV/82-webgl-audio-resources-limitation
@@ -54,9 +56,9 @@ namespace UnityCommon
             return audioClip;
         }
 
-        public object Convert (object obj) => Convert(obj as byte[]);
+        public object Convert (object obj, string name) => Convert(obj as byte[], name);
 
-        public async UniTask<object> ConvertAsync (object obj) => await ConvertAsync(obj as byte[]);
+        public async UniTask<object> ConvertAsync (object obj, string name) => await ConvertAsync(obj as byte[], name);
 
         private void DecodeMpeg (MpegFile mpegFile, AudioClip audioClip)
         {

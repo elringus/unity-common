@@ -23,14 +23,14 @@ namespace UnityCommon
                 RedirectToSourceConverter = redirectToSourceConverter;
             }
 
-            public async UniTask<TSource> ToSourceAsync<TSource> (object obj)
+            public async UniTask<TSource> ToSourceAsync<TSource> (object obj, string name)
             {
-                return (TSource)await RedirectToSourceConverter.ConvertAsync(obj);
+                return (TSource)await RedirectToSourceConverter.ConvertAsync(obj, name);
             }
 
-            public TSource ToSource<TSource> (object obj)
+            public TSource ToSource<TSource> (object obj, string name)
             {
-                return (TSource)RedirectToSourceConverter.Convert(obj);
+                return (TSource)RedirectToSourceConverter.Convert(obj, name);
             }
         }
 

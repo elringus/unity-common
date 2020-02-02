@@ -12,12 +12,17 @@ namespace UnityCommon
 
         public string ExportMimeType { get { return "text/plain"; } }
 
-        public TextAsset Convert (byte[] obj) => new TextAsset(Encoding.UTF8.GetString(obj));
+        public TextAsset Convert (byte[] obj, string name)
+        {
+            var textAsset = new TextAsset(Encoding.UTF8.GetString(obj));
+            textAsset.name = name;
+            return textAsset;
+        }
 
-        public UniTask<TextAsset> ConvertAsync (byte[] obj) => UniTask.FromResult(new TextAsset(Encoding.UTF8.GetString(obj)));
+        public UniTask<TextAsset> ConvertAsync (byte[] obj, string name) => UniTask.FromResult(Convert(obj, name));
 
-        public object Convert (object obj) => Convert(obj as byte[]);
+        public object Convert (object obj, string name) => Convert(obj as byte[], name);
 
-        public async UniTask<object> ConvertAsync (object obj) => await ConvertAsync(obj as byte[]);
+        public async UniTask<object> ConvertAsync (object obj, string name) => await ConvertAsync(obj as byte[], name);
     }
 }
