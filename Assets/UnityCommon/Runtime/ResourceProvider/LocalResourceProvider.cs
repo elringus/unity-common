@@ -16,14 +16,17 @@ namespace UnityCommon
         /// - %DATA% - <see cref="Application.dataPath"/>
         /// - %PDATA% - <see cref="Application.persistentDataPath"/>
         /// - %STREAM% - <see cref="Application.streamingAssetsPath"/>
+        /// - %USER% - <see cref="Environment.SpecialFolder.UserProfile"/>
         /// </param>
         public LocalResourceProvider (string rootPath)
         {
-            rootPath = rootPath.Replace("\\", "/");
             if (rootPath.StartsWith("%DATA%")) RootPath = string.Concat(Application.dataPath, rootPath.GetAfterFirst("%DATA%"));
             else if (rootPath.StartsWith("%PDATA%")) RootPath = string.Concat(Application.persistentDataPath, rootPath.GetAfterFirst("%PDATA%"));
             else if (rootPath.StartsWith("%STREAM%")) RootPath = string.Concat(Application.streamingAssetsPath, rootPath.GetAfterFirst("%STREAM%"));
+            else if (rootPath.StartsWith("%USER%")) RootPath = string.Concat(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), rootPath.GetAfterFirst("%USER%"));
             else RootPath = rootPath; // Absolute path.
+
+            RootPath = RootPath.Replace("\\", "/");
         }
 
         public override bool SupportsType<T> () => converters.ContainsKey(typeof(T));
