@@ -29,8 +29,8 @@ public class TestResourceProvider : MonoBehaviour
     {
         //provider = InitializeProjectResourceProvider();
         //provider = InitializeEditorResourceProvider();
-        //provider = InitializeLocalResourceProvider();
-        provider = InitializeGoogleDriveResourceProvider(true);
+        provider = InitializeLocalResourceProvider();
+        //provider = InitializeGoogleDriveResourceProvider(true);
         //provider = InitializeAddresableResourceProvider();
     }
 
@@ -104,7 +104,7 @@ public class TestResourceProvider : MonoBehaviour
 
     private static LocalResourceProvider InitializeLocalResourceProvider ()
     {
-        var provider = new LocalResourceProvider("Resources");
+        var provider = new LocalResourceProvider("%DATA%/Resources");
 
         provider.AddConverter(new JpgOrPngToSpriteConverter());
         provider.AddConverter(new JpgOrPngToTextureConverter());
