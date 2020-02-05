@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using UniRx.Async;
-using UnityEngine;
 
 namespace UnityCommon
 {
@@ -32,11 +31,9 @@ namespace UnityCommon
             var locatedResources = new List<string>();
 
             // 1. Resolving parent folder.
-            var folderPath = Application.dataPath;
-            if (!string.IsNullOrEmpty(rootPath) && !string.IsNullOrEmpty(resourcesPath))
-                folderPath += string.Concat('/', rootPath, '/', resourcesPath);
-            else if (string.IsNullOrEmpty(rootPath)) folderPath += string.Concat('/', resourcesPath);
-            else folderPath += string.Concat('/', rootPath);
+            var folderPath = rootPath;
+            if (!string.IsNullOrEmpty(resourcesPath))
+                folderPath += string.Concat('/', resourcesPath);
             var parendFolder = new DirectoryInfo(folderPath);
             if (!parendFolder.Exists) return locatedResources;
 

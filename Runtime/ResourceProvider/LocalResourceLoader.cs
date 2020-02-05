@@ -27,8 +27,7 @@ namespace UnityCommon
         {
             var startTime = Time.time;
 
-            var filePath = string.IsNullOrEmpty(RootPath) ? Path : string.Concat(RootPath, '/', Path);
-            filePath = string.Concat(Application.dataPath, "/", filePath);
+            var filePath = string.Concat(RootPath, '/', Path);
 
             foreach (var representation in converter.Representations)
             {

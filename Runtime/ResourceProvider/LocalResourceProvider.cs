@@ -6,16 +6,24 @@ namespace UnityCommon
 {
     public class LocalResourceProvider : ResourceProvider
     {
-        /// <summary>
-        /// Path to the folder where resources are located (realtive to <see cref="Application.dataPath"/>).
-        /// </summary>
         public readonly string RootPath;
 
         private readonly Dictionary<Type, IConverter> converters = new Dictionary<Type, IConverter>();
 
+        /// <param name="rootPath">
+        /// An absolute path to the folder where the resources are located,
+        /// or a relative path with one of the available origins:
+        /// - %DATA% - <see cref="Application.dataPath"/>
+        /// - %PDATA% - <see cref="Application.persistentDataPath"/>
+        /// - %STREAM% - <see cref="Application.streamingAssetsPath"/>
+        /// </param>
         public LocalResourceProvider (string rootPath)
         {
-            RootPath = rootPath;
+            rootPath = rootPath.Replace("\\", "/");
+            if (rootPath.StartsWith("%DATA%")) RootPath = string.Concat(Application.dataPath, rootPath.GetAfterFirst("%DATA%"));
+            else if (rootPath.StartsWith("%PDATA%")) RootPath = string.Concat(Application.persistentDataPath, rootPath.GetAfterFirst("%PDATA%"));
+            else if (rootPath.StartsWith("%STREAM%")) RootPath = string.Concat(Application.streamingAssetsPath, rootPath.GetAfterFirst("%STREAM%"));
+            else RootPath = rootPath; // Absolute path.
         }
 
         public override bool SupportsType<T> () => converters.ContainsKey(typeof(T));

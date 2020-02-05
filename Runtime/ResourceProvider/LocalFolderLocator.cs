@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using UniRx.Async;
-using UnityEngine;
 
 namespace UnityCommon
 {
@@ -26,11 +25,9 @@ namespace UnityCommon
         {
             var locatedFolders = new List<Folder>();
 
-            var folderPath = Application.dataPath;
-            if (!string.IsNullOrEmpty(rootPath) && !string.IsNullOrEmpty(resourcesPath))
-                folderPath += string.Concat('/', rootPath, '/', resourcesPath);
-            else if (string.IsNullOrEmpty(rootPath)) folderPath += string.Concat('/', resourcesPath);
-            else folderPath += string.Concat('/', rootPath);
+            var folderPath = rootPath;
+            if (!string.IsNullOrEmpty(resourcesPath))
+                folderPath += string.Concat('/', resourcesPath);
             var parendFolder = new DirectoryInfo(folderPath);
             if (!parendFolder.Exists) return locatedFolders;
 
