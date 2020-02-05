@@ -16,14 +16,23 @@ namespace UnityCommon
         /// - %DATA% - <see cref="Application.dataPath"/>
         /// - %PDATA% - <see cref="Application.persistentDataPath"/>
         /// - %STREAM% - <see cref="Application.streamingAssetsPath"/>
-        /// - %USER% - <see cref="Environment.SpecialFolder.UserProfile"/>
+        /// - %SPECIAL{F}%, where F is a value from <see cref="Environment.SpecialFolder"/> - <see cref="Environment.GetFolderPath(Environment.SpecialFolder)"/>
         /// </param>
         public LocalResourceProvider (string rootPath)
         {
             if (rootPath.StartsWith("%DATA%")) RootPath = string.Concat(Application.dataPath, rootPath.GetAfterFirst("%DATA%"));
             else if (rootPath.StartsWith("%PDATA%")) RootPath = string.Concat(Application.persistentDataPath, rootPath.GetAfterFirst("%PDATA%"));
             else if (rootPath.StartsWith("%STREAM%")) RootPath = string.Concat(Application.streamingAssetsPath, rootPath.GetAfterFirst("%STREAM%"));
-            else if (rootPath.StartsWith("%USER%")) RootPath = string.Concat(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), rootPath.GetAfterFirst("%USER%"));
+            else if (rootPath.StartsWith("%SPECIAL{"))
+            {
+                var specialFolderStr = rootPath.GetBetween("%SPECIAL{", "}%");
+                if (!Enum.TryParse<Environment.SpecialFolder>(specialFolderStr, true, out var specialFolder))
+                {
+                    Debug.LogError($"Failed to parse `{rootPath}` special folder path for local resource provider root.");
+                    return;
+                }
+                RootPath = string.Concat(Environment.GetFolderPath(specialFolder), rootPath.GetAfterFirst("}%"));
+            }
             else RootPath = rootPath; // Absolute path.
 
             RootPath = RootPath.Replace("\\", "/");
