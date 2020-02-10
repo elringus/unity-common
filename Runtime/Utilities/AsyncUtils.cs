@@ -4,7 +4,7 @@ namespace UnityCommon
 {
     public static class AsyncUtils
     {
-        public static YieldAwaitable WaitEndOfFrame => UniTask.Yield();
+        public static YieldAwaitable WaitEndOfFrame => UniTask.Yield(PlayerLoopTiming.PostLateUpdate);
 
         public static UniTask.Awaiter GetAwaiter (this UniTask? task) => task.HasValue ? task.Value.GetAwaiter() : UniTask.CompletedTask.GetAwaiter();
 
