@@ -78,7 +78,7 @@ namespace UnityCommon
         [Tooltip("Invoked when visibility of the UI is changed.")]
         [SerializeField] private VisibilityChangedEvent onVisibilityChanged = default;
 
-        private Tweener<FloatTween> fadeTweener;
+        private readonly Tweener<FloatTween> fadeTweener = new Tweener<FloatTween>();
         private RectTransform rectTransform;
         private Canvas topmostCanvasCache;
         private bool visible;
@@ -257,7 +257,6 @@ namespace UnityCommon
         {
             base.Awake();
 
-            fadeTweener = new Tweener<FloatTween>();
             CanvasGroup = GetComponent<CanvasGroup>();
 
             if (CanvasGroup && disableInteraction)
