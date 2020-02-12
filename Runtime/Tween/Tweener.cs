@@ -96,7 +96,7 @@ namespace UnityCommon
 
             Running = true;
             elapsedTime = 0f;
-            lastRunGuid = new Guid();
+            lastRunGuid = Guid.NewGuid();
         }
 
         private void PeformTween ()

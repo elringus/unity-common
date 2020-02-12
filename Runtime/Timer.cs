@@ -55,7 +55,7 @@ namespace UnityCommon
 
         protected virtual async UniTaskVoid WaitAndComplete (CancellationToken cancellationToken = default)
         {
-            lastRunGuid = new Guid();
+            lastRunGuid = Guid.NewGuid();
             var currentRunGuid = lastRunGuid;
 
             await UniTask.Delay(TimeSpan.FromSeconds(Duration), TimeScaleIgnored, cancellationToken: cancellationToken);
@@ -68,7 +68,7 @@ namespace UnityCommon
 
         protected virtual async UniTaskVoid WaitAndLoop (CancellationToken cancellationToken = default)
         {
-            lastRunGuid = new Guid();
+            lastRunGuid = Guid.NewGuid();
             var currentRunGuid = lastRunGuid;
 
             while (true)
