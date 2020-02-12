@@ -60,9 +60,9 @@ namespace UnityCommon
 
         protected async UniTask TweenAsync (CancellationToken cancellationToken = default)
         {
+            PrepareTween();
             if (TweenValue.TweenDuration <= 0f) { CompleteInstantly(); return; }
 
-            PrepareTween();
             var currentRunGuid = lastRunGuid;
             while (!cancellationToken.IsCancellationRequested && elapsedTime <= TweenValue.TweenDuration)
             {
@@ -77,9 +77,9 @@ namespace UnityCommon
         // Remember to keep both methods identical.
         protected async UniTaskVoid TweenAsyncAndForget (CancellationToken cancellationToken = default)
         {
+            PrepareTween();
             if (TweenValue.TweenDuration <= 0f) { CompleteInstantly(); return; }
 
-            PrepareTween();
             var currentRunGuid = lastRunGuid;
             while (!cancellationToken.IsCancellationRequested && elapsedTime <= TweenValue.TweenDuration)
             {
