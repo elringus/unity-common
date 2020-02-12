@@ -36,7 +36,7 @@ namespace UnityCommon
         {
             base.Awake();
 
-            fadeTweener = new Tweener<FloatTween>(this);
+            fadeTweener = new Tweener<FloatTween>();
         }
 
         protected override void Start ()

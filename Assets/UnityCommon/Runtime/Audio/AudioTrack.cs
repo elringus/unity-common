@@ -72,8 +72,8 @@ namespace UnityCommon
         private readonly Tweener<FloatTween> volumeTweener;
         private readonly Timer stopTimer;
 
-        public AudioTrack (AudioClip clip, AudioSource source, MonoBehaviour behaviourContainer = null,
-            float volume = 1f, bool loop = false, AudioMixerGroup mixerGroup = null, AudioClip introClip = null)
+        public AudioTrack (AudioClip clip, AudioSource source, float volume = 1f, bool loop = false, 
+            AudioMixerGroup mixerGroup = null, AudioClip introClip = null)
         {
             Clip = clip;
             IntroClip = introClip;
@@ -83,8 +83,8 @@ namespace UnityCommon
             Source.loop = loop;
             Source.outputAudioMixerGroup = mixerGroup;
 
-            volumeTweener = new Tweener<FloatTween>(behaviourContainer);
-            stopTimer = new Timer(coroutineContainer: behaviourContainer, onCompleted: InvokeOnStop);
+            volumeTweener = new Tweener<FloatTween>();
+            stopTimer = new Timer(onCompleted: InvokeOnStop);
         }
 
         public void Play ()
