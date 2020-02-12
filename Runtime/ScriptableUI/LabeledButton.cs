@@ -23,7 +23,7 @@ namespace UnityCommon
         {
             base.Awake();
 
-            tintTweener = new Tweener<ColorTween>(this);
+            tintTweener = new Tweener<ColorTween>();
         }
 
         #if UNITY_EDITOR

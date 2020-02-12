@@ -1,70 +1,83 @@
 ﻿using System;
 using System.Threading;
-using UnityEngine;
+using UniRx.Async;
 
 namespace UnityCommon
 {
-    public class Timer : CoroutineRunner
+    public class Timer
     {
-        public event Action OnLoop;
-
-        public override bool CanInstantlyComplete => true;
+        public bool Running { get; private set; }
         public bool Loop { get; private set; }
         public bool TimeScaleIgnored { get; private set; }
         public float Duration { get; private set; }
-        public float ElapsedTime { get; private set; }
+
+        private readonly Action onLoop;
+        private readonly Action onCompleted;
+        private Guid lastRunGuid;
 
         public Timer (float duration = 0f, bool loop = false, bool ignoreTimeScale = false,
-            MonoBehaviour coroutineContainer = null, Action onCompleted = null, Action onLoop = null) : base(coroutineContainer)
+            Action onCompleted = null, Action onLoop = null)
         {
             Duration = duration;
             Loop = loop;
             TimeScaleIgnored = ignoreTimeScale;
 
-            if (onCompleted != null) OnCompleted += onCompleted;
-            if (onLoop != null) OnLoop += onLoop;
+            this.onLoop += onLoop;
+            this.onCompleted += onCompleted;
         }
 
         public void Run (float duration, bool loop = false, bool ignoreTimeScale = false, CancellationToken cancellationToken = default)
         {
-            ElapsedTime = 0f;
+            if (Running) CompleteInstantly();
+
             Duration = duration;
             Loop = loop;
             TimeScaleIgnored = ignoreTimeScale;
+            Running = true;
 
-            base.Run(cancellationToken);
+            if (Loop) WaitAndLoop(cancellationToken).Forget();
+            else WaitAndComplete(cancellationToken).Forget();
         }
 
-        public override void Run (CancellationToken cancellationToken = default) => Run(Duration, Loop, TimeScaleIgnored, cancellationToken);
+        public void Run (CancellationToken cancellationToken = default) => Run(Duration, Loop, TimeScaleIgnored, cancellationToken);
 
-        public override void Stop ()
+        public void Stop ()
         {
-            base.Stop();
-
-            Loop = false;
+            lastRunGuid = Guid.Empty;
+            Running = false;
         }
 
-        protected override bool LoopCondition ()
+        public void CompleteInstantly ()
         {
-            return !CancellationToken.IsCancellationRequested && ElapsedTime < Duration;
+            Stop();
+            onCompleted?.Invoke();
         }
 
-        protected override void OnCoroutineTick ()
+        protected virtual async UniTaskVoid WaitAndComplete (CancellationToken cancellationToken = default)
         {
-            base.OnCoroutineTick();
+            lastRunGuid = new Guid();
+            var currentRunGuid = lastRunGuid;
 
-            ElapsedTime += TimeScaleIgnored ? Time.unscaledDeltaTime : Time.deltaTime;
+            await UniTask.Delay(TimeSpan.FromSeconds(Duration), TimeScaleIgnored, cancellationToken: cancellationToken);
+            if (cancellationToken.IsCancellationRequested) return;
+            if (lastRunGuid != currentRunGuid) return; // The timer was completed instantly or stopped.
+
+            Running = false;
+            onCompleted?.Invoke();
         }
 
-        protected override void HandleOnCompleted ()
+        protected virtual async UniTaskVoid WaitAndLoop (CancellationToken cancellationToken = default)
         {
-            if (Loop)
+            lastRunGuid = new Guid();
+            var currentRunGuid = lastRunGuid;
+
+            while (true)
             {
-                OnLoop.SafeInvoke();
-                base.Stop();
-                Run();
+                await UniTask.Delay(TimeSpan.FromSeconds(Duration), TimeScaleIgnored, cancellationToken: cancellationToken);
+                if (cancellationToken.IsCancellationRequested) return;
+                if (lastRunGuid != currentRunGuid) return; // The timer was stopped.
+                onLoop?.Invoke();
             }
-            else base.HandleOnCompleted();
         }
     }
 }

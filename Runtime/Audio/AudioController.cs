@@ -23,7 +23,7 @@ namespace UnityCommon
 
         private void Awake ()
         {
-            listenerVolumeTweener = new Tweener<FloatTween>(this);
+            listenerVolumeTweener = new Tweener<FloatTween>();
             FindOrAddListener();
         }
 
@@ -63,7 +63,7 @@ namespace UnityCommon
             if (audioSource && IsOwnedByController(audioSource)) audioSource = null;
             if (!audioSource) audioSource = GetPooledSource();
 
-            var track = new AudioTrack(clip, audioSource, this, volume, loop, mixerGroup, introClip);
+            var track = new AudioTrack(clip, audioSource, volume, loop, mixerGroup, introClip);
             audioTracks.Add(clip, track);
             track.Play();
         }
@@ -80,7 +80,7 @@ namespace UnityCommon
             if (audioSource && IsOwnedByController(audioSource)) audioSource = null;
             if (!audioSource) audioSource = GetPooledSource();
 
-            var track = new AudioTrack(clip, audioSource, this, volume, loop, mixerGroup, introClip);
+            var track = new AudioTrack(clip, audioSource, volume, loop, mixerGroup, introClip);
             audioTracks.Add(clip, track);
             await track.PlayAsync(fadeInTime, cancellationToken);
         }
