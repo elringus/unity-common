@@ -35,7 +35,7 @@ namespace UnityCommon
             Run(cancellationToken);
         }
 
-        public void Run (CancellationToken cancellationToken = default) => TweenAsync(cancellationToken).Forget();
+        public void Run (CancellationToken cancellationToken = default) => TweenAsyncAndForget(cancellationToken).Forget();
 
         public UniTask RunAsync (TTweenValue tweenValue, CancellationToken cancellationToken = default)
         {
@@ -43,7 +43,7 @@ namespace UnityCommon
             return RunAsync(cancellationToken);
         }
 
-        public async UniTask RunAsync (CancellationToken cancellationToken = default) => await TweenAsync(cancellationToken);
+        public UniTask RunAsync (CancellationToken cancellationToken = default) => TweenAsync(cancellationToken);
 
         public void Stop ()
         {
@@ -58,7 +58,39 @@ namespace UnityCommon
             onCompleted?.Invoke();
         }
 
-        protected async UniTaskVoid TweenAsync (CancellationToken cancellationToken = default)
+        protected async UniTask TweenAsync (CancellationToken cancellationToken = default)
+        {
+            var currentRunGuid = PrepareTween();
+            if (currentRunGuid == Guid.Empty) return;
+
+            while (!cancellationToken.IsCancellationRequested && elapsedTime <= TweenValue.TweenDuration)
+            {
+                PeformTween();
+                await AsyncUtils.WaitEndOfFrame;
+                if (lastRunGuid != currentRunGuid) return; // The tweener was completed instantly or stopped.
+            }
+
+            FinishTween();
+        }
+
+        // Required to prevent garbage when await is not required (fire and forget).
+        // Remember to keep both methods identical.
+        protected async UniTaskVoid TweenAsyncAndForget (CancellationToken cancellationToken = default)
+        {
+            var currentRunGuid = PrepareTween();
+            if (currentRunGuid == Guid.Empty) return;
+
+            while (!cancellationToken.IsCancellationRequested && elapsedTime <= TweenValue.TweenDuration)
+            {
+                PeformTween();
+                await AsyncUtils.WaitEndOfFrame;
+                if (lastRunGuid != currentRunGuid) return; // The tweener was completed instantly or stopped.
+            }
+
+            FinishTween();
+        }
+
+        private Guid PrepareTween ()
         {
             if (Running) CompleteInstantly();
 
@@ -70,18 +102,21 @@ namespace UnityCommon
             if (TweenValue.TweenDuration <= 0f)
             {
                 CompleteInstantly();
-                return;
+                return Guid.Empty;
             }
 
-            while (!cancellationToken.IsCancellationRequested && elapsedTime <= TweenValue.TweenDuration)
-            {
-                elapsedTime += TweenValue.TimeScaleIgnored ? Time.unscaledDeltaTime : Time.deltaTime;
-                var tweenPercent = Mathf.Clamp01(elapsedTime / TweenValue.TweenDuration);
-                TweenValue.TweenValue(tweenPercent);
-                await AsyncUtils.WaitEndOfFrame;
-                if (lastRunGuid != currentRunGuid) return; // The tweener was completed instantly or stopped.
-            }
+            return currentRunGuid;
+        }
 
+        private void PeformTween ()
+        {
+            elapsedTime += TweenValue.TimeScaleIgnored ? Time.unscaledDeltaTime : Time.deltaTime;
+            var tweenPercent = Mathf.Clamp01(elapsedTime / TweenValue.TweenDuration);
+            TweenValue.TweenValue(tweenPercent);
+        }
+
+        private void FinishTween ()
+        {
             Running = false;
             onCompleted?.Invoke();
         }
