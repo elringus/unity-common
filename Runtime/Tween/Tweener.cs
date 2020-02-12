@@ -18,12 +18,12 @@ namespace UnityCommon
         private float elapsedTime;
         private Guid lastRunGuid;
 
-        public Tweener (Action onCompleted = null) 
+        public Tweener (Action onCompleted = null)
         {
             this.onCompleted = onCompleted;
         }
 
-        public Tweener (TTweenValue tweenValue, Action onCompleted = null) 
+        public Tweener (TTweenValue tweenValue, Action onCompleted = null)
             : this(onCompleted)
         {
             TweenValue = tweenValue;
@@ -60,16 +60,16 @@ namespace UnityCommon
 
         protected async UniTask TweenAsync (CancellationToken cancellationToken = default)
         {
-            var currentRunGuid = PrepareTween();
-            if (currentRunGuid == Guid.Empty) return;
+            if (TweenValue.TweenDuration <= 0f) { CompleteInstantly(); return; }
 
+            PrepareTween();
+            var currentRunGuid = lastRunGuid;
             while (!cancellationToken.IsCancellationRequested && elapsedTime <= TweenValue.TweenDuration)
             {
                 PeformTween();
                 await AsyncUtils.WaitEndOfFrame;
                 if (lastRunGuid != currentRunGuid) return; // The tweener was completed instantly or stopped.
             }
-
             FinishTween();
         }
 
@@ -77,35 +77,26 @@ namespace UnityCommon
         // Remember to keep both methods identical.
         protected async UniTaskVoid TweenAsyncAndForget (CancellationToken cancellationToken = default)
         {
-            var currentRunGuid = PrepareTween();
-            if (currentRunGuid == Guid.Empty) return;
+            if (TweenValue.TweenDuration <= 0f) { CompleteInstantly(); return; }
 
+            PrepareTween();
+            var currentRunGuid = lastRunGuid;
             while (!cancellationToken.IsCancellationRequested && elapsedTime <= TweenValue.TweenDuration)
             {
                 PeformTween();
                 await AsyncUtils.WaitEndOfFrame;
                 if (lastRunGuid != currentRunGuid) return; // The tweener was completed instantly or stopped.
             }
-
             FinishTween();
         }
 
-        private Guid PrepareTween ()
+        private void PrepareTween ()
         {
             if (Running) CompleteInstantly();
 
             Running = true;
-            lastRunGuid = new Guid();
-            var currentRunGuid = lastRunGuid;
             elapsedTime = 0f;
-
-            if (TweenValue.TweenDuration <= 0f)
-            {
-                CompleteInstantly();
-                return Guid.Empty;
-            }
-
-            return currentRunGuid;
+            lastRunGuid = new Guid();
         }
 
         private void PeformTween ()
