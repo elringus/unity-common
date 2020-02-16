@@ -152,7 +152,6 @@ namespace UnityCommon
         /// </summary>
         public virtual void Show ()
         {
-            if (Visible) return;
             SetVisibilityAsync(true).Forget();
         }
 
@@ -161,7 +160,6 @@ namespace UnityCommon
         /// </summary>
         public virtual void Hide ()
         {
-            if (!Visible) return;
             SetVisibilityAsync(false).Forget();
         }
 
