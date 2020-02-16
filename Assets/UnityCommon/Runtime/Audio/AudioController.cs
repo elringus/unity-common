@@ -114,11 +114,6 @@ namespace UnityCommon
             return audioTracks.ContainsKey(clip) ? audioTracks[clip] : null;
         }
 
-        public HashSet<AudioTrack> GetTracksByClipName (string clipName)
-        {
-            return new HashSet<AudioTrack>(audioTracks.Values.Where(track => track.Name == clipName));
-        }
-
         private AudioListener FindOrAddListener ()
         {
             listenerCache = FindObjectOfType<AudioListener>();
