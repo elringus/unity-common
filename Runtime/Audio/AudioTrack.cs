@@ -21,10 +21,6 @@ namespace UnityCommon
         event Action OnStop;
 
         /// <summary>
-        /// Name of the audio track.
-        /// </summary>
-        string Name { get; }
-        /// <summary>
         /// Whether the track is currently playing.
         /// </summary>
         bool Playing { get; }
@@ -59,7 +55,6 @@ namespace UnityCommon
         public event Action OnPlay;
         public event Action OnStop;
 
-        public string Name => Clip.name;
         public AudioClip Clip { get; private set; }
         public AudioClip IntroClip { get; private set; }
         public AudioSource Source { get; private set; }
