@@ -41,7 +41,7 @@ namespace UnityCommon
             if (listenerVolumeTweener.Running)
                 listenerVolumeTweener.CompleteInstantly();
 
-            var tween = new FloatTween(Volume, volume, time, value => Volume = value, ignoreTimeScale: true);
+            var tween = new FloatTween(Volume, volume, time, value => Volume = value, ignoreTimeScale: true, target: this);
             listenerVolumeTweener.Run(tween);
         }
 
