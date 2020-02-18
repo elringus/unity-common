@@ -8,30 +8,33 @@ namespace UnityCommon
     /// </summary>
     public enum ColorTweenMode { All, RGB, Alpha }
 
-    public struct ColorTween : ITweenValue
+    public readonly struct ColorTween : ITweenValue
     {
-        public event Action<Color> OnColorTween;
-
-        public Color StartColor { get; set; }
-        public Color TargetColor { get; set; }
-        public ColorTweenMode TweenMode { get; set; }
         public EasingType EasingType { get; }
-        public float TweenDuration { get; set; }
-        public bool TimeScaleIgnored { get; set; }
-        public bool TargetValid => OnColorTween != null;
+        public float TweenDuration { get; }
+        public bool TimeScaleIgnored { get; }
+        public bool TargetValid => onTween != null && (!targetProvided || target);
 
+        private readonly Color startColor;
+        private readonly Color targetColor;
+        private readonly ColorTweenMode tweenMode;
+        private readonly Action<Color> onTween;
         private readonly EasingFunction easingFunction;
+        private readonly UnityEngine.Object target;
+        private readonly bool targetProvided;
 
-        public ColorTween (Color from, Color to, ColorTweenMode mode, float time, Action<Color> onTween, bool ignoreTimeScale = false, EasingType easingType = default)
+        public ColorTween (Color from, Color to, ColorTweenMode mode, float time, Action<Color> onTween, 
+            bool ignoreTimeScale = false, EasingType easingType = default, UnityEngine.Object target = default)
         {
-            StartColor = from;
-            TargetColor = to;
-            TweenMode = mode;
+            startColor = from;
+            targetColor = to;
+            tweenMode = mode;
             TweenDuration = time;
             EasingType = easingType;
             TimeScaleIgnored = ignoreTimeScale;
-            OnColorTween = onTween;
+            this.onTween = onTween;
 
+            targetProvided = this.target = target;
             easingFunction = EasingType.GetEasingFunction();
         }
 
@@ -40,13 +43,12 @@ namespace UnityCommon
             if (!TargetValid) return;
 
             var newColor = default(Color);
-            newColor.r = TweenMode == ColorTweenMode.Alpha ? StartColor.r : easingFunction(StartColor.r, TargetColor.r, tweenPercent);
-            newColor.g = TweenMode == ColorTweenMode.Alpha ? StartColor.g : easingFunction(StartColor.g, TargetColor.g, tweenPercent);
-            newColor.b = TweenMode == ColorTweenMode.Alpha ? StartColor.b : easingFunction(StartColor.b, TargetColor.b, tweenPercent);
-            newColor.a = TweenMode == ColorTweenMode.RGB ? StartColor.a : easingFunction(StartColor.a, TargetColor.a, tweenPercent);
+            newColor.r = tweenMode == ColorTweenMode.Alpha ? startColor.r : easingFunction(startColor.r, targetColor.r, tweenPercent);
+            newColor.g = tweenMode == ColorTweenMode.Alpha ? startColor.g : easingFunction(startColor.g, targetColor.g, tweenPercent);
+            newColor.b = tweenMode == ColorTweenMode.Alpha ? startColor.b : easingFunction(startColor.b, targetColor.b, tweenPercent);
+            newColor.a = tweenMode == ColorTweenMode.RGB ? startColor.a : easingFunction(startColor.a, targetColor.a, tweenPercent);
 
-            OnColorTween.Invoke(newColor);
+            onTween.Invoke(newColor);
         }
-
     }
 }
