@@ -3,28 +3,31 @@ using UnityEngine;
 
 namespace UnityCommon
 {
-    public struct VectorTween : ITweenValue
+    public readonly struct VectorTween : ITweenValue
     {
-        public event Action<Vector3> OnTween;
-
-        public Vector3 StartValue { get; set; }
-        public Vector3 TargetValue { get; set; }
-        public float TweenDuration { get; set; }
+        public float TweenDuration { get; }
         public EasingType EasingType { get; }
-        public bool TimeScaleIgnored { get; set; }
-        public bool TargetValid => OnTween != null;
+        public bool TimeScaleIgnored { get; }
+        public bool TargetValid => onTween != null && (!targetProvided || target);
 
+        private readonly Vector3 startValue;
+        private readonly Vector3 targetValue;
+        private readonly Action<Vector3> onTween;
         private readonly EasingFunction easingFunction;
+        private readonly UnityEngine.Object target;
+        private readonly bool targetProvided;
 
-        public VectorTween (Vector3 from, Vector3 to, float time, Action<Vector3> onTween, bool ignoreTimeScale = false, EasingType easingType = default)
+        public VectorTween (Vector3 from, Vector3 to, float time, Action<Vector3> onTween, 
+            bool ignoreTimeScale = false, EasingType easingType = default, UnityEngine.Object target = default)
         {
-            StartValue = from;
-            TargetValue = to;
+            startValue = from;
+            targetValue = to;
             TweenDuration = time;
             EasingType = easingType;
             TimeScaleIgnored = ignoreTimeScale;
-            OnTween = onTween;
+            this.onTween = onTween;
 
+            targetProvided = this.target = target;
             easingFunction = EasingType.GetEasingFunction();
         }
 
@@ -33,12 +36,12 @@ namespace UnityCommon
             if (!TargetValid) return;
 
             var newValue = new Vector3(
-                easingFunction(StartValue.x, TargetValue.x, tweenPercent),
-                easingFunction(StartValue.y, TargetValue.y, tweenPercent),
-                easingFunction(StartValue.z, TargetValue.z, tweenPercent)
+                easingFunction(startValue.x, targetValue.x, tweenPercent),
+                easingFunction(startValue.y, targetValue.y, tweenPercent),
+                easingFunction(startValue.z, targetValue.z, tweenPercent)
             );
 
-            OnTween.Invoke(newValue);
+            onTween.Invoke(newValue);
         }
     }
 }

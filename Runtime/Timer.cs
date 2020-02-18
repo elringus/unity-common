@@ -10,9 +10,12 @@ namespace UnityCommon
         public bool Loop { get; private set; }
         public bool TimeScaleIgnored { get; private set; }
         public float Duration { get; private set; }
+        public bool TargetValid => !targetProvided || target;
 
         private readonly Action onLoop;
         private readonly Action onCompleted;
+        private UnityEngine.Object target;
+        private bool targetProvided;
         private Guid lastRunGuid;
 
         public Timer (float duration = 0f, bool loop = false, bool ignoreTimeScale = false,
@@ -26,7 +29,8 @@ namespace UnityCommon
             this.onCompleted += onCompleted;
         }
 
-        public void Run (float duration, bool loop = false, bool ignoreTimeScale = false, CancellationToken cancellationToken = default)
+        public void Run (float duration, bool loop = false, bool ignoreTimeScale = false, 
+            CancellationToken cancellationToken = default, UnityEngine.Object target = default)
         {
             if (Running) CompleteInstantly();
 
@@ -35,11 +39,14 @@ namespace UnityCommon
             TimeScaleIgnored = ignoreTimeScale;
             Running = true;
 
+            targetProvided = this.target = target;
+
             if (Loop) WaitAndLoop(cancellationToken).Forget();
             else WaitAndComplete(cancellationToken).Forget();
         }
 
-        public void Run (CancellationToken cancellationToken = default) => Run(Duration, Loop, TimeScaleIgnored, cancellationToken);
+        public void Run (CancellationToken cancellationToken = default, UnityEngine.Object target = default) 
+            => Run(Duration, Loop, TimeScaleIgnored, cancellationToken, target);
 
         public void Stop ()
         {
@@ -59,7 +66,7 @@ namespace UnityCommon
             var currentRunGuid = lastRunGuid;
 
             await UniTask.Delay(TimeSpan.FromSeconds(Duration), TimeScaleIgnored, cancellationToken: cancellationToken);
-            if (cancellationToken.IsCancellationRequested) return;
+            if (cancellationToken.IsCancellationRequested || !TargetValid) return;
             if (lastRunGuid != currentRunGuid) return; // The timer was completed instantly or stopped.
 
             Running = false;
@@ -74,7 +81,7 @@ namespace UnityCommon
             while (true)
             {
                 await UniTask.Delay(TimeSpan.FromSeconds(Duration), TimeScaleIgnored, cancellationToken: cancellationToken);
-                if (cancellationToken.IsCancellationRequested) return;
+                if (cancellationToken.IsCancellationRequested || !TargetValid) return;
                 if (lastRunGuid != currentRunGuid) return; // The timer was stopped.
                 onLoop?.Invoke();
             }

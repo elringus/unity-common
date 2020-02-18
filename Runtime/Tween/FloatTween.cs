@@ -2,28 +2,31 @@
 
 namespace UnityCommon
 {
-    public struct FloatTween : ITweenValue
+    public readonly struct FloatTween : ITweenValue
     {
-        public event Action<float> OnFloatTween;
-
-        public float StartValue { get; set; }
-        public float TargetValue { get; set; }
-        public float TweenDuration { get; set; }
+        public float TweenDuration { get; }
         public EasingType EasingType { get; }
-        public bool TimeScaleIgnored { get; set; }
-        public bool TargetValid => OnFloatTween != null;
+        public bool TimeScaleIgnored { get; }
+        public bool TargetValid => onTween != null && (!targetProvided || target);
 
+        private readonly float startValue;
+        private readonly float targetValue;
+        private readonly Action<float> onTween;
         private readonly EasingFunction easingFunction;
+        private readonly UnityEngine.Object target;
+        private readonly bool targetProvided;
 
-        public FloatTween (float from, float to, float time, Action<float> onTween, bool ignoreTimeScale = false, EasingType easingType = default)
+        public FloatTween (float from, float to, float time, Action<float> onTween, 
+            bool ignoreTimeScale = false, EasingType easingType = default, UnityEngine.Object target = default)
         {
-            StartValue = from;
-            TargetValue = to;
+            startValue = from;
+            targetValue = to;
             TweenDuration = time;
             EasingType = easingType;
             TimeScaleIgnored = ignoreTimeScale;
-            OnFloatTween = onTween;
+            this.onTween = onTween;
 
+            targetProvided = this.target = target;
             easingFunction = EasingType.GetEasingFunction();
         }
 
@@ -31,9 +34,8 @@ namespace UnityCommon
         {
             if (!TargetValid) return;
 
-            var newValue = easingFunction(StartValue, TargetValue, tweenPercent);
-            OnFloatTween.Invoke(newValue);
+            var newValue = easingFunction(startValue, targetValue, tweenPercent);
+            onTween.Invoke(newValue);
         }
-
     }
 }

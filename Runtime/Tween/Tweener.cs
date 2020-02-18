@@ -64,7 +64,7 @@ namespace UnityCommon
             if (TweenValue.TweenDuration <= 0f) { CompleteInstantly(); return; }
 
             var currentRunGuid = lastRunGuid;
-            while (!cancellationToken.IsCancellationRequested && elapsedTime <= TweenValue.TweenDuration)
+            while (!cancellationToken.IsCancellationRequested && TweenValue.TargetValid && elapsedTime <= TweenValue.TweenDuration)
             {
                 PeformTween();
                 await AsyncUtils.WaitEndOfFrame;
@@ -81,7 +81,7 @@ namespace UnityCommon
             if (TweenValue.TweenDuration <= 0f) { CompleteInstantly(); return; }
 
             var currentRunGuid = lastRunGuid;
-            while (!cancellationToken.IsCancellationRequested && elapsedTime <= TweenValue.TweenDuration)
+            while (!cancellationToken.IsCancellationRequested && TweenValue.TargetValid && elapsedTime <= TweenValue.TweenDuration)
             {
                 PeformTween();
                 await AsyncUtils.WaitEndOfFrame;
