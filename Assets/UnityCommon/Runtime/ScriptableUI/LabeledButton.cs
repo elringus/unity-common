@@ -78,11 +78,9 @@ namespace UnityCommon
             }
             else if (tintTweener != null)
             {
-                var tween = new ColorTween(Label.color, tintColor * LabelColorBlock.colorMultiplier * LabelColorMultiplier, ColorTweenMode.All, LabelColorBlock.fadeDuration, SetLabelColor);
+                var tween = new ColorTween(Label.color, tintColor * LabelColorBlock.colorMultiplier * LabelColorMultiplier, ColorTweenMode.All, LabelColorBlock.fadeDuration, c => Label.color = c, target: Label);
                 tintTweener.Run(tween);
             }
-
-            void SetLabelColor (Color c) { if (Label) Label.color = c; }
         }
     }
 }

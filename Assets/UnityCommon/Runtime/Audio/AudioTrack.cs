@@ -91,12 +91,12 @@ namespace UnityCommon
             {
                 Source.PlayOneShot(IntroClip);
                 Source.PlayScheduled(AudioSettings.dspTime + IntroClip.length);
-                if (!Loop) stopTimer.Run(IntroClip.length + Clip.length);
+                if (!Loop) stopTimer.Run(IntroClip.length + Clip.length, Source);
             }
             else
             {
                 Source.Play();
-                if (!Loop) stopTimer.Run(Clip.length);
+                if (!Loop) stopTimer.Run(Clip.length, Source);
             }
 
             OnPlay?.Invoke();
@@ -108,7 +108,7 @@ namespace UnityCommon
             if (!Valid) return;
 
             if (!Playing) Play();
-            var tween = new FloatTween(0, Volume, fadeInTime, volume => Volume = volume);
+            var tween = new FloatTween(0, Volume, fadeInTime, volume => Volume = volume, target: Source);
             await volumeTweener.RunAsync(tween, cancellationToken);
         }
 
@@ -127,7 +127,7 @@ namespace UnityCommon
             CompleteAllRunners();
             if (!Valid) return;
 
-            var tween = new FloatTween(Volume, 0, fadeOutTime, volume => Volume = volume);
+            var tween = new FloatTween(Volume, 0, fadeOutTime, volume => Volume = volume, target: Source);
             await volumeTweener.RunAsync(tween, cancellationToken);
             if (cancellationToken.IsCancellationRequested) return;
             Stop();
@@ -138,7 +138,7 @@ namespace UnityCommon
             CompleteAllRunners();
             if (!Valid) return;
 
-            var tween = new FloatTween(Volume, volume, fadeTime, v => Volume = v);
+            var tween = new FloatTween(Volume, volume, fadeTime, v => Volume = v, target: Source);
             await volumeTweener.RunAsync(tween, cancellationToken);
         }
 
