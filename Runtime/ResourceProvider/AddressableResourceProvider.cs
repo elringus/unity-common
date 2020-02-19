@@ -14,13 +14,23 @@ namespace UnityCommon
         /// All the assets managed by this provider should have this label assigned, 
         /// also their addresses are expected to start with the label followed by a slash.
         /// </summary>
-        public readonly string AssetsLabel;
+        public readonly string MainLabel;
+        /// <summary>
+        /// When specified, the provider will only work with assets that have the set of labels.
+        /// </summary>
+        public readonly string[] ExtraLabels;
 
         private List<IResourceLocation> locations;
 
-        public AddressableResourceProvider (string assetsLabel = "UNITY_COMMON")
+        public AddressableResourceProvider (string mainLabel = "UNITY_COMMON", string[] extraLabels = null)
         {
-            AssetsLabel = assetsLabel;
+            MainLabel = mainLabel;
+            if (extraLabels != null && extraLabels.Length > 0)
+            {
+                var labels = new List<string>(extraLabels);
+                labels.Add(mainLabel);
+                ExtraLabels = labels.ToArray();
+            }
         }
 
         public override bool SupportsType<T> () => true;
@@ -67,7 +77,7 @@ namespace UnityCommon
 
         private async UniTask<List<IResourceLocation>> LoadAllLocations ()
         {
-            var task = Addressables.LoadResourceLocationsAsync(AssetsLabel);
+            var task = ExtraLabels != null ? Addressables.LoadResourceLocationsAsync(ExtraLabels, Addressables.MergeMode.Intersection) : Addressables.LoadResourceLocationsAsync(MainLabel);
             while (!task.IsDone) // When awaiting the method directly it fails on WebGL (they're using mutlithreaded Task fot GetAwaiter)
                 await AsyncUtils.WaitEndOfFrame;
             var locations = task.Result;
