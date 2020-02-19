@@ -21,7 +21,7 @@ namespace UnityCommon
         {
             this.locations = locations;
             this.logAction = logAction;
-            resourceAddress = $"{provider.AssetsLabel}/{Path}";
+            resourceAddress = $"{provider.MainLabel}/{Path}";
         }
 
         public override async UniTask RunAsync ()
