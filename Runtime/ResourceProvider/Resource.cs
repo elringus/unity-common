@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace UnityCommon
@@ -69,10 +70,15 @@ namespace UnityCommon
         /// <param name="unload">Whether to also unload the resource in case no other objects are holding it.</param>
         public void Release (object holder, bool unload = true)
         {
-            holders.RemoveWhere(hr => !hr.IsAlive || hr.Target == holder);
+            holders.RemoveWhere(wr => !wr.IsAlive || wr.Target == holder);
             if (unload && holders.Count == 0)
                 Provider.UnloadResource(Path);
         }
+
+        /// <summary>
+        /// Checks whether the resource is being held by the provided object.
+        /// </summary>
+        public bool IsHeldBy (object holder) => holders.Any(wr => wr.Target == holder);
     }
 
     /// <summary>
