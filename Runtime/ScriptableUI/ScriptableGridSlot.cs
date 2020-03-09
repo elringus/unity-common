@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 
 namespace UnityCommon
 {
-    [RequireComponent(typeof(CanvasGroup))]
+    [RequireComponent(typeof(UnityEngine.UI.Button))]
     public class ScriptableGridSlot : ScriptableButton, IPointerEnterHandler, IPointerExitHandler
     { 
         public class Constructor<TSlot> where TSlot : ScriptableGridSlot
@@ -27,37 +27,16 @@ namespace UnityCommon
         public string Id { get; private set; }
         public int NumberInGrid => transform.GetSiblingIndex() + 1;
 
-        [SerializeField] private float hoverOpacityFade = .25f;
-
-        private Tweener<FloatTween> fadeTweener;
         private OnClicked onClickedAction;
-
-        protected override void Awake ()
-        {
-            base.Awake();
-
-            fadeTweener = new Tweener<FloatTween>();
-        }
-
-        protected override void Start ()
-        {
-            base.Start();
-
-            SetOpacity(1 - hoverOpacityFade);
-        }
 
         public virtual void OnPointerEnter (PointerEventData eventData)
         {
-            if (fadeTweener.Running) fadeTweener.CompleteInstantly();
-            var tween = new FloatTween(Opacity, 1f, FadeTime, SetOpacity, true, target: this);
-            fadeTweener.Run(tween);
+            
         }
 
         public virtual void OnPointerExit (PointerEventData eventData)
         {
-            if (fadeTweener.Running) fadeTweener.CompleteInstantly();
-            var tween = new FloatTween(Opacity, 1f - hoverOpacityFade, FadeTime, SetOpacity, true, target: this);
-            fadeTweener.Run(tween);
+            
         }
 
         protected override void OnButtonClick ()
