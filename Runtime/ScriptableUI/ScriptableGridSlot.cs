@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 namespace UnityCommon
 {
     [RequireComponent(typeof(CanvasGroup)), RequireComponent(typeof(UnityEngine.UI.Button))]
-    public class ScriptableGridSlot : ScriptableButton, IPointerEnterHandler, IPointerExitHandler
+    public class ScriptableGridSlot : ScriptableButton, IPointerEnterHandler, IPointerExitHandler, ISelectHandler, IDeselectHandler, ISubmitHandler
     { 
         public class Constructor<TSlot> where TSlot : ScriptableGridSlot
         {
@@ -59,6 +59,12 @@ namespace UnityCommon
             var tween = new FloatTween(Opacity, 1f - hoverOpacityFade, FadeTime, SetOpacity, true, target: this);
             fadeTweener.Run(tween);
         }
+
+        public virtual void OnSelect (BaseEventData eventData) => OnPointerEnter(default);
+
+        public virtual void OnDeselect (BaseEventData eventData) => OnPointerExit(default);
+
+        public virtual void OnSubmit (BaseEventData eventData) => OnButtonClick();
 
         protected override void OnButtonClick ()
         {
