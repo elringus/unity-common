@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 namespace UnityCommon
 {
     [RequireComponent(typeof(CanvasGroup))]
-    public class ScriptableGridSlot : ScriptableUIBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
+    public class ScriptableGridSlot : ScriptableButton, IPointerEnterHandler, IPointerExitHandler
     { 
         public class Constructor<TSlot> where TSlot : ScriptableGridSlot
         {
@@ -60,8 +60,10 @@ namespace UnityCommon
             fadeTweener.Run(tween);
         }
 
-        public virtual void OnPointerClick (PointerEventData eventData)
+        protected override void OnButtonClick ()
         {
+            base.OnButtonClick();
+
             onClickedAction?.Invoke(Id);
         }
     }
