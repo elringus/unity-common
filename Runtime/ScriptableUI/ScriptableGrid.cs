@@ -87,6 +87,8 @@ namespace UnityCommon
 
             previousPageButton.SetInteractable(CurrentPage > 1);
             nextPageButton.SetInteractable(CurrentPage < PageCount);
+
+            FocusOnNavigation = SlotsMap.Values.FirstOrDefault(s => s.gameObject.activeSelf)?.gameObject;
         }
 
         protected virtual void SelectPreviousPage ()
