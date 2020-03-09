@@ -45,7 +45,7 @@ namespace UnityCommon
         /// Whether the UI is currently interctable.
         /// requires a <see cref="UnityEngine.CanvasGroup"/> on the same game object.
         /// </summary>
-        public virtual bool Interactable => CanvasGroup ? CanvasGroup.interactable : true;
+        public virtual bool Interactable { get => CanvasGroup ? CanvasGroup.interactable : true; set => SetInteractable(value); }
         /// <summary>
         /// Transform used by the UI element.
         /// </summary>
