@@ -45,7 +45,7 @@ namespace UnityCommon
         /// Whether the UI is currently interctable.
         /// requires a <see cref="UnityEngine.CanvasGroup"/> on the same game object.
         /// </summary>
-        public virtual bool Interactable => CanvasGroup ? CanvasGroup.interactable : true;
+        public virtual bool Interactable { get => CanvasGroup ? CanvasGroup.interactable : true; set => SetInteractable(value); }
         /// <summary>
         /// Transform used by the UI element.
         /// </summary>
@@ -67,6 +67,8 @@ namespace UnityCommon
         /// </summary>
         public Camera RenderCamera { get => ObjectUtils.IsValid(TopmostCanvas) ? TopmostCanvas.worldCamera : null; set => SetRenderCamera(value); }
 
+        protected static GameObject FocusOnNavigation { get; set; }
+
         protected CanvasGroup CanvasGroup { get; private set; }
 
         [Tooltip("Whether to permamently disable interaction with the object, no matter the visibility.")]
@@ -81,8 +83,6 @@ namespace UnityCommon
         [SerializeField] private FocusMode focusMode = default;
         [Tooltip("Invoked when visibility of the UI is changed.")]
         [SerializeField] private VisibilityChangedEvent onVisibilityChanged = default;
-
-        private static GameObject focusOnNavigation;
 
         private readonly Tweener<FloatTween> fadeTweener = new Tweener<FloatTween>();
         private RectTransform rectTransform;
@@ -293,17 +293,17 @@ namespace UnityCommon
                 {
                     case FocusMode.Visibility:
                         EventSystem.current.SetSelectedGameObject(focusObject);
-                        focusOnNavigation = null;
+                        FocusOnNavigation = null;
                         break;
                     case FocusMode.Navigation:
-                        focusOnNavigation = focusObject;
+                        FocusOnNavigation = focusObject;
                         break;
                 }
         }
 
-        private void HandleNavigationFocus ()
+        protected virtual void HandleNavigationFocus ()
         {
-            if (focusMode != FocusMode.Navigation || !ObjectUtils.IsValid(focusOnNavigation) || !Visible || !EventSystem.current) return;
+            if (focusMode != FocusMode.Navigation || !ObjectUtils.IsValid(FocusOnNavigation) || !Visible || !EventSystem.current) return;
 
             var navDown = false;
 
@@ -323,8 +323,8 @@ namespace UnityCommon
 
             if (navDown)
             {
-                EventSystem.current.SetSelectedGameObject(focusOnNavigation);
-                focusOnNavigation = null;
+                EventSystem.current.SetSelectedGameObject(FocusOnNavigation);
+                FocusOnNavigation = null;
             }
         }
 
