@@ -3,8 +3,8 @@ using UnityEngine.EventSystems;
 
 namespace UnityCommon
 {
-    [RequireComponent(typeof(CanvasGroup))]
-    public class ScriptableGridSlot : ScriptableUIBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
+    [RequireComponent(typeof(CanvasGroup)), RequireComponent(typeof(UnityEngine.UI.Button))]
+    public class ScriptableGridSlot : ScriptableButton, IPointerEnterHandler, IPointerExitHandler, ISelectHandler, IDeselectHandler
     { 
         public class Constructor<TSlot> where TSlot : ScriptableGridSlot
         {
@@ -60,8 +60,14 @@ namespace UnityCommon
             fadeTweener.Run(tween);
         }
 
-        public virtual void OnPointerClick (PointerEventData eventData)
+        public virtual void OnSelect (BaseEventData eventData) => OnPointerEnter(default);
+
+        public virtual void OnDeselect (BaseEventData eventData) => OnPointerExit(default);
+
+        protected override void OnButtonClick ()
         {
+            base.OnButtonClick();
+
             onClickedAction?.Invoke(Id);
         }
     }

@@ -77,7 +77,7 @@ namespace UnityCommon
         [SerializeField] private float fadeTime = .3f;
         [Tooltip("When assigned, will make the object focused (for keyboard or gamepad control) when the UI becomes visible or upon navigation.")]
         [SerializeField] private GameObject focusObject = default;
-        [Tooltip("When `Focus Object` is assigned, determines when to focus the object: on the UI becomes visible or on first navigation attempt (arrow keys or d-pad) while the UI is visible. Be aware, that `Navigation` mode requires Unity's new input system package installed.")]
+        [Tooltip("When `Focus Object` is assigned, determines when to focus the object: on the UI becomes visible or on first navigation attempt (arrow keys or d-pad) while the UI is visible. Be aware, that gamepad support for Navigation mode requires Unity's new input system package installed.")]
         [SerializeField] private FocusMode focusMode = default;
         [Tooltip("Invoked when visibility of the UI is changed.")]
         [SerializeField] private VisibilityChangedEvent onVisibilityChanged = default;
