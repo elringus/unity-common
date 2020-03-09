@@ -11,6 +11,8 @@ namespace UnityCommon
     /// </summary>
     public class ScriptableUIBehaviour : UIBehaviour
     {
+        public enum FocusMode { Visibility, Navigation }
+
         [System.Serializable]
         private class VisibilityChangedEvent : UnityEvent<bool> { }
 
@@ -73,10 +75,14 @@ namespace UnityCommon
         [SerializeField] private bool visibleOnAwake = true;
         [Tooltip("Fade duration (in seconds) when changing visiblity.")]
         [SerializeField] private float fadeTime = .3f;
-        [Tooltip("When assigned, will make the object focused (for keyboard or gamepad control) when the UI becomes visible.")]
+        [Tooltip("When assigned, will make the object focused (for keyboard or gamepad control) when the UI becomes visible or upon navigation.")]
         [SerializeField] private GameObject focusObject = default;
+        [Tooltip("When `Focus Object` is assigned, determines when to focus the object: on the UI becomes visible or on first navigation attempt (arrow keys or d-pad) while the UI is visible. Be aware, that `Navigation` mode requires Unity's new input system package installed.")]
+        [SerializeField] private FocusMode focusMode = default;
         [Tooltip("Invoked when visibility of the UI is changed.")]
         [SerializeField] private VisibilityChangedEvent onVisibilityChanged = default;
+
+        private static GameObject focusOnNavigation;
 
         private readonly Tweener<FloatTween> fadeTweener = new Tweener<FloatTween>();
         private RectTransform rectTransform;
@@ -150,6 +156,7 @@ namespace UnityCommon
         /// <summary>
         /// Reveals the UI over <see cref="FadeTime"/>.
         /// </summary>
+        [ContextMenu("Show")]
         public virtual void Show ()
         {
             SetVisibilityAsync(true).Forget();
@@ -158,6 +165,7 @@ namespace UnityCommon
         /// <summary>
         /// Hides the UI over <see cref="FadeTime"/>.
         /// </summary>
+        [ContextMenu("Hide")]
         public virtual void Hide ()
         {
             SetVisibilityAsync(false).Forget();
@@ -266,6 +274,11 @@ namespace UnityCommon
             SetVisibility(VisibleOnAwake);
         }
 
+        protected virtual void Update ()
+        {
+            HandleNavigationFocus();
+        }
+
         /// <summary>
         /// Invoked when visibility of the UI is changed.
         /// </summary>
@@ -276,7 +289,43 @@ namespace UnityCommon
             onVisibilityChanged?.Invoke(visible);
 
             if (focusObject && visible && EventSystem.current)
-                EventSystem.current.SetSelectedGameObject(focusObject);
+                switch (focusMode)
+                {
+                    case FocusMode.Visibility:
+                        EventSystem.current.SetSelectedGameObject(focusObject);
+                        focusOnNavigation = null;
+                        break;
+                    case FocusMode.Navigation:
+                        focusOnNavigation = focusObject;
+                        break;
+                }
+        }
+
+        private void HandleNavigationFocus ()
+        {
+            if (focusMode != FocusMode.Navigation || !ObjectUtils.IsValid(focusOnNavigation) || !Visible || !EventSystem.current) return;
+
+            var navDown = false;
+
+            #if ENABLE_INPUT_SYSTEM && INPUT_SYSTEM_AVAILABLE
+            var gamepad = UnityEngine.InputSystem.Gamepad.current;
+            if (gamepad != null && !navDown)
+                navDown = gamepad.dpad.up.wasPressedThisFrame || gamepad.dpad.down.wasPressedThisFrame || gamepad.dpad.left.wasPressedThisFrame || gamepad.dpad.right.wasPressedThisFrame;
+            var keyboard = UnityEngine.InputSystem.Keyboard.current;
+            if (keyboard != null && !navDown)
+                navDown = keyboard.downArrowKey.wasPressedThisFrame || keyboard.upArrowKey.wasPressedThisFrame || keyboard.leftArrowKey.wasPressedThisFrame || keyboard.rightArrowKey.wasPressedThisFrame;
+            #endif
+
+            #if ENABLE_LEGACY_INPUT_MANAGER
+            if (!navDown)
+                navDown = Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow);
+            #endif
+
+            if (navDown)
+            {
+                EventSystem.current.SetSelectedGameObject(focusOnNavigation);
+                focusOnNavigation = null;
+            }
         }
 
         private RectTransform GetRectTransform ()
