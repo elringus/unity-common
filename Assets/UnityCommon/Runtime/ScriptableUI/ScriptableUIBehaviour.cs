@@ -70,12 +70,15 @@ namespace UnityCommon
         protected static GameObject FocusOnNavigation { get; set; }
 
         protected CanvasGroup CanvasGroup { get; private set; }
+        protected bool ControlOpacity => controlOpacity;
 
-        [Tooltip("Whether to permamently disable interaction with the object, no matter the visibility.")]
+        [Tooltip("Whether to permamently disable interaction with the object, no matter the visibility. Requires `Canvas Group` component on the same game object.")]
         [SerializeField] private bool disableInteraction = false;
         [Tooltip("Whether UI element should be visible or hidden on awake.")]
         [SerializeField] private bool visibleOnAwake = true;
-        [Tooltip("Fade duration (in seconds) when changing visiblity.")]
+        [Tooltip("Whether to change opacity (alpha) of Canvas Group in correspondence to visibility of the UI element. Requires `Canvas Group` component on the same game object.")]
+        [SerializeField] private bool controlOpacity = true;
+        [Tooltip("When `Control Opacity` is enabled, controls opacity fade duration (in seconds) when changing visibility.")]
         [SerializeField] private float fadeTime = .3f;
         [Tooltip("When assigned, will make the object focused (for keyboard or gamepad control) when the UI becomes visible or upon navigation.")]
         [SerializeField] private GameObject focusObject = default;
@@ -108,6 +111,8 @@ namespace UnityCommon
                 CanvasGroup.interactable = visible;
                 CanvasGroup.blocksRaycasts = visible;
             }
+
+            if (!controlOpacity) return;
 
             var fadeDuration = fadeTime ?? FadeTime;
             var targetOpacity = visible ? 1f : 0f;
@@ -142,7 +147,8 @@ namespace UnityCommon
                 CanvasGroup.blocksRaycasts = visible;
             }
 
-            CanvasGroup.alpha = visible ? 1f : 0f;
+            if (controlOpacity)
+                CanvasGroup.alpha = visible ? 1f : 0f;
         }
 
         /// <summary>
