@@ -13,9 +13,6 @@ namespace UnityCommon
     {
         public enum FocusMode { Visibility, Navigation }
 
-        [System.Serializable]
-        private class VisibilityChangedEvent : UnityEvent<bool> { }
-
         /// <summary>
         /// Event invoked when visibility of the UI changes.
         /// </summary>
@@ -84,8 +81,10 @@ namespace UnityCommon
         [SerializeField] private GameObject focusObject = default;
         [Tooltip("When `Focus Object` is assigned, determines when to focus the object: on the UI becomes visible or on first navigation attempt (arrow keys or d-pad) while the UI is visible. Be aware, that gamepad support for Navigation mode requires Unity's new input system package installed.")]
         [SerializeField] private FocusMode focusMode = default;
-        [Tooltip("Invoked when visibility of the UI is changed.")]
-        [SerializeField] private VisibilityChangedEvent onVisibilityChanged = default;
+        [Tooltip("Invoked when the UI element is shown.")]
+        [SerializeField] private UnityEvent onShow = default;
+        [Tooltip("Invoked when the UI element is hidden.")]
+        [SerializeField] private UnityEvent onHide = default;
 
         private readonly Tweener<FloatTween> fadeTweener = new Tweener<FloatTween>();
         private RectTransform rectTransform;
@@ -292,7 +291,9 @@ namespace UnityCommon
         protected virtual void HandleVisibilityChanged (bool visible)
         {
             OnVisibilityChanged?.Invoke(visible);
-            onVisibilityChanged?.Invoke(visible);
+
+            if (visible) onShow?.Invoke();
+            else onHide?.Invoke();
 
             if (focusObject && visible && EventSystem.current)
                 switch (focusMode)
