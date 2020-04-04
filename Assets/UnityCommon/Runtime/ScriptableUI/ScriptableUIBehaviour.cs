@@ -92,9 +92,9 @@ namespace UnityCommon
         private bool visible;
 
         /// <summary>
-        /// Changes <see cref="Visible"/> over specified time.
+        /// Gradually changes <see cref="Visible"/> with fade animation over <see cref="FadeTime"/> or specified time (in seconds).
         /// </summary>
-        public virtual async UniTask SetVisibilityAsync (bool visible, float? fadeTime = null)
+        public virtual async UniTask ChangeVisibilityAsync (bool visible, float? duration = null)
         {
             if (fadeTweener.Running)
                 fadeTweener.Stop();
@@ -113,7 +113,7 @@ namespace UnityCommon
 
             if (!controlOpacity) return;
 
-            var fadeDuration = fadeTime ?? FadeTime;
+            var fadeDuration = duration ?? FadeTime;
             var targetOpacity = visible ? 1f : 0f;
 
             if (fadeDuration == 0f)
@@ -155,7 +155,7 @@ namespace UnityCommon
         /// </summary>
         public virtual void ToggleVisibility ()
         {
-            SetVisibilityAsync(!Visible).Forget();
+            ChangeVisibilityAsync(!Visible).Forget();
         }
 
         /// <summary>
@@ -164,7 +164,7 @@ namespace UnityCommon
         [ContextMenu("Show")]
         public virtual void Show ()
         {
-            SetVisibilityAsync(true).Forget();
+            ChangeVisibilityAsync(true).Forget();
         }
 
         /// <summary>
@@ -173,7 +173,7 @@ namespace UnityCommon
         [ContextMenu("Hide")]
         public virtual void Hide ()
         {
-            SetVisibilityAsync(false).Forget();
+            ChangeVisibilityAsync(false).Forget();
         }
 
         /// <summary>
