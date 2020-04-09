@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UniRx.Async;
 
 namespace UnityCommon
@@ -27,7 +28,10 @@ namespace UnityCommon
         public static IEnumerable<string> LocateProjectResources (string rootPath, string resourcesPath, ProjectResources projectResources)
         {
             var path = string.IsNullOrEmpty(rootPath) ? resourcesPath : string.IsNullOrEmpty(resourcesPath) ? rootPath : $"{rootPath}/{resourcesPath}";
-            return projectResources.ResourcePaths.LocateResourcePathsAtFolder(path);
+            var result = projectResources.ResourcePaths.LocateResourcePathsAtFolder(path);
+            if (!string.IsNullOrEmpty(rootPath))
+                return result.Select(p => p.GetAfterFirst(rootPath + "/"));
+            return result;
         }
     }
 }
