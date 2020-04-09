@@ -34,13 +34,16 @@ namespace UnityCommon
             }
         }
 
+        public readonly string RootPath;
+
         private readonly ProjectResources projectResources;
         private readonly Dictionary<Type, TypeRedirector> redirectors;
 
-        public ProjectResourceProvider ()
+        public ProjectResourceProvider (string rootPath = null)
         {
             projectResources = ProjectResources.Get();
             redirectors = new Dictionary<Type, TypeRedirector>();
+            RootPath = rootPath;
         }
 
         public override bool SupportsType<T> () => true;
@@ -57,12 +60,17 @@ namespace UnityCommon
 
         protected override LoadResourceRunner<T> CreateLoadResourceRunner<T> (string path)
         {
-            return new ProjectResourceLoader<T>(this, path, redirectors.ContainsKey(typeof(T)) ? redirectors[typeof(T)] : null, LogMessage);
+            return new ProjectResourceLoader<T>(this, RootPath, path, redirectors.ContainsKey(typeof(T)) ? redirectors[typeof(T)] : null, LogMessage);
         }
 
         protected override LocateResourcesRunner<T> CreateLocateResourcesRunner<T> (string path)
         {
-            return new ProjectResourceLocator<T>(this, path, projectResources);
+            return new ProjectResourceLocator<T>(this, RootPath, path, projectResources);
+        }
+
+        protected override LocateFoldersRunner CreateLocateFoldersRunner (string path)
+        {
+            return new ProjectFolderLocator(this, RootPath, path, projectResources);
         }
 
         protected override void DisposeResource (Resource resource)
@@ -81,11 +89,6 @@ namespace UnityCommon
             if (resource.Object is GameObject || resource.Object is Component) return;
 
             Resources.UnloadAsset(resource.Object);
-        }
-
-        protected override LocateFoldersRunner CreateLocateFoldersRunner (string path)
-        {
-            return new ProjectFolderLocator(this, path, projectResources);
         }
     }
 }

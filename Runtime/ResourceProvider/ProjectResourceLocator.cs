@@ -6,23 +6,27 @@ namespace UnityCommon
     public class ProjectResourceLocator<TResource> : LocateResourcesRunner<TResource> 
         where TResource : UnityEngine.Object
     {
+        public readonly string RootPath;
+
         private readonly ProjectResources projectResources;
 
-        public ProjectResourceLocator (IResourceProvider provider, string resourcesPath, 
+        public ProjectResourceLocator (IResourceProvider provider, string rootPath, string resourcesPath, 
             ProjectResources projectResources) : base (provider, resourcesPath ?? string.Empty)
         {
+            RootPath = rootPath;
             this.projectResources = projectResources;
         }
 
         public override UniTask RunAsync ()
         {
-            var locatedResourcePaths = LocateProjectResources(Path, projectResources);
+            var locatedResourcePaths = LocateProjectResources(RootPath, Path, projectResources);
             SetResult(locatedResourcePaths);
             return UniTask.CompletedTask;
         }
 
-        public static IEnumerable<string> LocateProjectResources (string path, ProjectResources projectResources)
+        public static IEnumerable<string> LocateProjectResources (string rootPath, string resourcesPath, ProjectResources projectResources)
         {
+            var path = string.IsNullOrEmpty(rootPath) ? resourcesPath : string.IsNullOrEmpty(resourcesPath) ? rootPath : $"{rootPath}/{resourcesPath}";
             return projectResources.ResourcePaths.LocateResourcePathsAtFolder(path);
         }
     }
