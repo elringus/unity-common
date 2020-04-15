@@ -22,12 +22,16 @@ namespace UnityCommon
         /// Fade duration (in seconds) when changing visiblity of the UI;
         /// requires a <see cref="UnityEngine.CanvasGroup"/> on the same game object.
         /// </summary>
-        public float FadeTime { get => fadeTime; set => fadeTime = value; }
+        public virtual float FadeTime { get => fadeTime; set => fadeTime = value; }
+        /// <summary>
+        /// Whether to ignore time scale when changing visibility (fade animation).
+        /// </summary>
+        public virtual bool IgnoreTimeScale { get => ignoreTimeScale; set => ignoreTimeScale = value; }
         /// <summary>
         /// Whether the UI element should be visible or hidden on awake.
         /// requires a <see cref="UnityEngine.CanvasGroup"/> on the same game object.
         /// </summary>
-        public bool VisibleOnAwake => visibleOnAwake;
+        public virtual bool VisibleOnAwake => visibleOnAwake;
         /// <summary>
         /// Whether the UI is currently visible.
         /// requires a <see cref="UnityEngine.CanvasGroup"/> on the same game object.
@@ -46,23 +50,23 @@ namespace UnityCommon
         /// <summary>
         /// Transform used by the UI element.
         /// </summary>
-        public RectTransform RectTransform => GetRectTransform();
+        public virtual RectTransform RectTransform => GetRectTransform();
         /// <summary>
         /// Topmost parent (in the game object hierarchy) canvas component.
         /// </summary>
-        public Canvas TopmostCanvas => ObjectUtils.IsValid(topmostCanvasCache) ? topmostCanvasCache : (topmostCanvasCache = FindTopmostCanvas());
+        public virtual Canvas TopmostCanvas => ObjectUtils.IsValid(topmostCanvasCache) ? topmostCanvasCache : (topmostCanvasCache = FindTopmostCanvas());
         /// <summary>
         /// Current sort order of the UI element, as per <see cref="TopmostCanvas"/>.
         /// </summary>
-        public int SortingOrder { get => ObjectUtils.IsValid(TopmostCanvas) ? TopmostCanvas.sortingOrder : 0; set => SetSortingOrder(value); }
+        public virtual int SortingOrder { get => ObjectUtils.IsValid(TopmostCanvas) ? TopmostCanvas.sortingOrder : 0; set => SetSortingOrder(value); }
         /// <summary>
         /// Current render mode of the UI element, as per <see cref="TopmostCanvas"/>.
         /// </summary>
-        public RenderMode RenderMode { get => ObjectUtils.IsValid(TopmostCanvas) ? TopmostCanvas.renderMode : default; set => SetRenderMode(value); }
+        public virtual RenderMode RenderMode { get => ObjectUtils.IsValid(TopmostCanvas) ? TopmostCanvas.renderMode : default; set => SetRenderMode(value); }
         /// <summary>
         /// Current render camera of the UI element, as per <see cref="TopmostCanvas"/>.
         /// </summary>
-        public Camera RenderCamera { get => ObjectUtils.IsValid(TopmostCanvas) ? TopmostCanvas.worldCamera : null; set => SetRenderCamera(value); }
+        public virtual Camera RenderCamera { get => ObjectUtils.IsValid(TopmostCanvas) ? TopmostCanvas.worldCamera : null; set => SetRenderCamera(value); }
 
         protected static GameObject FocusOnNavigation { get; set; }
 
@@ -77,6 +81,8 @@ namespace UnityCommon
         [SerializeField] private bool controlOpacity = true;
         [Tooltip("When `Control Opacity` is enabled, controls opacity fade duration (in seconds) when changing visibility.")]
         [SerializeField] private float fadeTime = .3f;
+        [Tooltip("When `Control Opacity` is enabled, controls whether to ignore time scale when changing visibility.")]
+        [SerializeField] private bool ignoreTimeScale = true;
         [Tooltip("When assigned, will make the object focused (for keyboard or gamepad control) when the UI becomes visible or upon navigation.")]
         [SerializeField] private GameObject focusObject = default;
         [Tooltip("When `Focus Object` is assigned, determines when to focus the object: on the UI becomes visible or on first navigation attempt (arrow keys or d-pad) while the UI is visible. Be aware, that gamepad support for Navigation mode requires Unity's new input system package installed.")]
@@ -122,7 +128,7 @@ namespace UnityCommon
                 return;
             }
 
-            var tween = new FloatTween(CanvasGroup.alpha, targetOpacity, fadeDuration, SetOpacity, target: this);
+            var tween = new FloatTween(CanvasGroup.alpha, targetOpacity, fadeDuration, SetOpacity, IgnoreTimeScale, target: this);
             await fadeTweener.RunAsync(tween);
         }
 
