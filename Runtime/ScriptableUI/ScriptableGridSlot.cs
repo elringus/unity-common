@@ -46,29 +46,33 @@ namespace UnityCommon
             SetOpacity(1 - hoverOpacityFade);
         }
 
-        public virtual void OnPointerEnter (PointerEventData eventData)
-        {
-            if (fadeTweener.Running) fadeTweener.CompleteInstantly();
-            var tween = new FloatTween(Opacity, 1f, FadeTime, SetOpacity, true, target: this);
-            fadeTweener.Run(tween);
-        }
+        public virtual void OnPointerEnter (PointerEventData eventData) => FadeInSlot();
 
-        public virtual void OnPointerExit (PointerEventData eventData)
-        {
-            if (fadeTweener.Running) fadeTweener.CompleteInstantly();
-            var tween = new FloatTween(Opacity, 1f - hoverOpacityFade, FadeTime, SetOpacity, true, target: this);
-            fadeTweener.Run(tween);
-        }
+        public virtual void OnPointerExit (PointerEventData eventData) => FadeOutSlot();
 
-        public virtual void OnSelect (BaseEventData eventData) => OnPointerEnter(default);
+        public virtual void OnSelect (BaseEventData eventData) => FadeInSlot();
 
-        public virtual void OnDeselect (BaseEventData eventData) => OnPointerExit(default);
+        public virtual void OnDeselect (BaseEventData eventData) => FadeOutSlot();
 
         protected override void OnButtonClick ()
         {
             base.OnButtonClick();
 
             onClickedAction?.Invoke(Id);
+        }
+
+        protected virtual void FadeInSlot ()
+        {
+            if (fadeTweener.Running) fadeTweener.CompleteInstantly();
+            var tween = new FloatTween(Opacity, 1f, FadeTime, SetOpacity, true, target: this);
+            fadeTweener.Run(tween);
+        }
+
+        protected virtual void FadeOutSlot ()
+        {
+            if (fadeTweener.Running) fadeTweener.CompleteInstantly();
+            var tween = new FloatTween(Opacity, 1f - hoverOpacityFade, FadeTime, SetOpacity, true, target: this);
+            fadeTweener.Run(tween);
         }
     }
 }
