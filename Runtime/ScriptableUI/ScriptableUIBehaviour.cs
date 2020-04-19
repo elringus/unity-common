@@ -33,6 +33,14 @@ namespace UnityCommon
         /// </summary>
         public virtual bool VisibleOnAwake => visibleOnAwake;
         /// <summary>
+        /// Determines when to focus the object: on the UI becomes visible or on first navigation attempt (arrow keys or d-pad) while the UI is visible.
+        /// </summary>
+        public virtual FocusMode FocusModeType { get => focusMode; set => focusMode = value; }
+        /// <summary>
+        /// The object to focus (for keyboard or gamepad control) when the UI becomes visible or upon navigation.
+        /// </summary>
+        public virtual GameObject FocusObject { get => focusObject; set => focusObject = value; }
+        /// <summary>
         /// Whether the UI is currently visible.
         /// requires a <see cref="UnityEngine.CanvasGroup"/> on the same game object.
         /// </summary>
