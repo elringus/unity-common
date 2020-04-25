@@ -72,40 +72,42 @@ namespace UnityCommon
         /// </summary>
         /// <param name="source">The collection to order.</param>
         /// <param name="getDependencies">Function used to retrieve element's dependencies.</param>
+        ///  <param name="warnCyclic">Whether to warn about cyclic dependencies.</param>
         /// <remarks>Based on: https://www.codeproject.com/Articles/869059/Topological-sorting-in-Csharp </remarks>
-        public static IList<T> TopologicalOrder<T> (this IEnumerable<T> source, Func<T, IEnumerable<T>> getDependencies)
+        public static IList<T> TopologicalOrder<T> (this IEnumerable<T> source, Func<T, IEnumerable<T>> getDependencies, bool warnCyclic = true)
         {
             var sorted = new List<T>();
             var visited = new Dictionary<T, bool>();
 
             foreach (var item in source)
-                Visit(item, getDependencies, sorted, visited);
+                Visit(item);
 
             return sorted;
-        }
 
-        private static void Visit<T> (T item, Func<T, IEnumerable<T>> getDependencies, List<T> sorted, Dictionary<T, bool> visited)
-        {
-            var inProcess = default(bool);
-            var alreadyVisited = visited.TryGetValue(item, out inProcess);
-
-            if (alreadyVisited)
+            void Visit (T item)
             {
-                if (inProcess) Debug.LogWarning($"Cyclic dependency found while performing topological ordering of {typeof(T).Name}.");
-            }
-            else
-            {
-                visited[item] = true;
+                var inProcess = default(bool);
+                var alreadyVisited = visited.TryGetValue(item, out inProcess);
 
-                var dependencies = getDependencies(item);
-                if (dependencies != null)
+                if (alreadyVisited)
                 {
-                    foreach (var dependency in dependencies)
-                        Visit(dependency, getDependencies, sorted, visited);
+                    if (inProcess && warnCyclic) 
+                        Debug.LogWarning($"Cyclic dependency found while performing topological ordering of {typeof(T).Name}.");
                 }
+                else
+                {
+                    visited[item] = true;
 
-                visited[item] = false;
-                sorted.Add(item);
+                    var dependencies = getDependencies(item);
+                    if (dependencies != null)
+                    {
+                        foreach (var dependency in dependencies)
+                            Visit(dependency);
+                    }
+
+                    visited[item] = false;
+                    sorted.Add(item);
+                }
             }
         }
     }
