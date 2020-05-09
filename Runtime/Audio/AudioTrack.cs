@@ -67,7 +67,7 @@ namespace UnityCommon
         private readonly Tweener<FloatTween> volumeTweener;
         private readonly Timer stopTimer;
 
-        public AudioTrack (AudioClip clip, AudioSource source, float volume = 1f, bool loop = false, 
+        public AudioTrack (AudioClip clip, AudioSource source, float volume = 1f, bool loop = false,
             AudioMixerGroup mixerGroup = null, AudioClip introClip = null)
         {
             Clip = clip;
@@ -91,12 +91,12 @@ namespace UnityCommon
             {
                 Source.PlayOneShot(IntroClip);
                 Source.PlayScheduled(AudioSettings.dspTime + IntroClip.length);
-                if (!Loop) stopTimer.Run(IntroClip.length + Clip.length, Source);
+                if (!Loop) stopTimer.Run(IntroClip.length + Clip.length, target: Source);
             }
             else
             {
                 Source.Play();
-                if (!Loop) stopTimer.Run(Clip.length, Source);
+                if (!Loop) stopTimer.Run(Clip.length, target: Source);
             }
 
             OnPlay?.Invoke();
