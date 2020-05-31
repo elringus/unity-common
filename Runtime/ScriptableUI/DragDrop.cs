@@ -12,6 +12,7 @@ namespace UnityCommon
 
         private RectTransform trs;
         private RectTransform handleTrs;
+        private Canvas canvas;
 
         private void Awake ()
         {
@@ -19,6 +20,7 @@ namespace UnityCommon
 
             trs = GetComponent<RectTransform>();
             handleTrs = handle.GetComponent<RectTransform>();
+            canvas = gameObject.FindTopmostComponent<Canvas>();
         }
 
         private void OnEnable ()
@@ -33,7 +35,13 @@ namespace UnityCommon
 
         private void HandleDrag (Vector2 position)
         {
-            trs.position = trs.TransformPoint(position) - handleTrs.position;
+            if (!canvas) return;
+
+            position /= canvas.scaleFactor;
+
+            var dragPos = trs.TransformPoint(position) - handleTrs.position;
+
+            trs.position = new Vector3(dragPos.x, dragPos.y, trs.position.z);
         }
     }
 }
