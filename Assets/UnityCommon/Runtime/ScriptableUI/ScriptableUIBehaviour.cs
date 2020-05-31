@@ -62,7 +62,7 @@ namespace UnityCommon
         /// <summary>
         /// Topmost parent (in the game object hierarchy) canvas component.
         /// </summary>
-        public virtual Canvas TopmostCanvas => ObjectUtils.IsValid(topmostCanvasCache) ? topmostCanvasCache : (topmostCanvasCache = FindTopmostCanvas());
+        public virtual Canvas TopmostCanvas => ObjectUtils.IsValid(topmostCanvasCache) ? topmostCanvasCache : (topmostCanvasCache = gameObject.FindTopmostComponent<Canvas>());
         /// <summary>
         /// Current sort order of the UI element, as per <see cref="TopmostCanvas"/>.
         /// </summary>
@@ -354,14 +354,6 @@ namespace UnityCommon
             if (!rectTransform)
                 rectTransform = GetComponent<RectTransform>();
             return rectTransform;
-        }
-
-        private Canvas FindTopmostCanvas ()
-        {
-            var parentCanvases = gameObject.GetComponentsInParent<Canvas>();
-            if (parentCanvases != null && parentCanvases.Length > 0)
-                return parentCanvases[parentCanvases.Length - 1];
-            return null;
         }
 
         private void SetSortingOrder (int value)
