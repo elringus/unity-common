@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -57,6 +58,8 @@ namespace UnityCommon
         public virtual List<TSlot> GetAllSlots () => SlotsMap.Values.ToList();
 
         public virtual bool SlotExists (string slotId) => SlotsMap.ContainsKey(slotId);
+
+        public virtual TSlot FindSlot (Predicate<TSlot> predicate) => SlotsMap.Values.FirstOrDefault(s => predicate.Invoke(s));
 
         protected override void Awake ()
         {
