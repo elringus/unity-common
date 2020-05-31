@@ -37,6 +37,9 @@ namespace UnityCommon
         {
             if (!canvas) return;
 
+            if (canvas.renderMode != RenderMode.ScreenSpaceOverlay && ObjectUtils.IsValid(canvas.worldCamera))
+                position -= canvas.pixelRect.size / 2;
+            
             position /= canvas.scaleFactor;
 
             var dragPos = trs.TransformPoint(position) - handleTrs.position;
