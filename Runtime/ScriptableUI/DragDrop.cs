@@ -9,6 +9,8 @@ namespace UnityCommon
     public class DragDrop : MonoBehaviour
     {
         [SerializeField] private DragDropHandle handle = default;
+        [Tooltip("Whether to prevent dragging over the canvas bounds.")]
+        [SerializeField] private bool clipOverCanvas = true;
 
         private RectTransform trs;
         private RectTransform handleTrs;
@@ -36,6 +38,8 @@ namespace UnityCommon
         private void HandleDrag (Vector2 position)
         {
             if (!canvas) return;
+
+            if (clipOverCanvas && !canvas.pixelRect.Contains(position)) return;
 
             if (canvas.renderMode != RenderMode.ScreenSpaceOverlay && ObjectUtils.IsValid(canvas.worldCamera))
                 position -= canvas.pixelRect.size / 2;
