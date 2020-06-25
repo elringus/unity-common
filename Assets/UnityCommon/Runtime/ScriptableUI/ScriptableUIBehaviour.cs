@@ -33,6 +33,14 @@ namespace UnityCommon
         /// </summary>
         public virtual bool VisibleOnAwake => visibleOnAwake;
         /// <summary>
+        /// Whether to allow changing font (via <see cref="SetFont(Font)"/>) of the text components under the game object.
+        /// </summary>
+        public virtual bool AllowFontChange => allowFontChange;
+        /// <summary>
+        /// Whether to allow changing font size (via <see cref="SetFontSize(int)"/>) of the text components under the game object.
+        /// </summary>
+        public virtual bool AllowFontSizeChange => allowFontSizeChange;
+        /// <summary>
         /// Determines when to focus the object: on the UI becomes visible or on first navigation attempt (arrow keys or d-pad) while the UI is visible.
         /// </summary>
         public virtual FocusMode FocusModeType { get => focusMode; set => focusMode = value; }
@@ -91,6 +99,10 @@ namespace UnityCommon
         [SerializeField] private float fadeTime = .3f;
         [Tooltip("When `Control Opacity` is enabled, controls whether to ignore time scale when changing visibility.")]
         [SerializeField] private bool ignoreTimeScale = true;
+        [Tooltip("Whether to allow changing font of the text components under the game object.")]
+        [SerializeField] private bool allowFontChange = true;
+        [Tooltip("Whether to allow changing font size of the text components under the game object.")]
+        [SerializeField] private bool allowFontSizeChange = true;
         [Tooltip("When assigned, will make the object focused (for keyboard or gamepad control) when the UI becomes visible or upon navigation.")]
         [SerializeField] private GameObject focusObject = default;
         [Tooltip("When `Focus Object` is assigned, determines when to focus the object: on the UI becomes visible or on first navigation attempt (arrow keys or d-pad) while the UI is visible. Be aware, that gamepad support for Navigation mode requires Unity's new input system package installed.")]
@@ -213,7 +225,7 @@ namespace UnityCommon
         /// <summary>
         /// Removes input focus from the UI element.
         /// </summary>
-        public void ClearFocus ()
+        public virtual void ClearFocus ()
         {
             if (EventSystem.current &&
                 EventSystem.current.currentSelectedGameObject &&
@@ -224,7 +236,7 @@ namespace UnityCommon
         /// <summary>
         /// Applies input focus to the UI element.
         /// </summary>
-        public void SetFocus ()
+        public virtual void SetFocus ()
         {
             if (EventSystem.current)
                 EventSystem.current.SetSelectedGameObject(gameObject);
@@ -234,9 +246,9 @@ namespace UnityCommon
         /// Applies provided font to all the <see cref="UnityEngine.UI.Text"/>
         /// and TMPro text components inside the UI element.
         /// </summary>
-        public void SetFont (Font font)
+        public virtual void SetFont (Font font)
         {
-            if (!ObjectUtils.IsValid(font)) return;
+            if (!AllowFontChange || !ObjectUtils.IsValid(font)) return;
 
             foreach (var text in GetComponentsInChildren<UnityEngine.UI.Text>(true))
                 text.font = font;
@@ -267,8 +279,10 @@ namespace UnityCommon
         /// Applies provided font size to all the <see cref="UnityEngine.UI.Text"/>
         /// and TMPro text components inside the UI element.
         /// </summary>
-        public void SetFontSize (int size)
+        public virtual void SetFontSize (int size)
         {
+            if (!AllowFontSizeChange || size <= 0) return;
+
             foreach (var text in GetComponentsInChildren<UnityEngine.UI.Text>(true))
                 text.fontSize = size;
 
