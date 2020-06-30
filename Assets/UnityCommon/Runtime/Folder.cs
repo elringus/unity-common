@@ -11,7 +11,7 @@ namespace UnityCommon
         public string Path => path;
         public string Name => Path.Contains("/") ? Path.GetAfter("/") : Path;
 
-        [SerializeField] string path = null;
+        [SerializeField] private string path = null;
 
         public Folder (string path)
         {
