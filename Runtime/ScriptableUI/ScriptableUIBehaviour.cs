@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using UniRx.Async;
 using UnityEngine;
 using UnityEngine.Events;
@@ -32,14 +34,6 @@ namespace UnityCommon
         /// requires a <see cref="UnityEngine.CanvasGroup"/> on the same game object.
         /// </summary>
         public virtual bool VisibleOnAwake => visibleOnAwake;
-        /// <summary>
-        /// Whether to allow changing font (via <see cref="SetFont(Font)"/>) of the text components under the game object.
-        /// </summary>
-        public virtual bool AllowFontChange => allowFontChange;
-        /// <summary>
-        /// Whether to allow changing font size (via <see cref="SetFontSize(int)"/>) of the text components under the game object.
-        /// </summary>
-        public virtual bool AllowFontSizeChange => allowFontSizeChange;
         /// <summary>
         /// Determines when to focus the object: on the UI becomes visible or on first navigation attempt (arrow keys or d-pad) while the UI is visible.
         /// </summary>
@@ -86,6 +80,9 @@ namespace UnityCommon
 
         protected static GameObject FocusOnNavigation { get; set; }
 
+        protected virtual List<GameObject> ChangeFont => changeFont;
+        protected virtual List<GameObject> ChangeFontSize => changeFontSize;
+
         protected CanvasGroup CanvasGroup { get; private set; }
         protected bool ControlOpacity => controlOpacity;
 
@@ -99,10 +96,10 @@ namespace UnityCommon
         [SerializeField] private float fadeTime = .3f;
         [Tooltip("When `Control Opacity` is enabled, controls whether to ignore time scale when changing visibility.")]
         [SerializeField] private bool ignoreTimeScale = true;
-        [Tooltip("Whether to allow changing font of the text components under the game object.")]
-        [SerializeField] private bool allowFontChange = true;
-        [Tooltip("Whether to allow changing font size of the text components under the game object.")]
-        [SerializeField] private bool allowFontSizeChange = true;
+        [Tooltip("Text component attached to the provided game objects will be affected by font changes.")]
+        [SerializeField] private List<GameObject> changeFont = default;
+        [Tooltip("Text component attached to the provided game objects will be affected by font size changes.")]
+        [SerializeField] private List<GameObject> changeFontSize = default;
         [Tooltip("When assigned, will make the object focused (for keyboard or gamepad control) when the UI becomes visible or upon navigation.")]
         [SerializeField] private GameObject focusObject = default;
         [Tooltip("When `Focus Object` is assigned, determines when to focus the object: on the UI becomes visible or on first navigation attempt (arrow keys or d-pad) while the UI is visible. Be aware, that gamepad support for Navigation mode requires Unity's new input system package installed.")]
@@ -244,18 +241,21 @@ namespace UnityCommon
 
         /// <summary>
         /// Applies provided font to all the <see cref="UnityEngine.UI.Text"/>
-        /// and TMPro text components inside the UI element.
+        /// and TMPro text components attached to <see cref="ChangeFont"/> game objects.
         /// </summary>
         public virtual void SetFont (Font font)
         {
-            if (!AllowFontChange || !ObjectUtils.IsValid(font)) return;
+            if (ChangeFont is null || ChangeFont.Count == 0 || !ObjectUtils.IsValid(font)) return;
 
-            foreach (var text in GetComponentsInChildren<UnityEngine.UI.Text>(true))
-                text.font = font;
+            foreach (var go in ChangeFont)
+                if (go.TryGetComponent<UnityEngine.UI.Text>(out var text))
+                    text.font = font;
 
             #if TMPRO_AVAILABLE
-            var tmroComponents = GetComponentsInChildren<TMPro.TextMeshProUGUI>(true);
-            if (tmroComponents.Length == 0) return;
+            var tmroComponents = ChangeFont
+                .Where(go => go.TryGetComponent<TMPro.TextMeshProUGUI>(out _))
+                .Select(go => go.GetComponent<TMPro.TextMeshProUGUI>());
+            if (tmroComponents.Count() == 0) return;
             // TMPro requires font with a full path, while Unity doesn't store it by default; trying to guess it from the font name.
             var fontPath = default(string);
             var localFonts = Font.GetPathsToOSFonts();
@@ -277,19 +277,21 @@ namespace UnityCommon
 
         /// <summary>
         /// Applies provided font size to all the <see cref="UnityEngine.UI.Text"/>
-        /// and TMPro text components inside the UI element.
+        /// and TMPro text components attached to <see cref="ChangeFontSize"/> game objects.
         /// </summary>
         public virtual void SetFontSize (int size)
         {
-            if (!AllowFontSizeChange || size <= 0) return;
+            if (ChangeFontSize is null || ChangeFontSize.Count == 0 || size <= 0) return;
 
-            foreach (var text in GetComponentsInChildren<UnityEngine.UI.Text>(true))
-                text.fontSize = size;
-
-            #if TMPRO_AVAILABLE
-            foreach (var text in GetComponentsInChildren<TMPro.TextMeshProUGUI>(true))
-                text.fontSize = size;
-            #endif
+            foreach (var go in ChangeFontSize)
+            {
+                if (go.TryGetComponent<UnityEngine.UI.Text>(out var text))
+                    text.fontSize = size;
+                #if TMPRO_AVAILABLE
+                if (go.TryGetComponent<TMPro.TextMeshProUGUI>(out var tmproText))
+                    tmproText.fontSize = size;
+                #endif
+            }
         }
 
         protected override void Awake ()
