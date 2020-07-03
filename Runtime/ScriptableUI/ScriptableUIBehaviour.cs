@@ -80,8 +80,16 @@ namespace UnityCommon
 
         protected static GameObject FocusOnNavigation { get; set; }
 
-        protected virtual List<GameObject> ChangeFont => changeFont;
-        protected virtual List<GameObject> ChangeFontSize => changeFontSize;
+        /// <summary>
+        /// Only text component attached to the provided game objects 
+        /// will be affected by font changes via <see cref="SetFont(Font)"/>.
+        /// </summary>
+        protected virtual List<GameObject> ChangeFontFilter => null;
+        /// <summary>
+        /// Only text component attached to the provided game objects 
+        /// will be affected by font size changes via <see cref="SetFontSize(int)"/>.
+        /// </summary>
+        protected virtual List<GameObject> ChangeFontSizeFilter => null;
 
         protected CanvasGroup CanvasGroup { get; private set; }
         protected bool ControlOpacity => controlOpacity;
@@ -96,10 +104,6 @@ namespace UnityCommon
         [SerializeField] private float fadeTime = .3f;
         [Tooltip("When `Control Opacity` is enabled, controls whether to ignore time scale when changing visibility.")]
         [SerializeField] private bool ignoreTimeScale = true;
-        [Tooltip("Text component attached to the provided game objects will be affected by font changes.")]
-        [SerializeField] private List<GameObject> changeFont = default;
-        [Tooltip("Text component attached to the provided game objects will be affected by font size changes.")]
-        [SerializeField] private List<GameObject> changeFontSize = default;
         [Tooltip("When assigned, will make the object focused (for keyboard or gamepad control) when the UI becomes visible or upon navigation.")]
         [SerializeField] private GameObject focusObject = default;
         [Tooltip("When `Focus Object` is assigned, determines when to focus the object: on the UI becomes visible or on first navigation attempt (arrow keys or d-pad) while the UI is visible. Be aware, that gamepad support for Navigation mode requires Unity's new input system package installed.")]
@@ -241,18 +245,18 @@ namespace UnityCommon
 
         /// <summary>
         /// Applies provided font to all the <see cref="UnityEngine.UI.Text"/>
-        /// and TMPro text components attached to <see cref="ChangeFont"/> game objects.
+        /// and TMPro text components attached to <see cref="ChangeFontFilter"/> game objects.
         /// </summary>
         public virtual void SetFont (Font font)
         {
-            if (ChangeFont is null || ChangeFont.Count == 0 || !ObjectUtils.IsValid(font)) return;
+            if (ChangeFontFilter is null || ChangeFontFilter.Count == 0 || !ObjectUtils.IsValid(font)) return;
 
-            foreach (var go in ChangeFont)
+            foreach (var go in ChangeFontFilter)
                 if (go.TryGetComponent<UnityEngine.UI.Text>(out var text))
                     text.font = font;
 
             #if TMPRO_AVAILABLE
-            var tmroComponents = ChangeFont
+            var tmroComponents = ChangeFontFilter
                 .Where(go => go.TryGetComponent<TMPro.TextMeshProUGUI>(out _))
                 .Select(go => go.GetComponent<TMPro.TextMeshProUGUI>());
             if (tmroComponents.Count() == 0) return;
@@ -277,13 +281,13 @@ namespace UnityCommon
 
         /// <summary>
         /// Applies provided font size to all the <see cref="UnityEngine.UI.Text"/>
-        /// and TMPro text components attached to <see cref="ChangeFontSize"/> game objects.
+        /// and TMPro text components attached to <see cref="ChangeFontSizeFilter"/> game objects.
         /// </summary>
         public virtual void SetFontSize (int size)
         {
-            if (ChangeFontSize is null || ChangeFontSize.Count == 0 || size <= 0) return;
+            if (ChangeFontSizeFilter is null || ChangeFontSizeFilter.Count == 0 || size <= 0) return;
 
-            foreach (var go in ChangeFontSize)
+            foreach (var go in ChangeFontSizeFilter)
             {
                 if (go.TryGetComponent<UnityEngine.UI.Text>(out var text))
                     text.fontSize = size;
