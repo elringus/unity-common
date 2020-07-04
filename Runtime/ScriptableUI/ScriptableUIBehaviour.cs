@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using UniRx.Async;
 using UnityEngine;
 using UnityEngine.Events;
@@ -79,17 +77,6 @@ namespace UnityCommon
         public virtual Camera RenderCamera { get => ObjectUtils.IsValid(TopmostCanvas) ? TopmostCanvas.worldCamera : null; set => SetRenderCamera(value); }
 
         protected static GameObject FocusOnNavigation { get; set; }
-
-        /// <summary>
-        /// Only text component attached to the provided game objects 
-        /// will be affected by font changes via <see cref="SetFont(Font)"/>.
-        /// </summary>
-        protected virtual List<GameObject> ChangeFontFilter => null;
-        /// <summary>
-        /// Only text component attached to the provided game objects 
-        /// will be affected by font size changes via <see cref="SetFontSize(int)"/>.
-        /// </summary>
-        protected virtual List<GameObject> ChangeFontSizeFilter => null;
 
         protected CanvasGroup CanvasGroup { get; private set; }
         protected bool ControlOpacity => controlOpacity;
@@ -241,61 +228,6 @@ namespace UnityCommon
         {
             if (EventSystem.current)
                 EventSystem.current.SetSelectedGameObject(gameObject);
-        }
-
-        /// <summary>
-        /// Applies provided font to all the <see cref="UnityEngine.UI.Text"/>
-        /// and TMPro text components attached to <see cref="ChangeFontFilter"/> game objects.
-        /// </summary>
-        public virtual void SetFont (Font font)
-        {
-            if (ChangeFontFilter is null || ChangeFontFilter.Count == 0 || !ObjectUtils.IsValid(font)) return;
-
-            foreach (var go in ChangeFontFilter)
-                if (go.TryGetComponent<UnityEngine.UI.Text>(out var text))
-                    text.font = font;
-
-            #if TMPRO_AVAILABLE
-            var tmroComponents = ChangeFontFilter
-                .Where(go => go.TryGetComponent<TMPro.TextMeshProUGUI>(out _))
-                .Select(go => go.GetComponent<TMPro.TextMeshProUGUI>());
-            if (tmroComponents.Count() == 0) return;
-            // TMPro requires font with a full path, while Unity doesn't store it by default; trying to guess it from the font name.
-            var fontPath = default(string);
-            var localFonts = Font.GetPathsToOSFonts();
-            for (int i = 0; i < localFonts.Length; i++)
-                if (localFonts[i].Replace("-", " ").Contains(font.name)) { fontPath = localFonts[i]; break; }
-            if (string.IsNullOrEmpty(fontPath)) return;
-            var localFont = new Font(fontPath);
-            var fontAsset = TMPro.TMP_FontAsset.CreateFontAsset(localFont);
-            if (!ObjectUtils.IsValid(fontAsset)) return;
-            foreach (var text in tmroComponents)
-            {
-                var shader = text.font.material.shader;
-                text.font = fontAsset;
-                foreach (var mat in text.fontMaterials)
-                    mat.shader = shader; // Transfer custom material shaders to the new font.
-            }
-            #endif
-        }
-
-        /// <summary>
-        /// Applies provided font size to all the <see cref="UnityEngine.UI.Text"/>
-        /// and TMPro text components attached to <see cref="ChangeFontSizeFilter"/> game objects.
-        /// </summary>
-        public virtual void SetFontSize (int size)
-        {
-            if (ChangeFontSizeFilter is null || ChangeFontSizeFilter.Count == 0 || size <= 0) return;
-
-            foreach (var go in ChangeFontSizeFilter)
-            {
-                if (go.TryGetComponent<UnityEngine.UI.Text>(out var text))
-                    text.fontSize = size;
-                #if TMPRO_AVAILABLE
-                if (go.TryGetComponent<TMPro.TextMeshProUGUI>(out var tmproText))
-                    tmproText.fontSize = size;
-                #endif
-            }
         }
 
         protected override void Awake ()
