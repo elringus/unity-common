@@ -75,7 +75,7 @@ namespace UnityCommon
 
         protected override void DisposeResource (Resource resource)
         {
-            if (!resource.IsValid) return;
+            if (!resource.Valid) return;
 
             // Non-asset resources are created when using type redirectors.
             if (redirectors.Count > 0 && redirectors.ContainsKey(resource.Object.GetType()))

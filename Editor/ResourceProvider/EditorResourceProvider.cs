@@ -39,7 +39,7 @@ namespace UnityCommon
 
         protected override void DisposeResource (Resource resource)
         {
-            if (!resource.IsValid) return;
+            if (!resource.Valid) return;
             #if UNITY_EDITOR
             if (UnityEditor.AssetDatabase.Contains(resource.Object))
             {

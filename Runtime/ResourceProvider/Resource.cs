@@ -32,7 +32,7 @@ namespace UnityCommon
         /// Whether the <see cref="Object"/> is currently alive (not destroyed) 
         /// on both managed and unmanaged sides of the engine.
         /// </summary>
-        public bool IsValid => ObjectUtils.IsValid(Object);
+        public bool Valid => ObjectUtils.IsValid(Object);
         /// <summary>
         /// How many objects are currently holding (using) the resource.
         /// </summary>
@@ -49,7 +49,7 @@ namespace UnityCommon
 
         public static implicit operator UnityEngine.Object (Resource resource) => resource?.Object;
 
-        public override string ToString () => $"Resource<{Object?.GetType()}> {Path}@{Provider.GetType().Name}";
+        public override string ToString () => $"Resource<{(ObjectUtils.IsValid(Object) ? Object.GetType() : default)}> {Path}@{Provider.GetType().Name}";
 
         /// <summary>
         /// Registers the provided object as a holder of the resource.
@@ -100,7 +100,7 @@ namespace UnityCommon
 
         private TResource CastObject (UnityEngine.Object obj)
         {
-            if (!IsValid) return null;
+            if (!Valid) return null;
 
             var castedObj = obj as TResource;
             if (castedObj is null)
