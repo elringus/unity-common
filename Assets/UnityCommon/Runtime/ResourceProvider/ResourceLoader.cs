@@ -98,7 +98,7 @@ namespace UnityCommon
             if (!isFullPath) path = BuildFullPath(path);
 
             var resource = await Providers.LoadResourceAsync<TResource>(path);
-            if (resource != null && resource.IsValid)
+            if (resource != null && resource.Valid)
                 LoadedResources.Add(resource);
             return resource;
         }
@@ -109,7 +109,7 @@ namespace UnityCommon
 
             var resources = await Providers.LoadResourcesAsync<TResource>(path);
             foreach (var resource in resources)
-                if (resource != null && resource.IsValid)
+                if (resource != null && resource.Valid)
                     LoadedResources.Add(resource);
             return resources;
         }

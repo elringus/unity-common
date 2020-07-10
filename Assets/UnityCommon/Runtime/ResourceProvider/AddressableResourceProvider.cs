@@ -70,7 +70,7 @@ namespace UnityCommon
 
         protected override void DisposeResource (Resource resource)
         {
-            if (!resource.IsValid) return;
+            if (!resource.Valid) return;
 
             Addressables.Release(resource.Object);
         }
