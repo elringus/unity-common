@@ -70,6 +70,9 @@ namespace UnityCommon
                 await AsyncUtils.WaitEndOfFrame;
                 if (lastRunGuid != currentRunGuid) return; // The tweener was completed instantly or stopped.
             }
+
+            if (cancellationToken.IsCancellationRequested) return;
+
             FinishTween();
         }
 
@@ -87,6 +90,9 @@ namespace UnityCommon
                 await AsyncUtils.WaitEndOfFrame;
                 if (lastRunGuid != currentRunGuid) return; // The tweener was completed instantly or stopped.
             }
+
+            if (cancellationToken.IsCancellationRequested) return;
+
             FinishTween();
         }
 
