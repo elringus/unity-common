@@ -64,16 +64,16 @@ namespace UnityCommon
             if (TweenValue.TweenDuration <= 0f) { CompleteInstantly(); return; }
 
             var currentRunGuid = lastRunGuid;
-            while (!cancellationToken.IsCancellationRequested && TweenValue.TargetValid && elapsedTime <= TweenValue.TweenDuration)
+            while (!cancellationToken.CancellationRequested && TweenValue.TargetValid && elapsedTime <= TweenValue.TweenDuration)
             {
                 PeformTween();
                 await AsyncUtils.WaitEndOfFrame;
                 if (lastRunGuid != currentRunGuid) return; // The tweener was completed instantly or stopped.
             }
 
-            if (cancellationToken.IsCancellationRequested) return;
-
-            FinishTween();
+            if (cancellationToken.CancelASAP) return;
+            if (cancellationToken.CancelLazy) CompleteInstantly();
+            else FinishTween();
         }
 
         // Required to prevent garbage when await is not required (fire and forget).
@@ -84,16 +84,16 @@ namespace UnityCommon
             if (TweenValue.TweenDuration <= 0f) { CompleteInstantly(); return; }
 
             var currentRunGuid = lastRunGuid;
-            while (!cancellationToken.IsCancellationRequested && TweenValue.TargetValid && elapsedTime <= TweenValue.TweenDuration)
+            while (!cancellationToken.CancellationRequested && TweenValue.TargetValid && elapsedTime <= TweenValue.TweenDuration)
             {
                 PeformTween();
                 await AsyncUtils.WaitEndOfFrame;
                 if (lastRunGuid != currentRunGuid) return; // The tweener was completed instantly or stopped.
             }
 
-            if (cancellationToken.IsCancellationRequested) return;
-
-            FinishTween();
+            if (cancellationToken.CancelASAP) return;
+            if (cancellationToken.CancelLazy) CompleteInstantly();
+            else FinishTween();
         }
 
         private void PrepareTween ()

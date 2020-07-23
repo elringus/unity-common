@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using UniRx.Async;
 
 namespace UnityCommon
@@ -65,12 +64,17 @@ namespace UnityCommon
             lastRunGuid = Guid.NewGuid();
             var currentRunGuid = lastRunGuid;
 
-            await UniTask.Delay(TimeSpan.FromSeconds(Duration), TimeScaleIgnored, cancellationToken: cancellationToken);
-            if (cancellationToken.IsCancellationRequested || !TargetValid) return;
+            using (var combinedCTS = cancellationToken.CreateLinkedTokenSource())
+                await UniTask.Delay(TimeSpan.FromSeconds(Duration), TimeScaleIgnored, cancellationToken: combinedCTS.Token);
+            if (cancellationToken.CancelASAP || !TargetValid) return;
             if (lastRunGuid != currentRunGuid) return; // The timer was completed instantly or stopped.
 
-            Running = false;
-            onCompleted?.Invoke();
+            if (cancellationToken.CancelLazy) CompleteInstantly();
+            else
+            {
+                Running = false;
+                onCompleted?.Invoke();
+            }
         }
 
         protected virtual async UniTaskVoid WaitAndLoop (CancellationToken cancellationToken = default)
@@ -78,13 +82,16 @@ namespace UnityCommon
             lastRunGuid = Guid.NewGuid();
             var currentRunGuid = lastRunGuid;
 
-            while (true)
+            while (!cancellationToken.CancellationRequested)
             {
-                await UniTask.Delay(TimeSpan.FromSeconds(Duration), TimeScaleIgnored, cancellationToken: cancellationToken);
-                if (cancellationToken.IsCancellationRequested || !TargetValid) return;
+                using (var combinedCTS = cancellationToken.CreateLinkedTokenSource())
+                    await UniTask.Delay(TimeSpan.FromSeconds(Duration), TimeScaleIgnored, cancellationToken: combinedCTS.Token);
+                if (cancellationToken.CancelASAP || !TargetValid) return;
                 if (lastRunGuid != currentRunGuid) return; // The timer was stopped.
                 onLoop?.Invoke();
             }
+
+            if (cancellationToken.CancelLazy) CompleteInstantly();
         }
     }
 }
