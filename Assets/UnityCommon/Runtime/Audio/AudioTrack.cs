@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using UniRx.Async;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -129,7 +128,7 @@ namespace UnityCommon
 
             var tween = new FloatTween(Volume, 0, fadeOutTime, volume => Volume = volume, target: Source);
             await volumeTweener.RunAsync(tween, cancellationToken);
-            if (cancellationToken.IsCancellationRequested) return;
+            if (cancellationToken.CancelASAP) return;
             Stop();
         }
 
