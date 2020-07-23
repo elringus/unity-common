@@ -57,6 +57,8 @@ namespace UnityCommon
             return System.Threading.CancellationTokenSource.CreateLinkedTokenSource(ASAPToken, LazyToken);
         }
 
+        public static implicit operator CancellationToken (System.Threading.CancellationToken token) => new CancellationToken(token);
+
         public static bool operator == (CancellationToken left, CancellationToken right) => left.Equals(right);
 
         public static bool operator != (CancellationToken left, CancellationToken right) => !(left == right);
