@@ -5,15 +5,15 @@ namespace UnityCommon
 {
     public class LabeledButton : Button
     {
-        public Text Label => labelText;
-        public ColorBlock LabelColorBlock => labelColors;
-        public Color LabelColorMultiplier
+        public virtual Text Label => labelText ? labelText : (labelText = GetComponentInChildren<Text>());
+        public virtual ColorBlock LabelColorBlock => labelColors;
+        public virtual Color LabelColorMultiplier
         {
             get => labelColorMultiplier; 
             set { labelColorMultiplier = value; DoStateTransition(currentSelectionState, false); }
         }
 
-        [SerializeField] private Text labelText;
+        [SerializeField] private Text labelText = default;
         [SerializeField] private ColorBlock labelColors = ColorBlock.defaultColorBlock;
 
         private Color labelColorMultiplier = Color.white;
@@ -24,22 +24,6 @@ namespace UnityCommon
             base.Awake();
 
             tintTweener = new Tweener<ColorTween>();
-        }
-
-        #if UNITY_EDITOR
-        protected override void OnValidate ()
-        {
-            base.OnValidate();
-
-            if (!labelText) labelText = GetComponentInChildren<Text>();
-        }
-        #endif
-
-        protected override void Start ()
-        {
-            base.Start();
-
-            if (!labelText) labelText = GetComponentInChildren<Text>();
         }
 
         protected override void DoStateTransition (SelectionState state, bool instant)
