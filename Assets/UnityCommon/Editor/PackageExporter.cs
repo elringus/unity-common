@@ -1,10 +1,9 @@
-﻿// WARNING: Don't forget to keep compatibility with .NET 3.5 and Unity 2018.1.
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -16,8 +15,8 @@ namespace UnityCommon
     {
         public interface IProcessor
         {
-            void OnPackagePreProcess ();
-            void OnPackagePostProcess ();
+            Task OnPackagePreProcessAsync ();
+            Task OnPackagePostProcessAsync ();
         }
 
         private static string PackageName { get { return PlayerPrefs.GetString(prefsPrefix + "PackageName"); } set { PlayerPrefs.SetString(prefsPrefix + "PackageName", value); } }
@@ -185,7 +184,7 @@ namespace UnityCommon
             return IgnoredAssetGUIds.Contains(guid);
         }
 
-        private static void ExportPackageImpl ()
+        private static async void ExportPackageImpl ()
         {
             DisplayProgressBar("Preparing for export...", 0f);
 
@@ -201,7 +200,7 @@ namespace UnityCommon
             DisplayProgressBar("Pre-processing assets...", 0f);
             var processors = GetProcessors();
             foreach (var proc in processors)
-                proc.OnPackagePreProcess();
+                await proc.OnPackagePreProcessAsync();
 
             var assetPaths = AssetDatabase.GetAllAssetPaths().Where(p => p.StartsWith(AssetsPath));
             var ignoredPaths = assetPaths.Where(p => IsAssetIgnored(p));
@@ -325,7 +324,7 @@ namespace UnityCommon
 
             DisplayProgressBar("Post-processing assets...", 1f);
             foreach (var proc in processors)
-                proc.OnPackagePostProcess();
+                await proc.OnPackagePostProcessAsync();
 
             EditorPrefs.SetBool(autoRefreshKey, wasAutoRefreshEnabled);
             EditorSceneManager.RestoreSceneManagerSetup(sceneSetup);
