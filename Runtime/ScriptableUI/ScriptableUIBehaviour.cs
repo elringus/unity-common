@@ -78,8 +78,8 @@ namespace UnityCommon
 
         protected static GameObject FocusOnNavigation { get; set; }
 
-        protected CanvasGroup CanvasGroup { get; private set; }
-        protected bool ControlOpacity => controlOpacity;
+        protected virtual CanvasGroup CanvasGroup { get; private set; }
+        protected virtual bool ControlOpacity => controlOpacity;
 
         [Tooltip("Whether to permamently disable interaction with the object, no matter the visibility. Requires `Canvas Group` component on the same game object.")]
         [SerializeField] private bool disableInteraction = false;
