@@ -19,7 +19,7 @@ namespace UnityCommon
             }
         }
 
-        [MenuItem("Help/Count Lines")]
+        [MenuItem("Tools/Count Lines")]
         private static void CountLines ()
         {
             var strDir = Directory.GetCurrentDirectory();
