@@ -9,7 +9,7 @@ namespace UnityCommon
         private const string fileName = "EditorScreenshot#";
         private const int startIndex = 0;
 
-        [MenuItem("Help/Capture Screenshot")]
+        [MenuItem("Tools/Capture Screenshot")]
         private static void CountLines ()
         {
             var index = startIndex;
