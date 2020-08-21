@@ -3,6 +3,8 @@ using UnityEngine;
 
 namespace UnityCommon
 {
+    // https://forum.unity.com/threads/disconnecting-is-no-longer-implemented.656377/
+
     public class SwapScript : EditorWindow
     {
         private static readonly GUIContent searchScriptLabel = new GUIContent("Search Script", "The component to replace.");
@@ -28,8 +30,12 @@ namespace UnityCommon
             searchScript = (MonoScript)EditorGUILayout.ObjectField(searchScriptLabel, searchScript, typeof(MonoScript), false);
             replacementScript = (MonoScript)EditorGUILayout.ObjectField(replacementScriptLabel, replacementScript, typeof(MonoScript), false);
             path = EditorGUILayout.ObjectField(pathLabel, path, typeof(Object), false);
-
             var pathValid = ValidatePath();
+            if (path && !pathValid)
+                EditorGUILayout.HelpBox("You've assigned an incorrect object: either a prefab or a folder is expected.", MessageType.Error, false);
+
+            EditorGUILayout.Space();
+
             EditorGUI.BeginDisabledGroup(!searchScript || !replacementScript || !pathValid);
             if (GUILayout.Button("Perform Swap"))
             {
@@ -37,7 +43,6 @@ namespace UnityCommon
                 finally { EditorUtility.ClearProgressBar(); }
             }
             EditorGUI.EndDisabledGroup();
-            if (path && !pathValid) EditorGUILayout.HelpBox("You've assigned an incorrect object to the `Path` field. Either a prefab or a folder is expected.", MessageType.Error);
         }
 
         private bool ValidatePath ()
@@ -89,14 +94,14 @@ namespace UnityCommon
 
         private void ProcessBehaviour (MonoBehaviour behaviour)
         {
+            var prefabPath = AssetDatabase.GetAssetPath(behaviour.transform.root.gameObject);
+            Debug.Log($"Replaced script for `{behaviour.GetType().Name}` component attached to `{behaviour.gameObject.name}` game object of `{prefabPath}` prefab.");
+
             var serializedBehaviour = new SerializedObject(behaviour);
             var scriptProperty = serializedBehaviour.FindProperty("m_Script");
             serializedBehaviour.Update();
             scriptProperty.objectReferenceValue = replacementScript;
             serializedBehaviour.ApplyModifiedProperties();
-
-            var prefabPath = AssetDatabase.GetAssetPath(behaviour.transform.root.gameObject);
-            Debug.Log($"Script Swap: Replaced script for `{behaviour.GetType().Name}` component attached to `{behaviour.gameObject.name}` game object of `{prefabPath}` prefab.");
         }
     }
 }
