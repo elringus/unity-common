@@ -1,9 +1,9 @@
 {
   "name": "com.elringus.unitycommon",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "displayName": "UnityCommon",
   "description": "A collection of common frameworks and tools for Unity-based projects",
-  "unity": "2019.1",
+  "unity": "2019.4",
   "author": {
     "name": "Elringus",
     "url": "https://elringus.me"
