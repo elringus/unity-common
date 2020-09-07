@@ -19,6 +19,16 @@ namespace UnityCommon
                 list.RemoveAt(elementIndex);
         }
 
+        /// <summary>
+        /// Returns last <paramref name="count"/> elements in the collection.
+        /// In case collection length is less then <paramref name="count"/>, will return less elements.
+        /// </summary>
+        public static IEnumerable<T> TakeLast<T> (this IEnumerable<T> source, int count)
+        {
+            var skipCount = Mathf.Max(0, source.Count() - count);
+            return source.Skip(skipCount);
+        }
+
         public static int GetArrayHashCode<T> (this T[] array)
         {
             return ArrayEqualityComparer<T>.GetHashCode(array);
