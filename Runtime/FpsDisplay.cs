@@ -25,7 +25,7 @@ namespace UnityCommon
         {
             var waitForDelay = new WaitForSeconds(updateFrequency);
 
-            while (true)
+            while (Application.isPlaying)
             {
                 var lastFrameCount = Time.frameCount;
                 var lastTime = Time.realtimeSinceStartup;
@@ -35,7 +35,7 @@ namespace UnityCommon
                 var timeDelta = Time.realtimeSinceStartup - lastTime;
                 var frameDelta = Time.frameCount - lastFrameCount;
 
-                text.text = string.Format("{0:0.} FPS", frameDelta / timeDelta);
+                text.text = $"{frameDelta / timeDelta:0.} FPS";
             }
         }
     }

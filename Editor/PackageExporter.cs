@@ -10,7 +10,6 @@ using UnityEngine;
 
 namespace UnityCommon
 {
-    [InitializeOnLoad]
     public class PackageExporter : EditorWindow
     {
         public interface IProcessor
@@ -272,7 +271,7 @@ namespace UnityCommon
                 try
                 {
                     var sourcePath = Path.Combine(Application.dataPath, PackageName).Replace("\\", "/");
-                    var destPath = Path.Combine(OutputPath, OutputFileName).Replace("\\", "/"); ;
+                    var destPath = Path.Combine(OutputPath, OutputFileName).Replace("\\", "/");
                     var sourceDir = new DirectoryInfo(sourcePath);
 
                     var hiddenFolders = sourceDir.GetDirectories("*", SearchOption.AllDirectories)

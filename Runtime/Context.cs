@@ -241,7 +241,7 @@ namespace UnityCommon
         {
             var waitForGcInterval = new WaitForSeconds(gcInterval);
 
-            while (true)
+            while (Application.isPlaying)
             {
                 references.Values.ToList()
                     .ForEach(refList => refList.RemoveAll(r => !IsWeakRefValid(r)));

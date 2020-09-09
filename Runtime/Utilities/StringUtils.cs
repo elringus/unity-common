@@ -161,14 +161,14 @@ namespace UnityCommon
         }
 
         /// <summary>
-        /// Removes mathing trailing string.
+        /// Removes matching trailing string.
         /// </summary>
         public static string TrimEnd (this string source, string value)
         {
             if (!source.EndsWithFast(value))
                 return source;
 
-            return source.Remove(source.LastIndexOf(value));
+            return source.Remove(source.LastIndexOf(value, StringComparison.InvariantCulture));
         }
 
         /// <summary>
