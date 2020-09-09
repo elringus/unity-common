@@ -280,6 +280,7 @@ namespace UnityCommon
 
             var navDown = false;
 
+            // ReSharper disable ConditionIsAlwaysTrueOrFalse
             #if ENABLE_INPUT_SYSTEM && INPUT_SYSTEM_AVAILABLE
             var gamepad = UnityEngine.InputSystem.Gamepad.current;
             if (gamepad != null && !navDown)
@@ -293,6 +294,7 @@ namespace UnityCommon
             if (!navDown)
                 navDown = Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow);
             #endif
+            // ReSharper restore ConditionIsAlwaysTrueOrFalse
 
             if (navDown)
             {
