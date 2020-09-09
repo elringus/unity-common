@@ -16,7 +16,7 @@ namespace UnityCommon
     {
         public readonly string RootPath;
 
-        private static readonly Type[] nativeRequestTypes = new[] { typeof(AudioClip), typeof(Texture2D) };
+        private static readonly Type[] nativeRequestTypes = { typeof(AudioClip), typeof(Texture2D) };
 
         private TResource loadedObject;
         private bool useNativeRequests;

@@ -205,21 +205,21 @@ public class PlayerPrefsEditor : EditorWindow
             var key = valueNames[i];
 
             // Remove the _h193410979 style suffix used on PlayerPref keys in Windows registry.
-            var index = key.LastIndexOf("_");
+            var index = key.LastIndexOf("_", StringComparison.Ordinal);
             key = key.Remove(index, key.Length - index);
 
             var ambiguousValue = registryKey.GetValue(valueName);
 
             // Unfortunately floats will come back as an int (at least on 64 bit) because the float is stored as
             // 64 bit but marked as 32 bit - which confuses the GetValue() method greatly! 
-            if (ambiguousValue.GetType() == typeof(int))
+            if (ambiguousValue is int)
             {
                 // If the PlayerPref is not actually an int then it must be a float, this will evaluate to true
                 // (impossible for it to be 0 and -1 at the same time).
-                if (GetInt(key, -1) == -1 && GetInt(key, 0) == 0)
+                if (GetInt(key, -1) == -1 && GetInt(key) == 0)
                     ambiguousValue = GetFloat(key);
                 // If it reports a non default value as a bool, it's a bool not a string.
-                else if (showEditorPrefs && (GetBool(key, true) != true || GetBool(key, false) != false))
+                else if (showEditorPrefs && (GetBool(key, true) != true || GetBool(key)))
                     ambiguousValue = GetBool(key);
             }
             else if (ambiguousValue.GetType() == typeof(byte[]))
@@ -265,7 +265,7 @@ public class PlayerPrefsEditor : EditorWindow
 
         // Allow the user to toggle between editor and PlayerPrefs.
         var oldIndex = showEditorPrefs ? 1 : 0;
-        var newIndex = GUILayout.Toolbar(oldIndex, new string[] { "PlayerPrefs", "EditorPrefs" });
+        var newIndex = GUILayout.Toolbar(oldIndex, new[] { "PlayerPrefs", "EditorPrefs" });
 
         // Has the toggle changed?
         if (newIndex != oldIndex)
@@ -304,7 +304,7 @@ public class PlayerPrefsEditor : EditorWindow
         // PlayerPrefs without slowing the interface to a halt.
 
         var rowHeight = 18;
-        var visibleCount = Mathf.CeilToInt(Screen.height / rowHeight);
+        var visibleCount = Mathf.CeilToInt((float)Screen.height / rowHeight);
         var firstShownIndex = Mathf.FloorToInt(scrollPosition.y / rowHeight);
         var shownIndexLimit = firstShownIndex + visibleCount;
 
@@ -414,11 +414,11 @@ public class PlayerPrefsEditor : EditorWindow
         EditorGUILayout.BeginHorizontal();
 
         if (showEditorPrefs)
-            newEntryType = (PrefType)GUILayout.Toolbar((int)newEntryType, new string[] { "float", "int", "string", "bool" });
+            newEntryType = (PrefType)GUILayout.Toolbar((int)newEntryType, new[] { "float", "int", "string", "bool" });
         else
         {
             if (newEntryType == PrefType.Bool) newEntryType = PrefType.String;
-            newEntryType = (PrefType)GUILayout.Toolbar((int)newEntryType, new string[] { "float", "int", "string" });
+            newEntryType = (PrefType)GUILayout.Toolbar((int)newEntryType, new[] { "float", "int", "string" });
         }
 
         EditorGUILayout.EndHorizontal();

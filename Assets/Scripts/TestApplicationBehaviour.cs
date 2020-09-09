@@ -12,7 +12,7 @@ public class TestApplicationBehaviour : MonoBehaviour
 
     private IEnumerator Coroutine ()
     {
-        while (true)
+        while (Application.isPlaying)
         {
             yield return null;
             transform.localScale = Vector3.one * (Mathf.Sin(Time.time) + 2);

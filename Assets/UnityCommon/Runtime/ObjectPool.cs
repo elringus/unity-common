@@ -80,8 +80,7 @@ namespace UnityCommon
                     Transform parent = transform;
                     while (list.Count < initialPoolSize)
                     {
-                        var obj = (GameObject)Object.Instantiate(prefab);
-                        obj.transform.parent = parent;
+                        var obj = Instantiate(prefab, parent, true);
                         list.Add(obj);
                     }
                     prefab.SetActive(active);
@@ -154,7 +153,7 @@ namespace UnityCommon
                         return obj;
                     }
                 }
-                obj = (GameObject)Object.Instantiate(prefab);
+                obj = Instantiate(prefab);
                 trans = obj.transform;
                 if (parent != null)
                 {

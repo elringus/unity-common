@@ -1,5 +1,6 @@
 ﻿using UnityEditor;
 using UnityEditor.SceneManagement;
+using UnityEngine.SceneManagement;
 
 namespace UnityCommon
 {
@@ -18,7 +19,7 @@ namespace UnityCommon
             #endif
                 if (EditorApplication.isPlayingOrWillChangePlaymode && !EditorApplication.isPlaying)
                 {
-                    var activeScene = EditorSceneManager.GetActiveScene();
+                    var activeScene = SceneManager.GetActiveScene();
                     EditorSceneManager.SaveScene(activeScene);
                     AssetDatabase.SaveAssets();
                 }

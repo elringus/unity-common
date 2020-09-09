@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UniRx.Async;
 using UnityCommon;
 using UnityEngine;
-using UniRx.Async;
 
 public class TestResourceProvider : MonoBehaviour
 {
@@ -19,7 +19,7 @@ public class TestResourceProvider : MonoBehaviour
     private IResourceProvider provider;
     private string text = "empty";
 
-    private readonly List<string> resources = new List<string>() {
+    private readonly List<string> resources = new List<string> {
         "Sprites/Image01",
         "Sprites/Image02",
         "Sprites/Image03",
@@ -142,14 +142,14 @@ public class TestResourceProvider : MonoBehaviour
     {
         for (int i = 0; i < 10; i++)
         {
-            var resources = await provider.LoadResourcesAsync<Texture2D>("Sprites");
-            text = "Total memory used after load: " + Mathf.CeilToInt(System.GC.GetTotalMemory(true) * .000001f) + "Mb";
+            var loadedResources = await provider.LoadResourcesAsync<Texture2D>("Sprites");
+            text = "Total memory used after load: " + Mathf.CeilToInt(GC.GetTotalMemory(true) * .000001f) + "Mb";
 
             await UniTask.Delay(TimeSpan.FromSeconds(.5f));
 
-            foreach (var resource in resources)
+            foreach (var resource in loadedResources)
                 provider.UnloadResource(resource.Path);
-            text = "Total memory used after unload: " + Mathf.CeilToInt(System.GC.GetTotalMemory(true) * .000001f) + "Mb";
+            text = "Total memory used after unload: " + Mathf.CeilToInt(GC.GetTotalMemory(true) * .000001f) + "Mb";
 
             await UniTask.Delay(TimeSpan.FromSeconds(.5f));
         }
@@ -157,30 +157,30 @@ public class TestResourceProvider : MonoBehaviour
 
     private async UniTask TestAudioAsync ()
     {
-        var resources = await provider.LoadResourcesAsync<AudioClip>("Audio");
+        var loadedResources = await provider.LoadResourcesAsync<AudioClip>("Audio");
 
-        foreach (var audioResource in resources)
+        foreach (var audioResource in loadedResources)
         {
             AudioSource.PlayOneShot(audioResource.Object);
             await UniTask.Delay(TimeSpan.FromSeconds(5));
             AudioSource.Stop();
         }
 
-        foreach (var audioResource in resources)
+        foreach (var audioResource in loadedResources)
             provider.UnloadResource(audioResource.Path);
     }
 
     private async UniTask ResolveTextByPathAsync ()
     {
-        var resources = await provider.LoadResourcesAsync<TextAsset>("Text");
+        var loadedResources = await provider.LoadResourcesAsync<TextAsset>("Text");
 
-        foreach (var textResource in resources)
+        foreach (var textResource in loadedResources)
         {
             text = textResource.Object.text;
             await UniTask.Delay(TimeSpan.FromSeconds(1f));
         }
 
-        foreach (var textResource in resources)
+        foreach (var textResource in loadedResources)
             provider.UnloadResource(textResource.Path);
     }
 
@@ -189,7 +189,7 @@ public class TestResourceProvider : MonoBehaviour
         foreach (var res in resources)
         {
             var exist = await provider.ResourceExistsAsync<Sprite>(res);
-            print(res + ": " + exist.ToString());
+            print(res + ": " + exist);
         }
     }
 
@@ -236,9 +236,9 @@ public class TestResourceProvider : MonoBehaviour
 
     private async UniTask TestTextureByDir ()
     {
-        var resources = await provider.LoadResourcesAsync<Texture2D>("Sprites");
+        var loadedResources = await provider.LoadResourcesAsync<Texture2D>("Sprites");
 
-        foreach (var res in resources)
+        foreach (var res in loadedResources)
         {
             var texture = res.Object;
             SpriteRenderer.sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.one * .5f);
