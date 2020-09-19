@@ -89,7 +89,7 @@ namespace UnityCommon
             if (!LoadedResources.Any(r => r.Value.Object == resource.Object))
                 DisposeResource(resource);
 
-            LogMessage($"Resource '{path}' unloaded.");
+            LogMessage($"Resource `{path}` unloaded.");
         }
 
         public virtual void UnloadResources ()
@@ -207,7 +207,7 @@ namespace UnityCommon
 
         protected virtual void HandleResourceLoaded<T> (Resource<T> resource) where T : UnityEngine.Object
         {
-            if (!resource.Valid) Debug.LogError($"Resource '{resource.Path}' failed to load.");
+            if (!resource.Valid) Debug.LogError($"Resource `{resource.Path}` failed to load.");
             else LoadedResources[resource.Path] = resource;
 
             if (LoadRunners.ContainsKey(resource.Path))

@@ -122,7 +122,7 @@ namespace UnityCommon
             foreach (var filePath in Directory.GetFiles(CacheDirPath).Where(f => Path.GetFileName(f).StartsWith(resourcesPath)))
             {
                 File.Delete(filePath);
-                LogMessage($"Cached resource '{filePath}' purged.");
+                LogMessage($"Cached resource `{filePath}` purged.");
             }
 
             IOUtils.WebGLSyncFs();

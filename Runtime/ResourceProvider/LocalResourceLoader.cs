@@ -42,12 +42,12 @@ namespace UnityCommon
             {
                 var usedExtensions = string.Join("/", converter.Representations.Select(r => r.Extension));
                 Debug.LogError($"Failed to load `{filePath}({usedExtensions})` resource using local file system: File not found.");
-                SetResult(new Resource<TResource>(Path, null, Provider));
+                SetResult(new Resource<TResource>(Path, null));
                 return;
             }
 
             var obj = await converter.ConvertAsync(rawData, System.IO.Path.GetFileNameWithoutExtension(Path));
-            var result = new Resource<TResource>(Path, obj, Provider);
+            var result = new Resource<TResource>(Path, obj);
 
             SetResult(result);
 

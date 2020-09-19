@@ -5,7 +5,7 @@ using UniRx.Async;
 namespace UnityCommon
 {
     /// <summary>
-    /// Implementation is able to load and unload <see cref="Resource"/> objects at runtime.
+    /// Implementation is able to load and unload <see cref="Resource"/> objects from a specific provision source.
     /// </summary>
     public interface IResourceProvider
     {

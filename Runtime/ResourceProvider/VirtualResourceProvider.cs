@@ -36,7 +36,7 @@ namespace UnityCommon
 
         public void AddResource (string path, UnityEngine.Object obj)
         {
-            Resources[path] = new Resource(path, obj, this);
+            Resources[path] = new Resource(path, obj);
         }
 
         public void RemoveResource (string path)
@@ -72,13 +72,13 @@ namespace UnityCommon
 
         public IEnumerable<Resource<T>> LoadResources<T> (string path) where T : UnityEngine.Object
         {
-            return Resources.Where(kv => kv.Value is T).Select(kv => kv.Key).LocateResourcePathsAtFolder(path).Select(p => LoadResource<T>(p));
+            return Resources.Where(kv => kv.Value is T).Select(kv => kv.Key).LocateResourcePathsAtFolder(path).Select(LoadResource<T>);
         }
 
         public UniTask<IEnumerable<Resource<T>>> LoadResourcesAsync<T> (string path) where T : UnityEngine.Object
         {
-            var resoucres = LoadResources<T>(path);
-            return UniTask.FromResult(resoucres);
+            var resources = LoadResources<T>(path);
+            return UniTask.FromResult(resources);
         }
 
         public IEnumerable<Folder> LocateFolders (string path)
