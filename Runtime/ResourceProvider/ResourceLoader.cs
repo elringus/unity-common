@@ -72,6 +72,26 @@ namespace UnityCommon
             foreach (var provider in providersList)
                 ProvisionSources.Add(new ProvisionSource(provider, pathPrefix));
         }
+        
+        /// <summary>
+        /// Given resource with the provided local is loaded, returns full path of the resource, null otherwise.
+        /// </summary>
+        public string GetFullPath (string localPath)
+        {
+            var resource = GetLoadedResource(localPath);
+            if (resource is null) { Debug.LogError($"Failed to get full path for `{localPath}` resource: Resource is not loaded."); return null; }
+            return resource.FullPath;
+        }
+        
+        /// <summary>
+        /// Given resource with the provided full path is loaded, returns local path of the resource, null otherwise.
+        /// </summary>
+        public string GetLocalPath (string fullPath)
+        {
+            var resource = LoadedResources.FirstOrDefault(r => r.FullPath.EqualsFast(fullPath));
+            if (resource is null) { Debug.LogError($"Failed to get full path for `{fullPath}` resource: Resource is not loaded."); return null; }
+            return resource.FullPath;
+        }
 
         public virtual async void Hold (string path, object holder)
         {
@@ -239,7 +259,7 @@ namespace UnityCommon
             LoadedResources.Clear();
             pendingHoldResources.Clear();
         }
-        
+
         protected virtual LoadedResource GetLoadedResource (string localPath) => LoadedResources.FirstOrDefault(r => r.Valid && r.LocalPath.EqualsFast(localPath));
         
         private TrackedResource GetPendingHold (string localPath) => pendingHoldResources.FirstOrDefault(r => r.LocalPath.EqualsFast(localPath));
