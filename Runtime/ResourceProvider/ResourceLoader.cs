@@ -7,19 +7,19 @@ using UnityEngine;
 namespace UnityCommon
 {
     /// <summary>
-    /// Allows to to load and unload <see cref="Resource{TResource}"/> objects via a prioritized <see cref="IResourceProvider"/> list and local paths.
+    /// Allows to load and unload <see cref="Resource{TResource}"/> objects via a prioritized <see cref="ProvisionSource"/> list.
     /// </summary>
     public class ResourceLoader<TResource> : IResourceLoader<TResource> 
         where TResource : UnityEngine.Object
     {
         protected class TrackedResource
         {
-            public readonly string FullPath;
+            public readonly string LocalPath;
             public readonly LinkedList<WeakReference> Holders = new LinkedList<WeakReference>();
             
-            public TrackedResource (string fullPath)
+            public TrackedResource (string localPath)
             {
-                FullPath = fullPath;
+                LocalPath = localPath;
             }
 
             public void AddHolder (object holder) => Holders.AddLast(new WeakReference(holder));
@@ -30,14 +30,16 @@ namespace UnityCommon
         protected class LoadedResource : TrackedResource
         {
             public readonly Resource<TResource> Resource;
-            public readonly IResourceProvider Provider;
-            public bool Valid => Resource?.Valid ?? false;
+            public readonly ProvisionSource ProvisionSource;
+            public readonly string FullPath;
+            public bool Valid => Resource.Valid;
 
-            public LoadedResource (Resource<TResource> resource, IResourceProvider provider)
-                : base(resource?.Path)
+            public LoadedResource (Resource<TResource> resource, ProvisionSource provisionSource)
+                : base(ProvisionSource.BuildLocalPath(provisionSource.PathPrefix, resource.Path))
             {
                 Resource = resource;
-                Provider = provider;
+                ProvisionSource = provisionSource;
+                FullPath = resource.Path;
             }
         }
 
@@ -47,66 +49,32 @@ namespace UnityCommon
         /// <summary>
         /// Whether any of the providers used by this loader is currently loading anything.
         /// </summary>
-        public virtual bool LoadingAny => Providers.AnyIsLoading();
+        public virtual bool LoadingAny => ProvisionSources.Any(s => s.Provider.IsLoading);
+
         /// <summary>
-        /// Prefix used by this provider to build full resource paths from provided local paths.
+        /// Prioritized provision sources list used by the loader.
         /// </summary>
-        public virtual string PathPrefix { get; }
-        
+        protected readonly List<ProvisionSource> ProvisionSources = new List<ProvisionSource>();
         /// <summary>
-        /// Prioritized providers list used by this loader.
-        /// </summary>
-        protected virtual List<IResourceProvider> Providers { get; }
-        /// <summary>
-        /// Resources loaded by this loader.
+        /// Resources loaded by the loader.
         /// </summary>
         protected readonly LinkedList<LoadedResource> LoadedResources = new LinkedList<LoadedResource>();
-        
+
         private readonly LinkedList<TrackedResource> pendingHoldResources = new LinkedList<TrackedResource>();
 
-        public ResourceLoader (IList<IResourceProvider> providersList, string resourcePathPrefix = null)
+        public ResourceLoader (IList<ProvisionSource> provisionSources)
         { 
-            Providers = new List<IResourceProvider>();
-            Providers.AddRange(providersList);
+            ProvisionSources.AddRange(provisionSources);
+        }
+        
+        public ResourceLoader (IList<IResourceProvider> providersList, string pathPrefix = null)
+        { 
+            foreach (var provider in providersList)
+                ProvisionSources.Add(new ProvisionSource(provider, pathPrefix));
+        }
 
-            PathPrefix = resourcePathPrefix;
-        }
-        
-        /// <summary>
-        /// Given a local path to the resource, builds full path using predefined <see cref="PathPrefix"/>.
-        /// </summary>
-        public virtual string BuildFullPath (string localPath)
+        public virtual async void Hold (string path, object holder)
         {
-            if (!string.IsNullOrWhiteSpace(PathPrefix))
-            {
-                if (!string.IsNullOrWhiteSpace(localPath)) return $"{PathPrefix}/{localPath}";
-                else return PathPrefix;
-            }
-            else return localPath;
-        }
-        
-        /// <summary>
-        /// Given a full path to the resource, builds local path using predefined <see cref="PathPrefix"/>.
-        /// </summary>
-        public virtual string BuildLocalPath (string fullPath)
-        {
-            if (!string.IsNullOrWhiteSpace(PathPrefix))
-            {
-                var prefixAndSlash = $"{PathPrefix}/";
-                if (!fullPath.Contains(prefixAndSlash))
-                {
-                    Debug.LogError($"Failed to build local path from `{fullPath}`: the provided path doesn't contain `{PathPrefix}` path prefix.");
-                    return null;
-                }
-                return fullPath.GetAfterFirst(prefixAndSlash);
-            }
-            else return fullPath;
-        }
-        
-        public virtual async void Hold (string path, object holder, bool fullPath = false)
-        {
-            if (!fullPath) path = BuildFullPath(path);
-            
             var loadedResource = GetLoadedResource(path);
             if (loadedResource is null) // Attempt to load the resource in background.
             {
@@ -120,9 +88,9 @@ namespace UnityCommon
                 
                 var pendingResource = new TrackedResource(path);
                 pendingHoldResources.AddLast(pendingResource);
-                await LoadAsync(path, true);
+                await LoadAsync(path);
                 // Check if the resource has been requested to unload while it was loading.
-                if (!pendingHoldResources.Contains(pendingResource)) { Unload(path, true); return; }
+                if (!pendingHoldResources.Contains(pendingResource)) { Unload(path); return; }
                 loadedResource = GetLoadedResource(path);
                 if (loadedResource is null) { Debug.LogError($"Failed to hold `{path}` resource: Resource is not available."); return; }
                 // Transfer the holders added while the resource was loading.
@@ -135,121 +103,150 @@ namespace UnityCommon
             loadedResource.AddHolder(holder);
         }
 
-        public virtual void Release (string path, object holder, bool unload = true, bool fullPath = false)
+        public virtual void Release (string path, object holder, bool unload = true)
         {
-            if (!fullPath) path = BuildFullPath(path);
-
             var resource = GetLoadedResource(path) ?? GetPendingHold(path);
             if (resource is null) return;
 
             resource.RemoveHolder(holder);
             
             if (unload && resource.Holders.Count == 0)
-                Unload(path, true);
+                Unload(path);
         }
 
-        public virtual bool IsHeldBy (string path, object holder, bool fullPath = false)
+        public virtual bool IsHeldBy (string path, object holder)
         {
-            if (!fullPath) path = BuildFullPath(path);
-            
             var resource = GetLoadedResource(path) ?? GetPendingHold(path);
             return resource?.IsHeldBy(holder) ?? false;
         }
 
-        public virtual bool IsLoaded (string path, bool fullPath = false)
+        public virtual bool IsLoaded (string path)
         {
-            if (!fullPath) path = BuildFullPath(path);
-            return Providers.ResourceLoaded(path);
+            return LoadedResources.Any(r => r.Valid && r.LocalPath.EqualsFast(path));
         }
 
-        public virtual Resource<TResource> GetLoadedOrNull (string path, bool fullPath = false)
+        public virtual Resource<TResource> GetLoadedOrNull (string path)
         {
-            if (!fullPath) path = BuildFullPath(path);
-            return LoadedResources.FirstOrDefault(r => r.Valid && r.FullPath.EqualsFast(path))?.Resource;
+            return GetLoadedResource(path)?.Resource;
         }
 
-        public virtual async UniTask<Resource<TResource>> LoadAsync (string path, bool fullPath = false)
+        public virtual async UniTask<Resource<TResource>> LoadAsync (string path)
         {
-            if (!fullPath) path = BuildFullPath(path);
+            if (IsLoaded(path))
+                return GetLoadedOrNull(path);
 
-            var (resource, provider) = await Providers.LoadResourceAsync<TResource>(path);
-            if (resource != null && resource.Valid)
+            foreach (var source in ProvisionSources)
             {
-                LoadedResources.AddLast(new LoadedResource(resource, provider));
-                OnResourceLoaded?.Invoke(BuildLocalPath(path));
+                var fullPath = source.BuildFullPath(path);
+                if (!await source.Provider.ResourceExistsAsync<TResource>(fullPath)) continue;
+                
+                var resource = await source.Provider.LoadResourceAsync<TResource>(fullPath);
+                LoadedResources.AddLast(new LoadedResource(resource, source));
+                OnResourceLoaded?.Invoke(path);
+                return resource;
             }
-            return resource;
-        }
-
-        public virtual async UniTask<IEnumerable<Resource<TResource>>> LoadAllAsync (string path = null, bool fullPath = false)
-        {
-            if (!fullPath) path = BuildFullPath(path);
-
-            var loadResult = await Providers.LoadResourcesAsync<TResource>(path);
-            foreach (var (resource, provider) in loadResult)
-                if (resource != null && resource.Valid)
-                {
-                    LoadedResources.AddLast(new LoadedResource(resource, provider));
-                    OnResourceLoaded?.Invoke(BuildLocalPath(path));
-                }
-            return loadResult.Select(t => t.Item1);
-        }
-
-        public virtual IEnumerable<Resource<TResource>> GetAllLoaded () => LoadedResources.Where(r => r.Valid).Select(r => r.Resource);
-
-        public virtual async UniTask<IEnumerable<string>> LocateAsync (string path = null, bool fullPath = false)
-        {
-            if (!fullPath) path = BuildFullPath(path);
-            var fullPaths = await Providers.LocateResourcesAsync<TResource>(path);
-            return fullPaths.Select(t => BuildLocalPath(t.Item1));
-        }
-
-        public virtual async UniTask<bool> ExistsAsync (string path, bool fullPath = false)
-        {
-            if (!fullPath) path = BuildFullPath(path);
-            var (exist, provider) = await Providers.ResourceExistsAsync<TResource>(path);
-            return exist;
-        }
-
-        public virtual void Unload (string path, bool fullPath = false)
-        {
-            if (!fullPath) path = BuildFullPath(path);
-
-            Providers.UnloadResource(path);
-            LoadedResources.RemoveAll(r => !r.Valid || r.FullPath.EqualsFast(path));
-            pendingHoldResources.RemoveAll(p => p.FullPath.EqualsFast(path));
             
-            OnResourceUnloaded?.Invoke(BuildLocalPath(path));
+            return Resource<TResource>.Invalid;
+        }
+
+        public virtual async UniTask<IEnumerable<Resource<TResource>>> LoadAllAsync (string path = null)
+        {
+            var result = new List<Resource<TResource>>();
+            
+            foreach (var source in ProvisionSources)
+            {
+                var fullPath = source.BuildFullPath(path);
+                var locatedResourcePaths = await source.Provider.LocateResourcesAsync<TResource>(fullPath);
+                foreach (var locatedResourcePath in locatedResourcePaths)
+                {
+                    if (result.Any(r => r.Path.EqualsFast(locatedResourcePath))) continue;
+
+                    var localPath = source.BuildLocalPath(locatedResourcePath);
+                    
+                    if (IsLoaded(localPath))
+                    {
+                        result.Add(GetLoadedOrNull(localPath));
+                        continue;
+                    }
+                    
+                    var resource = await source.Provider.LoadResourceAsync<TResource>(locatedResourcePath);
+                    LoadedResources.AddLast(new LoadedResource(resource, source));
+                    OnResourceLoaded?.Invoke(localPath);
+                    result.Add(resource);
+                }
+            }
+
+            return result;
+        }
+
+        public virtual IEnumerable<Resource<TResource>> GetAllLoaded ()
+        {
+            return LoadedResources.Where(r => r.Valid).Select(r => r.Resource);
+        } 
+
+        public virtual async UniTask<IEnumerable<string>> LocateAsync (string path = null)
+        {
+            var result = new List<string>();
+            
+            foreach (var source in ProvisionSources)
+            {
+                var fullPath = source.BuildFullPath(path);
+                var locatedResourcePaths = await source.Provider.LocateResourcesAsync<TResource>(fullPath);
+                foreach (var locatedResourcePath in locatedResourcePaths)
+                {
+                    var localPath = source.BuildLocalPath(locatedResourcePath);
+                    if (!result.Any(p => p.EqualsFast(localPath)))
+                        result.Add(localPath);
+                }
+            }
+            
+            return result;
+        }
+
+        public virtual async UniTask<bool> ExistsAsync (string path)
+        {
+            if (IsLoaded(path)) 
+                return true;
+
+            foreach (var source in ProvisionSources)
+            {
+                var fullPath = source.BuildFullPath(path);
+                if (await source.Provider.ResourceExistsAsync<TResource>(fullPath)) 
+                    return true;
+            }
+
+            return false;
+        }
+
+        public virtual void Unload (string path)
+        {
+            var resource = GetLoadedResource(path);
+            resource?.ProvisionSource.Provider.UnloadResource(resource.FullPath);
+
+            LoadedResources.RemoveAll(r => !r.Valid || r.LocalPath.EqualsFast(path));
+            pendingHoldResources.RemoveAll(p => p.LocalPath.EqualsFast(path));
+            
+            OnResourceUnloaded?.Invoke(path);
         }
 
         public virtual void UnloadAll ()
         {
             foreach (var resource in LoadedResources)
             {
-                resource.Provider.UnloadResource(resource.FullPath);
-                OnResourceUnloaded?.Invoke(BuildLocalPath(resource.FullPath));
+                resource.ProvisionSource.Provider.UnloadResource(resource.FullPath);
+                OnResourceUnloaded?.Invoke(resource.LocalPath);
             }
             LoadedResources.Clear();
             pendingHoldResources.Clear();
         }
         
-        protected virtual LoadedResource GetLoadedResource (string fullPath) => LoadedResources.FirstOrDefault(r => r.Valid && r.FullPath.EqualsFast(fullPath));
+        protected virtual LoadedResource GetLoadedResource (string localPath) => LoadedResources.FirstOrDefault(r => r.Valid && r.LocalPath.EqualsFast(localPath));
         
-        private TrackedResource GetPendingHold (string fullPath) => pendingHoldResources.FirstOrDefault(r => r.FullPath.EqualsFast(fullPath));
-
-        void IResourceLoader.Unload (string path) => Unload(path, false);
-        void IResourceLoader.Hold (string path, object holder) => Hold(path, holder, false);
-        void IResourceLoader.Release (string path, object holder, bool unload) => Release(path, holder, unload, false);
-        bool IResourceLoader.IsHeldBy (string path, object holder) => IsHeldBy(path, holder, false);
-        bool IResourceLoader.IsLoaded (string path) => IsLoaded(path, false);
-        Resource<TResource> IResourceLoader<TResource>.GetLoadedOrNull (string path) => GetLoadedOrNull(path, false);
-        Resource IResourceLoader.GetLoadedOrNull (string path) => GetLoadedOrNull(path, false);
+        private TrackedResource GetPendingHold (string localPath) => pendingHoldResources.FirstOrDefault(r => r.LocalPath.EqualsFast(localPath));
+        
+        Resource IResourceLoader.GetLoadedOrNull (string path) => GetLoadedOrNull(path);
         IEnumerable<Resource> IResourceLoader.GetAllLoaded () => GetAllLoaded();
-        UniTask<Resource<TResource>> IResourceLoader<TResource>.LoadAsync (string path) => LoadAsync(path, false);
-        UniTask<IEnumerable<Resource<TResource>>> IResourceLoader<TResource>.LoadAllAsync (string path) => LoadAllAsync(path, false);
-        async UniTask<Resource> IResourceLoader.LoadAsync (string path) => await LoadAsync(path, false);
-        async UniTask<IEnumerable<Resource>> IResourceLoader.LoadAllAsync (string path) => await LoadAllAsync(path, false);
-        UniTask<IEnumerable<string>> IResourceLoader.LocateAsync (string path) => LocateAsync(path, false);
-        UniTask<bool> IResourceLoader.ExistsAsync (string path) => ExistsAsync(path, false);
+        async UniTask<Resource> IResourceLoader.LoadAsync (string path) => await LoadAsync(path);
+        async UniTask<IEnumerable<Resource>> IResourceLoader.LoadAllAsync (string path) => await LoadAllAsync(path);
     }
 }
