@@ -47,16 +47,16 @@ namespace UnityCommon
         /// <summary>
         /// Whether any of the providers used by this loader is currently loading anything.
         /// </summary>
-        public bool LoadingAny => Providers.AnyIsLoading();
+        public virtual bool LoadingAny => Providers.AnyIsLoading();
         /// <summary>
         /// Prefix used by this provider to build full resource paths from provided local paths.
         /// </summary>
-        public string PathPrefix { get; }
+        public virtual string PathPrefix { get; }
         
         /// <summary>
         /// Prioritized providers list used by this loader.
         /// </summary>
-        protected List<IResourceProvider> Providers { get; }
+        protected virtual List<IResourceProvider> Providers { get; }
         /// <summary>
         /// Resources loaded by this loader.
         /// </summary>
@@ -75,7 +75,7 @@ namespace UnityCommon
         /// <summary>
         /// Given a local path to the resource, builds full path using predefined <see cref="PathPrefix"/>.
         /// </summary>
-        public string BuildFullPath (string localPath)
+        public virtual string BuildFullPath (string localPath)
         {
             if (!string.IsNullOrWhiteSpace(PathPrefix))
             {
@@ -88,7 +88,7 @@ namespace UnityCommon
         /// <summary>
         /// Given a full path to the resource, builds local path using predefined <see cref="PathPrefix"/>.
         /// </summary>
-        public string BuildLocalPath (string fullPath)
+        public virtual string BuildLocalPath (string fullPath)
         {
             if (!string.IsNullOrWhiteSpace(PathPrefix))
             {
@@ -103,7 +103,7 @@ namespace UnityCommon
             else return fullPath;
         }
         
-        public async void Hold (string path, object holder, bool fullPath = false)
+        public virtual async void Hold (string path, object holder, bool fullPath = false)
         {
             if (!fullPath) path = BuildFullPath(path);
             
@@ -135,7 +135,7 @@ namespace UnityCommon
             loadedResource.AddHolder(holder);
         }
 
-        public void Release (string path, object holder, bool unload = true, bool fullPath = false)
+        public virtual void Release (string path, object holder, bool unload = true, bool fullPath = false)
         {
             if (!fullPath) path = BuildFullPath(path);
 
@@ -148,7 +148,7 @@ namespace UnityCommon
                 Unload(path, true);
         }
 
-        public bool IsHeldBy (string path, object holder, bool fullPath = false)
+        public virtual bool IsHeldBy (string path, object holder, bool fullPath = false)
         {
             if (!fullPath) path = BuildFullPath(path);
             
@@ -233,7 +233,7 @@ namespace UnityCommon
             pendingHoldResources.Clear();
         }
         
-        protected LoadedResource GetLoadedResource (string fullPath) => LoadedResources.FirstOrDefault(r => r.Valid && r.FullPath.EqualsFast(fullPath));
+        protected virtual LoadedResource GetLoadedResource (string fullPath) => LoadedResources.FirstOrDefault(r => r.Valid && r.FullPath.EqualsFast(fullPath));
         
         private TrackedResource GetPendingHold (string fullPath) => pendingHoldResources.FirstOrDefault(r => r.FullPath.EqualsFast(fullPath));
 
