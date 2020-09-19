@@ -76,6 +76,26 @@ namespace UnityCommon
             list[indexB] = tmp;
             return list;
         }
+        
+        public static int RemoveAll<T>(this LinkedList<T> list, Predicate<T> match)
+        {
+            if (list == null) throw new ArgumentNullException(nameof(list));
+            if (match == null) throw new ArgumentNullException(nameof(match));
+            
+            var count = 0;
+            var node = list.First;
+            while (node != null)
+            {
+                var next = node.Next;
+                if (match(node.Value))
+                {
+                    list.Remove(node);
+                    count++;
+                }
+                node = next;
+            }
+            return count;
+        }
 
         /// <summary>
         /// Orders the elements of <paramref name="source"/> collection in a way that no element depends on any previous element.
@@ -96,8 +116,7 @@ namespace UnityCommon
 
             void Visit (T item)
             {
-                var inProcess = default(bool);
-                var alreadyVisited = visited.TryGetValue(item, out inProcess);
+                var alreadyVisited = visited.TryGetValue(item, out var inProcess);
 
                 if (alreadyVisited)
                 {
