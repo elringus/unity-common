@@ -38,7 +38,7 @@ namespace UnityCommon
         /// </summary>
         public int HoldersCount => holders.Count;
 
-        private readonly HashSet<WeakReference> holders = new HashSet<WeakReference>();
+        private readonly LinkedList<WeakReference> holders = new LinkedList<WeakReference>();
 
         public Resource (string path, UnityEngine.Object obj, IResourceProvider provider)
         {
@@ -58,19 +58,20 @@ namespace UnityCommon
         /// <param name="holder">The object that is going to hold the resource.</param>
         public void Hold (object holder)
         {
+            if (IsHeldBy(holder)) return;
             var holderRef = new WeakReference(holder);
-            holders.Add(holderRef);
+            holders.AddLast(holderRef);
         }
 
         /// <summary>
-        /// Removes the provided object from the holders set.
+        /// Removes the provided object from the holders list.
         /// Will (optionally) unload the resource after the release in case no other objects are holding it.
         /// </summary>
         /// <param name="holder">The object that is no longer holding the resource.</param>
         /// <param name="unload">Whether to also unload the resource in case no other objects are holding it.</param>
         public void Release (object holder, bool unload = true)
         {
-            holders.RemoveWhere(wr => !wr.IsAlive || wr.Target == holder);
+            holders.RemoveAll(wr => !wr.IsAlive || wr.Target == holder);
             if (unload && holders.Count == 0)
                 Provider.UnloadResource(Path);
         }
