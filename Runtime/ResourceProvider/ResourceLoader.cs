@@ -100,7 +100,7 @@ namespace UnityCommon
             return resource?.IsHeldBy(holder) ?? false;
         }
 
-        public int HoldersCount (string path)
+        public int CountHolders (string path)
         {
             return GetLoadedResource(path)?.CountHolders() ?? 0;
         }

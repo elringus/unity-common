@@ -81,7 +81,7 @@ namespace UnityCommon
         /// <summary>
         /// Returns number of objects currently holding a loaded resource with the specified path.
         /// </summary>
-        int HoldersCount (string path);
+        int CountHolders (string path);
     }
 
     /// <summary>
