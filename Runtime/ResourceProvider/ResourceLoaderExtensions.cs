@@ -9,6 +9,26 @@ namespace UnityCommon
     public static class ResourceLoaderExtensions
     {
         /// <summary>
+        /// Given provided resource is loaded by the loader, hold it.
+        /// </summary>
+        public static void Hold (this IResourceLoader loader, Resource resource, object holder)
+        {
+            var localPath = loader.GetLocalPath(resource);
+            if (!string.IsNullOrEmpty(localPath))
+                loader.Hold(localPath, holder);
+        }
+        
+        /// <summary>
+        /// Given provided resource is loaded by the loader, release it.
+        /// </summary>
+        public static void Release (this IResourceLoader loader, Resource resource, object holder, bool unload = true)
+        {
+            var localPath = loader.GetLocalPath(resource);
+            if (!string.IsNullOrEmpty(localPath))
+                loader.Release(localPath, holder, unload);
+        }
+        
+        /// <summary>
         /// Attempts to load a resource with the provided path and holds it in case it's loaded successfully.
         /// </summary>
         public static async UniTask<Resource<TResource>> LoadAndHoldAsync<TResource> (this IResourceLoader<TResource> loader, string path, object holder)
