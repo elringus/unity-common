@@ -17,7 +17,12 @@ namespace UnityCommon
         /// Event invoked when a resources with the path is unloaded.
         /// </summary>
         event Action<string> OnResourceUnloaded;
-        
+
+        /// <summary>
+        /// Given provided resource is loaded by this loader,
+        /// returns local (to the loader) path of the resource, null otherwise.
+        /// </summary>
+        string GetLocalPath (Resource resource);
         /// <summary>
         /// Checks whether a resource with the provided path is loaded.
         /// </summary>
@@ -55,12 +60,12 @@ namespace UnityCommon
         /// </summary>
         void UnloadAll ();
         /// <summary>
-        /// Registers the provided object as a holder of a resource with the path.
+        /// Registers the provided object as a holder of a loaded resource with the specified path.
         /// The resource won't be unloaded by <see cref="Release"/> while it's held by at least one object.
         /// </summary>
         void Hold (string path, object holder);
         /// <summary>
-        /// Removes the provided object from the holders list of a resource with the path.
+        /// Removes the provided object from the holders list of a loaded resource with the specified path.
         /// Will (optionally) unload the resource after the release in case no other objects are holding it.
         /// </summary>
         void Release (string path, object holder, bool unload = true);
@@ -70,17 +75,9 @@ namespace UnityCommon
         /// </summary>
         void ReleaseAll (object holder, bool unload = true);
         /// <summary>
-        /// Checks whether a resource with the provided path is being held by the object.
+        /// Checks whether a loaded resource with the provided path is being held by the object.
         /// </summary>
         bool IsHeldBy (string path, object holder);
-        /// <summary>
-        /// Returns paths of the resources, that are currently held by at least one holder.
-        /// </summary>
-        IEnumerable<string> GetHeld ();
-        /// <summary>
-        /// Loads all the held resources.
-        /// </summary>
-        UniTask LoadHeldAsync ();
     }
 
     /// <summary>
