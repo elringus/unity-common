@@ -55,7 +55,7 @@ namespace UnityCommon
         /// </summary>
         void UnloadAll ();
         /// <summary>
-        /// Registers the provided object as a holder of a resource with the path; will start loading the resource if it's not loaded.
+        /// Registers the provided object as a holder of a resource with the path.
         /// The resource won't be unloaded by <see cref="Release"/> while it's held by at least one object.
         /// </summary>
         void Hold (string path, object holder);
