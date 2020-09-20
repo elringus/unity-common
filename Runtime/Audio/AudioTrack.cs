@@ -54,13 +54,13 @@ namespace UnityCommon
         public event Action OnPlay;
         public event Action OnStop;
 
-        public AudioClip Clip { get; private set; }
-        public AudioClip IntroClip { get; private set; }
-        public AudioSource Source { get; private set; }
+        public AudioClip Clip { get; }
+        public AudioClip IntroClip { get; }
+        public AudioSource Source { get; }
         public bool Valid => Clip && Source;
-        public bool Loop { get => Valid ? Source.loop : false; set { if (Valid) Source.loop = value; } }
-        public bool Playing => Valid ? Source.isPlaying : false;
-        public bool Mute { get => Valid ? Source.mute : false; set { if (Valid) Source.mute = value; } }
+        public bool Loop { get => Valid && Source.loop; set { if (Valid) Source.loop = value; } }
+        public bool Playing => Valid && Source.isPlaying;
+        public bool Mute { get => Valid && Source.mute; set { if (Valid) Source.mute = value; } }
         public float Volume { get => Valid ? Source.volume : 0f; set { if (Valid) Source.volume = value; } }
 
         private readonly Tweener<FloatTween> volumeTweener;
