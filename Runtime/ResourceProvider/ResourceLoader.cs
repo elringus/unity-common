@@ -15,10 +15,11 @@ namespace UnityCommon
         {
             public readonly Resource<TResource> Resource;
             public readonly ProvisionSource ProvisionSource;
-            public readonly LinkedList<WeakReference> Holders = new LinkedList<WeakReference>();
             public readonly string LocalPath;
             public string FullPath => Resource.Path;
             public bool Valid => Resource.Valid;
+
+            private readonly LinkedList<WeakReference> holders = new LinkedList<WeakReference>();
 
             public LoadedResource (Resource<TResource> resource, ProvisionSource provisionSource)
             {
@@ -26,10 +27,11 @@ namespace UnityCommon
                 ProvisionSource = provisionSource;
                 LocalPath = provisionSource.BuildLocalPath(resource.Path);
             }
-            
-            public void AddHolder (object holder) => Holders.AddLast(new WeakReference(holder));
-            public void RemoveHolder (object holder) => Holders.RemoveAll(wr => !wr.IsAlive || wr.Target == holder);
-            public bool IsHeldBy (object holder) => Holders.Any(wr => wr.Target == holder);
+
+            public void AddHolder (object holder) => holders.AddLast(new WeakReference(holder));
+            public void RemoveHolder (object holder) => holders.RemoveAll(wr => !wr.IsAlive || wr.Target == holder);
+            public bool IsHeldBy (object holder) => holders.Any(wr => wr.IsAlive && wr.Target == holder);
+            public int CountHolders () => holders.Count(wr => wr.IsAlive);
         }
 
         public event Action<string> OnResourceLoaded;
@@ -79,7 +81,7 @@ namespace UnityCommon
 
             resource.RemoveHolder(holder);
             
-            if (unload && resource.Holders.Count == 0)
+            if (unload && resource.CountHolders() == 0)
                 Unload(path);
         }
         
@@ -96,6 +98,11 @@ namespace UnityCommon
         {
             var resource = GetLoadedResource(path);
             return resource?.IsHeldBy(holder) ?? false;
+        }
+
+        public int HoldersCount (string path)
+        {
+            return GetLoadedResource(path)?.CountHolders() ?? 0;
         }
 
         public virtual bool IsLoaded (string path)
