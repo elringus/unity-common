@@ -128,6 +128,11 @@ namespace UnityCommon
             return resource?.IsHeldBy(holder) ?? false;
         }
 
+        public IEnumerable<string> GetHeld ()
+        {
+            return HeldResources.Where(r => r.Holders.Count > 0).Select(r => r.LocalPath);
+        }
+
         public virtual bool IsLoaded (string path)
         {
             return LoadedResources.Any(r => r.Valid && r.LocalPath.EqualsFast(path));
@@ -159,7 +164,10 @@ namespace UnityCommon
 
         public virtual async UniTask<IEnumerable<Resource<TResource>>> LoadAllAsync (string path = null)
         {
-            var result = new List<Resource<TResource>>();
+            var result = new LinkedList<Resource<TResource>>();
+            var addedPaths = new HashSet<string>();
+            var loadTasks = new List<UniTask<Resource<TResource>>>();
+            var loadData = new List<(ProvisionSource, string)>();
             
             foreach (var source in ProvisionSources)
             {
@@ -167,21 +175,31 @@ namespace UnityCommon
                 var locatedResourcePaths = await source.Provider.LocateResourcesAsync<TResource>(fullPath);
                 foreach (var locatedResourcePath in locatedResourcePaths)
                 {
-                    if (result.Any(r => r.Path.EqualsFast(locatedResourcePath))) continue;
-
                     var localPath = source.BuildLocalPath(locatedResourcePath);
+                    
+                    if (addedPaths.Contains(localPath)) continue;
+                    else addedPaths.Add(localPath);
                     
                     if (IsLoaded(localPath))
                     {
-                        result.Add(GetLoadedOrNull(localPath));
+                        result.AddLast(GetLoadedOrNull(localPath));
                         continue;
                     }
                     
-                    var resource = await source.Provider.LoadResourceAsync<TResource>(locatedResourcePath);
-                    LoadedResources.AddLast(new LoadedResource(resource, source));
-                    OnResourceLoaded?.Invoke(localPath);
-                    result.Add(resource);
+                    loadTasks.Add(source.Provider.LoadResourceAsync<TResource>(locatedResourcePath));
+                    loadData.Add((source, localPath));
                 }
+            }
+
+            await UniTask.WhenAll(loadTasks);
+
+            for (int i = 0; i < loadTasks.Count; i++)
+            {
+                var resource = loadTasks[i].Result;
+                var (source, localPath) = loadData[i];
+                LoadedResources.AddLast(new LoadedResource(resource, source));
+                OnResourceLoaded?.Invoke(localPath);
+                result.AddLast(resource);
             }
 
             return result;
@@ -194,18 +212,25 @@ namespace UnityCommon
 
         public virtual async UniTask<IEnumerable<string>> LocateAsync (string path = null)
         {
-            var result = new List<string>();
+            var result = new HashSet<string>();
+            var tasks = new List<UniTask<IEnumerable<string>>>();
+            var tasksData = new List<ProvisionSource>();
             
             foreach (var source in ProvisionSources)
             {
                 var fullPath = source.BuildFullPath(path);
-                var locatedResourcePaths = await source.Provider.LocateResourcesAsync<TResource>(fullPath);
-                foreach (var locatedResourcePath in locatedResourcePaths)
-                {
-                    var localPath = source.BuildLocalPath(locatedResourcePath);
-                    if (!result.Any(p => p.EqualsFast(localPath)))
-                        result.Add(localPath);
-                }
+                tasks.Add(source.Provider.LocateResourcesAsync<TResource>(fullPath));
+                tasksData.Add(source);
+            }
+
+            await UniTask.WhenAll(tasks);
+
+            for (int i = 0; i < tasks.Count; i++)
+            {
+                var fullPaths = tasks[i].Result;
+                var source = tasksData[i];
+                foreach (var fullPath in fullPaths)
+                    result.Add(source.BuildLocalPath(fullPath));
             }
             
             return result;

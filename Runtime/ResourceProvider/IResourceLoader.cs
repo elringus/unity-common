@@ -73,6 +73,10 @@ namespace UnityCommon
         /// Checks whether a resource with the provided path is being held by the object.
         /// </summary>
         bool IsHeldBy (string path, object holder);
+        /// <summary>
+        /// Returns paths of the resources, that are currently held by at least one holder.
+        /// </summary>
+        IEnumerable<string> GetHeld ();
     }
 
     /// <summary>
