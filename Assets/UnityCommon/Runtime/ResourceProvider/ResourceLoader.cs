@@ -89,7 +89,7 @@ namespace UnityCommon
         {
             var pathsToRelease = LoadedResources
                 .Where(r => r.IsHeldBy(holder))
-                .Select(r => r.LocalPath);
+                .Select(r => r.LocalPath).ToList();
             foreach (var path in pathsToRelease)
                 Release(path, holder, unload);
         }
