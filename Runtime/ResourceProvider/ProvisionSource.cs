@@ -56,6 +56,7 @@ namespace UnityCommon
 
         /// <inheritdoc cref="BuildFullPath(string,string)"/>
         public string BuildFullPath (string localPath) => BuildFullPath(PathPrefix, localPath);
+        
         /// <inheritdoc cref="BuildLocalPath(string,string)"/>
         public string BuildLocalPath (string fullPath) => BuildLocalPath(PathPrefix, fullPath);
         

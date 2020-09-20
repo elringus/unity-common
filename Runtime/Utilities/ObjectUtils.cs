@@ -34,7 +34,7 @@ namespace UnityCommon
 
         /// <summary>
         /// Wrapper over FindObjectsOfType to allow searching by any type and with predicate.
-        /// Be aware this is slow and scales lineary with scene complexity.
+        /// Be aware this is slow and scales linearly with scene complexity.
         /// </summary>
         public static T FindObject<T> (Predicate<T> predicate = null) where T : class
         {
@@ -44,12 +44,12 @@ namespace UnityCommon
 
         /// <summary>
         /// Wrapper over FindObjectsOfType to allow searching by any type and with predicate.
-        /// Be aware this is slow and scales lineary with scene complexity.
+        /// Be aware this is slow and scales linearly with scene complexity.
         /// </summary>
         public static List<T> FindObjects<T> (Predicate<T> predicate = null) where T : class
         {
-            return Object.FindObjectsOfType<Object>().Where(obj => obj is T &&
-                (predicate == null || predicate(obj as T))).Cast<T>().ToList();
+            return Object.FindObjectsOfType<Object>().Where(obj => obj is T arg &&
+                (predicate == null || predicate(arg))).Cast<T>().ToList();
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace UnityCommon
         {
             var objectType = unityObject.GetType();
             Debug.Assert(Object.FindObjectsOfType(objectType).Length == 1,
-               string.Format("More than one instance of {0} found on scene.", objectType.Name));
+                $"More than one instance of {objectType.Name} found on scene.");
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace UnityCommon
         }
 
         /// <summary>
-        /// Checks if provided reference targets to a valid (not-destoyed) <see cref="UnityEngine.Object"/>.
+        /// Checks if provided reference targets to a valid (not-destroyed) <see cref="UnityEngine.Object"/>.
         /// </summary>
         public static bool IsValid (object obj)
         {

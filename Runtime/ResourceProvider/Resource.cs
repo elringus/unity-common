@@ -21,8 +21,7 @@ namespace UnityCommon
         /// </summary>
         public readonly Object Object;
         /// <summary>
-        /// Whether the <see cref="Object"/> is currently alive (not destroyed) 
-        /// on both managed and unmanaged sides of the engine.
+        /// Whether <see cref="Object"/> is a valid (not-destroyed) instance.
         /// </summary>
         public bool Valid => ObjectUtils.IsValid(Object);
 
@@ -36,12 +35,13 @@ namespace UnityCommon
 
         public override string ToString () => $"Resource<{(Valid ? Object.GetType().Name : "INVALID")}>@{Path}";
     }
-
+    
     /// <summary>
     /// Represents a strongly typed <see cref="UnityEngine.Object"/> associated with a string identifier (path).
     /// </summary>
     /// <typeparam name="TResource">Type of the resource object.</typeparam>
-    public class Resource<TResource> : Resource where TResource : Object
+    public class Resource<TResource> : Resource
+        where TResource : Object
     {
         /// <summary>
         /// A cached invalid resource.
