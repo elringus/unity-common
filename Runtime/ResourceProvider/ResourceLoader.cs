@@ -133,6 +133,15 @@ namespace UnityCommon
             if (unload && resource.Holders.Count == 0)
                 Unload(path);
         }
+        
+        public virtual void ReleaseAll (object holder, bool unload = true)
+        {
+            var pathsToRelease = LoadedResources
+                .Where(r => r.IsHeldBy(holder))
+                .Select(r => r.LocalPath);
+            foreach (var path in pathsToRelease)
+                Release(path, holder, unload);
+        }
 
         public virtual bool IsHeldBy (string path, object holder)
         {

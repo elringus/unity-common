@@ -65,6 +65,11 @@ namespace UnityCommon
         /// </summary>
         void Release (string path, object holder, bool unload = true);
         /// <summary>
+        /// Removes the provided holder object from all the loaded resources.
+        /// Will (optionally) unload the affected resources after the release in case no other objects are holding them.
+        /// </summary>
+        void ReleaseAll (object holder, bool unload = true);
+        /// <summary>
         /// Checks whether a resource with the provided path is being held by the object.
         /// </summary>
         bool IsHeldBy (string path, object holder);
