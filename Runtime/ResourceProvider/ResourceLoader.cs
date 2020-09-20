@@ -133,6 +133,16 @@ namespace UnityCommon
             return HeldResources.Where(r => r.Holders.Count > 0).Select(r => r.LocalPath);
         }
 
+        public async UniTask LoadHeldAsync ()
+        {
+            var loadTasks = new LinkedList<UniTask>();
+            
+            foreach (var heldResource in HeldResources)
+                loadTasks.AddLast(LoadAsync(heldResource.LocalPath));
+
+            await UniTask.WhenAll(loadTasks);
+        }
+
         public virtual bool IsLoaded (string path)
         {
             return LoadedResources.Any(r => r.Valid && r.LocalPath.EqualsFast(path));

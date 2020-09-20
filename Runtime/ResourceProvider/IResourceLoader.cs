@@ -77,6 +77,10 @@ namespace UnityCommon
         /// Returns paths of the resources, that are currently held by at least one holder.
         /// </summary>
         IEnumerable<string> GetHeld ();
+        /// <summary>
+        /// Loads all the held resources.
+        /// </summary>
+        UniTask LoadHeldAsync ();
     }
 
     /// <summary>
