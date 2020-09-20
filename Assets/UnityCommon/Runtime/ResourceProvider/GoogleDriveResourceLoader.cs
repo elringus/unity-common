@@ -61,7 +61,7 @@ namespace UnityCommon
                 if (fileMeta is null)
                 {
                     Debug.LogError($"Failed to resolve '{filePath}' Google Drive metadata.");
-                    SetResult(new Resource<TResource>(Path, null, Provider));
+                    SetResult(new Resource<TResource>(Path, null));
                     return;
                 }
 
@@ -77,13 +77,12 @@ namespace UnityCommon
             if (!ObjectUtils.IsValid(loadedObject))
                 loadedObject = await converter.ConvertAsync(rawData, System.IO.Path.GetFileNameWithoutExtension(Path));
 
-            var result = new Resource<TResource>(Path, loadedObject, Provider);
+            var result = new Resource<TResource>(Path, loadedObject);
             SetResult(result);
 
-            logAction?.Invoke($"Resource '{Path}' loaded {StringUtils.FormatFileSize(rawData.Length)} over {Time.time - startTime:0.###} seconds from " + (usedCache ? "cache." : "Google Drive."));
+            logAction?.Invoke($"Resource `{Path}` loaded {StringUtils.FormatFileSize(rawData.Length)} over {Time.time - startTime:0.###} seconds from " + (usedCache ? "cache." : "Google Drive."));
 
-            if (downloadRequest != null)
-                downloadRequest.Dispose();
+            downloadRequest?.Dispose();
         }
 
         public override void Cancel ()
@@ -165,7 +164,7 @@ namespace UnityCommon
                 // Web requests over IndexedDB are not supported; we should either use raw converters or disable caching.
                 if (Application.platform == RuntimePlatform.WebGLPlayer)
                 {
-                    // Binary convertion of the audio is fucked on WebGL (can't use buffers), so disable caching here.
+                    // Binary conversion of the audio is fucked on WebGL (can't use buffers), so disable caching here.
                     if (typeof(TResource) == typeof(AudioClip)) return null;
                     // Use raw converters for other native types.
                     return await IOUtils.ReadFileAsync(filePath);

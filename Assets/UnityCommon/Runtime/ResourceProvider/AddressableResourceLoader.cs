@@ -38,10 +38,10 @@ namespace UnityCommon
                 asset = task.Result;
             }
 
-            var result = new Resource<TResource>(Path, asset, Provider);
+            var result = new Resource<TResource>(Path, asset);
             SetResult(result);
 
-            logAction?.Invoke($"Resource '{Path}' loaded over {Time.time - startTime:0.###} seconds.");
+            logAction?.Invoke($"Resource `{Path}` loaded over {Time.time - startTime:0.###} seconds.");
         }
     }
 }

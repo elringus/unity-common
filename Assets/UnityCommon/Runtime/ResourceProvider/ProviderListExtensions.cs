@@ -52,7 +52,7 @@ namespace UnityCommon
                     return await provider.LoadResourceAsync<T>(path);
                 }
             }
-            return new Resource<T>(path, null, null);
+            return Resource<T>.Invalid;
         }
 
         /// <summary>
