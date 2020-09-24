@@ -3,7 +3,7 @@
 namespace UnityCommon
 {
     /// <summary>
-    /// Should be placed in scenes to proprely register objects with [RegisterInContext] attribute.
+    /// Should be placed in scenes to properly register objects with [RegisterInContext] attribute.
     /// Temp (hopefully) hack; waiting for [RuntimeInitializeOnLoadMethod]-esque thingy to support per-scene trigger.
     /// </summary>
     [ScriptOrder(-9999)]

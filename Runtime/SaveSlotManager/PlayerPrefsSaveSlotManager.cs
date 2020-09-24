@@ -26,10 +26,10 @@ namespace UnityCommon
         protected abstract bool PrettifyJson { get; }
         protected abstract bool Binary { get; }
 
-        protected void InvokeOnBeforeSave () { Saving = true; OnBeforeSave.SafeInvoke(); }
-        protected void InvokeOnSaved () { Saving = false; OnSaved.SafeInvoke(); }
-        protected void InvokeOnBeforeLoad () { Loading = true; OnBeforeLoad.SafeInvoke(); }
-        protected void InvokeOnLoaded () { Loading = false; OnLoaded.SafeInvoke(); }
+        protected void InvokeOnBeforeSave () { Saving = true; OnBeforeSave?.Invoke(); }
+        protected void InvokeOnSaved () { Saving = false; OnSaved?.Invoke(); }
+        protected void InvokeOnBeforeLoad () { Loading = true; OnBeforeLoad?.Invoke(); }
+        protected void InvokeOnLoaded () { Loading = false; OnLoaded?.Invoke(); }
     }
 
     /// <summary>
@@ -162,7 +162,7 @@ namespace UnityCommon
             var indexList = PlayerPrefs.GetString(IndexKey).Split(new[] { IndexDelimiter }, StringSplitOptions.RemoveEmptyEntries).ToList();
             if (!indexList.Remove(slotKey)) return;
 
-            var index = string.Join(IndexDelimiter.ToString(), indexList);
+            var index = string.Join(IndexDelimiter, indexList);
             PlayerPrefs.SetString(IndexKey, index);
         }
     }

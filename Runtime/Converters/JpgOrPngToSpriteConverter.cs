@@ -8,10 +8,10 @@ namespace UnityCommon
     /// </summary>
     public class JpgOrPngToSpriteConverter : IRawConverter<Sprite>
     {
-        public RawDataRepresentation[] Representations { get { return new RawDataRepresentation[] {
+        public RawDataRepresentation[] Representations { get; } = {
             new RawDataRepresentation(".png", "image/png"),
             new RawDataRepresentation(".jpg", "image/jpeg")
-        }; } }
+        };
 
         public Sprite Convert (byte[] obj, string name)
         {

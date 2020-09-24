@@ -65,7 +65,7 @@ namespace UnityCommon
         }
 
         /// <summary>
-        /// Deletes file at the provided path. Will insure for correct IO on specific plaforms.
+        /// Deletes file at the provided path. Will insure for correct IO on specific platforms.
         /// </summary>
         public static void DeleteFile (string filePath)
         {
@@ -85,7 +85,7 @@ namespace UnityCommon
         }
 
         /// <summary>
-        /// Creates a new directory at the provided path. Will insure for correct IO on specific plaforms.
+        /// Creates a new directory at the provided path. Will insure for correct IO on specific platforms.
         /// </summary>
         public static void CreateDirectory (string path)
         {
@@ -94,7 +94,7 @@ namespace UnityCommon
         }
 
         /// <summary>
-        /// Deletes directory at the provided path. Will insure for correct IO on specific plaforms.
+        /// Deletes directory at the provided path. Will insure for correct IO on specific platforms.
         /// </summary>
         public static void DeleteDirectory (string path, bool recursive)
         {

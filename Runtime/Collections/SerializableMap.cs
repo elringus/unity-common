@@ -34,22 +34,22 @@ namespace UnityCommon
 
         private Dictionary<TKey, TValue> dictionary;
 
-        public SerializableMap ()
+        protected SerializableMap ()
         {
             dictionary = new Dictionary<TKey, TValue>();
         }
 
-        public SerializableMap (IEqualityComparer<TKey> comparer)
+        protected SerializableMap (IEqualityComparer<TKey> comparer)
         {
             dictionary = new Dictionary<TKey, TValue>(comparer);
         }
 
-        public SerializableMap (IDictionary<TKey, TValue> dict)
+        protected SerializableMap (IDictionary<TKey, TValue> dict)
         {
             dictionary = new Dictionary<TKey, TValue>(dict);
         }
 
-        public SerializableMap (IDictionary<TKey, TValue> dict, IEqualityComparer<TKey> comparer)
+        protected SerializableMap (IDictionary<TKey, TValue> dict, IEqualityComparer<TKey> comparer)
         {
             dictionary = new Dictionary<TKey, TValue>(dict, comparer);
         }
@@ -88,15 +88,15 @@ namespace UnityCommon
 
         #region IDictionary<TKey, TValue>
 
-        public ICollection<TKey> Keys { get { return ((IDictionary<TKey, TValue>)dictionary).Keys; } }
-        public ICollection<TValue> Values { get { return ((IDictionary<TKey, TValue>)dictionary).Values; } }
-        public int Count { get { return ((IDictionary<TKey, TValue>)dictionary).Count; } }
-        public bool IsReadOnly { get { return ((IDictionary<TKey, TValue>)dictionary).IsReadOnly; } }
+        public ICollection<TKey> Keys => ((IDictionary<TKey, TValue>)dictionary).Keys;
+        public ICollection<TValue> Values => ((IDictionary<TKey, TValue>)dictionary).Values;
+        public int Count => ((IDictionary<TKey, TValue>)dictionary).Count;
+        public bool IsReadOnly => ((IDictionary<TKey, TValue>)dictionary).IsReadOnly;
 
         public TValue this[TKey key]
         {
-            get { return ((IDictionary<TKey, TValue>)dictionary)[key]; }
-            set { ((IDictionary<TKey, TValue>)dictionary)[key] = value; }
+            get => ((IDictionary<TKey, TValue>)dictionary)[key];
+            set => ((IDictionary<TKey, TValue>)dictionary)[key] = value;
         }
 
         public void Add (TKey key, TValue value)
@@ -158,16 +158,16 @@ namespace UnityCommon
 
         #region IDictionary
 
-        public bool IsFixedSize { get { return ((IDictionary)dictionary).IsFixedSize; } }
-        ICollection IDictionary.Keys { get { return ((IDictionary)dictionary).Keys; } }
-        ICollection IDictionary.Values { get { return ((IDictionary)dictionary).Values; } }
-        public bool IsSynchronized { get { return ((IDictionary)dictionary).IsSynchronized; } }
-        public object SyncRoot { get { return ((IDictionary)dictionary).SyncRoot; } }
+        public bool IsFixedSize => ((IDictionary)dictionary).IsFixedSize;
+        ICollection IDictionary.Keys => ((IDictionary)dictionary).Keys;
+        ICollection IDictionary.Values => ((IDictionary)dictionary).Values;
+        public bool IsSynchronized => ((IDictionary)dictionary).IsSynchronized;
+        public object SyncRoot => ((IDictionary)dictionary).SyncRoot;
 
         public object this[object key]
         {
-            get { return ((IDictionary)dictionary)[key]; }
-            set { ((IDictionary)dictionary)[key] = value; }
+            get => ((IDictionary)dictionary)[key];
+            set => ((IDictionary)dictionary)[key] = value;
         }
 
         public void Add (object key, object value)

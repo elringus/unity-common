@@ -23,8 +23,7 @@ namespace UnityCommon
 
         private void InvokeOnDropdownValueChanged (int value)
         {
-            if (OnDropdownValueChanged != null)
-                OnDropdownValueChanged.Invoke(value);
+            OnDropdownValueChanged?.Invoke(value);
         }
     }
 }

@@ -20,8 +20,8 @@ namespace UnityCommon
         {
             var result = new List<Folder>();
 
-            var fullpath = PathUtils.Combine(RootPath, Path) + "/";
-            var gFolders = await Helpers.FindFilesByPathAsync(fullpath, fields: new List<string> { "files(name)" }, mime: "application/vnd.google-apps.folder");
+            var fullPath = PathUtils.Combine(RootPath, Path) + "/";
+            var gFolders = await Helpers.FindFilesByPathAsync(fullPath, fields: new List<string> { "files(name)" }, mime: "application/vnd.google-apps.folder");
 
             foreach (var gFolder in gFolders)
             {

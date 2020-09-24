@@ -10,7 +10,7 @@ namespace UnityCommon
         /// <summary>
         /// Available options for the popup value.
         /// </summary>
-        public int[] Values { get; private set; }
+        public int[] Values { get; }
 
         public IntPopupAttribute (params int[] values)
         {

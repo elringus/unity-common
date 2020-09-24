@@ -98,7 +98,7 @@ namespace UnityCommon
 
         private void Complete ()
         {
-            OnComplete.SafeInvoke();
+            OnComplete?.Invoke();
             OnComplete = null;
         }
     }

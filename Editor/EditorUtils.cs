@@ -19,7 +19,7 @@ namespace UnityCommon
             if (property is null || property.propertyType != SerializedPropertyType.Generic)
                 throw new NullReferenceException("The property is null or not generic.");
 
-            var targetObect = property.serializedObject.targetObject as object;
+            var targetObject = property.serializedObject.targetObject as object;
             var propertyPath = property.propertyPath;
             var paths = propertyPath.Split('.');
             var fieldInfo = default(FieldInfo);
@@ -27,30 +27,29 @@ namespace UnityCommon
             for (int i = 0; i < paths.Length; i++)
             {
                 var path = paths[i];
-                if (targetObect == null)
+                if (targetObject == null)
                     throw new NullReferenceException("Can't set a value on a null instance.");
 
-                var type = targetObect.GetType();
+                var type = targetObject.GetType();
                 if (path == "Array")
                 {
                     path = paths[++i];
 
-                    var array = targetObect as System.Collections.IEnumerable;
+                    var array = targetObject as System.Collections.IEnumerable;
                     if (array is null)
                         throw new ArgumentException($"Property at path '{propertyPath}' can't be parsed: '{paths[i - 2]}' is not an enumerable.");
 
                     var indexString = path.Split('[', ']');
-                    var index = -1;
 
-                    if (indexString is null || indexString.Length < 2)
+                    if (indexString.Length < 2)
                         throw new FormatException($"Property path '{propertyPath}' is malformed.");
 
-                    if (!int.TryParse(indexString[1], out index))
+                    if (!int.TryParse(indexString[1], out var index))
                         throw new FormatException($"Property path '{propertyPath}' is malformed.");
 
                     if (i == (paths.Length - 1)) // Our property is an array.
                     {
-                        var targetArray = (System.Collections.IList)targetObect;
+                        var targetArray = (System.Collections.IList)targetObject;
                         return (TValue)targetArray[index];
                     }
 
@@ -59,7 +58,7 @@ namespace UnityCommon
                     {
                         if (elementIndex == index)
                         {
-                            targetObect = element;
+                            targetObject = element;
                             break;
                         }
                         elementIndex++;
@@ -67,19 +66,19 @@ namespace UnityCommon
                     continue;
                 }
 
-                fieldInfo = type.GetFieldWithInheritence(path, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                fieldInfo = type.GetFieldWithInheritance(path, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
                 if (fieldInfo == null)
                     throw new MissingFieldException($"The field '{path}' in '{propertyPath}' could not be found.");
 
                 if (i < paths.Length - 1)
-                    targetObect = fieldInfo.GetValue(targetObect);
+                    targetObject = fieldInfo.GetValue(targetObject);
             }
 
             var valueType = typeof(TValue);
             if (valueType is null || fieldInfo.FieldType is null || !valueType.IsAssignableFrom(fieldInfo.FieldType))
                 throw new InvalidCastException($"Cannot cast '{valueType}' into field type '{fieldInfo.FieldType}'.");
 
-            return (TValue)fieldInfo.GetValue(targetObect);
+            return (TValue)fieldInfo.GetValue(targetObject);
         }
 
         /// <summary>
@@ -111,12 +110,11 @@ namespace UnityCommon
                         throw new ArgumentException($"Property at path '{propertyPath}' can't be parsed: '{paths[i - 2]}' is not an enumerable.");
 
                     var indexString = path.Split('[', ']');
-                    var index = -1;
 
-                    if (indexString is null || indexString.Length < 2)
+                    if (indexString.Length < 2)
                         throw new FormatException($"Property path '{propertyPath}' is malformed.");
 
-                    if (!int.TryParse(indexString[1], out index))
+                    if (!int.TryParse(indexString[1], out var index))
                         throw new FormatException($"Property path '{propertyPath}' is malformed.");
 
                     if (i == (paths.Length - 1)) // Our property is an array.
@@ -139,7 +137,7 @@ namespace UnityCommon
                     continue;
                 }
 
-                fieldInfo = type.GetFieldWithInheritence(path, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                fieldInfo = type.GetFieldWithInheritance(path, BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
                 if (fieldInfo == null)
                     throw new MissingFieldException($"The field '{path}' in '{propertyPath}' could not be found.");
 
@@ -205,7 +203,7 @@ namespace UnityCommon
         {
             var editorType = editor.GetType();
             var editedType = typeof(T);
-            if (editedType is null || !(editedType.IsSubclassOf(typeof(MonoBehaviour)) || editedType.IsSubclassOf(typeof(ScriptableObject)))) return;
+            if (!(editedType.IsSubclassOf(typeof(MonoBehaviour)) || editedType.IsSubclassOf(typeof(ScriptableObject)))) return;
 
             var serializedFields = editedType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
                 .Where(f => f.IsPublic || f.GetCustomAttribute<SerializeField>(true) != null).ToList();
@@ -325,7 +323,7 @@ namespace UnityCommon
             toggleValue = EditorGUI.ToggleLeft(position, label, toggleValue);
             EditorGUI.indentLevel = oldIndent;
             if (EditorGUI.EndChangeCheck())
-                property.boolValue = property.hasMultipleDifferentValues ? true : !property.boolValue;
+                property.boolValue = property.hasMultipleDifferentValues || !property.boolValue;
             EditorGUI.showMixedValue = false;
         }
 

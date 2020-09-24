@@ -20,7 +20,7 @@ namespace UnityCommon
         [Serializable]
         public class CacheManifest : SerializableLiteralStringMap
         {
-            public string StartToken { get { return ContainsKey(startTokenKey) ? this[startTokenKey] : null; } set { this[startTokenKey] = value; } }
+            public string StartToken { get => ContainsKey(startTokenKey) ? this[startTokenKey] : null; set => this[startTokenKey] = value; }
 
             private const string startTokenKey = "GDRIVE_CACHE_START_TOKEN";
             private static readonly string filePath = string.Concat(CacheDirPath, "/CacheManifest");

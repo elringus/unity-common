@@ -8,9 +8,9 @@ namespace UnityCommon
     /// </summary>
     public class JpgToSpriteConverter : IRawConverter<Sprite>
     {
-        public RawDataRepresentation[] Representations { get { return new RawDataRepresentation[] {
+        public RawDataRepresentation[] Representations { get; } = {
             new RawDataRepresentation(".jpg", "image/jpeg")
-        }; } }
+        };
 
         public Sprite Convert (byte[] obj, string name)
         {

@@ -14,32 +14,32 @@ namespace UnityCommon
 
         private void Awake ()
         {
-            OnBehaviourAwake.SafeInvoke();
+            OnBehaviourAwake?.Invoke();
         }
 
         private void OnEnable ()
         {
-            OnBehaviourEnable.SafeInvoke();
+            OnBehaviourEnable?.Invoke();
         }
 
         private void Start ()
         {
-            OnBehaviourStart.SafeInvoke();
+            OnBehaviourStart?.Invoke();
         }
 
         private void Update ()
         {
-            OnBehaviourUpdate.SafeInvoke();
+            OnBehaviourUpdate?.Invoke();
         }
 
         private void OnDisable ()
         {
-            OnBehaviourDisable.SafeInvoke();
+            OnBehaviourDisable?.Invoke();
         }
 
         private void OnDestroy ()
         {
-            OnBehaviourDestroy.SafeInvoke();
+            OnBehaviourDestroy?.Invoke();
         }
     }
 }

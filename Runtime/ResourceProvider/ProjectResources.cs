@@ -6,9 +6,9 @@ namespace UnityCommon
 {
     public class ProjectResources : ScriptableObject
     {
-        public List<string> ResourcePaths => resourcePaths;
+        public IEnumerable<string> ResourcePaths => resourcePaths;
 
-        [SerializeField] List<string> resourcePaths = new List<string>();
+        [SerializeField] private List<string> resourcePaths = new List<string>();
 
         private void Awake ()
         {

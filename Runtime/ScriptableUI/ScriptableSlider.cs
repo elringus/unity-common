@@ -23,8 +23,7 @@ namespace UnityCommon
 
         private void InvokeOnSliderValueChanged (float value)
         {
-            if (OnSliderValueChanged != null)
-                OnSliderValueChanged.Invoke(value);
+            OnSliderValueChanged?.Invoke(value);
         }
     }
 }

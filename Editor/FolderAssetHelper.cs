@@ -5,11 +5,11 @@ using UnityEngine;
 
 namespace UnityCommon
 {
-    public struct FolderAsset<T>
+    public readonly struct FolderAsset<T>
     {
         public readonly string Name, Path;
         public readonly T Object;
-        public AssetImporter Importer { get { return AssetImporter.GetAtPath(Path); } }
+        public AssetImporter Importer => AssetImporter.GetAtPath(Path);
 
         public FolderAsset (string name, string path, T @object)
         {
@@ -25,16 +25,16 @@ namespace UnityCommon
     /// </summary>
     public class FolderAssetHelper
     {
-        public Object FolderObject { get; private set; }
-        public string Path { get { return AssetDatabase.GetAssetPath(FolderObject); } }
-        public string FullPath { get { return Application.dataPath.GetBefore("Assets") + Path; } }
+        public Object FolderObject { get; }
+        public string Path => AssetDatabase.GetAssetPath(FolderObject);
+        public string FullPath => Application.dataPath.GetBefore("Assets") + Path;
 
         public FolderAssetHelper (Object folderObject)
         {
             FolderObject = folderObject;
             if (FolderObject == null || !AssetDatabase.IsValidFolder(Path))
             {
-                Debug.LogError(string.Format("Object '{0}' is not a folder.", FolderObject ? FolderObject.name : "null"));
+                Debug.LogError($"Object '{(FolderObject ? FolderObject.name : "null")}' is not a folder.");
                 return;
             }
         }

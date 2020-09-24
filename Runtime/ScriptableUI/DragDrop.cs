@@ -16,7 +16,7 @@ namespace UnityCommon
         private RectTransform handleTrs;
         private Canvas canvas;
 
-        private void Awake ()
+        protected virtual void Awake ()
         {
             this.AssertRequiredObjects(handle);
 
@@ -25,17 +25,17 @@ namespace UnityCommon
             canvas = gameObject.FindTopmostComponent<Canvas>();
         }
 
-        private void OnEnable ()
+        protected virtual void OnEnable ()
         {
             handle.OnDragged += HandleDrag;
         }
 
-        private void OnDisable ()
+        protected virtual void OnDisable ()
         {
             handle.OnDragged -= HandleDrag;
         }
 
-        private void HandleDrag (Vector2 position)
+        protected virtual void HandleDrag (Vector2 position)
         {
             if (!canvas) return;
 

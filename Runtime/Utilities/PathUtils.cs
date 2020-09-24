@@ -16,7 +16,7 @@ namespace UnityCommon
         }
 
         /// <summary>
-        /// Inovkes <see cref="Path.Combine(string[])"/> and replaces back slashes with forward slashes on the result.
+        /// Invokes <see cref="Path.Combine(string[])"/> and replaces back slashes with forward slashes on the result.
         /// </summary>
         public static string Combine (params string[] paths)
         {

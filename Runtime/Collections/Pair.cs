@@ -24,7 +24,7 @@ namespace UnityCommon
 
         public override string ToString ()
         {
-            return string.Format("<{0}, {1}>", Item1, Item2);
+            return $"<{Item1}, {Item2}>";
         }
 
         public override int GetHashCode ()
@@ -58,7 +58,7 @@ namespace UnityCommon
 
         private static bool IsNull (object obj)
         {
-            return object.ReferenceEquals(obj, null);
+            return ReferenceEquals(obj, null);
         }
     }
 }

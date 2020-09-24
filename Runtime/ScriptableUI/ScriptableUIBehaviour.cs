@@ -19,7 +19,7 @@ namespace UnityCommon
         public event Action<bool> OnVisibilityChanged;
 
         /// <summary>
-        /// Fade duration (in seconds) when changing visiblity of the UI;
+        /// Fade duration (in seconds) when changing visibility of the UI;
         /// requires a <see cref="UnityEngine.CanvasGroup"/> on the same game object.
         /// </summary>
         public virtual float FadeTime { get => fadeTime; set => fadeTime = value; }
@@ -51,7 +51,7 @@ namespace UnityCommon
         /// </summary>
         public virtual float Opacity => CanvasGroup ? CanvasGroup.alpha : 1f;
         /// <summary>
-        /// Whether the UI is currently interctable.
+        /// Whether the UI is currently interactable.
         /// requires a <see cref="UnityEngine.CanvasGroup"/> on the same game object.
         /// </summary>
         public virtual bool Interactable { get => !CanvasGroup || CanvasGroup.interactable; set => SetInteractable(value); }
@@ -81,7 +81,7 @@ namespace UnityCommon
         protected virtual CanvasGroup CanvasGroup { get; private set; }
         protected virtual bool ControlOpacity => controlOpacity;
 
-        [Tooltip("Whether to permamently disable interaction with the object, no matter the visibility. Requires `Canvas Group` component on the same game object.")]
+        [Tooltip("Whether to permanently disable interaction with the object, no matter the visibility. Requires `Canvas Group` component on the same game object.")]
         [SerializeField] private bool disableInteraction = false;
         [Tooltip("Whether UI element should be visible or hidden on awake.")]
         [SerializeField] private bool visibleOnAwake = true;

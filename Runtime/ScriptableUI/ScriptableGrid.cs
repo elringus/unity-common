@@ -9,12 +9,12 @@ namespace UnityCommon
     [RequireComponent(typeof(GridLayoutGroup))]
     public abstract class ScriptableGrid<TSlot> : ScriptableUIComponent<GridLayoutGroup> where TSlot : ScriptableGridSlot
     {
-        public TSlot SlotPrototype => slotPrototype;
-        public int SlotCount => SlotsMap.Count;
-        public int PageCount => Mathf.CeilToInt(transform.childCount / (float)slotsPerPage);
+        public virtual TSlot SlotPrototype => slotPrototype;
+        public virtual int SlotCount => SlotsMap.Count;
+        public virtual int PageCount => Mathf.CeilToInt(transform.childCount / (float)slotsPerPage);
 
-        protected Dictionary<string, TSlot> SlotsMap { get; private set; } = new Dictionary<string, TSlot>();
-        protected int CurrentPage { get; private set; } = 1;
+        protected virtual Dictionary<string, TSlot> SlotsMap { get; } = new Dictionary<string, TSlot>();
+        protected virtual int CurrentPage { get; private set; } = 1;
 
         [SerializeField] private TSlot slotPrototype = null;
 
@@ -59,7 +59,7 @@ namespace UnityCommon
 
         public virtual bool SlotExists (string slotId) => SlotsMap.ContainsKey(slotId);
 
-        public virtual TSlot FindSlot (Predicate<TSlot> predicate) => SlotsMap.Values.FirstOrDefault(s => predicate.Invoke(s));
+        public virtual TSlot FindSlot (Predicate<TSlot> predicate) => SlotsMap.Values.FirstOrDefault(predicate.Invoke);
 
         protected override void Awake ()
         {
