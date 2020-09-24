@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -24,6 +25,26 @@ namespace UnityCommon
             Debug.LogWarning("`UnityCommon.GetHoveredGameObject` requires legacy input system, which is disabled; the method will always return null.");
             return null;
             #endif
+        }
+
+        public static void SafeInvoke (this Action action)
+        {
+            action?.Invoke();
+        }
+
+        public static void SafeInvoke<T0> (this Action<T0> action, T0 arg0)
+        {
+            action?.Invoke(arg0);
+        }
+
+        public static void SafeInvoke<T0, T1> (this Action<T0, T1> action, T0 arg0, T1 arg1)
+        {
+            action?.Invoke(arg0, arg1);
+        }
+
+        public static void SafeInvoke<T0, T1, T2> (this Action<T0, T1, T2> action, T0 arg0, T1 arg1, T2 arg2)
+        {
+            action?.Invoke(arg0, arg1, arg2);
         }
     }
 }
