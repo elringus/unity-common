@@ -24,8 +24,8 @@ namespace UnityCommon
         /// <param name="slotId">ID of the clicked slot.</param>
         public delegate void OnClicked (string slotId);
 
-        public string Id { get; private set; }
-        public int NumberInGrid => transform.GetSiblingIndex() + 1;
+        public virtual string Id { get; private set; }
+        public virtual int NumberInGrid => transform.GetSiblingIndex() + 1;
 
         [Tooltip("Opacity to fade to when the slot is hovered or selected; set to zero to disable the fade behaviour.")]
         [SerializeField] private float hoverOpacityFade = .25f;

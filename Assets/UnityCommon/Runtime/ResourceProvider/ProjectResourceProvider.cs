@@ -12,9 +12,9 @@ namespace UnityCommon
     {
         public class TypeRedirector
         {
-            public Type SourceType { get; private set; }
-            public Type RedirectType { get; private set; }
-            public IConverter RedirectToSourceConverter { get; private set; }
+            public Type SourceType { get; }
+            public Type RedirectType { get; }
+            public IConverter RedirectToSourceConverter { get; }
 
             public TypeRedirector (Type sourceType, Type redirectType, IConverter redirectToSourceConverter)
             {
@@ -85,7 +85,6 @@ namespace UnityCommon
             }
 
             // Can't unload prefabs: https://forum.unity.com/threads/393385.
-            // TODO: Replace the project provider with addressable system in Unity 2019?
             if (resource.Object is GameObject || resource.Object is Component) return;
 
             Resources.UnloadAsset(resource.Object);

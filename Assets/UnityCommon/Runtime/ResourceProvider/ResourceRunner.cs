@@ -10,7 +10,7 @@ namespace UnityCommon
         public readonly string Path;
         public readonly Type ResourceType;
 
-        public ResourceRunner (IResourceProvider provider, string path, Type resourceType)
+        protected ResourceRunner (IResourceProvider provider, string path, Type resourceType)
         {
             Provider = provider;
             Path = path;
@@ -29,9 +29,9 @@ namespace UnityCommon
     {
         public TResult Result { get; private set; }
 
-        private UniTaskCompletionSource<TResult> completionSource = new UniRx.Async.UniTaskCompletionSource<TResult>();
+        private UniTaskCompletionSource<TResult> completionSource = new UniTaskCompletionSource<TResult>();
 
-        public ResourceRunner (IResourceProvider provider, string path, Type resourceType)
+        protected ResourceRunner (IResourceProvider provider, string path, Type resourceType)
             : base(provider, path, resourceType) { }
 
         public new UniTask<TResult>.Awaiter GetAwaiter () => completionSource.Task.GetAwaiter();
@@ -53,20 +53,20 @@ namespace UnityCommon
     public abstract class LocateResourcesRunner<TResource> : ResourceRunner<IEnumerable<string>> 
         where TResource : UnityEngine.Object
     {
-        public LocateResourcesRunner (IResourceProvider provider, string path)
+        protected LocateResourcesRunner (IResourceProvider provider, string path)
             : base(provider, path, typeof(TResource)) { }
     }
 
     public abstract class LoadResourceRunner<TResource> : ResourceRunner<Resource<TResource>> 
         where TResource : UnityEngine.Object
     {
-        public LoadResourceRunner (IResourceProvider provider, string path)
+        protected LoadResourceRunner (IResourceProvider provider, string path)
             : base(provider, path, typeof(TResource)) { }
     }
 
     public abstract class LocateFoldersRunner : ResourceRunner<IEnumerable<Folder>>
     {
-        public LocateFoldersRunner (IResourceProvider provider, string path)
+        protected LocateFoldersRunner (IResourceProvider provider, string path)
             : base(provider, path, typeof(Folder)) { }
     }
 }

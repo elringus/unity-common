@@ -11,12 +11,12 @@ using System.Diagnostics;
 [Conditional("UNITY_CCU"), AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
 public class OptionalDependencyAttribute : Attribute
 {
-    public string dependentClass;
-    public string define;
+    public readonly string DependentClass;
+    public readonly string Define;
 
     public OptionalDependencyAttribute (string dependentClass, string define)
     {
-        this.dependentClass = dependentClass;
-        this.define = define;
+        DependentClass = dependentClass;
+        Define = define;
     }
 }

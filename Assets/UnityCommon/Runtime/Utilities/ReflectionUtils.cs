@@ -42,11 +42,11 @@ namespace UnityCommon
         /// Uses <see cref="Type.GetField(string, BindingFlags)"/>, but also includes private fields from all the base types.
         /// In case multiple fields with equal names exist in different base types, will return only the first most-derived one.
         /// </summary>
-        public static FieldInfo GetFieldWithInheritence (this Type type, string fieldName, BindingFlags flags = BindingFlags.Default)
+        public static FieldInfo GetFieldWithInheritance (this Type type, string fieldName, BindingFlags flags = BindingFlags.Default)
         {
             if (type is null) return null;
             var field = type.GetField(fieldName, flags);
-            return field ?? GetFieldWithInheritence(type.BaseType, fieldName, flags);
+            return field ?? GetFieldWithInheritance(type.BaseType, fieldName, flags);
         }
     }
 }

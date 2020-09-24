@@ -72,7 +72,7 @@ namespace UnityCommon
             if (!SupportsType<T>()) return null;
 
             var locatedResourcePaths = await LocateResourcesAsync<T>(path);
-            return await UniTask.WhenAll(locatedResourcePaths.Select(p => LoadResourceAsync<T>(p)));
+            return await UniTask.WhenAll(locatedResourcePaths.Select(LoadResourceAsync<T>));
         }
 
         public virtual void UnloadResource (string path)

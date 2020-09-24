@@ -26,7 +26,7 @@ namespace UnityCommon
             return UniTask.CompletedTask;
         }
 
-        public static List<string> LocateResources (string rootPath, string resourcesPath, IRawConverter<TResource> converter)
+        public static IEnumerable<string> LocateResources (string rootPath, string resourcesPath, IRawConverter<TResource> converter)
         {
             var locatedResources = new List<string>();
 
@@ -42,7 +42,7 @@ namespace UnityCommon
             foreach (var representation in converter.Representations.DistinctBy(r => r.Extension))
             {
                 var files = parendFolder.GetFiles(string.Concat("*", representation.Extension)).ToList();
-                if (files != null && files.Count > 0) results.Add(representation, files);
+                if (files.Count > 0) results.Add(representation, files);
             }
 
             // 3. Create resources using located files.

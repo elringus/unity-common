@@ -33,7 +33,7 @@ namespace UnityCommon
             if (locations.Exists(l => l.PrimaryKey.EqualsFast(resourceAddress)))
             {
                 var task = Addressables.LoadAssetAsync<TResource>(resourceAddress);
-                while (!task.IsDone) // When awaiting the method directly it fails on WebGL (they're using mutlithreaded Task fot GetAwaiter)
+                while (!task.IsDone) // When awaiting the method directly it fails on WebGL (they're using multithreaded Task fot GetAwaiter)
                     await AsyncUtils.WaitEndOfFrame;
                 asset = task.Result;
             }

@@ -12,7 +12,7 @@ namespace UnityCommon
     {
         public event Action<Vector2> OnDragged;
 
-        public void OnDrag (PointerEventData eventData)
+        public virtual void OnDrag (PointerEventData eventData)
         {
             OnDragged?.Invoke(eventData.position);
         }

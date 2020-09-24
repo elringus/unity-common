@@ -24,8 +24,7 @@ namespace UnityCommon
 
         private void InvokeOnPositionChanged (Vector2 value)
         {
-            if (OnPositionChanged != null)
-                OnPositionChanged.Invoke(value);
+            OnPositionChanged?.Invoke(value);
         }
     }
 }

@@ -66,7 +66,7 @@ namespace UnityCommon
             if (!IsGrounded) return false;
 
             moveVelocity.y = jumpHeight;
-            OnJumped.SafeInvoke();
+            OnJumped?.Invoke();
 
             return true;
         }
@@ -125,16 +125,16 @@ namespace UnityCommon
         private void DetectLanding ()
         {
             if (IsGrounded && !wasGroundedLastFrame)
-                OnLanded.SafeInvoke();
+                OnLanded?.Invoke();
             wasGroundedLastFrame = IsGrounded;
         }
 
         private void DetectMovement ()
         {
             if (!wasMovingLastFrame && IsMoving)
-                OnStartedMoving.SafeInvoke();
+                OnStartedMoving?.Invoke();
             if (wasMovingLastFrame && !IsMoving)
-                OnStoppedMoving.SafeInvoke();
+                OnStoppedMoving?.Invoke();
             wasMovingLastFrame = IsMoving;
         }
 

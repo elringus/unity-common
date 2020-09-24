@@ -9,12 +9,10 @@ namespace UnityCommon
     {
         private readonly struct StatFile
         {
-            public readonly string Name;
             public readonly int LinesCount;
 
-            public StatFile (string name, int linesCount)
+            public StatFile (int linesCount)
             {
-                Name = name;
                 LinesCount = linesCount;
             }
         }
@@ -67,7 +65,7 @@ namespace UnityCommon
                 reader.ReadLine();
                 ++iLineCount;
             }
-            stats.Add(new StatFile(filename, iLineCount));
+            stats.Add(new StatFile(iLineCount));
             reader.Close();
         }
     }

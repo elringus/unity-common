@@ -146,7 +146,7 @@ namespace UnityCommon
 
         /// <summary>
         /// Splits the string using new line symbol as a separator.
-        /// Will split by all type of new lines, independant of environment.
+        /// Will split by all type of new lines, independent of environment.
         /// </summary>
         public static string[] SplitByNewLine (this string content, StringSplitOptions splitOptions = StringSplitOptions.None)
         {
@@ -217,7 +217,7 @@ namespace UnityCommon
 
             return source;
             #else
-            return source.Trim().Trim(new char[] { '\uFEFF', '\u200B' });
+            return source.Trim().Trim('\uFEFF', '\u200B');
             #endif
         }
 
@@ -236,7 +236,7 @@ namespace UnityCommon
                 ++unit;
             }
 
-            return string.Format("{0:G4} {1}", size, units[unit]);
+            return $"{size:G4} {units[unit]}";
         }
 
         /// <summary>

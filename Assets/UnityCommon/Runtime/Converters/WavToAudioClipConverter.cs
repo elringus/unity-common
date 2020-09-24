@@ -6,13 +6,13 @@ namespace UnityCommon
 {
     /// <summary>
     /// Converts <see cref="T:byte[]"/> raw data of a .wav audio file to <see cref="AudioClip"/>.
-    /// Only PCM16 44100Hz stereo wavs are supported.
+    /// Only PCM16 44100Hz stereo .wav are supported.
     /// </summary>
     public class WavToAudioClipConverter : IRawConverter<AudioClip>
     {
-        public RawDataRepresentation[] Representations { get { return new RawDataRepresentation[] {
+        public RawDataRepresentation[] Representations { get; } = {
             new RawDataRepresentation(".wav", "audio/wav")
-        }; } }
+        };
 
         public AudioClip Convert (byte[] obj, string name)
         {

@@ -24,7 +24,7 @@ namespace UnityCommon
             return UniTask.CompletedTask;
         }
 
-        public static List<Folder> LocateProjectFolders (string rootPath, string resourcesPath, ProjectResources projectResources)
+        public static IEnumerable<Folder> LocateProjectFolders (string rootPath, string resourcesPath, ProjectResources projectResources)
         {
             var path = string.IsNullOrEmpty(rootPath) ? resourcesPath : string.IsNullOrEmpty(resourcesPath) ? rootPath : $"{rootPath}/{resourcesPath}";
             return projectResources.ResourcePaths.LocateFolderPathsAtFolder(path)

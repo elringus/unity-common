@@ -8,9 +8,9 @@ namespace UnityCommon
     /// </summary>
     public class PngToSpriteConverter : IRawConverter<Sprite>
     {
-        public RawDataRepresentation[] Representations { get { return new RawDataRepresentation[] {
+        public RawDataRepresentation[] Representations { get; } = {
             new RawDataRepresentation(".png", "image/png")
-        }; } }
+        };
 
         public Sprite Convert (byte[] obj, string name)
         {

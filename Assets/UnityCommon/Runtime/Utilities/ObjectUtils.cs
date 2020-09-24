@@ -25,7 +25,7 @@ namespace UnityCommon
         /// <summary>
         /// Invokes <see cref="DestroyOrImmediate(Object)"/> on each direct descendent of the provided transform.
         /// </summary>
-        public static void DestroyAllChilds (Transform trs)
+        public static void DestroyAllChildren (Transform trs)
         {
             var childCount = trs.childCount;
             for (int i = 0; i < childCount; i++)

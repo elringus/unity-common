@@ -18,22 +18,22 @@ namespace UnityCommon
             Task OnPackagePostProcessAsync ();
         }
 
-        private static string PackageName { get { return PlayerPrefs.GetString(prefsPrefix + "PackageName"); } set { PlayerPrefs.SetString(prefsPrefix + "PackageName", value); } }
-        private static string Copyright { get { return PlayerPrefs.GetString(prefsPrefix + "Copyright"); } set { PlayerPrefs.SetString(prefsPrefix + "Copyright", value); } }
-        private static string LicenseFilePath { get { return PlayerPrefs.GetString(prefsPrefix + "LicenseFilePath"); } set { PlayerPrefs.SetString(prefsPrefix + "LicenseFilePath", value); } }
-        private static string LicenseAssetPath { get { return AssetsPath + "/" + defaultLicenseFileName + ".md"; } }
-        private static string AssetsPath { get { return "Assets/" + PackageName; } }
-        private static string OutputPath { get { return PlayerPrefs.GetString(prefsPrefix + "OutputPath"); } set { PlayerPrefs.SetString(prefsPrefix + "OutputPath", value); } }
-        private static string OutputFileName { get { return PackageName; } }
-        private static string IgnoredAssetGUIds { get { return PlayerPrefs.GetString(prefsPrefix + "IgnoredAssetGUIds"); } set { PlayerPrefs.SetString(prefsPrefix + "IgnoredAssetGUIds", value); } }
-        private static bool IsAnyPathsIgnored { get { return !string.IsNullOrEmpty(IgnoredAssetGUIds); } }
-        private static bool IsReadyToExport { get { return !string.IsNullOrEmpty(OutputPath) && !string.IsNullOrEmpty(OutputFileName); } }
-        private static bool ExportAsUnityPackage { get { return PlayerPrefs.GetInt(prefsPrefix + "ExportAsUnityPackage", 1) == 1; } set { PlayerPrefs.SetInt(prefsPrefix + "ExportAsUnityPackage", value ? 1 : 0); } }
-        private static bool PublishToGit { get { return PlayerPrefs.GetInt(prefsPrefix + "PublishToGit", 0) == 1; } set { PlayerPrefs.SetInt(prefsPrefix + "PublishToGit", value ? 1 : 0); } }
-        private static string GitShellPath { get { return PlayerPrefs.GetString(prefsPrefix + "GitShellPath"); } set { PlayerPrefs.SetString(prefsPrefix + "GitShellPath", value); } }
-        private static string GitScriptPath { get { return PlayerPrefs.GetString(prefsPrefix + "GitScriptPath"); } set { PlayerPrefs.SetString(prefsPrefix + "GitScriptPath", value); } }
-        private static bool ApplyModificationsToGit { get { return PlayerPrefs.GetInt(prefsPrefix + "ApplyModificationsToGit", 0) == 1; } set { PlayerPrefs.SetInt(prefsPrefix + "ApplyModificationsToGit", value ? 1 : 0); } }
-        private static string OverrideNamespace { get { return PlayerPrefs.GetString(prefsPrefix + "OverrideNamespace"); } set { PlayerPrefs.SetString(prefsPrefix + "OverrideNamespace", value); } }
+        private static string PackageName { get => PlayerPrefs.GetString(prefsPrefix + "PackageName"); set => PlayerPrefs.SetString(prefsPrefix + "PackageName", value); }
+        private static string Copyright { get => PlayerPrefs.GetString(prefsPrefix + "Copyright"); set => PlayerPrefs.SetString(prefsPrefix + "Copyright", value); }
+        private static string LicenseFilePath { get => PlayerPrefs.GetString(prefsPrefix + "LicenseFilePath"); set => PlayerPrefs.SetString(prefsPrefix + "LicenseFilePath", value); }
+        private static string LicenseAssetPath => AssetsPath + "/" + defaultLicenseFileName + ".md";
+        private static string AssetsPath => "Assets/" + PackageName;
+        private static string OutputPath { get => PlayerPrefs.GetString(prefsPrefix + "OutputPath"); set => PlayerPrefs.SetString(prefsPrefix + "OutputPath", value); }
+        private static string OutputFileName => PackageName;
+        private static string IgnoredAssetGUIds { get => PlayerPrefs.GetString(prefsPrefix + "IgnoredAssetGUIds"); set => PlayerPrefs.SetString(prefsPrefix + "IgnoredAssetGUIds", value); }
+        private static bool IsAnyPathsIgnored => !string.IsNullOrEmpty(IgnoredAssetGUIds);
+        private static bool IsReadyToExport => !string.IsNullOrEmpty(OutputPath) && !string.IsNullOrEmpty(OutputFileName);
+        private static bool ExportAsUnityPackage { get => PlayerPrefs.GetInt(prefsPrefix + "ExportAsUnityPackage", 1) == 1; set => PlayerPrefs.SetInt(prefsPrefix + "ExportAsUnityPackage", value ? 1 : 0); }
+        private static bool PublishToGit { get => PlayerPrefs.GetInt(prefsPrefix + "PublishToGit", 0) == 1; set => PlayerPrefs.SetInt(prefsPrefix + "PublishToGit", value ? 1 : 0); }
+        private static string GitShellPath { get => PlayerPrefs.GetString(prefsPrefix + "GitShellPath"); set => PlayerPrefs.SetString(prefsPrefix + "GitShellPath", value); }
+        private static string GitScriptPath { get => PlayerPrefs.GetString(prefsPrefix + "GitScriptPath"); set => PlayerPrefs.SetString(prefsPrefix + "GitScriptPath", value); }
+        private static bool ApplyModificationsToGit { get => PlayerPrefs.GetInt(prefsPrefix + "ApplyModificationsToGit", 0) == 1; set => PlayerPrefs.SetInt(prefsPrefix + "ApplyModificationsToGit", value ? 1 : 0); }
+        private static string OverrideNamespace { get => PlayerPrefs.GetString(prefsPrefix + "OverrideNamespace"); set => PlayerPrefs.SetString(prefsPrefix + "OverrideNamespace", value); }
 
         private const string prefsPrefix = "PackageExporter.";
         private const string autoRefreshKey = "kAutoRefresh";
@@ -65,7 +65,6 @@ namespace UnityCommon
             RenderGUI();
         }
 
-        #if UNITY_2019_1_OR_NEWER
         [SettingsProvider]
         internal static SettingsProvider CreateProjectSettingsProvider ()
         {
@@ -74,23 +73,6 @@ namespace UnityCommon
             provider.guiHandler += id => RenderGUI();
             return provider;
         }
-        #elif UNITY_2018_3_OR_NEWER
-        [SettingsProvider]
-        internal static SettingsProvider CreateProjectSettingsProvider ()
-        {
-            var provider = new SettingsProvider("Project/Package Exporter");
-            provider.activateHandler += (a, b) => Initialize();
-            provider.guiHandler += id => RenderGUI();
-            return provider;
-        }
-        #else
-        [MenuItem("Edit/Project Settings/Package Exporter")]
-        private static void OpenSettingsWindow ()
-        {
-            var window = GetWindow<PackageExporter>();
-            window.Show();
-        }
-        #endif
 
         private static void Initialize ()
         {
@@ -98,7 +80,7 @@ namespace UnityCommon
                 PackageName = Application.productName;
             if (string.IsNullOrEmpty(LicenseFilePath))
                 LicenseFilePath = Application.dataPath.Replace("Assets", "") + defaultLicenseFileName;
-            DeserealizeIgnoredAssets();
+            DeserializeIgnoredAssets();
         }
 
         [MenuItem("Assets/+ Export Package", priority = 20)]
@@ -153,22 +135,22 @@ namespace UnityCommon
 
         private static void SerializeIgnoredAssets ()
         {
-            var ignoredAseetsGUIDs = new List<string>();
+            var ignoredAssetsGUIDs = new List<string>();
             foreach (var asset in ignoredAssets)
             {
                 if (!asset) continue;
                 var assetPath = AssetDatabase.GetAssetPath(asset);
                 var assetGUID = AssetDatabase.AssetPathToGUID(assetPath);
-                ignoredAseetsGUIDs.Add(assetGUID);
+                ignoredAssetsGUIDs.Add(assetGUID);
             }
-            IgnoredAssetGUIds = string.Join(",", ignoredAseetsGUIDs.ToArray());
+            IgnoredAssetGUIds = string.Join(",", ignoredAssetsGUIDs.ToArray());
         }
 
-        private static void DeserealizeIgnoredAssets ()
+        private static void DeserializeIgnoredAssets ()
         {
             ignoredAssets.Clear();
-            var ignoredAseetsGUIDs = IgnoredAssetGUIds.Split(',');
-            foreach (var guid in ignoredAseetsGUIDs)
+            var ignoredAssetsGUIDs = IgnoredAssetGUIds.Split(',');
+            foreach (var guid in ignoredAssetsGUIDs)
             {
                 if (string.IsNullOrEmpty(guid)) continue;
                 var assetPath = AssetDatabase.GUIDToAssetPath(guid);
@@ -225,9 +207,9 @@ namespace UnityCommon
             // Publish GitHub branch before modifications.
             if (!ApplyModificationsToGit && PublishToGit)
             {
-                using (var proccess = System.Diagnostics.Process.Start(GitShellPath, $"\"{GitScriptPath}\""))
+                using (var process = System.Diagnostics.Process.Start(GitShellPath, $"\"{GitScriptPath}\""))
                 {
-                    proccess.WaitForExit();
+                    process.WaitForExit();
                 }
             }
 
@@ -242,8 +224,8 @@ namespace UnityCommon
                     if (!path.EndsWith(".cs") && !path.EndsWith(".shader") && !path.EndsWith(".cginc")) continue;
                     if (path.Contains("ThirdParty")) continue;
 
-                    var fullpath = Application.dataPath.Replace("Assets", string.Empty) + path;
-                    var originalScriptText = File.ReadAllText(fullpath, Encoding.UTF8);
+                    var fullPath = Application.dataPath.Replace("Assets", string.Empty) + path;
+                    var originalScriptText = File.ReadAllText(fullPath, Encoding.UTF8);
 
                     string scriptText = string.Empty;
 
@@ -256,9 +238,9 @@ namespace UnityCommon
                     if (!string.IsNullOrEmpty(OverrideNamespace))
                         scriptText = scriptText.Replace($"namespace {PackageName}{Environment.NewLine}{{", $"namespace {OverrideNamespace}{Environment.NewLine}{{");
 
-                    File.WriteAllText(fullpath, scriptText, Encoding.UTF8);
+                    File.WriteAllText(fullPath, scriptText, Encoding.UTF8);
 
-                    modifiedScripts.Add(fullpath, originalScriptText);
+                    modifiedScripts.Add(fullPath, originalScriptText);
                 }
             }
 
@@ -295,9 +277,9 @@ namespace UnityCommon
             // Publish GitHub branch after modifications.
             if (ApplyModificationsToGit && PublishToGit)
             {
-                using (var proccess = System.Diagnostics.Process.Start(GitShellPath, $"\"{GitScriptPath}\""))
+                using (var process = System.Diagnostics.Process.Start(GitShellPath, $"\"{GitScriptPath}\""))
                 {
-                    proccess.WaitForExit();
+                    process.WaitForExit();
                 }
             }
 
@@ -333,7 +315,7 @@ namespace UnityCommon
 
         private static void DisplayProgressBar (string activity, float progress)
         {
-            EditorUtility.DisplayProgressBar(string.Format("Exporting {0}", PackageName), activity, progress);
+            EditorUtility.DisplayProgressBar($"Exporting {PackageName}", activity, progress);
         }
 
         private static IEnumerable<IProcessor> GetProcessors ()

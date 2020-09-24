@@ -31,8 +31,7 @@ namespace UnityCommon
 
         private void InvokeOnButtonClicked ()
         {
-            if (OnButtonClicked != null)
-                OnButtonClicked.Invoke();
+            OnButtonClicked?.Invoke();
         }
     }
 }
