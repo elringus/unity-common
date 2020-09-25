@@ -10,16 +10,16 @@ namespace UnityCommon
         /// <summary>
         /// Cached domain exported types from the non-dynamic assemblies.
         /// </summary>
-        public static Type[] ExportedDomainTypes => cachedDomainTypes ?? (cachedDomainTypes = GetExportedDomainTypes());
+        public static IEnumerable<Type> ExportedDomainTypes => cachedDomainTypes ?? (cachedDomainTypes = GetExportedDomainTypes());
         /// <summary>
         /// Cached domain exported types from the non-dynamic assemblies, excluding system and Unity assemblies.
         /// </summary>
-        public static Type[] ExportedCustomTypes => cachedCustomTypes ?? (cachedCustomTypes = GetExportedDomainTypes(true, true, true));
+        public static IEnumerable<Type> ExportedCustomTypes => cachedCustomTypes ?? (cachedCustomTypes = GetExportedDomainTypes(true, true, true));
 
-        private static Type[] cachedDomainTypes;
-        private static Type[] cachedCustomTypes;
+        private static IEnumerable<Type> cachedDomainTypes;
+        private static IEnumerable<Type> cachedCustomTypes;
 
-        public static Assembly[] GetDomainAssemblies (bool excludeDynamic = true, bool excludeSystem = false, bool excludeUnity = false)
+        public static IEnumerable<Assembly> GetDomainAssemblies (bool excludeDynamic = true, bool excludeSystem = false, bool excludeUnity = false)
         {
             return AppDomain.CurrentDomain.GetAssemblies().Where(a => 
                 (!excludeDynamic || !a.IsDynamic) && 
@@ -30,7 +30,7 @@ namespace UnityCommon
             ).ToArray();
         }
 
-        public static Type[] GetExportedDomainTypes (bool excludeDynamic = true, bool excludeSystem = false, bool excludeUnity = false, IEnumerable<string> namespaces = null)
+        public static IEnumerable<Type> GetExportedDomainTypes (bool excludeDynamic = true, bool excludeSystem = false, bool excludeUnity = false, IEnumerable<string> namespaces = null)
         {
             if (namespaces is null || !namespaces.Any())
                 return GetDomainAssemblies(excludeDynamic, excludeSystem, excludeUnity)
