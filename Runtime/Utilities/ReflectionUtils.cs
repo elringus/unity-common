@@ -30,10 +30,13 @@ namespace UnityCommon
             );
         }
 
-        public static IEnumerable<Type> GetExportedDomainTypes (bool excludeDynamic = true, bool excludeSystem = false, bool excludeUnity = false)
+        public static IEnumerable<Type> GetExportedDomainTypes (bool excludeDynamic = true, bool excludeSystem = false, bool excludeUnity = false, string[] namespaces = null)
         {
-            return GetDomainAssemblies(excludeDynamic, excludeSystem, excludeUnity)
-                .SelectMany(a => a.GetExportedTypes());
+            if (namespaces is null || namespaces.Length == 0)
+                return GetDomainAssemblies(excludeDynamic, excludeSystem, excludeUnity)
+                    .SelectMany(a => a.GetExportedTypes());
+            else return GetDomainAssemblies(excludeDynamic, excludeSystem, excludeUnity)
+                .SelectMany(a => a.GetExportedTypes()).Where(t => namespaces.Contains(t.Namespace));
         }
 
         /// <summary>
