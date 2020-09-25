@@ -10,32 +10,30 @@ namespace UnityCommon
         /// <summary>
         /// Cached domain exported types from the non-dynamic assemblies.
         /// </summary>
-        public static HashSet<Type> ExportedDomainTypes => cachedDomainTypes ?? (cachedDomainTypes = GetExportedDomainTypes());
+        public static IEnumerable<Type> ExportedDomainTypes => cachedDomainTypes ?? (cachedDomainTypes = GetExportedDomainTypes());
+        /// <summary>
+        /// Cached domain exported types from the non-dynamic assemblies, excluding system and Unity assemblies.
+        /// </summary>
+        public static IEnumerable<Type> ExportedCustomTypes => cachedCustomTypes ?? (cachedCustomTypes = GetExportedDomainTypes(true, true, true));
 
-        private static HashSet<Type> cachedDomainTypes;
+        private static IEnumerable<Type> cachedDomainTypes;
+        private static IEnumerable<Type> cachedCustomTypes;
 
-        public static bool IsDynamicAssembly (Assembly assembly)
+        public static IEnumerable<Assembly> GetDomainAssemblies (bool excludeDynamic = true, bool excludeSystem = false, bool excludeUnity = false)
         {
-            #if NET_4_6 || NET_STANDARD_2_0
-            return assembly.IsDynamic;
-            #else
-            return assembly is System.Reflection.Emit.AssemblyBuilder;
-            #endif
+            return AppDomain.CurrentDomain.GetAssemblies().Where(a => 
+                    (!excludeDynamic || !a.IsDynamic) && 
+                    (!excludeSystem || !a.GlobalAssemblyCache && !a.FullName.StartsWithFast("System") && !a.FullName.StartsWithFast("mscorlib")) &&
+                    (!excludeUnity || !a.FullName.StartsWithFast("UnityEditor") && !a.FullName.StartsWithFast("UnityEngine") && !a.FullName.StartsWithFast("Unity.") &&
+                                      !a.FullName.StartsWithFast("nunit.") && !a.FullName.StartsWithFast("ExCSS.") && !a.FullName.StartsWithFast("UniTask.") && 
+                                      !a.FullName.StartsWithFast("UniRx.") && !a.FullName.StartsWithFast("JetBrains.") && !a.FullName.StartsWithFast("Newtonsoft."))
+                );
         }
 
-        public static HashSet<Assembly> GetDomainAssemblies (bool excludeDynamic = true)
+        public static IEnumerable<Type> GetExportedDomainTypes (bool excludeDynamic = true, bool excludeSystem = false, bool excludeUnity = false)
         {
-            var result = new HashSet<Assembly>();
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            result.UnionWith(excludeDynamic ? assemblies.Where(a => !IsDynamicAssembly(a)) : assemblies);
-            return result;
-        }
-
-        public static HashSet<Type> GetExportedDomainTypes ()
-        {
-            var result = new HashSet<Type>();
-            result.UnionWith(GetDomainAssemblies().SelectMany(a => a.GetExportedTypes()));
-            return result;
+            return GetDomainAssemblies(excludeDynamic, excludeSystem, excludeUnity)
+                .SelectMany(a => a.GetExportedTypes());
         }
 
         /// <summary>
