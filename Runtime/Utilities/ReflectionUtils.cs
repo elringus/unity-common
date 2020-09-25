@@ -10,24 +10,24 @@ namespace UnityCommon
         /// <summary>
         /// Cached domain exported types from the non-dynamic assemblies.
         /// </summary>
-        public static IEnumerable<Type> ExportedDomainTypes => cachedDomainTypes ?? (cachedDomainTypes = GetExportedDomainTypes());
+        public static IEnumerable<Type> ExportedDomainTypes => cachedDomainTypes ?? (cachedDomainTypes = GetExportedDomainTypes().ToArray());
         /// <summary>
         /// Cached domain exported types from the non-dynamic assemblies, excluding system and Unity assemblies.
         /// </summary>
-        public static IEnumerable<Type> ExportedCustomTypes => cachedCustomTypes ?? (cachedCustomTypes = GetExportedDomainTypes(true, true, true));
+        public static IEnumerable<Type> ExportedCustomTypes => cachedCustomTypes ?? (cachedCustomTypes = GetExportedDomainTypes(true, true, true).ToArray());
 
-        private static IEnumerable<Type> cachedDomainTypes;
-        private static IEnumerable<Type> cachedCustomTypes;
+        private static Type[] cachedDomainTypes;
+        private static Type[] cachedCustomTypes;
 
         public static IEnumerable<Assembly> GetDomainAssemblies (bool excludeDynamic = true, bool excludeSystem = false, bool excludeUnity = false)
         {
             return AppDomain.CurrentDomain.GetAssemblies().Where(a => 
-                    (!excludeDynamic || !a.IsDynamic) && 
-                    (!excludeSystem || !a.GlobalAssemblyCache && !a.FullName.StartsWithFast("System") && !a.FullName.StartsWithFast("mscorlib")) &&
-                    (!excludeUnity || !a.FullName.StartsWithFast("UnityEditor") && !a.FullName.StartsWithFast("UnityEngine") && !a.FullName.StartsWithFast("Unity.") &&
-                                      !a.FullName.StartsWithFast("nunit.") && !a.FullName.StartsWithFast("ExCSS.") && !a.FullName.StartsWithFast("UniTask.") && 
-                                      !a.FullName.StartsWithFast("UniRx.") && !a.FullName.StartsWithFast("JetBrains.") && !a.FullName.StartsWithFast("Newtonsoft."))
-                );
+                (!excludeDynamic || !a.IsDynamic) && 
+                (!excludeSystem || !a.GlobalAssemblyCache && !a.FullName.StartsWithFast("System") && !a.FullName.StartsWithFast("mscorlib")) &&
+                (!excludeUnity || !a.FullName.StartsWithFast("UnityEditor") && !a.FullName.StartsWithFast("UnityEngine") && !a.FullName.StartsWithFast("Unity.") &&
+                    !a.FullName.StartsWithFast("nunit.") && !a.FullName.StartsWithFast("ExCSS.") && !a.FullName.StartsWithFast("UniTask.") && 
+                    !a.FullName.StartsWithFast("UniRx.") && !a.FullName.StartsWithFast("JetBrains.") && !a.FullName.StartsWithFast("Newtonsoft."))
+            );
         }
 
         public static IEnumerable<Type> GetExportedDomainTypes (bool excludeDynamic = true, bool excludeSystem = false, bool excludeUnity = false)
