@@ -138,8 +138,8 @@ namespace UnityCommon
         {
             var result = new LinkedList<Resource<TResource>>();
             var addedPaths = new HashSet<string>();
-            var loadTasks = new List<UniTask<Resource<TResource>>>();
-            var loadData = new List<(ProvisionSource, string)>();
+            var loadTasks = new LinkedList<UniTask<Resource<TResource>>>();
+            var loadData = new Dictionary<string, (ProvisionSource, string)>();
             
             foreach (var source in ProvisionSources)
             {
@@ -158,17 +158,16 @@ namespace UnityCommon
                         continue;
                     }
                     
-                    loadTasks.Add(source.Provider.LoadResourceAsync<TResource>(locatedResourcePath));
-                    loadData.Add((source, localPath));
+                    loadTasks.AddLast(source.Provider.LoadResourceAsync<TResource>(locatedResourcePath));
+                    loadData[locatedResourcePath] = (source, localPath);
                 }
             }
 
-            await UniTask.WhenAll(loadTasks);
+            var resources = await UniTask.WhenAll(loadTasks);
 
-            for (int i = 0; i < loadTasks.Count; i++)
+            foreach (var resource in resources)
             {
-                var resource = loadTasks[i].Result;
-                var (source, localPath) = loadData[i];
+                var (source, localPath) = loadData[resource.Path];
                 LoadedResources.AddLast(new LoadedResource(resource, source));
                 OnResourceLoaded?.Invoke(localPath);
                 result.AddLast(resource);
@@ -184,28 +183,18 @@ namespace UnityCommon
 
         public virtual async UniTask<IEnumerable<string>> LocateAsync (string path = null)
         {
-            var result = new HashSet<string>();
             var tasks = new List<UniTask<IEnumerable<string>>>();
-            var tasksData = new List<ProvisionSource>();
             
             foreach (var source in ProvisionSources)
             {
                 var fullPath = source.BuildFullPath(path);
-                tasks.Add(source.Provider.LocateResourcesAsync<TResource>(fullPath));
-                tasksData.Add(source);
+                tasks.Add(source.Provider.LocateResourcesAsync<TResource>(fullPath)
+                    .ContinueWith(ps => ps.Select(p => source.BuildLocalPath(p))));
             }
 
-            await UniTask.WhenAll(tasks);
+            var result = await UniTask.WhenAll(tasks);
 
-            for (int i = 0; i < tasks.Count; i++)
-            {
-                var fullPaths = tasks[i].Result;
-                var source = tasksData[i];
-                foreach (var fullPath in fullPaths)
-                    result.Add(source.BuildLocalPath(fullPath));
-            }
-            
-            return result;
+            return result.SelectMany(s => s).Distinct();
         }
 
         public virtual async UniTask<bool> ExistsAsync (string path)
