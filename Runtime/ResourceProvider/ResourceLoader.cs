@@ -19,7 +19,7 @@ namespace UnityCommon
             public string FullPath => Resource.Path;
             public bool Valid => Resource.Valid;
 
-            private readonly LinkedList<WeakReference> holders = new LinkedList<WeakReference>();
+            private readonly List<WeakReference> holders = new List<WeakReference>();
 
             public LoadedResource (Resource<TResource> resource, ProvisionSource provisionSource)
             {
@@ -28,7 +28,7 @@ namespace UnityCommon
                 LocalPath = provisionSource.BuildLocalPath(resource.Path);
             }
 
-            public void AddHolder (object holder) => holders.AddLast(new WeakReference(holder));
+            public void AddHolder (object holder) => holders.Add(new WeakReference(holder));
             public void RemoveHolder (object holder) => holders.RemoveAll(wr => !wr.IsAlive || wr.Target == holder);
             public bool IsHeldBy (object holder) => holders.Any(wr => wr.IsAlive && wr.Target == holder);
             public int CountHolders () => holders.Count(wr => wr.IsAlive);
@@ -49,7 +49,7 @@ namespace UnityCommon
         /// <summary>
         /// Resources loaded by the loader.
         /// </summary>
-        protected readonly LinkedList<LoadedResource> LoadedResources = new LinkedList<LoadedResource>();
+        protected readonly List<LoadedResource> LoadedResources = new List<LoadedResource>();
 
         public ResourceLoader (IList<ProvisionSource> provisionSources)
         { 
@@ -126,7 +126,7 @@ namespace UnityCommon
                 if (!await source.Provider.ResourceExistsAsync<TResource>(fullPath)) continue;
                 
                 var resource = await source.Provider.LoadResourceAsync<TResource>(fullPath);
-                LoadedResources.AddLast(new LoadedResource(resource, source));
+                LoadedResources.Add(new LoadedResource(resource, source));
                 OnResourceLoaded?.Invoke(path);
                 return resource;
             }
@@ -136,9 +136,9 @@ namespace UnityCommon
 
         public virtual async UniTask<IEnumerable<Resource<TResource>>> LoadAllAsync (string path = null)
         {
-            var result = new LinkedList<Resource<TResource>>();
+            var result = new List<Resource<TResource>>();
             var addedPaths = new HashSet<string>();
-            var loadTasks = new LinkedList<UniTask<Resource<TResource>>>();
+            var loadTasks = new List<UniTask<Resource<TResource>>>();
             var loadData = new Dictionary<string, (ProvisionSource, string)>();
             
             foreach (var source in ProvisionSources)
@@ -154,11 +154,11 @@ namespace UnityCommon
                     
                     if (IsLoaded(localPath))
                     {
-                        result.AddLast(GetLoadedOrNull(localPath));
+                        result.Add(GetLoadedOrNull(localPath));
                         continue;
                     }
                     
-                    loadTasks.AddLast(source.Provider.LoadResourceAsync<TResource>(locatedResourcePath));
+                    loadTasks.Add(source.Provider.LoadResourceAsync<TResource>(locatedResourcePath));
                     loadData[locatedResourcePath] = (source, localPath);
                 }
             }
@@ -168,9 +168,9 @@ namespace UnityCommon
             foreach (var resource in resources)
             {
                 var (source, localPath) = loadData[resource.Path];
-                LoadedResources.AddLast(new LoadedResource(resource, source));
+                LoadedResources.Add(new LoadedResource(resource, source));
                 OnResourceLoaded?.Invoke(localPath);
-                result.AddLast(resource);
+                result.Add(resource);
             }
 
             return result;
@@ -178,7 +178,7 @@ namespace UnityCommon
 
         public virtual IEnumerable<Resource<TResource>> GetAllLoaded ()
         {
-            return LoadedResources.Where(r => r.Valid).Select(r => r.Resource);
+            return LoadedResources.Where(r => r.Valid).Select(r => r.Resource).ToArray();
         } 
 
         public virtual async UniTask<IEnumerable<string>> LocateAsync (string path = null)
@@ -194,7 +194,7 @@ namespace UnityCommon
 
             var result = await UniTask.WhenAll(tasks);
 
-            return result.SelectMany(s => s).Distinct();
+            return result.SelectMany(s => s).Distinct().ToArray();
         }
 
         public virtual async UniTask<bool> ExistsAsync (string path)
