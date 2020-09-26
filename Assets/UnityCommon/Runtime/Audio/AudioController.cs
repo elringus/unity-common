@@ -15,7 +15,7 @@ namespace UnityCommon
         public float Volume { get => AudioListener.volume; set => AudioListener.volume = value; }
         public bool Mute { get => AudioListener.pause; set => AudioListener.pause = value; }
 
-        private readonly LinkedList<AudioTrack> audioTracks = new LinkedList<AudioTrack>();
+        private readonly List<AudioTrack> audioTracks = new List<AudioTrack>();
         private readonly Stack<AudioSource> sourcesPool = new Stack<AudioSource>();
         private AudioListener listenerCache;
         private Tweener<FloatTween> listenerVolumeTweener;
@@ -63,7 +63,7 @@ namespace UnityCommon
             if (!audioSource) audioSource = GetPooledSource();
 
             var track = new AudioTrack(clip, audioSource, volume, loop, mixerGroup, introClip);
-            audioTracks.AddLast(track);
+            audioTracks.Add(track);
             track.Play();
         }
 
@@ -80,48 +80,49 @@ namespace UnityCommon
             if (!audioSource) audioSource = GetPooledSource();
 
             var track = new AudioTrack(clip, audioSource, volume, loop, mixerGroup, introClip);
-            audioTracks.AddLast(track);
+            audioTracks.Add(track);
             await track.PlayAsync(fadeInTime, cancellationToken);
         }
 
         public void StopClip (AudioClip clip)
         {
             if (!clip || !ClipPlaying(clip)) return;
-            var tracksCopy = new LinkedList<AudioTrack>(GetTracks(clip));
-            foreach (var track in tracksCopy)
+            foreach (var track in GetTracks(clip))
                 track.Stop();
         }
 
         public void StopAllClips ()
         {
-            var tracksCopy = new LinkedList<AudioTrack>(audioTracks);
-            foreach (var track in tracksCopy)
+            foreach (var track in GetAllTracks())
                 track.Stop();
         }
 
         public async UniTask StopClipAsync (AudioClip clip, float fadeOutTime, CancellationToken cancellationToken = default)
         {
             if (!clip || !ClipPlaying(clip)) return;
-            var tracksCopy = new LinkedList<AudioTrack>(GetTracks(clip));
-            var tasks = new LinkedList<UniTask>();
-            foreach (var track in tracksCopy)
-                tasks.AddLast(track.StopAsync(fadeOutTime, cancellationToken));
+            var tasks = new List<UniTask>();
+            foreach (var track in GetTracks(clip))
+                tasks.Add(track.StopAsync(fadeOutTime, cancellationToken));
             await UniTask.WhenAll(tasks);
         }
 
         public async UniTask StopAllClipsAsync (float fadeOutTime, CancellationToken cancellationToken = default)
         {
-            var tracksCopy = new LinkedList<AudioTrack>(audioTracks);
-            var tasks = new LinkedList<UniTask>();
-            foreach (var track in tracksCopy)
-                tasks.AddLast(track.StopAsync(fadeOutTime, cancellationToken));
+            var tasks = new List<UniTask>();
+            foreach (var track in GetAllTracks())
+                tasks.Add(track.StopAsync(fadeOutTime, cancellationToken));
             await UniTask.WhenAll(tasks);
         }
 
         public IEnumerable<AudioTrack> GetTracks (AudioClip clip)
         {
             if (!clip) return null;
-            return audioTracks.Where(t => t.Clip == clip);
+            return audioTracks.Where(t => t.Clip == clip).ToArray();
+        }
+        
+        public IEnumerable<AudioTrack> GetAllTracks ()
+        {
+            return audioTracks.ToArray();
         }
 
         private AudioListener FindOrAddListener ()
@@ -144,14 +145,14 @@ namespace UnityCommon
 
         private void PoolUnusedSources ()
         {
-            var tracksCopy = new LinkedList<AudioTrack>(audioTracks);
-            foreach (var track in tracksCopy)
-                if (!track.Playing)
-                {
-                    if (IsOwnedByController(track.Source))
-                        sourcesPool.Push(track.Source);
-                    audioTracks.Remove(track);
-                }
+            for (int i = audioTracks.Count - 1; i >= 0; i--)
+            {
+                var track = audioTracks[i];
+                if (track.Playing) continue;
+                if (IsOwnedByController(track.Source))
+                    sourcesPool.Push(track.Source);
+                audioTracks.Remove(track);
+            }
         }
     }
 }
