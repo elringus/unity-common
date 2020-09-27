@@ -85,5 +85,21 @@ namespace UnityCommon
             texture2d.Apply();
             return texture2d;
         }
+
+        /// <summary>
+        /// Clears the depth and color contents of the render texture with transparent color.
+        /// </summary>
+        public static void Clear (this RenderTexture renderTexture) => Clear(renderTexture, true, true, Color.clear);
+        
+        /// <summary>
+        /// Clears the contents of the render texture with the specified color.
+        /// </summary>
+        public static void Clear (this RenderTexture renderTexture, bool clearDepth, bool clearColor, Color backgroundColor)
+        {
+            var activeTexture = RenderTexture.active;
+            RenderTexture.active = renderTexture;
+            GL.Clear(clearDepth, clearColor, backgroundColor);
+            RenderTexture.active = activeTexture;
+        }
     }
 }
