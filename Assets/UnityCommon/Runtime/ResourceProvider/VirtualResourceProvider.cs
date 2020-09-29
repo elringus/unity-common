@@ -34,9 +34,9 @@ namespace UnityCommon
 
         public bool SupportsType<T> () where T : UnityEngine.Object => true;
 
-        public void AddResource (string path, UnityEngine.Object obj)
+        public void AddResource<T> (string path, T obj) where T : UnityEngine.Object
         {
-            Resources[path] = new Resource(path, obj);
+            Resources[path] = new Resource<T>(path, obj);
         }
 
         public void RemoveResource (string path)
@@ -72,7 +72,7 @@ namespace UnityCommon
 
         public IEnumerable<Resource<T>> LoadResources<T> (string path) where T : UnityEngine.Object
         {
-            return Resources.Where(kv => kv.Value is T).Select(kv => kv.Key).LocateResourcePathsAtFolder(path).Select(LoadResource<T>);
+            return Resources.Where(kv => kv.Value?.Object.GetType() == typeof(T)).Select(kv => kv.Key).LocateResourcePathsAtFolder(path).Select(LoadResource<T>);
         }
 
         public UniTask<IEnumerable<Resource<T>>> LoadResourcesAsync<T> (string path) where T : UnityEngine.Object
@@ -94,7 +94,7 @@ namespace UnityCommon
 
         public IEnumerable<string> LocateResources<T> (string path) where T : UnityEngine.Object
         {
-            return Resources.Where(kv => kv.Value is T).Select(kv => kv.Key).LocateResourcePathsAtFolder(path);
+            return Resources.Where(kv => kv.Value?.Object.GetType() == typeof(T)).Select(kv => kv.Key).LocateResourcePathsAtFolder(path);
         }
 
         public UniTask<IEnumerable<string>> LocateResourcesAsync<T> (string path) where T : UnityEngine.Object
@@ -105,7 +105,7 @@ namespace UnityCommon
 
         public bool ResourceExists<T> (string path) where T : UnityEngine.Object
         {
-            return Resources.ContainsKey(path) && Resources[path] is T;
+            return Resources.ContainsKey(path) && Resources[path].Object.GetType() == typeof(T);
         }
 
         public UniTask<bool> ResourceExistsAsync<T> (string path) where T : UnityEngine.Object
