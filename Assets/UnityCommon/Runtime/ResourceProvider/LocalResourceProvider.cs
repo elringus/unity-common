@@ -27,10 +27,7 @@ namespace UnityCommon
             {
                 var specialFolderStr = rootPath.GetBetween("%SPECIAL{", "}%");
                 if (!Enum.TryParse<Environment.SpecialFolder>(specialFolderStr, true, out var specialFolder))
-                {
-                    Debug.LogError($"Failed to parse `{rootPath}` special folder path for local resource provider root.");
-                    return;
-                }
+                    throw new Exception($"Failed to parse `{rootPath}` special folder path for local resource provider root.");
                 RootPath = string.Concat(Environment.GetFolderPath(specialFolder), rootPath.GetAfterFirst("}%"));
             }
             else RootPath = rootPath; // Absolute path.
@@ -74,10 +71,7 @@ namespace UnityCommon
         {
             var resourceType = typeof(T);
             if (!converters.ContainsKey(resourceType))
-            {
-                Debug.LogError($"Converter for resource of type '{resourceType.Name}' is not available.");
-                return null;
-            }
+                throw new Exception($"Converter for resource of type '{resourceType.Name}' is not available.");
             return converters[resourceType] as IRawConverter<T>;
         }
     }

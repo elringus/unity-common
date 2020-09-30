@@ -32,10 +32,7 @@ namespace UnityCommon
             var loadedResource = LoadedResources[path];
             var loadedResourceType = loadedResource.Valid ? loadedResource.Object.GetType() : default;
             if (loadedResourceType != typeof(T))
-            {
-                Debug.LogError($"Failed to get a loaded resource with path `{path}`: the loaded resource is of type `{loadedResourceType.FullName}`, while the requested type is `{typeof(T).FullName}`.");
-                return null;
-            }
+                throw new Exception($"Failed to get a loaded resource with path `{path}`: The loaded resource is of type `{loadedResourceType.FullName}`, while the requested type is `{typeof(T).FullName}`.");
             else return LoadedResources[path] as Resource<T>;
         }
 
@@ -207,7 +204,7 @@ namespace UnityCommon
 
         protected virtual void HandleResourceLoaded<T> (Resource<T> resource) where T : UnityEngine.Object
         {
-            if (!resource.Valid) Debug.LogError($"Resource `{resource.Path}` failed to load.");
+            if (!resource.Valid) throw new Exception($"Resource `{resource.Path}` failed to load.");
             else LoadedResources[resource.Path] = resource;
 
             if (LoadRunners.ContainsKey(resource.Path))
