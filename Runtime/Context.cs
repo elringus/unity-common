@@ -103,7 +103,7 @@ namespace UnityCommon
                 return ConstructAndRegister(resolvingType) as T;
 
             if (result == null && assertResult)
-                Debug.LogError(string.Format("Failed to resolve object of type '{0}'", resolvingType.Name));
+                Debug.LogError($"Failed to resolve object of type '{resolvingType.Name}'");
 
             return result;
         }
@@ -118,7 +118,7 @@ namespace UnityCommon
             if (refsOfType == null || refsOfType.Count == 0)
             {
                 if (assertResult)
-                    Debug.LogError(string.Format("Failed to resolve objects of type '{0}'", resolvingType.Name));
+                    Debug.LogError($"Failed to resolve objects of type '{resolvingType.Name}'");
                 return new List<T>();
             }
 

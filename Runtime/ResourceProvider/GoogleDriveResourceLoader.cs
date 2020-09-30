@@ -58,12 +58,7 @@ namespace UnityCommon
                 // 4. Load file metadata from Google Drive.
                 var filePath = string.IsNullOrEmpty(RootPath) ? Path : string.Concat(RootPath, '/', Path);
                 var fileMeta = await GetFileMetaAsync(filePath);
-                if (fileMeta is null)
-                {
-                    Debug.LogError($"Failed to resolve '{filePath}' Google Drive metadata.");
-                    SetResult(new Resource<TResource>(Path, null));
-                    return;
-                }
+                if (fileMeta is null) throw new Exception($"Failed to resolve '{filePath}' Google Drive metadata.");
 
                 if (converter is IGoogleDriveConverter<TResource>) rawData = await ExportFileAsync(fileMeta);
                 else rawData = await DownloadFileAsync(fileMeta);
@@ -106,8 +101,7 @@ namespace UnityCommon
                 if (files.Count > 0) { usedRepresentation = representation; return files[0]; }
             }
 
-            Debug.LogError($"Failed to retrieve '{Path}' resource from Google Drive.");
-            return null;
+            throw new Exception($"Failed to retrieve '{Path}' resource from Google Drive.");
         }
 
         private async UniTask<byte[]> DownloadFileAsync (UnityGoogleDrive.Data.File fileMeta)
@@ -121,10 +115,7 @@ namespace UnityCommon
 
             await downloadRequest.SendNonGeneric();
             if (downloadRequest.IsError || downloadRequest.GetResponseData<UnityGoogleDrive.Data.File>().Content == null)
-            {
-                Debug.LogError($"Failed to download {Path}{usedRepresentation.Extension} resource from Google Drive.");
-                return null;
-            }
+                throw new Exception($"Failed to download {Path}{usedRepresentation.Extension} resource from Google Drive.");
 
             if (useNativeRequests)
             {
@@ -144,10 +135,7 @@ namespace UnityCommon
             downloadRequest = new GoogleDriveFiles.ExportRequest(fileMeta.Id, gDriveConverter.ExportMimeType);
             await downloadRequest.SendNonGeneric();
             if (downloadRequest.IsError || downloadRequest.GetResponseData<UnityGoogleDrive.Data.File>().Content == null)
-            {
-                Debug.LogError($"Failed to export '{Path}' resource from Google Drive.");
-                return null;
-            }
+                throw new Exception($"Failed to export '{Path}' resource from Google Drive.");
             return downloadRequest.GetResponseData<UnityGoogleDrive.Data.File>().Content;
         }
 

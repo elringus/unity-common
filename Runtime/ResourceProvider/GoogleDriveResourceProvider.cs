@@ -185,10 +185,7 @@ namespace UnityCommon
         {
             var resourceType = typeof(T);
             if (!converters.ContainsKey(resourceType))
-            {
-                Debug.LogError($"Converter for resource of type '{resourceType.Name}' is not available.");
-                return null;
-            }
+                throw new Exception($"Converter for resource of type '{resourceType.Name}' is not available.");
             return converters[resourceType] as IRawConverter<T>;
         }
 

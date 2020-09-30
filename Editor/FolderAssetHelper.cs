@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -25,18 +26,15 @@ namespace UnityCommon
     /// </summary>
     public class FolderAssetHelper
     {
-        public Object FolderObject { get; }
+        public UnityEngine.Object FolderObject { get; }
         public string Path => AssetDatabase.GetAssetPath(FolderObject);
         public string FullPath => Application.dataPath.GetBefore("Assets") + Path;
 
-        public FolderAssetHelper (Object folderObject)
+        public FolderAssetHelper (UnityEngine.Object folderObject)
         {
             FolderObject = folderObject;
             if (FolderObject == null || !AssetDatabase.IsValidFolder(Path))
-            {
-                Debug.LogError($"Object '{(FolderObject ? FolderObject.name : "null")}' is not a folder.");
-                return;
-            }
+                throw new Exception($"Object '{(FolderObject ? FolderObject.name : "null")}' is not a folder.");
         }
 
         public FolderAssetHelper (string path)
@@ -46,12 +44,12 @@ namespace UnityCommon
                 var folderGuid = AssetDatabase.CreateFolder(path.GetBeforeLast("/"), path.GetAfter("/"));
                 var folderAssetPath = AssetDatabase.GUIDToAssetPath(folderGuid);
                 Debug.Assert(AssetDatabase.IsValidFolder(folderAssetPath));
-                FolderObject = AssetDatabase.LoadAssetAtPath<Object>(folderAssetPath);
+                FolderObject = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(folderAssetPath);
             }
-            else FolderObject = AssetDatabase.LoadAssetAtPath<Object>(path);
+            else FolderObject = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(path);
         }
 
-        public List<T> SetContainedAssets<T> (List<T> objectsToSave) where T : Object
+        public List<T> SetContainedAssets<T> (List<T> objectsToSave) where T : UnityEngine.Object
         {
             var assetsToDestroy = LoadContainedAssets<T>()
                 .Where(containedAsset => !objectsToSave.Exists(objectToSave => objectToSave.name == containedAsset.Object.name)).ToList();
@@ -71,13 +69,13 @@ namespace UnityCommon
         /// <typeparam name="T">Type of the asset objects to load. Use 'UnityEngine.Object' to load any of them.</typeparam>
         /// <param name="includeSubfolders">Whether to load assets inside subfolders of the current folder.</param>
         /// <param name="prependSubfolderNames">Whether to prepend asset names with the subfolder name. Eg: SubfolderName.AssetName</param>
-        public List<FolderAsset<T>> LoadContainedAssets<T> (bool includeSubfolders = false, bool prependSubfolderNames = false) where T : Object
+        public List<FolderAsset<T>> LoadContainedAssets<T> (bool includeSubfolders = false, bool prependSubfolderNames = false) where T : UnityEngine.Object
         {
             return new HashSet<string>(AssetDatabase.FindAssets("", new[] { Path }))
                 .Select(assetGuid => AssetDatabase.GUIDToAssetPath(assetGuid))
                 .Select(assetPath => new FolderAsset<T>(
                     ExtractAssetName(assetPath, prependSubfolderNames), assetPath,
-                    AssetDatabase.LoadAssetAtPath<Object>(assetPath) as T))
+                    AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(assetPath) as T))
                 .Where(folderAsset => folderAsset.Object != null && (includeSubfolders || !folderAsset.Path.GetAfter(Path + "/").Contains("/")))
                 .ToList();
         }

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace UnityCommon
 {
@@ -19,19 +20,19 @@ namespace UnityCommon
         /// <summary>
         /// Actual object (data) represented by the resource.
         /// </summary>
-        public readonly Object Object;
+        public readonly UnityEngine.Object Object;
         /// <summary>
         /// Whether <see cref="Object"/> is a valid (not-destroyed) instance.
         /// </summary>
         public bool Valid => ObjectUtils.IsValid(Object);
 
-        public Resource (string path, Object obj)
+        public Resource (string path, UnityEngine.Object obj)
         {
             Path = path;
             Object = obj;
         }
 
-        public static implicit operator Object (Resource resource) => resource?.Object;
+        public static implicit operator UnityEngine.Object (Resource resource) => resource?.Object;
 
         public override string ToString () => $"Resource<{(Valid ? Object.GetType().Name : "INVALID")}>@{Path}";
     }
@@ -41,7 +42,7 @@ namespace UnityCommon
     /// </summary>
     /// <typeparam name="TResource">Type of the resource object.</typeparam>
     public class Resource<TResource> : Resource
-        where TResource : Object
+        where TResource : UnityEngine.Object
     {
         /// <summary>
         /// A cached invalid resource.
@@ -58,16 +59,13 @@ namespace UnityCommon
 
         public static implicit operator TResource (Resource<TResource> resource) => resource?.Object;
 
-        private TResource CastObject (Object obj)
+        private TResource CastObject (UnityEngine.Object obj)
         {
             if (!Valid) return null;
 
             var castedObj = obj as TResource;
             if (castedObj is null)
-            {
-                Debug.LogError($"Resource `{Path}` is not of type `{typeof(TResource).FullName}`.");
-                return null;
-            }
+                throw new Exception($"Resource `{Path}` is not of type `{typeof(TResource).FullName}`.");
 
             return castedObj;
         }
