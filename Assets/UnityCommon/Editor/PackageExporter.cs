@@ -183,9 +183,9 @@ namespace UnityCommon
             foreach (var proc in processors)
                 await proc.OnPackagePreProcessAsync();
 
-            var assetPaths = AssetDatabase.GetAllAssetPaths().Where(p => p.StartsWith(AssetsPath));
-            var ignoredPaths = assetPaths.Where(p => IsAssetIgnored(p));
-            var unignoredPaths = assetPaths.Where(p => !IsAssetIgnored(p));
+            var assetPaths = AssetDatabase.GetAllAssetPaths().Where(p => p.StartsWith(AssetsPath)).ToArray();
+            var ignoredPaths = assetPaths.Where(IsAssetIgnored).ToArray();
+            var unignoredPaths = assetPaths.Where(p => !IsAssetIgnored(p)).ToArray();
 
             // Temporary hide ignored assets.
             DisplayProgressBar("Hiding ignored assets...", .1f);
@@ -318,12 +318,12 @@ namespace UnityCommon
             EditorUtility.DisplayProgressBar($"Exporting {PackageName}", activity, progress);
         }
 
-        private static IEnumerable<IProcessor> GetProcessors ()
+        private static IReadOnlyCollection<IProcessor> GetProcessors ()
         {
             return AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(a => a.GetTypes())
                 .Where(t => typeof(IProcessor).IsAssignableFrom(t) && t.IsClass)
-                .Select(t => (IProcessor)Activator.CreateInstance(t));
+                .Select(t => (IProcessor)Activator.CreateInstance(t)).ToArray();
         }
     }
 }

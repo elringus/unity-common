@@ -169,7 +169,7 @@ namespace UnityCommon
             ProcessLoadQueue();
         }
 
-        protected override void HandleResourcesLocated<T> (IEnumerable<string> locatedResourcePaths, string path)
+        protected override void HandleResourcesLocated<T> (IReadOnlyCollection<string> locatedResourcePaths, string path)
         {
             base.HandleResourcesLocated<T>(locatedResourcePaths, path);
             ProcessLoadQueue();

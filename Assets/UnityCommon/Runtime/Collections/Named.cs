@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace UnityCommon
@@ -32,7 +31,7 @@ namespace UnityCommon
     /// </summary>
     /// <typeparam name="TValue">Type of the value; should be natively supported by the Unity serialization system.</typeparam> 
     [Serializable]
-    public class Named<TValue> : INamed<TValue>, IEquatable<Named<TValue>>
+    public class Named<TValue> : INamed<TValue>
     {
         /// <summary>
         /// Name of the value; underlying serialized type supports null values (via <see cref="NullableString"/>).
@@ -55,36 +54,6 @@ namespace UnityCommon
         }
 
         public override string ToString () => $"{Name ?? "null"}.{Value?.ToString() ?? "null"}";
-
-        public override bool Equals (object obj)
-        {
-            return Equals(obj as Named<TValue>);
-        }
-
-        public bool Equals (Named<TValue> other)
-        {
-            return other != null &&
-                   EqualityComparer<NullableString>.Default.Equals(name, other.name) &&
-                   EqualityComparer<TValue>.Default.Equals(value, other.value);
-        }
-
-        public override int GetHashCode ()
-        {
-            var hashCode = 1477024672;
-            hashCode = hashCode * -1521134295 + EqualityComparer<NullableString>.Default.GetHashCode(name);
-            hashCode = hashCode * -1521134295 + EqualityComparer<TValue>.Default.GetHashCode(value);
-            return hashCode;
-        }
-
-        public static bool operator == (Named<TValue> left, Named<TValue> right)
-        {
-            return EqualityComparer<Named<TValue>>.Default.Equals(left, right);
-        }
-
-        public static bool operator != (Named<TValue> left, Named<TValue> right)
-        {
-            return !(left == right);
-        }
     }
 
     /// <summary>

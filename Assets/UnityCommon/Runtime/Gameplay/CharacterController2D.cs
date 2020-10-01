@@ -489,7 +489,7 @@ namespace UnityCommon
                     return;
 
                 // we are moving down the slope if our normal and movement direction are in the same x direction
-                var isMovingDownSlope = Mathf.Sign(raycastHit.normal.x) == Mathf.Sign(deltaMovement.x);
+                var isMovingDownSlope = Mathf.Approximately(Mathf.Sign(raycastHit.normal.x), Mathf.Sign(deltaMovement.x));
                 if (isMovingDownSlope)
                 {
                     // going down we want to speed up in most cases so the slopeSpeedMultiplier curve should be > 1 for negative angles

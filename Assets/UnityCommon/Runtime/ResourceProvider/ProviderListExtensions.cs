@@ -19,9 +19,9 @@ namespace UnityCommon
         /// <summary>
         /// Returns all the resources loaded by all the providers in the list.
         /// </summary>
-        public static IEnumerable<Resource> GetLoadedResources (this IList<IResourceProvider> providers)
+        public static IReadOnlyCollection<Resource> GetLoadedResources (this IList<IResourceProvider> providers)
         {
-            return providers.SelectMany(p => p.LoadedResources);
+            return providers.SelectMany(p => p.LoadedResources).ToArray();
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace UnityCommon
         /// Loads all the resources at the provided path from all the providers.
         /// When a resource is available in multiple providers, will only load the one from the higher-priority provider.
         /// </summary>
-        public static async UniTask<IEnumerable<Resource<T>>> LoadResourcesAsync<T> (this IList<IResourceProvider> providers, string path) where T : UnityEngine.Object
+        public static async UniTask<IReadOnlyCollection<Resource<T>>> LoadResourcesAsync<T> (this IList<IResourceProvider> providers, string path) where T : UnityEngine.Object
         {
             var resources = new List<Resource<T>>();
             if (providers.Count == 1)
@@ -81,7 +81,7 @@ namespace UnityCommon
         /// Locates all the resources at the provided path from all the providers.
         /// When a resource is available in multiple providers, will only get the one from the higher-priority provider.
         /// </summary>
-        public static async UniTask<IEnumerable<string>> LocateResourcesAsync<T> (this IList<IResourceProvider> providers, string path) where T : UnityEngine.Object
+        public static async UniTask<IReadOnlyCollection<string>> LocateResourcesAsync<T> (this IList<IResourceProvider> providers, string path) where T : UnityEngine.Object
         {
             var result = new List<string>();
             foreach (var provider in providers)
@@ -98,7 +98,7 @@ namespace UnityCommon
         /// Locates all the folders at the provided path from all the providers.
         /// When a folder is available in multiple providers, will only get the one from the higher-priority provider.
         /// </summary>
-        public static async UniTask<IEnumerable<Folder>> LocateFoldersAsync (this IList<IResourceProvider> providers, string path)
+        public static async UniTask<IReadOnlyCollection<Folder>> LocateFoldersAsync (this IList<IResourceProvider> providers, string path)
         {
             var result = new List<Folder>();
             foreach (var provider in providers)

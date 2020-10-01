@@ -340,7 +340,7 @@ public class PlayerPrefsEditor : EditorWindow
             {
                 var initialValue = GetFloat(fullKey);
                 var newValue = EditorGUILayout.FloatField(initialValue, textFieldStyle);
-                if (newValue != initialValue)
+                if (!Mathf.Approximately(newValue, initialValue))
                 {
                     SetFloat(fullKey, newValue);
                     Save();

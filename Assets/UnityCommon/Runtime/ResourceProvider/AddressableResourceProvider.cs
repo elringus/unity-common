@@ -41,13 +41,13 @@ namespace UnityCommon
             return await base.LoadResourceAsync<T>(path);
         }
 
-        public override async UniTask<IEnumerable<string>> LocateResourcesAsync<T> (string path)
+        public override async UniTask<IReadOnlyCollection<string>> LocateResourcesAsync<T> (string path)
         {
             if (locations is null) locations = await LoadAllLocations();
             return await base.LocateResourcesAsync<T>(path);
         }
 
-        public override async UniTask<IEnumerable<Folder>> LocateFoldersAsync (string path)
+        public override async UniTask<IReadOnlyCollection<Folder>> LocateFoldersAsync (string path)
         {
             if (locations is null) locations = await LoadAllLocations();
             return await base.LocateFoldersAsync(path);

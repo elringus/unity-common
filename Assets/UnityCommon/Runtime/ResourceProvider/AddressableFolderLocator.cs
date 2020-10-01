@@ -22,7 +22,7 @@ namespace UnityCommon
             var locatedResourcePaths = locations
                 .Select(l => l.PrimaryKey.GetAfterFirst("/")) // Remove the addressables prefix.
                 .LocateFolderPathsAtFolder(Path)
-                .Select(p => new Folder(p));
+                .Select(p => new Folder(p)).ToArray();
             SetResult(locatedResourcePaths);
 
             return UniTask.CompletedTask;

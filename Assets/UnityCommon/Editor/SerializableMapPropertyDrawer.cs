@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
@@ -21,6 +22,7 @@ namespace UnityCommon
             public float ConflictLineHeight = 0f;
         }
 
+        [SuppressMessage("ReSharper", "NotAccessedField.Local")]
         private struct PropertyIdentity
         {
             public UnityEngine.Object Instance;

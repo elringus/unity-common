@@ -75,8 +75,8 @@ namespace UnityCommon
             }
 
             var valueType = typeof(TValue);
-            if (valueType is null || fieldInfo.FieldType is null || !valueType.IsAssignableFrom(fieldInfo.FieldType))
-                throw new InvalidCastException($"Cannot cast '{valueType}' into field type '{fieldInfo.FieldType}'.");
+            if (valueType is null || fieldInfo?.FieldType is null || !valueType.IsAssignableFrom(fieldInfo.FieldType))
+                throw new InvalidCastException($"Cannot cast '{valueType}' into field type '{fieldInfo?.FieldType}'.");
 
             return (TValue)fieldInfo.GetValue(targetObject);
         }
@@ -146,8 +146,8 @@ namespace UnityCommon
             }
 
             var valueType = value.GetType();
-            if (valueType is null || fieldInfo.FieldType is null || !valueType.IsAssignableFrom(fieldInfo.FieldType))
-                throw new InvalidCastException($"Cannot cast '{valueType}' into field type '{fieldInfo.FieldType}'.");
+            if (valueType is null || fieldInfo?.FieldType is null || !valueType.IsAssignableFrom(fieldInfo.FieldType))
+                throw new InvalidCastException($"Cannot cast '{valueType}' into field type '{fieldInfo?.FieldType}'.");
 
             fieldInfo.SetValue(targetObect, value);
         }
@@ -268,10 +268,13 @@ namespace UnityCommon
             var targetObject = serializedProperty.serializedObject.targetObject;
             var objectType = targetObject.GetType();
             var fieldInfo = objectType.GetField(serializedProperty.name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            var list = (List<T>)fieldInfo.GetValue(targetObject);
-            if (clearSourceList) list.Clear();
-            list.AddRange(listValues);
-            list.RemoveAll(item => !item || item == null);
+            if (!(fieldInfo is null))
+            {
+                var list = (List<T>)fieldInfo.GetValue(targetObject);
+                if (clearSourceList) list.Clear();
+                list.AddRange(listValues);
+                list.RemoveAll(item => !item || item == null);
+            }
 
             serializedProperty.serializedObject.CopyFromSerializedProperty(new SerializedObject(targetObject).FindProperty(serializedProperty.name));
         }
@@ -293,18 +296,22 @@ namespace UnityCommon
             path = $"{path.GetBeforeLast("/")}/{texture.name}.png";
             Debug.Assert(AssetDatabase.IsValidFolder(path.GetBefore("/")));
             var bytes = texture.EncodeToPNG();
-            using (var fileStream = System.IO.File.Create(path))
+            using (var fileStream = File.Create(path))
                 fileStream.Write(bytes, 0, bytes.Length);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
             var textureImporter = AssetImporter.GetAtPath(path) as TextureImporter;
-            textureImporter.textureType = textureType;
-            textureImporter.alphaIsTransparency = alphaIsTransparency;
-            textureImporter.wrapMode = wrapMode;
-            textureImporter.mipmapEnabled = generateMipmaps;
-            textureImporter.textureCompression = compression;
-            textureImporter.maxTextureSize = maxSize;
+            if (!(textureImporter is null))
+            {
+                textureImporter.textureType = textureType;
+                textureImporter.alphaIsTransparency = alphaIsTransparency;
+                textureImporter.wrapMode = wrapMode;
+                textureImporter.mipmapEnabled = generateMipmaps;
+                textureImporter.textureCompression = compression;
+                textureImporter.maxTextureSize = maxSize;
+            }
+
             AssetDatabase.ImportAsset(path);
 
             if (destroyInitialTextureObject)
