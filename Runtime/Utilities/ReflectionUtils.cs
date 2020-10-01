@@ -10,16 +10,16 @@ namespace UnityCommon
         /// <summary>
         /// Cached domain exported types from the non-dynamic assemblies.
         /// </summary>
-        public static IEnumerable<Type> ExportedDomainTypes => cachedDomainTypes ?? (cachedDomainTypes = GetExportedDomainTypes());
+        public static IReadOnlyCollection<Type> ExportedDomainTypes => cachedDomainTypes ?? (cachedDomainTypes = GetExportedDomainTypes());
         /// <summary>
         /// Cached domain exported types from the non-dynamic assemblies, excluding system and Unity assemblies.
         /// </summary>
-        public static IEnumerable<Type> ExportedCustomTypes => cachedCustomTypes ?? (cachedCustomTypes = GetExportedDomainTypes(true, true, true));
+        public static IReadOnlyCollection<Type> ExportedCustomTypes => cachedCustomTypes ?? (cachedCustomTypes = GetExportedDomainTypes(true, true, true));
 
-        private static IEnumerable<Type> cachedDomainTypes;
-        private static IEnumerable<Type> cachedCustomTypes;
+        private static IReadOnlyCollection<Type> cachedDomainTypes;
+        private static IReadOnlyCollection<Type> cachedCustomTypes;
 
-        public static IEnumerable<Assembly> GetDomainAssemblies (bool excludeDynamic = true, bool excludeSystem = false, bool excludeUnity = false)
+        public static IReadOnlyCollection<Assembly> GetDomainAssemblies (bool excludeDynamic = true, bool excludeSystem = false, bool excludeUnity = false)
         {
             return AppDomain.CurrentDomain.GetAssemblies().Where(a => 
                 (!excludeDynamic || !a.IsDynamic) && 
@@ -30,7 +30,7 @@ namespace UnityCommon
             ).ToArray();
         }
 
-        public static IEnumerable<Type> GetExportedDomainTypes (bool excludeDynamic = true, bool excludeSystem = false, bool excludeUnity = false)
+        public static IReadOnlyCollection<Type> GetExportedDomainTypes (bool excludeDynamic = true, bool excludeSystem = false, bool excludeUnity = false)
         {
             return GetDomainAssemblies(excludeDynamic, excludeSystem, excludeUnity)
                 .SelectMany(a => a.GetExportedTypes()).ToArray();

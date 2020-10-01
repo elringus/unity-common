@@ -114,13 +114,13 @@ namespace UnityCommon
             await UniTask.WhenAll(tasks);
         }
 
-        public IEnumerable<AudioTrack> GetTracks (AudioClip clip)
+        public IReadOnlyCollection<AudioTrack> GetTracks (AudioClip clip)
         {
             if (!clip) return null;
             return audioTracks.Where(t => t.Clip == clip).ToArray();
         }
         
-        public IEnumerable<AudioTrack> GetAllTracks ()
+        public IReadOnlyCollection<AudioTrack> GetAllTracks ()
         {
             return audioTracks.ToArray();
         }

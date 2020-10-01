@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UniRx.Async;
 
 namespace UnityCommon
@@ -6,10 +7,10 @@ namespace UnityCommon
     public class EditorResourceLocator<TResource> : LocateResourcesRunner<TResource> 
         where TResource : UnityEngine.Object
     {
-        private readonly IEnumerable<string> editorResourcePaths;
+        private readonly IReadOnlyCollection<string> editorResourcePaths;
 
         public EditorResourceLocator (IResourceProvider provider, string resourcesPath, 
-            IEnumerable<string> editorResourcePaths) : base (provider, resourcesPath ?? string.Empty)
+            IReadOnlyCollection<string> editorResourcePaths) : base (provider, resourcesPath ?? string.Empty)
         {
             this.editorResourcePaths = editorResourcePaths;
         }
@@ -21,9 +22,9 @@ namespace UnityCommon
             return UniTask.CompletedTask;
         }
 
-        public static IEnumerable<string> LocateProjectResources (string path, IEnumerable<string> editorResourcePaths)
+        public static IReadOnlyCollection<string> LocateProjectResources (string path, IReadOnlyCollection<string> editorResourcePaths)
         {
-            return editorResourcePaths.LocateResourcePathsAtFolder(path);
+            return editorResourcePaths.LocateResourcePathsAtFolder(path).ToArray();
         }
     }
 }

@@ -16,7 +16,7 @@ namespace UnityCommon
 
         public bool IsLoading => LoadProgress < 1f;
         public float LoadProgress { get; private set; } = 1f;
-        IEnumerable<Resource> IResourceProvider.LoadedResources => LoadedResources.Values;
+        IReadOnlyCollection<Resource> IResourceProvider.LoadedResources => LoadedResources.Values;
 
         protected Dictionary<string, Resource> LoadedResources = new Dictionary<string, Resource>();
         protected Dictionary<string, List<Folder>> LocatedFolders = new Dictionary<string, List<Folder>>();
@@ -32,7 +32,7 @@ namespace UnityCommon
             var loadedResource = LoadedResources[path];
             var loadedResourceType = loadedResource.Valid ? loadedResource.Object.GetType() : default;
             if (loadedResourceType != typeof(T))
-                throw new Exception($"Failed to get a loaded resource with path `{path}`: The loaded resource is of type `{loadedResourceType.FullName}`, while the requested type is `{typeof(T).FullName}`.");
+                throw new Exception($"Failed to get a loaded resource with path `{path}`: The loaded resource is of type `{loadedResourceType?.FullName}`, while the requested type is `{typeof(T).FullName}`.");
             else return LoadedResources[path] as Resource<T>;
         }
 
@@ -43,7 +43,7 @@ namespace UnityCommon
             if (ResourceLoading(path))
             {
                 if (LoadRunners[path].ResourceType != typeof(T)) UnloadResource(path);
-                else return await (LoadRunners[path] as LoadResourceRunner<T>);
+                else return await (LoadResourceRunner<T>)LoadRunners[path];
             }
 
             if (ResourceLoaded(path))
@@ -64,7 +64,7 @@ namespace UnityCommon
             return resource;
         }
 
-        public virtual async UniTask<IEnumerable<Resource<T>>> LoadResourcesAsync<T> (string path) where T : UnityEngine.Object
+        public virtual async UniTask<IReadOnlyCollection<Resource<T>>> LoadResourcesAsync<T> (string path) where T : UnityEngine.Object
         {
             if (!SupportsType<T>()) return null;
 
@@ -120,7 +120,7 @@ namespace UnityCommon
             return locatedResourcePaths.Any(p => p.EqualsFast(path));
         }
 
-        public virtual async UniTask<IEnumerable<string>> LocateResourcesAsync<T> (string path) where T : UnityEngine.Object
+        public virtual async UniTask<IReadOnlyCollection<string>> LocateResourcesAsync<T> (string path) where T : UnityEngine.Object
         {
             if (!SupportsType<T>()) return null;
 
@@ -142,7 +142,7 @@ namespace UnityCommon
             return locatedResourcePaths;
         }
 
-        public virtual async UniTask<IEnumerable<Folder>> LocateFoldersAsync (string path)
+        public virtual async UniTask<IReadOnlyCollection<Folder>> LocateFoldersAsync (string path)
         {
             if (path is null) path = string.Empty;
 
@@ -213,7 +213,7 @@ namespace UnityCommon
             UpdateLoadProgress();
         }
 
-        protected virtual void HandleResourcesLocated<T> (IEnumerable<string> locatedResourcePaths, string path) where T : UnityEngine.Object
+        protected virtual void HandleResourcesLocated<T> (IReadOnlyCollection<string> locatedResourcePaths, string path) where T : UnityEngine.Object
         {
             var locateKey = new Tuple<string, Type>(path, typeof(T));
             LocateRunners.Remove(locateKey);
@@ -221,7 +221,7 @@ namespace UnityCommon
             UpdateLoadProgress();
         }
 
-        protected virtual void HandleFoldersLocated (IEnumerable<Folder> locatedFolders, string path)
+        protected virtual void HandleFoldersLocated (IReadOnlyCollection<Folder> locatedFolders, string path)
         {
             var locateKey = new Tuple<string, Type>(path, typeof(Folder));
             LocateRunners.Remove(locateKey);
@@ -237,7 +237,7 @@ namespace UnityCommon
             var runnersCount = LoadRunners.Count + LocateRunners.Count;
             if (runnersCount == 0) LoadProgress = 1f;
             else LoadProgress = Mathf.Min(1f / runnersCount, .999f);
-            if (prevProgress != LoadProgress) OnLoadProgress?.Invoke(LoadProgress);
+            if (!Mathf.Approximately(prevProgress, LoadProgress)) OnLoadProgress?.Invoke(LoadProgress);
         }
     }
 }

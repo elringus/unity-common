@@ -50,7 +50,7 @@ namespace UnityCommon
         protected override UniTask.Awaiter GetAwaiterImpl () => ((UniTask)completionSource.Task).GetAwaiter();
     }
 
-    public abstract class LocateResourcesRunner<TResource> : ResourceRunner<IEnumerable<string>> 
+    public abstract class LocateResourcesRunner<TResource> : ResourceRunner<IReadOnlyCollection<string>> 
         where TResource : UnityEngine.Object
     {
         protected LocateResourcesRunner (IResourceProvider provider, string path)
@@ -64,7 +64,7 @@ namespace UnityCommon
             : base(provider, path, typeof(TResource)) { }
     }
 
-    public abstract class LocateFoldersRunner : ResourceRunner<IEnumerable<Folder>>
+    public abstract class LocateFoldersRunner : ResourceRunner<IReadOnlyCollection<Folder>>
     {
         protected LocateFoldersRunner (IResourceProvider provider, string path)
             : base(provider, path, typeof(Folder)) { }

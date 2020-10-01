@@ -16,7 +16,7 @@ namespace UnityCommon
         public bool RemoveResourcesOnUnload { get; set; } = true;
         public bool IsLoading => false;
         public float LoadProgress => 1;
-        public IEnumerable<Resource> LoadedResources => Resources?.Values;
+        public IReadOnlyCollection<Resource> LoadedResources => Resources?.Values;
 
         #pragma warning disable 0067
         public event Action<float> OnLoadProgress;
@@ -70,34 +70,34 @@ namespace UnityCommon
             return UniTask.FromResult(resource);
         }
 
-        public IEnumerable<Resource<T>> LoadResources<T> (string path) where T : UnityEngine.Object
+        public IReadOnlyCollection<Resource<T>> LoadResources<T> (string path) where T : UnityEngine.Object
         {
-            return Resources.Where(kv => kv.Value?.Object.GetType() == typeof(T)).Select(kv => kv.Key).LocateResourcePathsAtFolder(path).Select(LoadResource<T>);
+            return Resources.Where(kv => kv.Value?.Object.GetType() == typeof(T)).Select(kv => kv.Key).LocateResourcePathsAtFolder(path).Select(LoadResource<T>).ToArray();
         }
 
-        public UniTask<IEnumerable<Resource<T>>> LoadResourcesAsync<T> (string path) where T : UnityEngine.Object
+        public UniTask<IReadOnlyCollection<Resource<T>>> LoadResourcesAsync<T> (string path) where T : UnityEngine.Object
         {
             var resources = LoadResources<T>(path);
             return UniTask.FromResult(resources);
         }
 
-        public IEnumerable<Folder> LocateFolders (string path)
+        public IReadOnlyCollection<Folder> LocateFolders (string path)
         {
-            return FolderPaths.LocateFolderPathsAtFolder(path).Select(p => new Folder(p));
+            return FolderPaths.LocateFolderPathsAtFolder(path).Select(p => new Folder(p)).ToArray();
         }
 
-        public UniTask<IEnumerable<Folder>> LocateFoldersAsync (string path)
+        public UniTask<IReadOnlyCollection<Folder>> LocateFoldersAsync (string path)
         {
             var folders = LocateFolders(path);
             return UniTask.FromResult(folders);
         }
 
-        public IEnumerable<string> LocateResources<T> (string path) where T : UnityEngine.Object
+        public IReadOnlyCollection<string> LocateResources<T> (string path) where T : UnityEngine.Object
         {
-            return Resources.Where(kv => kv.Value?.Object.GetType() == typeof(T)).Select(kv => kv.Key).LocateResourcePathsAtFolder(path);
+            return Resources.Where(kv => kv.Value?.Object.GetType() == typeof(T)).Select(kv => kv.Key).LocateResourcePathsAtFolder(path).ToArray();
         }
 
-        public UniTask<IEnumerable<string>> LocateResourcesAsync<T> (string path) where T : UnityEngine.Object
+        public UniTask<IReadOnlyCollection<string>> LocateResourcesAsync<T> (string path) where T : UnityEngine.Object
         {
             var resources = LocateResources<T>(path);
             return UniTask.FromResult(resources);

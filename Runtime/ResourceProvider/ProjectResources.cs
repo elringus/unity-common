@@ -6,7 +6,7 @@ namespace UnityCommon
 {
     public class ProjectResources : ScriptableObject
     {
-        public IEnumerable<string> ResourcePaths => resourcePaths;
+        public IReadOnlyCollection<string> ResourcePaths => resourcePaths;
 
         [SerializeField] private List<string> resourcePaths = new List<string>();
 

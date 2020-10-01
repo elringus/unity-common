@@ -34,7 +34,7 @@ namespace UnityCommon
         /// <summary>
         /// Returns all the currently loaded resources.
         /// </summary>
-        IEnumerable<Resource> GetAllLoaded ();
+        IReadOnlyCollection<Resource> GetAllLoaded ();
         /// <summary>
         /// Attempts to load a resource with the provided path.
         /// </summary>
@@ -42,11 +42,11 @@ namespace UnityCommon
         /// <summary>
         /// Attempts to load all the available resources (optionally) filtered by a base path.
         /// </summary>
-        UniTask<IEnumerable<Resource>> LoadAllAsync (string path = null);
+        UniTask<IReadOnlyCollection<Resource>> LoadAllAsync (string path = null);
         /// <summary>
         /// Locates paths of all the available resources (optionally) filtered by a base path.
         /// </summary>
-        UniTask<IEnumerable<string>> LocateAsync (string path);
+        UniTask<IReadOnlyCollection<string>> LocateAsync (string path);
         /// <summary>
         /// Checks whether a resource with the provided path is available (can be loaded).
         /// </summary>
@@ -93,10 +93,10 @@ namespace UnityCommon
         /// <inheritdoc cref="IResourceLoader.GetLoadedOrNull"/>
         new Resource<TResource> GetLoadedOrNull (string path);
         /// <inheritdoc cref="IResourceLoader.GetAllLoaded"/>
-        new IEnumerable<Resource<TResource>> GetAllLoaded ();
+        new IReadOnlyCollection<Resource<TResource>> GetAllLoaded ();
         /// <inheritdoc cref="IResourceLoader.LoadAsync"/>
         new UniTask<Resource<TResource>> LoadAsync (string path);
         /// <inheritdoc cref="IResourceLoader.LoadAllAsync"/>
-        new UniTask<IEnumerable<Resource<TResource>>> LoadAllAsync (string path = null);
+        new UniTask<IReadOnlyCollection<Resource<TResource>>> LoadAllAsync (string path = null);
     }
 }

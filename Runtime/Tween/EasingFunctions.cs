@@ -298,7 +298,7 @@ namespace UnityCommon
 
             if (value == 0) return start;
 
-            if ((value /= d) == 1) return start + end;
+            if (Mathf.Approximately(value /= d, 1)) return start + end;
 
             if (a == 0f || a < Mathf.Abs(end))
             {
@@ -324,7 +324,7 @@ namespace UnityCommon
 
             if (value == 0) return start;
 
-            if ((value /= d) == 1) return start + end;
+            if (Mathf.Approximately(value /= d, 1)) return start + end;
 
             if (a == 0f || a < Mathf.Abs(end))
             {
@@ -350,7 +350,7 @@ namespace UnityCommon
 
             if (value == 0) return start;
 
-            if ((value /= d * .5f) == 2) return start + end;
+            if (Mathf.Approximately(value /= d * .5f, 2)) return start + end;
 
             if (a == 0f || a < Mathf.Abs(end))
             {

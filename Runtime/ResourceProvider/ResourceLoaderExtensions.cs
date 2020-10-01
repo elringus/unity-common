@@ -43,7 +43,7 @@ namespace UnityCommon
         /// <summary>
         /// Attempts to load all the available resources (optionally) filtered by a base path and holds each of them.
         /// </summary>
-        public static async UniTask<IEnumerable<Resource>> LoadAndHoldAllAsync<TResource> (this IResourceLoader<TResource> loader, object holder, string path = null)
+        public static async UniTask<IReadOnlyCollection<Resource>> LoadAndHoldAllAsync<TResource> (this IResourceLoader<TResource> loader, object holder, string path = null)
             where TResource : UnityEngine.Object
         {
             var resources = await loader.LoadAllAsync(path);

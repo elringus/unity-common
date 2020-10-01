@@ -134,7 +134,7 @@ namespace UnityCommon
             return Resource<TResource>.Invalid;
         }
 
-        public virtual async UniTask<IEnumerable<Resource<TResource>>> LoadAllAsync (string path = null)
+        public virtual async UniTask<IReadOnlyCollection<Resource<TResource>>> LoadAllAsync (string path = null)
         {
             var result = new List<Resource<TResource>>();
             var addedPaths = new HashSet<string>();
@@ -176,12 +176,12 @@ namespace UnityCommon
             return result;
         }
 
-        public virtual IEnumerable<Resource<TResource>> GetAllLoaded ()
+        public virtual IReadOnlyCollection<Resource<TResource>> GetAllLoaded ()
         {
             return LoadedResources.Where(r => r.Valid).Select(r => r.Resource).ToArray();
         } 
 
-        public virtual async UniTask<IEnumerable<string>> LocateAsync (string path = null)
+        public virtual async UniTask<IReadOnlyCollection<string>> LocateAsync (string path = null)
         {
             var tasks = new List<UniTask<IEnumerable<string>>>();
             
@@ -254,8 +254,8 @@ namespace UnityCommon
         }
 
         Resource IResourceLoader.GetLoadedOrNull (string path) => GetLoadedOrNull(path);
-        IEnumerable<Resource> IResourceLoader.GetAllLoaded () => GetAllLoaded();
+        IReadOnlyCollection<Resource> IResourceLoader.GetAllLoaded () => GetAllLoaded();
         async UniTask<Resource> IResourceLoader.LoadAsync (string path) => await LoadAsync(path);
-        async UniTask<IEnumerable<Resource>> IResourceLoader.LoadAllAsync (string path) => await LoadAllAsync(path);
+        async UniTask<IReadOnlyCollection<Resource>> IResourceLoader.LoadAllAsync (string path) => await LoadAllAsync(path);
     }
 }

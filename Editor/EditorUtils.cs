@@ -75,8 +75,8 @@ namespace UnityCommon
             }
 
             var valueType = typeof(TValue);
-            if (valueType is null || fieldInfo.FieldType is null || !valueType.IsAssignableFrom(fieldInfo.FieldType))
-                throw new InvalidCastException($"Cannot cast '{valueType}' into field type '{fieldInfo.FieldType}'.");
+            if (valueType is null || fieldInfo?.FieldType is null || !valueType.IsAssignableFrom(fieldInfo.FieldType))
+                throw new InvalidCastException($"Cannot cast '{valueType}' into field type '{fieldInfo?.FieldType}'.");
 
             return (TValue)fieldInfo.GetValue(targetObject);
         }
@@ -146,7 +146,7 @@ namespace UnityCommon
             }
 
             var valueType = value.GetType();
-            if (valueType is null || fieldInfo.FieldType is null || !valueType.IsAssignableFrom(fieldInfo.FieldType))
+            if (valueType is null || fieldInfo?.FieldType is null || !valueType.IsAssignableFrom(fieldInfo.FieldType))
                 throw new InvalidCastException($"Cannot cast '{valueType}' into field type '{fieldInfo.FieldType}'.");
 
             fieldInfo.SetValue(targetObect, value);

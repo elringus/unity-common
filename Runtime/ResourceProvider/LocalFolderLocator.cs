@@ -21,7 +21,7 @@ namespace UnityCommon
             return UniTask.CompletedTask;
         }
 
-        public static IEnumerable<Folder> LocateFoldersAtPath (string rootPath, string resourcesPath)
+        public static IReadOnlyCollection<Folder> LocateFoldersAtPath (string rootPath, string resourcesPath)
         {
             var locatedFolders = new List<Folder>();
 
