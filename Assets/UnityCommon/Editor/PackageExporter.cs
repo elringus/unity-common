@@ -209,7 +209,7 @@ namespace UnityCommon
             {
                 using (var process = System.Diagnostics.Process.Start(GitShellPath, $"\"{GitScriptPath}\""))
                 {
-                    process.WaitForExit();
+                    process?.WaitForExit();
                 }
             }
 

@@ -8,13 +8,12 @@ namespace UnityCommon
 {
     public readonly struct FolderAsset<T>
     {
-        public readonly string Name, Path;
+        public readonly string Path;
         public readonly T Object;
         public AssetImporter Importer => AssetImporter.GetAtPath(Path);
 
         public FolderAsset (string name, string path, T @object)
         {
-            Name = name;
             Path = path;
             Object = @object;
         }
@@ -72,7 +71,7 @@ namespace UnityCommon
         public List<FolderAsset<T>> LoadContainedAssets<T> (bool includeSubfolders = false, bool prependSubfolderNames = false) where T : UnityEngine.Object
         {
             return new HashSet<string>(AssetDatabase.FindAssets("", new[] { Path }))
-                .Select(assetGuid => AssetDatabase.GUIDToAssetPath(assetGuid))
+                .Select(AssetDatabase.GUIDToAssetPath)
                 .Select(assetPath => new FolderAsset<T>(
                     ExtractAssetName(assetPath, prependSubfolderNames), assetPath,
                     AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(assetPath) as T))

@@ -157,7 +157,7 @@ namespace UnityCommon
             // "\r"     (\u000D)        Mac
             // Not using Environment.NewLine here, as content could've been produced 
             // in not the same environment we running the program in.
-            return content.Split(new string[] { "\r\n", "\n", "\r" }, splitOptions);
+            return content.Split(new[] { "\r\n", "\n", "\r" }, splitOptions);
         }
 
         /// <summary>
@@ -176,10 +176,10 @@ namespace UnityCommon
         /// </summary>
         public static bool IsNullEmptyOrWhiteSpace (string content)
         {
-            if (String.IsNullOrEmpty(content))
+            if (string.IsNullOrEmpty(content))
                 return true;
 
-            return String.IsNullOrEmpty(content.TrimFull());
+            return string.IsNullOrEmpty(content.TrimFull());
         }
 
         /// <summary>
@@ -259,7 +259,7 @@ namespace UnityCommon
             {
                 if (IsUpperOrNumber(source[i]))
                 {
-                    if ((source[i - 1] != insert && !IsUpperOrNumber(source[i - 1])) || (preserveAcronyms && IsUpperOrNumber(source[i - 1]) && i < source.Length - 1 && !IsUpperOrNumber(source[i + 1])))
+                    if (source[i - 1] != insert && !IsUpperOrNumber(source[i - 1]) || (preserveAcronyms && IsUpperOrNumber(source[i - 1]) && i < source.Length - 1 && !IsUpperOrNumber(source[i + 1])))
                         builder.Append(insert);
                 }
                 builder.Append(source[i]);

@@ -6,13 +6,11 @@ namespace UnityCommon
 {
     public abstract class ResourceRunner
     {
-        public readonly IResourceProvider Provider;
         public readonly string Path;
         public readonly Type ResourceType;
 
-        protected ResourceRunner (IResourceProvider provider, string path, Type resourceType)
+        protected ResourceRunner (string path, Type resourceType)
         {
-            Provider = provider;
             Path = path;
             ResourceType = resourceType;
         }
@@ -31,8 +29,8 @@ namespace UnityCommon
 
         private UniTaskCompletionSource<TResult> completionSource = new UniTaskCompletionSource<TResult>();
 
-        protected ResourceRunner (IResourceProvider provider, string path, Type resourceType)
-            : base(provider, path, resourceType) { }
+        protected ResourceRunner (string path, Type resourceType)
+            : base(path, resourceType) { }
 
         public new UniTask<TResult>.Awaiter GetAwaiter () => completionSource.Task.GetAwaiter();
 
@@ -54,19 +52,19 @@ namespace UnityCommon
         where TResource : UnityEngine.Object
     {
         protected LocateResourcesRunner (IResourceProvider provider, string path)
-            : base(provider, path, typeof(TResource)) { }
+            : base(path, typeof(TResource)) { }
     }
 
     public abstract class LoadResourceRunner<TResource> : ResourceRunner<Resource<TResource>> 
         where TResource : UnityEngine.Object
     {
         protected LoadResourceRunner (IResourceProvider provider, string path)
-            : base(provider, path, typeof(TResource)) { }
+            : base(path, typeof(TResource)) { }
     }
 
     public abstract class LocateFoldersRunner : ResourceRunner<IReadOnlyCollection<Folder>>
     {
         protected LocateFoldersRunner (IResourceProvider provider, string path)
-            : base(provider, path, typeof(Folder)) { }
+            : base(path, typeof(Folder)) { }
     }
 }
