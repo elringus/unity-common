@@ -296,18 +296,22 @@ namespace UnityCommon
             path = $"{path.GetBeforeLast("/")}/{texture.name}.png";
             Debug.Assert(AssetDatabase.IsValidFolder(path.GetBefore("/")));
             var bytes = texture.EncodeToPNG();
-            using (var fileStream = System.IO.File.Create(path))
+            using (var fileStream = File.Create(path))
                 fileStream.Write(bytes, 0, bytes.Length);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
             var textureImporter = AssetImporter.GetAtPath(path) as TextureImporter;
-            textureImporter.textureType = textureType;
-            textureImporter.alphaIsTransparency = alphaIsTransparency;
-            textureImporter.wrapMode = wrapMode;
-            textureImporter.mipmapEnabled = generateMipmaps;
-            textureImporter.textureCompression = compression;
-            textureImporter.maxTextureSize = maxSize;
+            if (!(textureImporter is null))
+            {
+                textureImporter.textureType = textureType;
+                textureImporter.alphaIsTransparency = alphaIsTransparency;
+                textureImporter.wrapMode = wrapMode;
+                textureImporter.mipmapEnabled = generateMipmaps;
+                textureImporter.textureCompression = compression;
+                textureImporter.maxTextureSize = maxSize;
+            }
+
             AssetDatabase.ImportAsset(path);
 
             if (destroyInitialTextureObject)
