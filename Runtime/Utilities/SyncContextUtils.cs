@@ -6,7 +6,6 @@ namespace UnityCommon
 {
     public static class SyncContextUtils
     {
-        public static int UnityThreadId { get; private set; }
         public static SynchronizationContext UnitySynchronizationContext { get; private set; }
 
         /// <summary>
@@ -22,7 +21,6 @@ namespace UnityCommon
         private static void Initialize ()
         {
             UnitySynchronizationContext = SynchronizationContext.Current;
-            UnityThreadId = Thread.CurrentThread.ManagedThreadId;
         }
     }
 }

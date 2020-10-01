@@ -89,7 +89,7 @@ namespace UnityCommon
             if (property is null || property.propertyType != SerializedPropertyType.Generic)
                 throw new NullReferenceException("The property is null or not generic.");
 
-            var targetObect = property.serializedObject.targetObject as object;
+            var targetObject = property.serializedObject.targetObject as object;
             var propertyPath = property.propertyPath;
             var paths = propertyPath.Split('.');
             var fieldInfo = default(FieldInfo);
@@ -97,15 +97,15 @@ namespace UnityCommon
             for (int i = 0; i < paths.Length; i++)
             {
                 var path = paths[i];
-                if (targetObect == null)
+                if (targetObject == null)
                     throw new NullReferenceException("Can't set a value on a null instance.");
 
-                var type = targetObect.GetType();
+                var type = targetObject.GetType();
                 if (path == "Array")
                 {
                     path = paths[++i];
 
-                    var array = targetObect as System.Collections.IEnumerable;
+                    var array = targetObject as System.Collections.IEnumerable;
                     if (array is null)
                         throw new ArgumentException($"Property at path '{propertyPath}' can't be parsed: '{paths[i - 2]}' is not an enumerable.");
 
@@ -119,7 +119,7 @@ namespace UnityCommon
 
                     if (i == (paths.Length - 1)) // Our property is an array.
                     {
-                        var targetArray = (System.Collections.IList)targetObect;
+                        var targetArray = (System.Collections.IList)targetObject;
                         targetArray[index] = value;
                         return;
                     }
@@ -129,7 +129,7 @@ namespace UnityCommon
                     {
                         if (elementIndex == index)
                         {
-                            targetObect = element;
+                            targetObject = element;
                             break;
                         }
                         elementIndex++;
@@ -142,14 +142,14 @@ namespace UnityCommon
                     throw new MissingFieldException($"The field '{path}' in '{propertyPath}' could not be found.");
 
                 if (i < paths.Length - 1)
-                    targetObect = fieldInfo.GetValue(targetObect);
+                    targetObject = fieldInfo.GetValue(targetObject);
             }
 
             var valueType = value.GetType();
             if (valueType is null || fieldInfo?.FieldType is null || !valueType.IsAssignableFrom(fieldInfo.FieldType))
                 throw new InvalidCastException($"Cannot cast '{valueType}' into field type '{fieldInfo?.FieldType}'.");
 
-            fieldInfo.SetValue(targetObect, value);
+            fieldInfo.SetValue(targetObject, value);
         }
 
         /// <summary>

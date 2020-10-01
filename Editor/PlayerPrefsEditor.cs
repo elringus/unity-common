@@ -144,7 +144,7 @@ public class PlayerPrefsEditor : EditorWindow
     private bool GetBool (string key, bool defaultValue = false)
     {
         if (showEditorPrefs) return EditorPrefs.GetBool(key, defaultValue);
-        else throw new NotSupportedException("PlayerPrefs interface does not natively support bools.");
+        else throw new NotSupportedException("PlayerPrefs interface does not natively support booleans.");
     }
 
     private void SetInt (string key, int value)
@@ -168,7 +168,7 @@ public class PlayerPrefsEditor : EditorWindow
     private void SetBool (string key, bool value)
     {
         if (showEditorPrefs) EditorPrefs.SetBool(key, value);
-        else throw new NotSupportedException("PlayerPrefs interface does not natively support bools.");
+        else throw new NotSupportedException("PlayerPrefs interface does not natively support booleans.");
     }
 
     private void Save ()

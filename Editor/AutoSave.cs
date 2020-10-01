@@ -13,7 +13,7 @@ namespace UnityCommon
         static AutoSave ()
         {
             #if UNITY_2017_3_OR_NEWER
-            EditorApplication.playModeStateChanged += (_) => {
+            EditorApplication.playModeStateChanged += _ => {
             #else
             EditorApplication.playmodeStateChanged = () => {
             #endif
