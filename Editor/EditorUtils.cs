@@ -147,7 +147,7 @@ namespace UnityCommon
 
             var valueType = value.GetType();
             if (valueType is null || fieldInfo?.FieldType is null || !valueType.IsAssignableFrom(fieldInfo.FieldType))
-                throw new InvalidCastException($"Cannot cast '{valueType}' into field type '{fieldInfo.FieldType}'.");
+                throw new InvalidCastException($"Cannot cast '{valueType}' into field type '{fieldInfo?.FieldType}'.");
 
             fieldInfo.SetValue(targetObect, value);
         }
@@ -268,10 +268,13 @@ namespace UnityCommon
             var targetObject = serializedProperty.serializedObject.targetObject;
             var objectType = targetObject.GetType();
             var fieldInfo = objectType.GetField(serializedProperty.name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            var list = (List<T>)fieldInfo.GetValue(targetObject);
-            if (clearSourceList) list.Clear();
-            list.AddRange(listValues);
-            list.RemoveAll(item => !item || item == null);
+            if (!(fieldInfo is null))
+            {
+                var list = (List<T>)fieldInfo.GetValue(targetObject);
+                if (clearSourceList) list.Clear();
+                list.AddRange(listValues);
+                list.RemoveAll(item => !item || item == null);
+            }
 
             serializedProperty.serializedObject.CopyFromSerializedProperty(new SerializedObject(targetObject).FindProperty(serializedProperty.name));
         }
