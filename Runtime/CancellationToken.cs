@@ -10,6 +10,15 @@ namespace UnityCommon
     public readonly struct CancellationToken : IEquatable<CancellationToken>
     {
         /// <summary>
+        /// A token in a permanent ASAP cancellation state.
+        /// </summary>
+        public static CancellationToken ASAPCanceled { get; } = new CancellationToken(new System.Threading.CancellationToken(true));
+        /// <summary>
+        /// A token in a permanent lazy cancellation state.
+        /// </summary>
+        public static CancellationToken LazyCanceled { get; } = new CancellationToken(new System.Threading.CancellationToken(true), true);
+        
+        /// <summary>
         /// Source token for ASAP cancellation scenario.
         /// </summary>
         public readonly System.Threading.CancellationToken ASAPToken;
