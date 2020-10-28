@@ -99,5 +99,19 @@ namespace UnityCommon
                 return unityObject != null && unityObject;
             else return false;
         }
+
+        /// <summary>
+        /// Checks whether the provided game object is currently edited in prefab isolation mode.
+        /// Always returns false in case provided object is not valid and in builds.
+        /// </summary>
+        public static bool IsEditedInPrefabMode (GameObject obj)
+        {
+            if (!IsValid(obj)) return false;
+            #if UNITY_EDITOR
+            return UnityEditor.Experimental.SceneManagement.PrefabStageUtility.GetPrefabStage(obj) != null;
+            #else
+            return false;
+            #endif
+        }
     }
 }
