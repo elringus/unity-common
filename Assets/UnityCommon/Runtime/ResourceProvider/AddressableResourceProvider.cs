@@ -78,7 +78,13 @@ namespace UnityCommon
         private async UniTask<List<IResourceLocation>> LoadAllLocations ()
         {
             // ReSharper disable once CoVariantArrayConversion
-            var task = ExtraLabels != null ? Addressables.LoadResourceLocationsAsync(ExtraLabels, Addressables.MergeMode.Intersection) : Addressables.LoadResourceLocationsAsync(MainLabel);
+            var task = ExtraLabels != null ? Addressables.LoadResourceLocationsAsync(
+                #if UNITY_2021_1_OR_NEWER
+                ExtraLabels as IEnumerable, 
+                #else
+                ExtraLabels,
+                #endif
+                Addressables.MergeMode.Intersection) : Addressables.LoadResourceLocationsAsync(MainLabel);
             while (!task.IsDone) // When awaiting the method directly it fails on WebGL (they're using multithreaded Task fot GetAwaiter)
                 await AsyncUtils.WaitEndOfFrame;
             var locations = task.Result;
