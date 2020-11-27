@@ -170,6 +170,20 @@ namespace UnityCommon
 
             return source.Remove(source.LastIndexOf(value, StringComparison.InvariantCulture));
         }
+        
+        /// <summary>
+        /// Invokes <see cref="string.Replace(string,string)"/> with an empty string.
+        /// </summary>
+        public static string Remove (this string source, char value)
+        {
+            return source?.Replace(value.ToString(), string.Empty);
+        }
+        
+        /// <inheritdoc cref="Remove(string,char)"/>
+        public static string Remove (this string source, string value)
+        {
+            return source?.Replace(value, string.Empty);
+        }
 
         /// <summary>
         /// Checks whether string is null, empty or consists of whitespace chars.
