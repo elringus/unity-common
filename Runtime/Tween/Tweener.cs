@@ -22,27 +22,27 @@ namespace UnityCommon
             this.onCompleted = onCompleted;
         }
 
-        public Tweener (TTweenValue tweenValue, Action onCompleted = null)
+        public Tweener (in TTweenValue tweenValue, Action onCompleted = null)
             : this(onCompleted)
         {
             TweenValue = tweenValue;
         }
 
-        public void Run (TTweenValue tweenValue, CancellationToken cancellationToken = default)
+        public void Run (in TTweenValue tweenValue, in CancellationToken cancellationToken = default)
         {
             TweenValue = tweenValue;
             Run(cancellationToken);
         }
 
-        public void Run (CancellationToken cancellationToken = default) => TweenAsyncAndForget(cancellationToken).Forget();
+        public void Run (in CancellationToken cancellationToken = default) => TweenAsyncAndForget(cancellationToken).Forget();
 
-        public UniTask RunAsync (TTweenValue tweenValue, CancellationToken cancellationToken = default)
+        public UniTask RunAsync (in TTweenValue tweenValue, in CancellationToken cancellationToken = default)
         {
             TweenValue = tweenValue;
             return RunAsync(cancellationToken);
         }
 
-        public UniTask RunAsync (CancellationToken cancellationToken = default) => TweenAsync(cancellationToken);
+        public UniTask RunAsync (in CancellationToken cancellationToken = default) => TweenAsync(cancellationToken);
 
         public void Stop ()
         {

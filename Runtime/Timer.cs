@@ -29,7 +29,7 @@ namespace UnityCommon
         }
 
         public void Run (float duration, bool loop = false, bool ignoreTimeScale = false, 
-            CancellationToken cancellationToken = default, UnityEngine.Object target = default)
+            in CancellationToken cancellationToken = default, UnityEngine.Object target = default)
         {
             if (Running) CompleteInstantly();
 
@@ -44,7 +44,7 @@ namespace UnityCommon
             else WaitAndComplete(cancellationToken).Forget();
         }
 
-        public void Run (CancellationToken cancellationToken = default, UnityEngine.Object target = default) 
+        public void Run (in CancellationToken cancellationToken = default, UnityEngine.Object target = default) 
             => Run(Duration, Loop, TimeScaleIgnored, cancellationToken, target);
 
         public void Stop ()
