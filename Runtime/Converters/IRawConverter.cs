@@ -1,7 +1,7 @@
 ﻿
 namespace UnityCommon
 {
-    public readonly struct RawDataRepresentation
+    public class RawDataRepresentation
     {
         public readonly string Extension, MimeType;
 
