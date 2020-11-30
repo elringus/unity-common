@@ -36,7 +36,7 @@ namespace UnityCommon
         /// <param name="updateDelay">How frequently update the values, in seconds.</param>
         /// <param name="target">When provided and becomes invalid, monitoring will automatically stop.</param>
         public void Start (float updateDelay = .5f, UnityEngine.Object target = default, 
-            CancellationToken cancellationToken = default)
+            in CancellationToken cancellationToken = default)
         { 
             timer.Run(updateDelay, true, true, cancellationToken, target);
         } 

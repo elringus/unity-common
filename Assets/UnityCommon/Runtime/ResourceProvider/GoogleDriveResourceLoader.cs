@@ -41,7 +41,6 @@ namespace UnityCommon
             #endif
 
             this.converter = converter;
-            usedRepresentation = new RawDataRepresentation();
         }
 
         public override async UniTask RunAsync ()
@@ -115,7 +114,7 @@ namespace UnityCommon
 
             await downloadRequest.SendNonGeneric();
             if (downloadRequest.IsError || downloadRequest.GetResponseData<UnityGoogleDrive.Data.File>().Content == null)
-                throw new Exception($"Failed to download {Path}{usedRepresentation.Extension} resource from Google Drive.");
+                throw new Exception($"Failed to download {Path}{usedRepresentation?.Extension} resource from Google Drive.");
 
             if (useNativeRequests)
             {
@@ -132,7 +131,7 @@ namespace UnityCommon
 
             var gDriveConverter = converter as IGoogleDriveConverter<TResource>;
 
-            downloadRequest = new GoogleDriveFiles.ExportRequest(fileMeta.Id, gDriveConverter.ExportMimeType);
+            downloadRequest = new GoogleDriveFiles.ExportRequest(fileMeta.Id, gDriveConverter?.ExportMimeType);
             await downloadRequest.SendNonGeneric();
             if (downloadRequest.IsError || downloadRequest.GetResponseData<UnityGoogleDrive.Data.File>().Content == null)
                 throw new Exception($"Failed to export '{Path}' resource from Google Drive.");
@@ -161,6 +160,7 @@ namespace UnityCommon
                 UnityWebRequest request = null;
                 if (typeof(TResource) == typeof(AudioClip)) request = UnityWebRequestMultimedia.GetAudioClip(filePath, WebUtils.EvaluateAudioTypeFromMime(converter.Representations[0].MimeType));
                 else if (typeof(TResource) == typeof(Texture2D)) request = UnityWebRequestTexture.GetTexture(filePath, true);
+                else return null;
                 using (request)
                 {
                     await request.SendWebRequest();

@@ -5,7 +5,7 @@ namespace UnityCommon
     /// <summary>
     /// Represents a <see cref="IResourceProvider"/> associated with a path prefix used to evaluate full path to the provider resources.
     /// </summary>
-    public readonly struct ProvisionSource : IEquatable<ProvisionSource>
+    public class ProvisionSource
     {
         /// <summary>
         /// Provider associated with the source.
@@ -55,11 +55,5 @@ namespace UnityCommon
         
         /// <inheritdoc cref="BuildLocalPath(string,string)"/>
         public string BuildLocalPath (string fullPath) => BuildLocalPath(PathPrefix, fullPath);
-        
-        public bool Equals (ProvisionSource other) => Equals(Provider, other.Provider) && PathPrefix == other.PathPrefix;
-        public override bool Equals (object obj) => obj is ProvisionSource other && Equals(other);
-        public static bool operator == (ProvisionSource left, ProvisionSource right) => left.Equals(right);
-        public static bool operator != (ProvisionSource left, ProvisionSource right) => !left.Equals(right);
-        public override int GetHashCode () { unchecked { return ((Provider != null ? Provider.GetHashCode() : 0) * 397) ^ (PathPrefix != null ? PathPrefix.GetHashCode() : 0); } }
     }
 }
