@@ -282,6 +282,34 @@ namespace UnityCommon
             return builder.ToString();
         }
 
+        /// <summary>
+        /// Changes first character in the provided string to lower invariant.
+        /// </summary>
+        public static string FirstToLower (this string source)
+        {
+            if (string.IsNullOrEmpty(source) || char.IsLower(source, 0))
+                return source;
+
+            if (source.Length <= 1) 
+                return source.ToLowerInvariant();
+            
+            return char.ToLowerInvariant(source[0]) + source.Substring(1);
+        }
+        
+        /// <summary>
+        /// Changes first character in the provided string to upper invariant.
+        /// </summary>
+        public static string FirstToUpper (this string source)
+        {
+            if (string.IsNullOrEmpty(source) || char.IsUpper(source, 0))
+                return source;
+
+            if (source.Length <= 1) 
+                return source.ToUpperInvariant();
+            
+            return char.ToUpperInvariant(source[0]) + source.Substring(1);
+        }
+
         public static byte[] ZipString (string content)
         {
             using (var output = new MemoryStream())
