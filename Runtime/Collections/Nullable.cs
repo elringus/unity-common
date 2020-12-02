@@ -140,6 +140,8 @@ namespace UnityCommon
     {
         public static implicit operator NullableBoolean (bool value) => new NullableBoolean { Value = value };
         public static implicit operator bool? (NullableBoolean nullable) => (nullable is null || !nullable.HasValue) ? null : (bool?)nullable.Value;
+
+        public override string ToString () => base.ToString().ToLowerInvariant();
     }
 
     /// <summary>
