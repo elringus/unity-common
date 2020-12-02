@@ -50,11 +50,15 @@ namespace UnityCommon
         [SerializeField] private TValue value = default;
         [SerializeField] private bool hasValue = default;
 
-        public override string ToString () => HasValue ? Value.ToString() : "null";
+        public override string ToString ()
+        {
+            if (!HasValue) return "null";
+            return typeof(TValue) == typeof(bool) ? Value.ToString().ToLowerInvariant() : Value.ToString();
+        }
 
         public static implicit operator TValue (Nullable<TValue> nullable)
         {
-            return (nullable is null || !nullable.HasValue) ? default(TValue) : nullable.Value;
+            return (nullable is null || !nullable.HasValue) ? default : nullable.Value;
         }
 
         public static implicit operator Nullable<TValue> (TValue value)
@@ -140,8 +144,6 @@ namespace UnityCommon
     {
         public static implicit operator NullableBoolean (bool value) => new NullableBoolean { Value = value };
         public static implicit operator bool? (NullableBoolean nullable) => (nullable is null || !nullable.HasValue) ? null : (bool?)nullable.Value;
-
-        public override string ToString () => base.ToString().ToLowerInvariant();
     }
 
     /// <summary>
