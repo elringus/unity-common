@@ -50,7 +50,11 @@ namespace UnityCommon
         [SerializeField] private TValue value = default;
         [SerializeField] private bool hasValue = default;
 
-        public override string ToString () => HasValue ? Value.ToString() : "null";
+        public override string ToString ()
+        {
+            if (!HasValue) return "null";
+            return typeof(TValue) == typeof(bool) ? Value.ToString().ToLowerInvariant() : Value.ToString();
+        }
 
         public static implicit operator TValue (Nullable<TValue> nullable)
         {
