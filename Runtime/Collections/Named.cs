@@ -53,13 +53,7 @@ namespace UnityCommon
             Value = value;
         }
 
-        public override string ToString ()
-        { 
-            if (Name is null && Value?.ToString() is null) return "null";
-            if (Value?.ToString() is null) return Name;
-            if (Name is null) return $".{Value.ToString()}";
-            return $"{Name}.{Value.ToString()}";
-        }
+        public override string ToString () => $"{Name ?? "null"}.{Value?.ToString() ?? "null"}";
     }
 
     /// <summary>
