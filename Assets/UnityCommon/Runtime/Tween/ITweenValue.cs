@@ -1,4 +1,4 @@
-﻿
+
 namespace UnityCommon
 {
     /// <summary>

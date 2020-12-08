@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -225,7 +225,7 @@ namespace UnityCommon
                     if (path.Contains("ThirdParty")) continue;
 
                     var fullPath = Application.dataPath.Replace("Assets", string.Empty) + path;
-                    var originalScriptText = File.ReadAllText(fullPath, Encoding.UTF8);
+                    var originalScriptText = File.ReadAllText(fullPath);
 
                     string scriptText = string.Empty;
 
@@ -238,7 +238,7 @@ namespace UnityCommon
                     if (!string.IsNullOrEmpty(OverrideNamespace))
                         scriptText = scriptText.Replace($"namespace {PackageName}{Environment.NewLine}{{", $"namespace {OverrideNamespace}{Environment.NewLine}{{");
 
-                    File.WriteAllText(fullPath, scriptText, Encoding.UTF8);
+                    File.WriteAllText(fullPath, scriptText);
 
                     modifiedScripts.Add(fullPath, originalScriptText);
                 }
@@ -288,7 +288,7 @@ namespace UnityCommon
             if (needToModify)
             {
                 foreach (var modifiedScript in modifiedScripts)
-                    File.WriteAllText(modifiedScript.Key, modifiedScript.Value, Encoding.UTF8);
+                    File.WriteAllText(modifiedScript.Key, modifiedScript.Value);
             }
 
             // Remove previously added license asset.

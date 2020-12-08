@@ -1,4 +1,4 @@
-﻿#if ADDRESSABLES_AVAILABLE
+#if ADDRESSABLES_AVAILABLE
 
 using System;
 using System.Collections.Generic;

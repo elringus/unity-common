@@ -1,4 +1,4 @@
-﻿using UniRx.Async;
+using UniRx.Async;
 
 namespace UnityCommon
 {
