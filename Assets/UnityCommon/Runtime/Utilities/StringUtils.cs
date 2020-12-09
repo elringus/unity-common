@@ -10,6 +10,15 @@ namespace UnityCommon
     public static class StringUtils
     {
         /// <summary>
+        /// Characters used to represent new lines, cross-platform (Windows-Mac-Unix).
+        /// </summary>
+        public static readonly char[] NewLineChars = { '\n', '\r' };
+        /// <summary>
+        /// Character combinations used to represent new lines, cross-platform (Windows-Mac-Unix).
+        /// </summary>
+        public static readonly string[] NewLineSymbols = { "\r\n", "\n", "\r" };
+        
+        /// <summary>
         /// Performs <see cref="string.Equals(string, string, StringComparison)"/> with <see cref="StringComparison.Ordinal"/>.
         /// </summary>
         public static bool EqualsFast (this string content, string comparedString)
@@ -151,13 +160,8 @@ namespace UnityCommon
         public static string[] SplitByNewLine (this string content, StringSplitOptions splitOptions = StringSplitOptions.None)
         {
             if (string.IsNullOrEmpty(content)) return null;
-
-            // "\r\n"   (\u000D\u000A)  Windows
-            // "\n"     (\u000A)        Unix
-            // "\r"     (\u000D)        Mac
-            // Not using Environment.NewLine here, as content could've been produced 
-            // in not the same environment we running the program in.
-            return content.Split(new[] { "\r\n", "\n", "\r" }, splitOptions);
+            
+            return content.Split(NewLineSymbols, splitOptions);
         }
 
         /// <summary>
