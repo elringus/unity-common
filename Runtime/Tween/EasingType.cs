@@ -1,4 +1,4 @@
-﻿namespace UnityCommon
+namespace UnityCommon
 {
     /// <summary>
     /// Represents an animation easing function type.

@@ -1,4 +1,4 @@
-﻿using NLayer;
+using NLayer;
 using System;
 using System.IO;
 using UniRx.Async;
