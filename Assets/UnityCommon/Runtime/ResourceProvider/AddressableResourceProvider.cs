@@ -80,7 +80,7 @@ namespace UnityCommon
             // ReSharper disable once CoVariantArrayConversion
             var task = ExtraLabels != null ? Addressables.LoadResourceLocationsAsync(
                 #if UNITY_2021_1_OR_NEWER
-                ExtraLabels as IEnumerable, 
+                ExtraLabels as System.Collections.IEnumerable, 
                 #else
                 ExtraLabels,
                 #endif
