@@ -134,7 +134,7 @@ namespace UnityCommon
 
         private bool IsOwnedByController (AudioSource audioSource)
         {
-            return audioSource.gameObject == gameObject;
+            return audioSource && audioSource.gameObject == gameObject;
         }
 
         private AudioSource GetPooledSource ()
