@@ -114,7 +114,7 @@ namespace UnityCommon
 
             await downloadRequest.SendNonGeneric();
             if (downloadRequest.IsError || downloadRequest.GetResponseData<UnityGoogleDrive.Data.File>().Content == null)
-                throw new Exception($"Failed to download {Path}{usedRepresentation?.Extension} resource from Google Drive.");
+                throw new Exception($"Failed to download {Path}{usedRepresentation.Extension} resource from Google Drive.");
 
             if (useNativeRequests)
             {
