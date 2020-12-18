@@ -38,6 +38,7 @@ namespace UnityCommon
         private const string prefsPrefix = "PackageExporter.";
         private const string autoRefreshKey = "kAutoRefresh";
         private const string defaultLicenseFileName = "LICENSE";
+        private const char newLine = '\n';
 
         private static Dictionary<string, string> modifiedScripts = new Dictionary<string, string>();
         private static List<UnityEngine.Object> ignoredAssets = new List<UnityEngine.Object>();
@@ -231,12 +232,12 @@ namespace UnityCommon
 
                     var copyright = string.IsNullOrEmpty(Copyright) ? string.Empty : "// " + Copyright;
                     if (!string.IsNullOrEmpty(copyright))
-                        scriptText += copyright + Environment.NewLine + Environment.NewLine;
+                        scriptText += copyright + newLine + newLine;
 
                     scriptText += originalScriptText;
 
                     if (!string.IsNullOrEmpty(OverrideNamespace))
-                        scriptText = scriptText.Replace($"namespace {PackageName}{Environment.NewLine}{{", $"namespace {OverrideNamespace}{Environment.NewLine}{{");
+                        scriptText = scriptText.Replace($"namespace {PackageName}{newLine}{{", $"namespace {OverrideNamespace}{newLine}{{");
 
                     File.WriteAllText(fullPath, scriptText);
 
