@@ -3,24 +3,24 @@ using UnityEngine;
 
 namespace UnityCommon
 {
-    public enum StartupPoolMode
+    public class GameObjectPool : MonoBehaviour
     {
-        Awake,
-        Start,
-        CallManually
-    };
+        public enum StartupPoolMode
+        {
+            Awake,
+            Start,
+            CallManually
+        };
 
-    [System.Serializable]
-    public class StartupPool
-    {
-        public int Size;
-        public GameObject Prefab;
-    }
-
-    public class ObjectPool : MonoBehaviour
-    {
-        public StartupPoolMode StartupPoolMode { get { return startupPoolMode; } private set { startupPoolMode = value; } }
-        public StartupPool[] StartupPools { get { return startupPools; } private set { startupPools = value; } }
+        [System.Serializable]
+        public class StartupPool
+        {
+            public int Size;
+            public GameObject Prefab;
+        }
+        
+        public StartupPoolMode PoolMode { get => startupPoolMode; private set => startupPoolMode = value; }
+        public StartupPool[] StartupPools { get => startupPools; private set => startupPools = value; }
 
         private Dictionary<GameObject, List<GameObject>> pooledObjects = new Dictionary<GameObject, List<GameObject>>();
         private Dictionary<GameObject, GameObject> spawnedObjects = new Dictionary<GameObject, GameObject>();
@@ -32,13 +32,13 @@ namespace UnityCommon
 
         private void Awake ()
         {
-            if (StartupPoolMode == StartupPoolMode.Awake)
+            if (PoolMode == StartupPoolMode.Awake)
                 CreateStartupPools();
         }
 
         private void Start ()
         {
-            if (StartupPoolMode == StartupPoolMode.Start)
+            if (PoolMode == StartupPoolMode.Start)
                 CreateStartupPools();
         }
 
