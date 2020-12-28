@@ -1,5 +1,6 @@
 using System;
 using UniRx.Async;
+using UnityEngine;
 
 namespace UnityCommon
 {
@@ -40,8 +41,8 @@ namespace UnityCommon
 
             targetProvided = this.target = target;
 
-            if (Loop) WaitAndLoop(cancellationToken).Forget();
-            else WaitAndComplete(cancellationToken).Forget();
+            if (Loop) WaitAndLoopAsync(cancellationToken).Forget();
+            else WaitAndCompleteAsync(cancellationToken).Forget();
         }
 
         public void Run (in CancellationToken cancellationToken = default, UnityEngine.Object target = default) 
@@ -59,13 +60,15 @@ namespace UnityCommon
             onCompleted?.Invoke();
         }
 
-        protected virtual async UniTaskVoid WaitAndComplete (CancellationToken cancellationToken = default)
+        protected virtual async UniTaskVoid WaitAndCompleteAsync (CancellationToken cancellationToken = default)
         {
             lastRunGuid = Guid.NewGuid();
             var currentRunGuid = lastRunGuid;
+            var startTime = GetTime();
 
-            using (var combinedCTS = cancellationToken.CreateLinkedTokenSource())
-                await UniTask.Delay(TimeSpan.FromSeconds(Duration), TimeScaleIgnored, cancellationToken: combinedCTS.Token);
+            while (!WaitedEnough(startTime) && !cancellationToken.CancellationRequested)
+                await AsyncUtils.WaitEndOfFrame;
+            
             if (cancellationToken.CancelASAP || !TargetValid) return;
             if (lastRunGuid != currentRunGuid) return; // The timer was completed instantly or stopped.
 
@@ -77,21 +80,29 @@ namespace UnityCommon
             }
         }
 
-        protected virtual async UniTaskVoid WaitAndLoop (CancellationToken cancellationToken = default)
+        protected virtual async UniTaskVoid WaitAndLoopAsync (CancellationToken cancellationToken = default)
         {
             lastRunGuid = Guid.NewGuid();
             var currentRunGuid = lastRunGuid;
-
+            var startTime = GetTime();
+            
             while (!cancellationToken.CancellationRequested)
             {
-                using (var combinedCTS = cancellationToken.CreateLinkedTokenSource())
-                    await UniTask.Delay(TimeSpan.FromSeconds(Duration), TimeScaleIgnored, cancellationToken: combinedCTS.Token);
+                await AsyncUtils.WaitEndOfFrame;
                 if (cancellationToken.CancelASAP || !TargetValid) return;
                 if (lastRunGuid != currentRunGuid) return; // The timer was stopped.
-                onLoop?.Invoke();
+                if (WaitedEnough(startTime))
+                {
+                    onLoop?.Invoke();
+                    startTime = GetTime();
+                }
             }
 
             if (cancellationToken.CancelLazy) CompleteInstantly();
         }
+
+        private float GetTime () => TimeScaleIgnored ? Time.unscaledTime : Time.time;
+        
+        private bool WaitedEnough (float startTime) => GetTime() - startTime >= Duration;
     }
 }
