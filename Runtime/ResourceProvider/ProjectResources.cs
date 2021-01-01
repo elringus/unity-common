@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 
@@ -25,22 +26,29 @@ namespace UnityCommon
             if (!Application.isEditor) return;
 
             resourcePaths.Clear();
-            var dataDir = new System.IO.DirectoryInfo(Application.dataPath);
-            var resourcesDirs = dataDir.GetDirectories("*Resources", System.IO.SearchOption.AllDirectories)
-                .Where(d => d.FullName.EndsWithFast($"{System.IO.Path.DirectorySeparatorChar}Resources")).ToList();
+            var dataDir = new DirectoryInfo(Application.dataPath);
+            var resourcesDirs = dataDir.GetDirectories("*Resources", SearchOption.AllDirectories)
+                .Where(d => d.FullName.EndsWithFast($"{Path.DirectorySeparatorChar}Resources")).ToList();
             foreach (var dir in resourcesDirs)
                 WalkResourcesDirectory(dir, resourcePaths);
         }
 
-        private static void WalkResourcesDirectory (System.IO.DirectoryInfo directory, List<string> outPaths)
+        private static void WalkResourcesDirectory (DirectoryInfo directory, List<string> outPaths)
         {
-            var paths = directory.GetFiles().Where(p => !p.FullName.EndsWithFast(".meta"))
-                .Select(p => p.FullName.Replace("\\", "/").GetAfterFirst("/Resources/").GetBeforeLast("."));
+            var paths = directory.GetFiles().Where(IsNotMetaFile).Select(GetResourcePath);
             outPaths.AddRange(paths);
 
             var subDirs = directory.GetDirectories();
             foreach (var dirInfo in subDirs)
                 WalkResourcesDirectory(dirInfo, outPaths);
+
+            bool IsNotMetaFile (FileInfo info) => !info.FullName.EndsWithFast(".meta");
+            
+            string GetResourcePath (FileInfo info)
+            {
+                var path = info.FullName.Replace("\\", "/").GetAfterFirst("/Resources/");
+                return path.Contains(".") ? path.GetBeforeLast(".") : path;
+            }
         }
     }
 }

@@ -129,7 +129,11 @@ namespace UnityCommon
             var locateKey = new Tuple<string, Type>(path, typeof(T));
 
             if (ResourceLocating<T>(path))
-                return await (LocateRunners[locateKey] as LocateResourcesRunner<T>);
+            {
+                var locateTask = LocateRunners[locateKey] as LocateResourcesRunner<T>;
+                if (locateTask is null) throw new Exception($"Failed to wait for `{path}` resource location runner.");
+                await locateTask;
+            }
 
             var locateRunner = CreateLocateResourcesRunner<T>(path);
             LocateRunners.Add(locateKey, locateRunner);
@@ -151,7 +155,11 @@ namespace UnityCommon
             var locateKey = new Tuple<string, Type>(path, typeof(Folder));
 
             if (ResourceLocating<Folder>(path))
-                return await (LocateRunners[locateKey] as LocateFoldersRunner);
+            {
+                var locateTask = LocateRunners[locateKey] as LocateFoldersRunner;
+                if (locateTask is null) throw new Exception($"Failed to wait for `{path}` folder location runner.");
+                return await locateTask;
+            }
 
             var locateRunner = CreateLocateFoldersRunner(path);
             LocateRunners.Add(locateKey, locateRunner);
