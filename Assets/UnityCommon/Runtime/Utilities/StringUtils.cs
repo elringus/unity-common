@@ -24,7 +24,7 @@ namespace UnityCommon
         /// <summary>
         /// Checks whether provided string contains any line break characters (platform-agnostic).
         /// </summary>
-        private static bool ContainsLineBreak (this string content)
+        public static bool ContainsLineBreak (this string content)
         {
             if (content is null) throw new ArgumentNullException(nameof(content));
             return content.IndexOfAny(NewLineChars) >= 0;
