@@ -7,6 +7,9 @@ using UnityEngine;
 
 namespace UnityCommon
 {
+    /// <summary>
+    /// Provides various helper and extension methods for <see cref="string"/> objects.
+    /// </summary>
     public static class StringUtils
     {
         /// <summary>
@@ -17,6 +20,15 @@ namespace UnityCommon
         /// Character combinations used to represent new lines, cross-platform (Windows-Mac-Unix).
         /// </summary>
         public static readonly string[] NewLineSymbols = { "\r\n", "\n", "\r" };
+        
+        /// <summary>
+        /// Checks whether provided string contains any line break characters (platform-agnostic).
+        /// </summary>
+        private static bool ContainsLineBreak (this string content)
+        {
+            if (content is null) throw new ArgumentNullException(nameof(content));
+            return content.IndexOfAny(NewLineChars) >= 0;
+        }
         
         /// <summary>
         /// Performs <see cref="string.Equals(string, string, StringComparison)"/> with <see cref="StringComparison.Ordinal"/>.
