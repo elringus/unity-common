@@ -44,6 +44,10 @@ namespace UnityCommon
         /// Stops playing the track.
         /// </summary>
         void Stop ();
+        /// <summary>
+        /// Fades <see cref="Volume"/> to the provided value over the specified time, in seconds.
+        /// </summary>
+        UniTask FadeAsync (float volume, float fadeTime, CancellationToken cancellationToken = default);
     }
 
     /// <summary>
