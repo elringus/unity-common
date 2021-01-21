@@ -13,7 +13,6 @@ namespace UnityCommon
         private readonly Vector3 startValue;
         private readonly Vector3 targetValue;
         private readonly Action<Vector3> onTween;
-        private readonly EasingFunction easingFunction;
         private readonly UnityEngine.Object target;
         private readonly bool targetProvided;
 
@@ -28,7 +27,6 @@ namespace UnityCommon
             this.onTween = onTween;
 
             targetProvided = this.target = target;
-            easingFunction = EasingType.GetEasingFunction();
         }
 
         public void TweenValue (float tweenPercent)
@@ -36,9 +34,9 @@ namespace UnityCommon
             if (!TargetValid) return;
 
             var newValue = new Vector3(
-                easingFunction(startValue.x, targetValue.x, tweenPercent),
-                easingFunction(startValue.y, targetValue.y, tweenPercent),
-                easingFunction(startValue.z, targetValue.z, tweenPercent)
+                EasingType.Tween(startValue.x, targetValue.x, tweenPercent),
+                EasingType.Tween(startValue.y, targetValue.y, tweenPercent),
+                EasingType.Tween(startValue.z, targetValue.z, tweenPercent)
             );
 
             onTween.Invoke(newValue);
@@ -49,7 +47,6 @@ namespace UnityCommon
             return startValue.Equals(other.startValue) && 
                    targetValue.Equals(other.targetValue) && 
                    Equals(onTween, other.onTween) && 
-                   Equals(easingFunction, other.easingFunction) && 
                    Equals(target, other.target) && 
                    targetProvided == other.targetProvided && 
                    TweenDuration.Equals(other.TweenDuration) && 
@@ -69,7 +66,6 @@ namespace UnityCommon
                 var hashCode = startValue.GetHashCode();
                 hashCode = (hashCode * 397) ^ targetValue.GetHashCode();
                 hashCode = (hashCode * 397) ^ (onTween != null ? onTween.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (easingFunction != null ? easingFunction.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (target != null ? target.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ targetProvided.GetHashCode();
                 hashCode = (hashCode * 397) ^ TweenDuration.GetHashCode();
