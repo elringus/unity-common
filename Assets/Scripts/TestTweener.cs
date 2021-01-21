@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class TestTweener : MonoBehaviour
 {
-    private readonly Tweener<VectorTween> tweener = new Tweener<VectorTween>();
+    private readonly ITweener<VectorTween> tweener = new Tweener<VectorTween>();
 
     private IEnumerator Start ()
     {
