@@ -7,7 +7,22 @@ namespace UnityCommon
     /// <summary>
     /// Allows tweening a <see cref="ITweenValue"/> using coroutine.
     /// </summary>
-    public class Tweener<TTweenValue> 
+    public interface ITweener<TTweenValue>
+        where TTweenValue : struct, ITweenValue
+    {
+        TTweenValue TweenValue { get; }
+        bool Running { get; }
+
+        void Run (in TTweenValue tweenValue, in CancellationToken cancellationToken = default);
+        void Run (in CancellationToken cancellationToken = default);
+        UniTask RunAsync (in TTweenValue tweenValue, in CancellationToken cancellationToken = default);
+        UniTask RunAsync (in CancellationToken cancellationToken = default);
+        void Stop ();
+        void CompleteInstantly ();
+    }
+
+    /// <inheritdoc cref="ITweener{TTweenValue}"/>
+    public class Tweener<TTweenValue> : ITweener<TTweenValue>
         where TTweenValue : struct, ITweenValue
     {
         public TTweenValue TweenValue { get; private set; }

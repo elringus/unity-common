@@ -19,7 +19,6 @@ namespace UnityCommon
         private readonly Color targetColor;
         private readonly ColorTweenMode tweenMode;
         private readonly Action<Color> onTween;
-        private readonly EasingFunction easingFunction;
         private readonly UnityEngine.Object target;
         private readonly bool targetProvided;
 
@@ -35,7 +34,6 @@ namespace UnityCommon
             this.onTween = onTween;
 
             targetProvided = this.target = target;
-            easingFunction = EasingType.GetEasingFunction();
         }
 
         public void TweenValue (float tweenPercent)
@@ -43,10 +41,10 @@ namespace UnityCommon
             if (!TargetValid) return;
 
             var newColor = default(Color);
-            newColor.r = tweenMode == ColorTweenMode.Alpha ? startColor.r : easingFunction(startColor.r, targetColor.r, tweenPercent);
-            newColor.g = tweenMode == ColorTweenMode.Alpha ? startColor.g : easingFunction(startColor.g, targetColor.g, tweenPercent);
-            newColor.b = tweenMode == ColorTweenMode.Alpha ? startColor.b : easingFunction(startColor.b, targetColor.b, tweenPercent);
-            newColor.a = tweenMode == ColorTweenMode.RGB ? startColor.a : easingFunction(startColor.a, targetColor.a, tweenPercent);
+            newColor.r = tweenMode == ColorTweenMode.Alpha ? startColor.r : EasingType.Tween(startColor.r, targetColor.r, tweenPercent);
+            newColor.g = tweenMode == ColorTweenMode.Alpha ? startColor.g : EasingType.Tween(startColor.g, targetColor.g, tweenPercent);
+            newColor.b = tweenMode == ColorTweenMode.Alpha ? startColor.b : EasingType.Tween(startColor.b, targetColor.b, tweenPercent);
+            newColor.a = tweenMode == ColorTweenMode.RGB ? startColor.a : EasingType.Tween(startColor.a, targetColor.a, tweenPercent);
 
             onTween.Invoke(newColor);
         }
@@ -56,7 +54,6 @@ namespace UnityCommon
             return startColor.Equals(other.startColor) && 
                    targetColor.Equals(other.targetColor) && 
                    tweenMode == other.tweenMode && Equals(onTween, other.onTween) && 
-                   Equals(easingFunction, other.easingFunction) && 
                    Equals(target, other.target) && 
                    targetProvided == other.targetProvided && 
                    EasingType == other.EasingType && 
@@ -77,7 +74,6 @@ namespace UnityCommon
                 hashCode = (hashCode * 397) ^ targetColor.GetHashCode();
                 hashCode = (hashCode * 397) ^ (int)tweenMode;
                 hashCode = (hashCode * 397) ^ (onTween != null ? onTween.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (easingFunction != null ? easingFunction.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (target != null ? target.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ targetProvided.GetHashCode();
                 hashCode = (hashCode * 397) ^ (int)EasingType;

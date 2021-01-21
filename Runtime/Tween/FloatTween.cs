@@ -12,7 +12,6 @@ namespace UnityCommon
         private readonly float startValue;
         private readonly float targetValue;
         private readonly Action<float> onTween;
-        private readonly EasingFunction easingFunction;
         private readonly UnityEngine.Object target;
         private readonly bool targetProvided;
 
@@ -27,14 +26,13 @@ namespace UnityCommon
             this.onTween = onTween;
 
             targetProvided = this.target = target;
-            easingFunction = EasingType.GetEasingFunction();
         }
 
         public void TweenValue (float tweenPercent)
         {
             if (!TargetValid) return;
 
-            var newValue = easingFunction(startValue, targetValue, tweenPercent);
+            var newValue = EasingType.Tween(startValue, targetValue, tweenPercent);
             onTween.Invoke(newValue);
         }
         
@@ -43,7 +41,6 @@ namespace UnityCommon
             return startValue.Equals(other.startValue) && 
                    targetValue.Equals(other.targetValue) && 
                    Equals(onTween, other.onTween) && 
-                   Equals(easingFunction, other.easingFunction) && 
                    Equals(target, other.target) && 
                    targetProvided == other.targetProvided && 
                    TweenDuration.Equals(other.TweenDuration) && 
@@ -63,7 +60,6 @@ namespace UnityCommon
                 var hashCode = startValue.GetHashCode();
                 hashCode = (hashCode * 397) ^ targetValue.GetHashCode();
                 hashCode = (hashCode * 397) ^ (onTween != null ? onTween.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (easingFunction != null ? easingFunction.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (target != null ? target.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ targetProvided.GetHashCode();
                 hashCode = (hashCode * 397) ^ TweenDuration.GetHashCode();
