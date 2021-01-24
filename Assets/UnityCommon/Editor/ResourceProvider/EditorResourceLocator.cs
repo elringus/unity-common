@@ -4,13 +4,13 @@ using UniRx.Async;
 
 namespace UnityCommon
 {
-    public class EditorResourceLocator<TResource> : LocateResourcesRunner<TResource> 
+    public class EditorResourceLocator<TResource> : LocateResourcesRunner<TResource>
         where TResource : UnityEngine.Object
     {
         private readonly IReadOnlyCollection<string> editorResourcePaths;
 
-        public EditorResourceLocator (IResourceProvider provider, string resourcesPath, 
-            IReadOnlyCollection<string> editorResourcePaths) : base (provider, resourcesPath ?? string.Empty)
+        public EditorResourceLocator (IResourceProvider provider, string resourcesPath,
+            IReadOnlyCollection<string> editorResourcePaths) : base(provider, resourcesPath ?? string.Empty)
         {
             this.editorResourcePaths = editorResourcePaths;
         }

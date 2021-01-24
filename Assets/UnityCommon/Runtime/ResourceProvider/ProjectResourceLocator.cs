@@ -4,15 +4,15 @@ using UniRx.Async;
 
 namespace UnityCommon
 {
-    public class ProjectResourceLocator<TResource> : LocateResourcesRunner<TResource> 
+    public class ProjectResourceLocator<TResource> : LocateResourcesRunner<TResource>
         where TResource : UnityEngine.Object
     {
         public readonly string RootPath;
 
         private readonly ProjectResources projectResources;
 
-        public ProjectResourceLocator (IResourceProvider provider, string rootPath, string resourcesPath, 
-            ProjectResources projectResources) : base (provider, resourcesPath ?? string.Empty)
+        public ProjectResourceLocator (IResourceProvider provider, string rootPath, string resourcesPath,
+            ProjectResources projectResources) : base(provider, resourcesPath ?? string.Empty)
         {
             RootPath = rootPath;
             this.projectResources = projectResources;
@@ -28,7 +28,7 @@ namespace UnityCommon
         public static IReadOnlyCollection<string> LocateProjectResources (string rootPath, string resourcesPath, ProjectResources projectResources)
         {
             var path = string.IsNullOrEmpty(rootPath) ? resourcesPath : string.IsNullOrEmpty(resourcesPath) ? rootPath : $"{rootPath}/{resourcesPath}";
-            var result = projectResources.ResourcePaths.LocateResourcePathsAtFolder(path);
+            var result = projectResources.Resources.Keys.LocateResourcePathsAtFolder(path);
             if (!string.IsNullOrEmpty(rootPath))
                 return result.Select(p => p.GetAfterFirst(rootPath + "/")).ToArray();
             return result.ToArray();

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,11 +14,13 @@ namespace UnityCommon
         public void AddResourceGuid (string path, string guid)
         {
             pathToGuidMap[path] = guid;
+            LocationsCache.Add(new CachedResourceLocation(path, typeof(UnityEngine.Object)));
         }
 
         public void RemoveResourceGuid (string path)
         {
             pathToGuidMap.Remove(path);
+            LocationsCache.RemoveAll(r => r.Path.EqualsFast(path));
         }
 
         public override bool SupportsType<T> () => true;
@@ -50,5 +53,7 @@ namespace UnityCommon
             else ObjectUtils.DestroyOrImmediate(resource.Object);
             #endif
         }
+
+        protected override bool AreTypesCompatible (Type sourceType, Type targetType) => true;
     }
 }

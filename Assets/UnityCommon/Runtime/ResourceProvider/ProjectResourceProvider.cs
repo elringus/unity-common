@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UniRx.Async;
 using UnityEngine;
 
@@ -44,6 +45,15 @@ namespace UnityCommon
             projectResources = ProjectResources.Get();
             redirectors = new Dictionary<Type, TypeRedirector>();
             RootPath = rootPath;
+            foreach (var kv in projectResources.Resources)
+                CacheResource(kv.Key, kv.Value);
+
+            void CacheResource (string path, Type type)
+            {
+                path = string.IsNullOrEmpty(RootPath) || !path.Contains(RootPath) ? path 
+                    : path.GetAfterFirst($"{RootPath}/");
+                LocationsCache.Add(new CachedResourceLocation(path, type));
+            }
         }
 
         public override bool SupportsType<T> () => true;
@@ -88,6 +98,12 @@ namespace UnityCommon
             if (resource.Object is GameObject || resource.Object is Component) return;
 
             Resources.UnloadAsset(resource.Object);
+        }
+
+        protected override bool AreTypesCompatible (Type sourceType, Type targetType)
+        {
+            return base.AreTypesCompatible(sourceType, targetType) ||
+                   redirectors.Values.Any(r => r.SourceType == sourceType && r.RedirectType == targetType);
         }
     }
 }

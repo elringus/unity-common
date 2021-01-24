@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,18 +8,25 @@ namespace UnityCommon
 {
     public class ProjectResources : ScriptableObject
     {
-        public IReadOnlyCollection<string> ResourcePaths => resourcePaths;
+        #pragma warning disable 0649
+        [Serializable]
+        private struct ProjectResource { public string Path, Type; }
+        #pragma warning restore 0649
+        
+        public IReadOnlyDictionary<string, Type> Resources { get; private set; }
 
-        [SerializeField] private List<string> resourcePaths = new List<string>();
+        [SerializeField] private List<ProjectResource> resourcePaths = new List<ProjectResource>();
 
         private void Awake ()
         {
             LocateAllResources();
+            Resources = resourcePaths.ToDictionary(r => r.Path, r => Type.GetType(r.Type));
         }
 
         public static ProjectResources Get ()
         {
-            return Application.isEditor ? CreateInstance<ProjectResources>() : Resources.Load<ProjectResources>(nameof(ProjectResources));
+            return Application.isEditor ? CreateInstance<ProjectResources>() 
+                : UnityEngine.Resources.Load<ProjectResources>(nameof(ProjectResources));
         }
 
         public void LocateAllResources ()
@@ -33,10 +41,11 @@ namespace UnityCommon
                 WalkResourcesDirectory(dir, resourcePaths);
         }
 
-        private static void WalkResourcesDirectory (DirectoryInfo directory, List<string> outPaths)
+        private static void WalkResourcesDirectory (DirectoryInfo directory, List<ProjectResource> outPaths)
         {
-            var paths = directory.GetFiles().Where(IsNotMetaFile).Select(GetResourcePath);
-            outPaths.AddRange(paths);
+            var paths = directory.GetFiles().Where(IsNotMetaFile).Select(GetAssetPath);
+            foreach (var path in paths)
+                AddPathUsingEditorAPI(path);
 
             var subDirs = directory.GetDirectories();
             foreach (var dirInfo in subDirs)
@@ -44,10 +53,20 @@ namespace UnityCommon
 
             bool IsNotMetaFile (FileInfo info) => !info.FullName.EndsWithFast(".meta");
             
-            string GetResourcePath (FileInfo info)
+            string GetAssetPath (FileInfo info) => PathUtils.AbsoluteToAssetPath(info.FullName);
+
+            void AddPathUsingEditorAPI (string assetPath)
             {
-                var path = info.FullName.Replace("\\", "/").GetAfterFirst("/Resources/");
-                return path.Contains(".") ? path.GetBeforeLast(".") : path;
+                #if UNITY_EDITOR
+                var type = UnityEditor.AssetDatabase.GetMainAssetTypeAtPath(assetPath);
+                if (type is null) throw new Exception($"Failed to get type of `{assetPath}` asset.");
+                outPaths.Add(new ProjectResource { Path = GetResourcePath(), Type = type.AssemblyQualifiedName });
+                string GetResourcePath ()
+                {
+                    assetPath = assetPath.GetAfterFirst("/Resources/");
+                    return assetPath.Contains(".") ? assetPath.GetBeforeLast(".") : assetPath;
+                }
+                #endif
             }
         }
     }
