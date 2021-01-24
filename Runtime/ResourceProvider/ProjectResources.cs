@@ -8,8 +8,10 @@ namespace UnityCommon
 {
     public class ProjectResources : ScriptableObject
     {
+        #pragma warning disable 0649
         [Serializable]
         private struct ProjectResource { public string Path, Type; }
+        #pragma warning restore 0649
         
         public IReadOnlyDictionary<string, Type> Resources { get; private set; }
 
@@ -52,21 +54,18 @@ namespace UnityCommon
             bool IsNotMetaFile (FileInfo info) => !info.FullName.EndsWithFast(".meta");
             
             string GetAssetPath (FileInfo info) => PathUtils.AbsoluteToAssetPath(info.FullName);
-            
-            string ToResourcePath (string assetPath)
-            {
-                assetPath = assetPath.GetAfterFirst("/Resources/");
-                return assetPath.Contains(".") ? assetPath.GetBeforeLast(".") : assetPath;
-            }
 
             void AddPathUsingEditorAPI (string assetPath)
             {
                 #if UNITY_EDITOR
                 var type = UnityEditor.AssetDatabase.GetMainAssetTypeAtPath(assetPath);
                 if (type is null) throw new Exception($"Failed to get type of `{assetPath}` asset.");
-                outPaths.Add(new ProjectResource { Path = ToResourcePath(assetPath), Type = type.AssemblyQualifiedName });
-                #else 
-                throw new Exception("Project resources can't be collected outside of editor.");
+                outPaths.Add(new ProjectResource { Path = GetResourcePath(), Type = type.AssemblyQualifiedName });
+                string GetResourcePath ()
+                {
+                    assetPath = assetPath.GetAfterFirst("/Resources/");
+                    return assetPath.Contains(".") ? assetPath.GetBeforeLast(".") : assetPath;
+                }
                 #endif
             }
         }
