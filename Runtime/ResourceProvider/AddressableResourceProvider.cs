@@ -34,7 +34,7 @@ namespace UnityCommon
         }
 
         public override bool SupportsType<T> () => true;
-
+        
         public override async UniTask<Resource<T>> LoadResourceAsync<T> (string path)
         {
             if (locations is null) locations = await LoadAllLocations();
@@ -87,8 +87,19 @@ namespace UnityCommon
                 Addressables.MergeMode.Intersection) : Addressables.LoadResourceLocationsAsync(MainLabel);
             while (!task.IsDone) // When awaiting the method directly it fails on WebGL (they're using multithreaded Task fot GetAwaiter)
                 await AsyncUtils.WaitEndOfFrame;
-            var locations = task.Result;
-            return locations?.ToList() ?? new List<IResourceLocation>();
+            var locations = task.Result?.ToList() ?? new List<IResourceLocation>();
+            CacheLocations(locations);
+            return locations;
+        }
+
+        private void CacheLocations (IEnumerable<IResourceLocation> locations)
+        {
+            foreach (var location in locations)
+            {
+                var type = location.ResourceType;
+                var path = location.PrimaryKey.GetAfterFirst("/"); // Remove the addressables prefix.
+                LocationsCache.Add(path, type);
+            }
         }
     }
 }
