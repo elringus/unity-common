@@ -50,8 +50,8 @@ namespace UnityCommon
 
             void CacheResource (string path, Type type)
             {
-                path = string.IsNullOrEmpty(RootPath) ? path
-                    : path.EndsWithFast(RootPath) ? string.Empty : path.GetAfterFirst($"{RootPath}/");
+                path = string.IsNullOrEmpty(RootPath) || !path.Contains(RootPath) ? path 
+                    : path.GetAfterFirst($"{RootPath}/");
                 LocationsCache.Add(path, type);
             }
         }
