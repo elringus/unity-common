@@ -40,13 +40,20 @@ namespace UnityCommon
         private readonly ProjectResources projectResources;
         private readonly Dictionary<Type, TypeRedirector> redirectors;
 
-        public ProjectResourceProvider (string rootPath =  null)
+        public ProjectResourceProvider (string rootPath = null)
         {
             projectResources = ProjectResources.Get();
             redirectors = new Dictionary<Type, TypeRedirector>();
             RootPath = rootPath;
             foreach (var kv in projectResources.Resources)
-                LocationsCache.Add(kv.Key, kv.Value);
+                CacheResource(kv.Key, kv.Value);
+
+            void CacheResource (string path, Type type)
+            {
+                path = string.IsNullOrEmpty(RootPath) ? path
+                    : path.EndsWithFast(RootPath) ? string.Empty : path.GetAfterFirst($"{RootPath}/");
+                LocationsCache.Add(path, type);
+            }
         }
 
         public override bool SupportsType<T> () => true;
