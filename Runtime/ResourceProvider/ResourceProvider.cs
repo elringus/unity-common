@@ -252,11 +252,16 @@ namespace UnityCommon
             if (!Mathf.Approximately(prevProgress, LoadProgress)) OnLoadProgress?.Invoke(LoadProgress);
         }
 
-        protected bool IsLocationCached<T> (string path) => LocationsCache.TryGetValue(path, out var type) && type == typeof(T);
+        protected virtual bool AreTypesCompatible (Type sourceType, Type targetType) => sourceType == targetType;
 
-        protected IReadOnlyCollection<string> LocateCached<T> (string path)
+        protected virtual bool IsLocationCached<T> (string path)
         {
-            return LocationsCache.Where(r => r.Value == typeof(T))
+            return LocationsCache.TryGetValue(path, out var type) && AreTypesCompatible(type, typeof(T));
+        }
+
+        protected virtual IReadOnlyCollection<string> LocateCached<T> (string path)
+        {
+            return LocationsCache.Where(r => AreTypesCompatible(r.Value, typeof(T)))
                                  .Select(r => r.Key).LocateResourcePathsAtFolder(path);
         }
     }
