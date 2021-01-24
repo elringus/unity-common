@@ -18,10 +18,11 @@ namespace UnityCommon
         public float LoadProgress { get; private set; } = 1f;
         IReadOnlyCollection<Resource> IResourceProvider.LoadedResources => LoadedResources.Values;
 
-        protected Dictionary<string, Resource> LoadedResources = new Dictionary<string, Resource>();
-        protected Dictionary<string, List<Folder>> LocatedFolders = new Dictionary<string, List<Folder>>();
-        protected Dictionary<string, ResourceRunner> LoadRunners = new Dictionary<string, ResourceRunner>();
-        protected Dictionary<Tuple<string, Type>, ResourceRunner> LocateRunners = new Dictionary<Tuple<string, Type>, ResourceRunner>();
+        protected readonly Dictionary<string, Resource> LoadedResources = new Dictionary<string, Resource>();
+        protected readonly Dictionary<string, List<Folder>> LocatedFolders = new Dictionary<string, List<Folder>>();
+        protected readonly Dictionary<string, ResourceRunner> LoadRunners = new Dictionary<string, ResourceRunner>();
+        protected readonly Dictionary<Tuple<string, Type>, ResourceRunner> LocateRunners = new Dictionary<Tuple<string, Type>, ResourceRunner>();
+        protected readonly Dictionary<string, Type> LocationsCache = new Dictionary<string, Type>();
 
         public abstract bool SupportsType<T> () where T : UnityEngine.Object;
 
@@ -113,6 +114,7 @@ namespace UnityCommon
 
         public virtual async UniTask<bool> ResourceExistsAsync<T> (string path) where T : UnityEngine.Object
         {
+            if (LocationsCache.Count > 0) return IsLocationCached<T>(path);
             if (!SupportsType<T>()) return false;
             if (ResourceLoaded<T>(path)) return true;
             var folderPath = path.Contains("/") ? path.GetBeforeLast("/") : string.Empty;
@@ -123,8 +125,10 @@ namespace UnityCommon
         public virtual async UniTask<IReadOnlyCollection<string>> LocateResourcesAsync<T> (string path) where T : UnityEngine.Object
         {
             if (!SupportsType<T>()) return null;
-
             if (path is null) path = string.Empty;
+
+            if (LocationsCache.Count > 0) 
+                return LocateCached<T>(path);
 
             var locateKey = new Tuple<string, Type>(path, typeof(T));
 
@@ -246,6 +250,14 @@ namespace UnityCommon
             if (runnersCount == 0) LoadProgress = 1f;
             else LoadProgress = Mathf.Min(1f / runnersCount, .999f);
             if (!Mathf.Approximately(prevProgress, LoadProgress)) OnLoadProgress?.Invoke(LoadProgress);
+        }
+
+        protected bool IsLocationCached<T> (string path) => LocationsCache.TryGetValue(path, out var type) && type == typeof(T);
+
+        protected IReadOnlyCollection<string> LocateCached<T> (string path)
+        {
+            return LocationsCache.Where(r => r.Value == typeof(T))
+                                 .Select(r => r.Key).LocateResourcePathsAtFolder(path);
         }
     }
 }

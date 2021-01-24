@@ -27,7 +27,7 @@ namespace UnityCommon
         public static IReadOnlyCollection<Folder> LocateProjectFolders (string rootPath, string resourcesPath, ProjectResources projectResources)
         {
             var path = string.IsNullOrEmpty(rootPath) ? resourcesPath : string.IsNullOrEmpty(resourcesPath) ? rootPath : $"{rootPath}/{resourcesPath}";
-            return projectResources.ResourcePaths.LocateFolderPathsAtFolder(path)
+            return projectResources.Resources.Keys.LocateFolderPathsAtFolder(path)
                 .Select(p => new Folder(string.IsNullOrEmpty(rootPath) ? p : p.GetAfterFirst(rootPath + "/"))).ToList();
         }
     }
