@@ -14,13 +14,13 @@ namespace UnityCommon
         public void AddResourceGuid (string path, string guid)
         {
             pathToGuidMap[path] = guid;
-            LocationsCache[path] = null;
+            LocationsCache.Add(new CachedResourceLocation(path, typeof(UnityEngine.Object)));
         }
 
         public void RemoveResourceGuid (string path)
         {
             pathToGuidMap.Remove(path);
-            LocationsCache.Remove(path);
+            LocationsCache.RemoveAll(r => r.Path.EqualsFast(path));
         }
 
         public override bool SupportsType<T> () => true;

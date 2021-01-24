@@ -22,7 +22,7 @@ namespace UnityCommon
         protected readonly Dictionary<string, List<Folder>> LocatedFolders = new Dictionary<string, List<Folder>>();
         protected readonly Dictionary<string, ResourceRunner> LoadRunners = new Dictionary<string, ResourceRunner>();
         protected readonly Dictionary<Tuple<string, Type>, ResourceRunner> LocateRunners = new Dictionary<Tuple<string, Type>, ResourceRunner>();
-        protected readonly Dictionary<string, Type> LocationsCache = new Dictionary<string, Type>();
+        protected readonly List<CachedResourceLocation> LocationsCache = new List<CachedResourceLocation>();
 
         public abstract bool SupportsType<T> () where T : UnityEngine.Object;
 
@@ -251,18 +251,20 @@ namespace UnityCommon
             else LoadProgress = Mathf.Min(1f / runnersCount, .999f);
             if (!Mathf.Approximately(prevProgress, LoadProgress)) OnLoadProgress?.Invoke(LoadProgress);
         }
-
+        
         protected virtual bool AreTypesCompatible (Type sourceType, Type targetType) => sourceType == targetType;
 
         protected virtual bool IsLocationCached<T> (string path)
         {
-            return LocationsCache.TryGetValue(path, out var type) && AreTypesCompatible(type, typeof(T));
+            var targetType = typeof(T);
+            return LocationsCache.Any(r => r.Path.EqualsFast(path) && AreTypesCompatible(r.Type, targetType));
         }
 
         protected virtual IReadOnlyCollection<string> LocateCached<T> (string path)
         {
-            return LocationsCache.Where(r => AreTypesCompatible(r.Value, typeof(T)))
-                                 .Select(r => r.Key).LocateResourcePathsAtFolder(path);
+            var targetType = typeof(T);
+            return LocationsCache.Where(r => AreTypesCompatible(r.Type, targetType))
+                                 .Select(r => r.Path).LocateResourcePathsAtFolder(path);
         }
     }
 }

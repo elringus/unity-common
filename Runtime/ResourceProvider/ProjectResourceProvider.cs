@@ -52,7 +52,7 @@ namespace UnityCommon
             {
                 path = string.IsNullOrEmpty(RootPath) || !path.Contains(RootPath) ? path 
                     : path.GetAfterFirst($"{RootPath}/");
-                LocationsCache.Add(path, type);
+                LocationsCache.Add(new CachedResourceLocation(path, type));
             }
         }
 

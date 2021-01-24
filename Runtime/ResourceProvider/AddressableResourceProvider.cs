@@ -97,7 +97,7 @@ namespace UnityCommon
             foreach (var location in locations)
             {
                 var path = location.PrimaryKey.GetAfterFirst("/"); // Remove the addressables prefix.
-                LocationsCache[path] = location.ResourceType;
+                LocationsCache.Add(new CachedResourceLocation(path, location.ResourceType));
             }
         }
     }
