@@ -31,6 +31,13 @@ namespace UnityCommon
                 array?.ElementAtOrDefault(2) ?? @default.z,
                 array?.ElementAtOrDefault(3) ?? @default.w);
         }
+        
+        public static float?[] ToNullableArray (this Vector2 vector) => new float?[] { vector.x, vector.y };
+        public static float?[] ToNullableArray (this Vector3 vector) => new float?[] { vector.x, vector.y, vector.z };
+        public static float?[] ToNullableArray (this Vector4 vector) => new float?[] { vector.x, vector.y, vector.z, vector.w };
+        public static float[] ToArray (this Vector2 vector) => new[] { vector.x, vector.y };
+        public static float[] ToArray (this Vector3 vector) => new[] { vector.x, vector.y, vector.z };
+        public static float[] ToArray (this Vector4 vector) => new[] { vector.x, vector.y, vector.z, vector.w };
 
         /// <summary>
         /// Appends <paramref name="item"/> to the end of <paramref name="array"/>.
