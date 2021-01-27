@@ -37,22 +37,25 @@ namespace UnityCommon
 
         public readonly string RootPath;
 
-        private readonly ProjectResources projectResources;
+        private readonly IReadOnlyDictionary<string, Type> projectResources;
         private readonly Dictionary<Type, TypeRedirector> redirectors;
 
         public ProjectResourceProvider (string rootPath = null)
         {
-            projectResources = ProjectResources.Get();
-            redirectors = new Dictionary<Type, TypeRedirector>();
             RootPath = rootPath;
-            foreach (var kv in projectResources.Resources)
-                CacheResource(kv.Key, kv.Value);
+            projectResources = GetProjectResources();
+            redirectors = new Dictionary<Type, TypeRedirector>();
+            foreach (var kv in projectResources)
+                LocationsCache.Add(new CachedResourceLocation(kv.Key, kv.Value));
 
-            void CacheResource (string path, Type type)
+            IReadOnlyDictionary<string, Type> GetProjectResources ()
             {
-                path = string.IsNullOrEmpty(RootPath) || !path.Contains(RootPath) ? path 
-                    : path.GetAfterFirst($"{RootPath}/");
-                LocationsCache.Add(new CachedResourceLocation(path, type));
+                if (string.IsNullOrEmpty(RootPath))
+                    return ProjectResources.Get().Resources;
+                var prefix = $"{RootPath}/";
+                return ProjectResources.Get().Resources
+                    .Where(kv => kv.Key.StartsWithFast(prefix))
+                    .ToDictionary(kv => kv.Key.GetAfterFirst(prefix), kv => kv.Value);
             }
         }
 
@@ -75,12 +78,12 @@ namespace UnityCommon
 
         protected override LocateResourcesRunner<T> CreateLocateResourcesRunner<T> (string path)
         {
-            return new ProjectResourceLocator<T>(this, RootPath, path, projectResources);
+            return new ProjectResourceLocator<T>(this, path, projectResources);
         }
 
         protected override LocateFoldersRunner CreateLocateFoldersRunner (string path)
         {
-            return new ProjectFolderLocator(this, RootPath, path, projectResources);
+            return new ProjectFolderLocator(this, path, projectResources);
         }
 
         protected override void DisposeResource (Resource resource)
