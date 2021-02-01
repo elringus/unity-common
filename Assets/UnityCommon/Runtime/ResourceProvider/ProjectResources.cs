@@ -12,33 +12,37 @@ namespace UnityCommon
         [Serializable]
         private struct ProjectResource { public string Path, Type; }
         #pragma warning restore 0649
+
+        public const string ResourcePath = "UnityCommon/ProjectResources";
         
-        public IReadOnlyDictionary<string, Type> Resources { get; private set; }
-
         [SerializeField] private List<ProjectResource> resourcePaths = new List<ProjectResource>();
-
-        private void Awake ()
-        {
-            LocateAllResources();
-            Resources = resourcePaths.ToDictionary(r => r.Path, r => Type.GetType(r.Type));
-        }
 
         public static ProjectResources Get ()
         {
-            return Application.isEditor ? CreateInstance<ProjectResources>() 
-                : UnityEngine.Resources.Load<ProjectResources>(nameof(ProjectResources));
+            var asset = Application.isEditor
+                ? CreateInstance<ProjectResources>()
+                : Resources.Load<ProjectResources>(ResourcePath);
+            if (Application.isEditor) asset.LocateAllResources();
+            return asset;
         }
 
-        public void LocateAllResources ()
+        public IReadOnlyDictionary<string, Type> GetAllResources (string prefixFilter = null)
         {
-            if (!Application.isEditor) return;
+            var resources = new Dictionary<string, Type>();
+            foreach (var resource in resourcePaths)
+                AddResource(resource);
+            return resources;
 
-            resourcePaths.Clear();
-            var dataDir = new DirectoryInfo(Application.dataPath);
-            var resourcesDirs = dataDir.GetDirectories("*Resources", SearchOption.AllDirectories)
-                .Where(d => d.FullName.EndsWithFast($"{Path.DirectorySeparatorChar}Resources")).ToList();
-            foreach (var dir in resourcesDirs)
-                WalkResourcesDirectory(dir, resourcePaths);
+            void AddResource (ProjectResource resource)
+            {
+                if (prefixFilter != null && !resource.Path.StartsWithFast(prefixFilter)) return;
+                var type = Type.GetType(resource.Type, false);
+                if (type is null) return;
+                var path = prefixFilter != null
+                    ? resource.Path.GetAfterFirst(prefixFilter)
+                    : resource.Path;
+                resources[path] = type;
+            }
         }
 
         private static void WalkResourcesDirectory (DirectoryInfo directory, List<ProjectResource> outPaths)
@@ -68,6 +72,16 @@ namespace UnityCommon
                 }
                 #endif
             }
+        }
+
+        private void LocateAllResources ()
+        {
+            resourcePaths.Clear();
+            var dataDir = new DirectoryInfo(Application.dataPath);
+            var resourcesDirs = dataDir.GetDirectories("*Resources", SearchOption.AllDirectories)
+                .Where(d => d.FullName.EndsWithFast($"{Path.DirectorySeparatorChar}Resources")).ToList();
+            foreach (var dir in resourcesDirs)
+                WalkResourcesDirectory(dir, resourcePaths);
         }
     }
 }
