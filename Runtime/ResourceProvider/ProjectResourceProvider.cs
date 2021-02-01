@@ -50,12 +50,8 @@ namespace UnityCommon
 
             IReadOnlyDictionary<string, Type> GetProjectResources ()
             {
-                if (string.IsNullOrEmpty(RootPath))
-                    return ProjectResources.Get().Resources;
-                var prefix = $"{RootPath}/";
-                return ProjectResources.Get().Resources
-                    .Where(kv => kv.Key.StartsWithFast(prefix))
-                    .ToDictionary(kv => kv.Key.GetAfterFirst(prefix), kv => kv.Value);
+                var filter = string.IsNullOrEmpty(RootPath) ? null : $"{RootPath}/";
+                return ProjectResources.Get().GetAllResources(filter);
             }
         }
 

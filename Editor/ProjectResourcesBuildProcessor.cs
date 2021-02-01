@@ -1,6 +1,6 @@
 using UnityEditor;
 using UnityEditor.Build;
-using UnityEngine;
+using UnityEditor.Build.Reporting;
 
 namespace UnityCommon
 {
@@ -10,18 +10,17 @@ namespace UnityCommon
 
         public int callbackOrder => 100;
 
-        private static string assetPath => TempFolderPath + "/" + nameof(ProjectResources) + ".asset";
+        private static string assetPath => $"{TempFolderPath}/{ProjectResources.ResourcePath}.asset";
 
-        public void OnPreprocessBuild (UnityEditor.Build.Reporting.BuildReport report)
+        public void OnPreprocessBuild (BuildReport report)
         {
-            var asset = ScriptableObject.CreateInstance<ProjectResources>();
-            asset.LocateAllResources();
-            EditorUtils.CreateFolderAsset(TempFolderPath);
+            var asset = ProjectResources.Get();
+            EditorUtils.CreateFolderAsset(assetPath.GetBeforeLast("/"));
             AssetDatabase.CreateAsset(asset, assetPath);
             AssetDatabase.SaveAssets();
         }
 
-        public void OnPostprocessBuild (UnityEditor.Build.Reporting.BuildReport report)
+        public void OnPostprocessBuild (BuildReport report)
         {
             AssetDatabase.DeleteAsset(TempFolderPath.GetBeforeLast("/"));
             AssetDatabase.SaveAssets();
