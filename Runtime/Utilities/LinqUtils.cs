@@ -39,7 +39,12 @@ namespace UnityCommon
             return array.Length > 0 && index >= 0 && index < array.Length;
         }
 
-        public static bool IsIndexValid<T> (this IList<T> list, int index)
+        public static bool IsIndexValid<T> (this ICollection<T> list, int index)
+        {
+            return list.Count > 0 && index >= 0 && index < list.Count;
+        }
+
+        public static bool IsIndexValid<T> (this IReadOnlyCollection<T> list, int index)
         {
             return list.Count > 0 && index >= 0 && index < list.Count;
         }
@@ -76,12 +81,12 @@ namespace UnityCommon
             list[indexB] = tmp;
             return list;
         }
-        
-        public static int RemoveAll<T>(this LinkedList<T> list, Predicate<T> match)
+
+        public static int RemoveAll<T> (this LinkedList<T> list, Predicate<T> match)
         {
             if (list == null) throw new ArgumentNullException(nameof(list));
             if (match == null) throw new ArgumentNullException(nameof(match));
-            
+
             var count = 0;
             var node = list.First;
             while (node != null)
@@ -120,7 +125,7 @@ namespace UnityCommon
 
                 if (alreadyVisited)
                 {
-                    if (inProcess && warnCyclic) 
+                    if (inProcess && warnCyclic)
                         Debug.LogWarning($"Cyclic dependency found while performing topological ordering of {typeof(T).Name}.");
                 }
                 else
@@ -186,7 +191,8 @@ namespace UnityCommon
             if (first == null || second == null) return false;
             if (first.Length != second.Length) return false;
             for (int i = 0; i < first.Length; i++)
-                if (!ITEMS_COMPARER.Equals(first[i], second[i])) return false;
+                if (!ITEMS_COMPARER.Equals(first[i], second[i]))
+                    return false;
             return true;
         }
 
