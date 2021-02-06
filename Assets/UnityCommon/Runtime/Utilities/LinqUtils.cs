@@ -39,7 +39,7 @@ namespace UnityCommon
             return array.Length > 0 && index >= 0 && index < array.Length;
         }
 
-        public static bool IsIndexValid<T> (this ICollection<T> list, int index)
+        public static bool IsIndexValid<T> (this List<T> list, int index)
         {
             return list.Count > 0 && index >= 0 && index < list.Count;
         }
