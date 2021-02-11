@@ -48,42 +48,13 @@ namespace UnityCommon
             }
         }
 
-        private static void WalkResourcesDirectory (DirectoryInfo directory, List<ProjectResource> outPaths)
-        {
-            var paths = directory.GetFiles().Where(IsNotMetaFile).Select(GetAssetPath);
-            foreach (var path in paths)
-                AddPathUsingEditorAPI(path);
-
-            var subDirs = directory.GetDirectories();
-            foreach (var dirInfo in subDirs)
-                WalkResourcesDirectory(dirInfo, outPaths);
-
-            bool IsNotMetaFile (FileInfo info) => !info.FullName.EndsWithFast(".meta");
-
-            string GetAssetPath (FileInfo info) => PathUtils.AbsoluteToAssetPath(info.FullName);
-
-            void AddPathUsingEditorAPI (string assetPath)
-            {
-                #if UNITY_EDITOR
-                var type = UnityEditor.AssetDatabase.GetMainAssetTypeAtPath(assetPath);
-                if (type is null) throw new Exception($"Failed to get type of `{assetPath}` asset.");
-                outPaths.Add(new ProjectResource { Path = GetResourcePath(), Type = type.AssemblyQualifiedName });
-                string GetResourcePath ()
-                {
-                    assetPath = assetPath.GetAfterFirst("/Resources/");
-                    return assetPath.Contains(".") ? assetPath.GetBeforeLast(".") : assetPath;
-                }
-                #endif
-            }
-        }
-
         private void LocateAllResources ()
         {
             #if UNITY_EDITOR
             resourcePaths.Clear();
-            var paths = UnityEditor.AssetDatabase.GetAllAssetPaths().Where(p => p.Contains("/Resources/"));
-            foreach (var path in paths)
+            foreach (var path in UnityEditor.AssetDatabase.GetAllAssetPaths())
             {
+                if (!path.Contains("/Resources/")) continue;
                 var type = UnityEditor.AssetDatabase.GetMainAssetTypeAtPath(path);
                 if (type is null) continue;
                 resourcePaths.Add(new ProjectResource { Path = GetPath(path), Type = type.AssemblyQualifiedName });
@@ -95,12 +66,6 @@ namespace UnityCommon
                 return path.Contains(".") ? path.GetBeforeLast(".") : path;
             }
             #endif
-
-            // var dataDir = new DirectoryInfo(Application.dataPath);
-            // var resourcesDirs = dataDir.GetDirectories("*Resources", SearchOption.AllDirectories)
-            //     .Where(d => d.FullName.EndsWithFast($"{Path.DirectorySeparatorChar}Resources")).ToList();
-            // foreach (var dir in resourcesDirs)
-            //     WalkResourcesDirectory(dir, resourcePaths);
         }
     }
 }
