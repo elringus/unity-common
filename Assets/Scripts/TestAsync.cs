@@ -1,29 +1,26 @@
-﻿using UniRx.Async;
-using UnityCommon;
+﻿using System.Threading.Tasks;
+using UniRx.Async;
 using UnityEngine;
 
 public class TestAsync : MonoBehaviour
 {
-    public class EternalYeild : CustomYieldInstruction
-    {
-        public override bool keepWaiting => Application.isPlaying;
-    }
-
-    private void Start ()
-    {
-        EndOfFrame();
-        CustomYeild();
-    }
-
-    private async void EndOfFrame ()
+    private async void Start ()
     {
         while (Application.isPlaying)
-            await AsyncUtils.WaitEndOfFrame;
+            await TaskMethod();
     }
 
-    private async void CustomYeild ()
+    private async Task TaskMethod ()
     {
-        while (Application.isPlaying)
-            await UniTask.WaitWhile(() => Time.time % 2 == 0);
+        var startTime = Time.realtimeSinceStartup;
+        while (Time.realtimeSinceStartup - startTime < .1f)
+            await Task.Yield();
+    }
+
+    private async UniTask UniTaskMethod ()
+    {
+        var startTime = Time.realtimeSinceStartup;
+        while (Time.realtimeSinceStartup - startTime < .1f)
+            await UniTask.Yield();
     }
 }
