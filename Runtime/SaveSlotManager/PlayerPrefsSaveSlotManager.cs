@@ -26,10 +26,29 @@ namespace UnityCommon
         protected abstract bool PrettifyJson { get; }
         protected abstract bool Binary { get; }
 
-        protected void InvokeOnBeforeSave () { Saving = true; OnBeforeSave?.Invoke(); }
-        protected void InvokeOnSaved () { Saving = false; OnSaved?.Invoke(); }
-        protected void InvokeOnBeforeLoad () { Loading = true; OnBeforeLoad?.Invoke(); }
-        protected void InvokeOnLoaded () { Loading = false; OnLoaded?.Invoke(); }
+        protected void InvokeOnBeforeSave ()
+        {
+            Saving = true;
+            OnBeforeSave?.Invoke();
+        }
+
+        protected void InvokeOnSaved ()
+        {
+            Saving = false;
+            OnSaved?.Invoke();
+        }
+
+        protected void InvokeOnBeforeLoad ()
+        {
+            Loading = true;
+            OnBeforeLoad?.Invoke();
+        }
+
+        protected void InvokeOnLoaded ()
+        {
+            Loading = false;
+            OnLoaded?.Invoke();
+        }
     }
 
     /// <summary>
@@ -57,6 +76,15 @@ namespace UnityCommon
             await SerializeDataAsync(slotId, data);
             InvokeOnSaved();
 
+            saveInProgress = false;
+        }
+
+        public void Save (string slotId, TData data)
+        {
+            saveInProgress = true;
+            InvokeOnBeforeSave();
+            SerializeData(slotId, data);
+            InvokeOnSaved();
             saveInProgress = false;
         }
 
@@ -116,6 +144,21 @@ namespace UnityCommon
             if (Binary)
             {
                 var bytes = await StringUtils.ZipStringAsync(jsonData);
+                jsonData = Convert.ToBase64String(bytes);
+            }
+
+            PlayerPrefs.SetString(slotKey, jsonData);
+            AddKeyIndexIfNotExist(slotKey);
+        }
+
+        protected virtual void SerializeData (string slotId, TData data)
+        {
+            var jsonData = JsonUtility.ToJson(data, PrettifyJson);
+            var slotKey = SlotIdToKey(slotId);
+
+            if (Binary)
+            {
+                var bytes = StringUtils.ZipString(jsonData);
                 jsonData = Convert.ToBase64String(bytes);
             }
 
