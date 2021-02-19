@@ -156,8 +156,8 @@ namespace UnityCommon
 
             for (int slotIndex = 0; slotIndex < ItemsPerPage; slotIndex++)
             {
-                var sourceIndex = (CurrentPage - 1) * ItemsPerPage + slotIndex;
-                BindSlot(Slots[slotIndex], sourceIndex);
+                var itemIndex = (CurrentPage - 1) * ItemsPerPage + slotIndex;
+                BindSlot(Slots[slotIndex], itemIndex);
             }
 
             if (PreviousPageButton)
