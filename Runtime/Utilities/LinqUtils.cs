@@ -49,6 +49,17 @@ namespace UnityCommon
             return list.Count > 0 && index >= 0 && index < list.Count;
         }
 
+        public static int IndexOf<T> (this IReadOnlyList<T> list, T itemToFind)
+        {
+            var i = 0;
+            foreach (T item in list)
+            {
+                if (Equals(item, itemToFind)) return i;
+                i++;
+            }
+            return -1;
+        }
+
         public static T Random<T> (this IList<T> list)
         {
             if (list == null || list.Count == 0) return default;
