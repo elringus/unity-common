@@ -6,13 +6,13 @@ using UnityEngine.UI;
 
 namespace UnityCommon
 {
+    [Serializable]
+    public class OnGridPageChangedEvent : UnityEvent<int> { }
+
     [RequireComponent(typeof(GridLayoutGroup))]
     public abstract class ScriptableGrid<TSlot> : ScriptableUIComponent<GridLayoutGroup>
         where TSlot : ScriptableGridSlot
     {
-        [Serializable]
-        private class OnPageChangedEvent : UnityEvent<int> { }
-
         /// <summary>
         /// Total items contained in the grid.
         /// </summary>
@@ -50,7 +50,7 @@ namespace UnityCommon
         [Tooltip("Button inside pagination panel to select previous grid page.")]
         [SerializeField] private Button nextPageButton = null;
         [Tooltip("Event invoked when grid page number changes.")]
-        [SerializeField] private OnPageChangedEvent onPageChanged = default;
+        [SerializeField] private OnGridPageChangedEvent onPageChanged = default;
 
         public virtual void Initialize (int itemsCount)
         {
