@@ -24,7 +24,7 @@ namespace UnityCommon
         /// <summary>
         /// Currently selected page number (starts from 1).
         /// </summary>
-        public virtual int CurrentPage { get; private set; } = 1;
+        public virtual int CurrentPage { get; private set; }
         /// <summary>
         /// Total number of pages.
         /// </summary>
@@ -57,7 +57,7 @@ namespace UnityCommon
             ItemsCount = itemsCount;
             Slots = PopulateGrid();
             FocusOnNavigation = Slots[Slots.Count - 1].gameObject;
-            Paginate();
+            SelectPage(1);
         }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace UnityCommon
         /// </summary>
         public virtual void SelectPage (int pageNumber)
         {
-            if (pageNumber == CurrentPage) return;
+            if (CurrentPage == pageNumber) return;
             if (pageNumber < 1 || pageNumber > PageCount)
                 throw new ArgumentOutOfRangeException(nameof(pageNumber), $"Page number should be between 1 and {PageCount}.");
             CurrentPage = pageNumber;
