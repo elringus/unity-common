@@ -165,7 +165,7 @@ namespace UnityCommon
         /// </summary>
         public static bool Contains<T> (T[] array, T item)
         {
-            return Array.Exists(array, i => item.Equals(i));
+            return Array.Exists(array, i => Equals(i, item));
         }
 
         /// <summary>
