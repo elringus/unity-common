@@ -28,7 +28,7 @@ namespace UnityCommon
         /// <summary>
         /// Total number of pages.
         /// </summary>
-        public virtual int PageCount => Mathf.CeilToInt(ItemsCount / (float)ItemsPerPage);
+        public virtual int PageCount => Mathf.Max(Mathf.CeilToInt(ItemsCount / (float)ItemsPerPage), 1);
         /// <summary>
         /// Slots instantiated under the grid representing currently displayed items.
         /// </summary>
@@ -58,6 +58,8 @@ namespace UnityCommon
             Slots = PopulateGrid();
             FocusOnNavigation = Slots[Slots.Count - 1].gameObject;
             SelectPage(1);
+            if (PaginationPanel)
+                PaginationPanel.SetActive(PageCount > 1);
         }
 
         /// <summary>
@@ -143,16 +145,6 @@ namespace UnityCommon
         protected virtual void Paginate ()
         {
             if (Slots is null) throw new Exception("The grid is not initialized.");
-
-            if (PageCount < 2)
-            {
-                if (PaginationPanel)
-                    PaginationPanel.SetActive(false);
-                return;
-            }
-
-            if (PaginationPanel)
-                PaginationPanel.SetActive(true);
 
             for (int slotIndex = 0; slotIndex < ItemsPerPage; slotIndex++)
             {
