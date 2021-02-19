@@ -14,12 +14,12 @@ namespace UnityCommon
         [Serializable]
         private class OnPageChangedEvent : UnityEvent<int> { }
 
+        public virtual IReadOnlyList<TSlot> Slots { get; private set; }
         public virtual int CurrentPage { get; private set; } = 1;
         public virtual int PageCount => Mathf.CeilToInt(SourceList.Count / (float)SlotsPerPage);
         public virtual int SlotsPerPage => slotsPerPage;
 
         protected abstract IList SourceList { get; }
-        protected virtual IReadOnlyList<TSlot> Slots { get; private set; }
         protected virtual TSlot SlotPrototype => slotPrototype;
         protected virtual GameObject PaginationPanel => paginationPanel;
         protected virtual Button PreviousPageButton => previousPageButton;
