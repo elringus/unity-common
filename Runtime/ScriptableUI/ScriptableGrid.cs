@@ -1,115 +1,133 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace UnityCommon
 {
     [RequireComponent(typeof(GridLayoutGroup))]
-    public abstract class ScriptableGrid<TSlot> : ScriptableUIComponent<GridLayoutGroup> where TSlot : ScriptableGridSlot
+    public abstract class ScriptableGrid<TSlot> : ScriptableUIComponent<GridLayoutGroup>
+        where TSlot : ScriptableGridSlot
     {
-        public virtual TSlot SlotPrototype => slotPrototype;
-        public virtual int SlotCount => SlotsMap.Count;
-        public virtual int PageCount => Mathf.CeilToInt(transform.childCount / (float)slotsPerPage);
+        [Serializable]
+        private class OnPageChangedEvent : UnityEvent<int> { }
 
-        protected virtual Dictionary<string, TSlot> SlotsMap { get; } = new Dictionary<string, TSlot>();
-        protected virtual int CurrentPage { get; private set; } = 1;
+        public virtual int CurrentPage { get; private set; } = 1;
+        public virtual int PageCount => Mathf.CeilToInt(SourceList.Count / (float)SlotsPerPage);
+        public virtual int SlotsPerPage => slotsPerPage;
 
+        protected abstract IList SourceList { get; }
+        protected virtual IReadOnlyList<TSlot> Slots { get; private set; }
+        protected virtual TSlot SlotPrototype => slotPrototype;
+        protected virtual GameObject PaginationPanel => paginationPanel;
+        protected virtual Button PreviousPageButton => previousPageButton;
+        protected virtual Button NextPageButton => nextPageButton;
+
+        [Tooltip("Prefab representing grid slot.")]
         [SerializeField] private TSlot slotPrototype = null;
-
-        [Header("Pagination")]
+        [Tooltip("How many slots should be visible per page."), Range(1, 99)]
         [SerializeField] private int slotsPerPage = 9;
+        [Tooltip("Container for the page number controls (optional). Will be disabled when grid has only one page.")]
         [SerializeField] private GameObject paginationPanel = null;
-        [SerializeField] private Text pageNumberText = null;
-        [SerializeField] private ScriptableButton previousPageButton = null;
-        [SerializeField] private ScriptableButton nextPageButton = null;
+        [Tooltip("Button inside pagination panel to select next grid page.")]
+        [SerializeField] private Button previousPageButton = null;
+        [Tooltip("Button inside pagination panel to select previous grid page.")]
+        [SerializeField] private Button nextPageButton = null;
+        [Tooltip("Event invoked when grid page number changes.")]
+        [SerializeField] private OnPageChangedEvent onPageChanged = default;
 
-        public virtual void AddSlot (TSlot slot)
+        /// <summary>
+        /// Attempts to select grid page with the specified number (starting with 1).
+        /// </summary>
+        public virtual void SelectPage (int pageNumber)
         {
-            if (SlotExists(slot.Id)) return;
-
-            slot.RectTransform.SetParent(transform, false);
-            SlotsMap.Add(slot.Id, slot);
-
+            if (pageNumber == CurrentPage) return;
+            if (pageNumber < 1 || pageNumber > PageCount)
+                throw new ArgumentOutOfRangeException(nameof(pageNumber), $"Page number should be between 1 and {PageCount}.");
+            CurrentPage = pageNumber;
             Paginate();
+            onPageChanged?.Invoke(pageNumber);
         }
 
-        public virtual void RemoveSlot (string slotId)
+        /// <summary>
+        /// Attempts to select next grid page; no effect when last page is selected.
+        /// </summary>
+        public virtual void SelectNextPage ()
         {
-            if (!SlotExists(slotId)) return;
-
-            var slot = SlotsMap[slotId];
-            ObjectUtils.DestroyOrImmediate(slot.gameObject);
-            SlotsMap.Remove(slotId);
-
-            Paginate();
+            if (CurrentPage == PageCount) return;
+            SelectPage(CurrentPage + 1);
         }
 
-        public virtual void RemoveAllSlots ()
+        /// <summary>
+        /// Attempts to select previous grid page; no effect when first page is selected.
+        /// </summary>
+        public virtual void SelectPreviousPage ()
         {
-            var slotIds = SlotsMap.Values.Select(slot => slot.Id).ToList();
-            foreach (var slotId in slotIds)
-                RemoveSlot(slotId);
+            if (CurrentPage == 1) return;
+            SelectPage(CurrentPage - 1);
         }
-
-        public virtual TSlot GetSlot (string slotId) => SlotsMap.TryGetValue(slotId, out var slot) ? slot : null;
-
-        public virtual List<TSlot> GetAllSlots () => SlotsMap.Values.ToList();
-
-        public virtual bool SlotExists (string slotId) => SlotsMap.ContainsKey(slotId);
-
-        public virtual TSlot FindSlot (Predicate<TSlot> predicate) => SlotsMap.Values.FirstOrDefault(predicate.Invoke);
 
         protected override void Awake ()
         {
             base.Awake();
+            this.AssertRequiredObjects(SlotPrototype);
 
-            this.AssertRequiredObjects(slotPrototype, paginationPanel, pageNumberText, previousPageButton, nextPageButton);
-
-            pageNumberText.text = "1";
-            previousPageButton.OnButtonClicked += SelectPreviousPage;
-            nextPageButton.OnButtonClicked += SelectNextPage;
-
+            Slots = PopulateGrid();
+            FocusOnNavigation = Slots[Slots.Count - 1].gameObject;
+            if (PreviousPageButton)
+                PreviousPageButton.onClick.AddListener(SelectPreviousPage);
+            if (NextPageButton)
+                NextPageButton.onClick.AddListener(SelectNextPage);
             Paginate();
         }
+
+        protected virtual TSlot[] PopulateGrid ()
+        {
+            var slots = new TSlot[SlotsPerPage];
+            for (int i = 0; i < SlotsPerPage; i++)
+            {
+                slots[i] = InstantiateSlot();
+                slots[i].RectTransform.SetParent(transform, false);
+            }
+            return slots;
+        }
+
+        /// <summary>
+        /// Creates a new instance of the slot prototype.
+        /// Invoked to populate the grid on initialization.
+        /// </summary>
+        protected abstract TSlot InstantiateSlot ();
+
+        /// <summary>
+        /// Binds the slot to the specified <see cref="SourceList"/> index.
+        /// Invoked on pagination to re-use instantiated slot objects.
+        /// </summary>
+        protected abstract void BindSlot (TSlot slot, int sourceIndex);
 
         protected virtual void Paginate ()
         {
-            if (PageCount < 2) { paginationPanel.SetActive(false); return; }
-
-            paginationPanel.SetActive(true);
-
-            var endIndex = CurrentPage * slotsPerPage;
-            var startIndex = endIndex - slotsPerPage + 1;
-            foreach (var slot in SlotsMap.Values)
+            if (PageCount < 2)
             {
-                var isActive = slot.NumberInGrid.IsWithin(startIndex, endIndex);
-                slot.gameObject.SetActive(isActive);
+                if (PaginationPanel)
+                    PaginationPanel.SetActive(false);
+                return;
             }
 
-            previousPageButton.SetInteractable(CurrentPage > 1);
-            nextPageButton.SetInteractable(CurrentPage < PageCount);
+            if (PaginationPanel)
+                PaginationPanel.SetActive(true);
 
-            FocusOnNavigation = SlotsMap.Values.FirstOrDefault(s => s.gameObject.activeSelf)?.gameObject;
-        }
+            for (int slotIndex = 0; slotIndex < SlotsPerPage; slotIndex++)
+            {
+                var sourceIndex = (CurrentPage - 1) * SlotsPerPage + slotIndex;
+                BindSlot(Slots[slotIndex], sourceIndex);
+            }
 
-        protected virtual void SelectPreviousPage ()
-        {
-            if (CurrentPage == 1) return;
-
-            CurrentPage--;
-            pageNumberText.text = CurrentPage.ToString();
-            Paginate();
-        }
-
-        protected virtual void SelectNextPage ()
-        {
-            if (CurrentPage == PageCount) return;
-
-            CurrentPage++;
-            pageNumberText.text = CurrentPage.ToString();
-            Paginate();
+            if (PreviousPageButton)
+                PreviousPageButton.interactable = CurrentPage > 1;
+            if (NextPageButton)
+                NextPageButton.interactable = CurrentPage < PageCount;
         }
     }
 }
