@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -14,12 +13,27 @@ namespace UnityCommon
         [Serializable]
         private class OnPageChangedEvent : UnityEvent<int> { }
 
-        public virtual IReadOnlyList<TSlot> Slots { get; private set; }
+        /// <summary>
+        /// Total items contained in the grid.
+        /// </summary>
+        public virtual int ItemsCount { get; private set; }
+        /// <summary>
+        /// Items displayed per page.
+        /// </summary>
+        public virtual int ItemsPerPage => itemsPerPage;
+        /// <summary>
+        /// Currently selected page number (starts from 1).
+        /// </summary>
         public virtual int CurrentPage { get; private set; } = 1;
-        public virtual int PageCount => Mathf.CeilToInt(SourceList.Count / (float)SlotsPerPage);
-        public virtual int SlotsPerPage => slotsPerPage;
+        /// <summary>
+        /// Total number of pages.
+        /// </summary>
+        public virtual int PageCount => Mathf.CeilToInt(ItemsCount / (float)ItemsPerPage);
+        /// <summary>
+        /// Slots instantiated under the grid representing currently displayed items.
+        /// </summary>
+        public virtual IReadOnlyList<TSlot> Slots { get; private set; }
 
-        protected abstract IList SourceList { get; }
         protected virtual TSlot SlotPrototype => slotPrototype;
         protected virtual GameObject PaginationPanel => paginationPanel;
         protected virtual Button PreviousPageButton => previousPageButton;
@@ -28,7 +42,7 @@ namespace UnityCommon
         [Tooltip("Prefab representing grid slot.")]
         [SerializeField] private TSlot slotPrototype = null;
         [Tooltip("How many slots should be visible per page."), Range(1, 99)]
-        [SerializeField] private int slotsPerPage = 9;
+        [SerializeField] private int itemsPerPage = 9;
         [Tooltip("Container for the page number controls (optional). Will be disabled when grid has only one page.")]
         [SerializeField] private GameObject paginationPanel = null;
         [Tooltip("Button inside pagination panel to select next grid page.")]
@@ -38,8 +52,9 @@ namespace UnityCommon
         [Tooltip("Event invoked when grid page number changes.")]
         [SerializeField] private OnPageChangedEvent onPageChanged = default;
 
-        public virtual void Initialize ()
+        public virtual void Initialize (int itemsCount)
         {
+            ItemsCount = itemsCount;
             Slots = PopulateGrid();
             FocusOnNavigation = Slots[Slots.Count - 1].gameObject;
             Paginate();
@@ -104,8 +119,8 @@ namespace UnityCommon
 
         protected virtual TSlot[] PopulateGrid ()
         {
-            var slots = new TSlot[SlotsPerPage];
-            for (int i = 0; i < SlotsPerPage; i++)
+            var slots = new TSlot[ItemsPerPage];
+            for (int i = 0; i < ItemsPerPage; i++)
             {
                 slots[i] = InstantiateSlot();
                 slots[i].RectTransform.SetParent(transform, false);
@@ -120,10 +135,10 @@ namespace UnityCommon
         protected abstract TSlot InstantiateSlot ();
 
         /// <summary>
-        /// Binds the slot to the specified <see cref="SourceList"/> index.
+        /// Binds the slot to the specified item index.
         /// Invoked on pagination to re-use instantiated slot objects.
         /// </summary>
-        protected abstract void BindSlot (TSlot slot, int sourceIndex);
+        protected abstract void BindSlot (TSlot slot, int itemIndex);
 
         protected virtual void Paginate ()
         {
@@ -139,9 +154,9 @@ namespace UnityCommon
             if (PaginationPanel)
                 PaginationPanel.SetActive(true);
 
-            for (int slotIndex = 0; slotIndex < SlotsPerPage; slotIndex++)
+            for (int slotIndex = 0; slotIndex < ItemsPerPage; slotIndex++)
             {
-                var sourceIndex = (CurrentPage - 1) * SlotsPerPage + slotIndex;
+                var sourceIndex = (CurrentPage - 1) * ItemsPerPage + slotIndex;
                 BindSlot(Slots[slotIndex], sourceIndex);
             }
 
