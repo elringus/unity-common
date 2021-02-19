@@ -28,7 +28,7 @@ namespace UnityCommon
         /// <summary>
         /// Total number of pages.
         /// </summary>
-        public virtual int PageCount => Mathf.CeilToInt(ItemsCount / (float)ItemsPerPage);
+        public virtual int PageCount => Mathf.Max(Mathf.CeilToInt(ItemsCount / (float)ItemsPerPage), 1);
         /// <summary>
         /// Slots instantiated under the grid representing currently displayed items.
         /// </summary>
