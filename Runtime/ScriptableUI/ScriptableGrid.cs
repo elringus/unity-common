@@ -38,6 +38,13 @@ namespace UnityCommon
         [Tooltip("Event invoked when grid page number changes.")]
         [SerializeField] private OnPageChangedEvent onPageChanged = default;
 
+        public virtual void Initialize ()
+        {
+            Slots = PopulateGrid();
+            FocusOnNavigation = Slots[Slots.Count - 1].gameObject;
+            Paginate();
+        }
+
         /// <summary>
         /// Attempts to select grid page with the specified number (starting with 1).
         /// </summary>
@@ -73,14 +80,26 @@ namespace UnityCommon
         {
             base.Awake();
             this.AssertRequiredObjects(SlotPrototype);
+        }
 
-            Slots = PopulateGrid();
-            FocusOnNavigation = Slots[Slots.Count - 1].gameObject;
+        protected override void OnEnable ()
+        {
+            base.OnEnable();
+
             if (PreviousPageButton)
                 PreviousPageButton.onClick.AddListener(SelectPreviousPage);
             if (NextPageButton)
                 NextPageButton.onClick.AddListener(SelectNextPage);
-            Paginate();
+        }
+
+        protected override void OnDisable ()
+        {
+            base.OnDisable();
+
+            if (PreviousPageButton)
+                PreviousPageButton.onClick.RemoveListener(SelectPreviousPage);
+            if (NextPageButton)
+                NextPageButton.onClick.RemoveListener(SelectNextPage);
         }
 
         protected virtual TSlot[] PopulateGrid ()
@@ -108,6 +127,8 @@ namespace UnityCommon
 
         protected virtual void Paginate ()
         {
+            if (Slots is null) throw new Exception("The grid is not initialized.");
+
             if (PageCount < 2)
             {
                 if (PaginationPanel)
