@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace UnityCommon
 {
     [Serializable]
-    public class OnGridPageChangedEvent : UnityEvent<int> { }
+    public class OnGridPageChangedEvent : UnityEvent<string> { }
 
     [RequireComponent(typeof(GridLayoutGroup))]
     public abstract class ScriptableGrid<TSlot> : ScriptableUIComponent<GridLayoutGroup>
@@ -70,7 +70,7 @@ namespace UnityCommon
                 throw new ArgumentOutOfRangeException(nameof(pageNumber), $"Page number should be between 1 and {PageCount}.");
             CurrentPage = pageNumber;
             Paginate();
-            onPageChanged?.Invoke(pageNumber);
+            onPageChanged?.Invoke(pageNumber.ToString());
         }
 
         /// <summary>
