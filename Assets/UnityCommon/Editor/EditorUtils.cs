@@ -334,6 +334,39 @@ namespace UnityCommon
             EditorGUI.showMixedValue = false;
         }
 
+        public static void FolderField (SerializedProperty property, string title = default, string defaultPath = default)
+        {
+            if (title is null) title = property.displayName;
+            if (defaultPath is null) defaultPath = Application.dataPath;
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.PropertyField(property);
+            if (GUILayout.Button("Select", EditorStyles.miniButton, GUILayout.Width(65)))
+                property.stringValue = EditorUtility.OpenFolderPanel(title, defaultPath, "");
+            EditorGUILayout.EndHorizontal();
+        }
+
+        public static void FileField (SerializedProperty property, string extension, string title = default, string defaultPath = default)
+        {
+            if (title is null) title = property.displayName;
+            if (defaultPath is null) defaultPath = Application.dataPath;
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.PropertyField(property);
+            if (GUILayout.Button("Select", EditorStyles.miniButton, GUILayout.Width(65)))
+                property.stringValue = EditorUtility.OpenFilePanel(title, defaultPath, extension);
+            EditorGUILayout.EndHorizontal();
+        }
+
+        public static void FileField (SerializedProperty property, string[] filters, string title = default, string defaultPath = default)
+        {
+            if (title is null) title = property.displayName;
+            if (defaultPath is null) defaultPath = Application.dataPath;
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.PropertyField(property);
+            if (GUILayout.Button("Select", EditorStyles.miniButton, GUILayout.Width(65)))
+                property.stringValue = EditorUtility.OpenFilePanelWithFilters(title, defaultPath, filters);
+            EditorGUILayout.EndHorizontal();
+        }
+
         /// <summary>
         /// Creates a new folder in the project's `Assets` directory. 
         /// Path should be relative to the project (starting with `Assets/`).
@@ -341,14 +374,14 @@ namespace UnityCommon
         public static void CreateFolderAsset (string assetPath)
         {
             EnsureFolderIsCreatedRecursively(assetPath);
-        }
 
-        private static void EnsureFolderIsCreatedRecursively (string targetFolder)
-        {
-            if (!AssetDatabase.IsValidFolder(targetFolder))
+            void EnsureFolderIsCreatedRecursively (string targetFolder)
             {
-                EnsureFolderIsCreatedRecursively(Path.GetDirectoryName(targetFolder));
-                AssetDatabase.CreateFolder(Path.GetDirectoryName(targetFolder), Path.GetFileName(targetFolder));
+                if (!AssetDatabase.IsValidFolder(targetFolder))
+                {
+                    EnsureFolderIsCreatedRecursively(Path.GetDirectoryName(targetFolder));
+                    AssetDatabase.CreateFolder(Path.GetDirectoryName(targetFolder), Path.GetFileName(targetFolder));
+                }
             }
         }
     }
