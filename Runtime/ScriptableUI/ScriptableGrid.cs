@@ -52,10 +52,15 @@ namespace UnityCommon
         [Tooltip("Event invoked when grid page number changes.")]
         [SerializeField] private OnGridPageChangedEvent onPageChanged = default;
 
+        /// <summary>
+        /// Instantiates displayed items (slots) and makes the grid
+        /// ready for interaction.
+        /// </summary>
+        /// <param name="itemsCount">Total items contained in the grid.</param>
         public virtual void Initialize (int itemsCount)
         {
             ItemsCount = itemsCount;
-            Slots = PopulateGrid();
+            Slots = CreateSlots();
             FocusOnNavigation = Slots[Slots.Count - 1].gameObject;
             SelectPage(1);
             if (PaginationPanel)
@@ -119,22 +124,10 @@ namespace UnityCommon
                 NextPageButton.onClick.RemoveListener(SelectNextPage);
         }
 
-        protected virtual TSlot[] PopulateGrid ()
-        {
-            var slots = new TSlot[ItemsPerPage];
-            for (int i = 0; i < ItemsPerPage; i++)
-            {
-                slots[i] = InstantiateSlot();
-                slots[i].RectTransform.SetParent(transform, false);
-            }
-            return slots;
-        }
-
         /// <summary>
-        /// Creates a new instance of the slot prototype.
-        /// Invoked to populate the grid on initialization.
+        /// Makes the slot ready for usage. Invoked on grid initialization.
         /// </summary>
-        protected abstract TSlot InstantiateSlot ();
+        protected virtual void InitializeSlot (TSlot slot) { }
 
         /// <summary>
         /// Binds the slot to the specified item index.
@@ -142,20 +135,44 @@ namespace UnityCommon
         /// </summary>
         protected abstract void BindSlot (TSlot slot, int itemIndex);
 
+        /// <summary>
+        /// Updates displayed items and pagination controls
+        /// in correspondence with the currently selected page.
+        /// </summary>
         protected virtual void Paginate ()
         {
             if (Slots is null) throw new Exception("The grid is not initialized.");
-
-            for (int slotIndex = 0; slotIndex < ItemsPerPage; slotIndex++)
-            {
-                var itemIndex = (CurrentPage - 1) * ItemsPerPage + slotIndex;
-                BindSlot(Slots[slotIndex], itemIndex);
-            }
-
+            for (int i = 0; i < Slots.Count; i++)
+                PaginateSlot(i);
             if (PreviousPageButton)
                 PreviousPageButton.interactable = CurrentPage > 1;
             if (NextPageButton)
                 NextPageButton.interactable = CurrentPage < PageCount;
+        }
+
+        private void PaginateSlot (int slotIndex)
+        {
+            var itemIndex = (CurrentPage - 1) * ItemsPerPage + slotIndex;
+            var slot = Slots[slotIndex];
+            var inBounds = itemIndex < ItemsCount;
+            if (inBounds != slot.gameObject.activeSelf)
+                slot.gameObject.SetActive(inBounds);
+            if (inBounds) BindSlot(slot, itemIndex);
+        }
+
+        private TSlot[] CreateSlots ()
+        {
+            var slots = new TSlot[ItemsPerPage];
+            for (int i = 0; i < ItemsPerPage; i++)
+                slots[i] = CreateSlot();
+            return slots;
+        }
+
+        private TSlot CreateSlot ()
+        {
+            var slot = Instantiate<TSlot>(SlotPrototype, transform, false);
+            InitializeSlot(slot);
+            return slot;
         }
     }
 }
