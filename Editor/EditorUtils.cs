@@ -361,9 +361,9 @@ namespace UnityCommon
             EditorGUILayout.PropertyField(property);
             if (GUILayout.Button("Select", EditorStyles.miniButton, GUILayout.Width(65)))
             {
-                var selectedPath = openPanel(title, defaultPath);
-                if (local) selectedPath = PathUtils.AbsoluteToAssetPath(selectedPath);
-                property.stringValue = selectedPath;
+                var path = openPanel(title, defaultPath);
+                if (local) path = PathUtils.AbsoluteToAssetPath(path);
+                property.stringValue = path;
             }
             EditorGUILayout.EndHorizontal();
         }

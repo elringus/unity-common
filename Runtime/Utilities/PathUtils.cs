@@ -6,12 +6,13 @@ namespace UnityCommon
     public static class PathUtils
     {
         /// <summary>
-        /// Given an absolute path (eg, `C:\UnityProject\Assets\FooAsset.asset`),
+        /// Given an absolute path inside current Unity project (eg, `C:\UnityProject\Assets\FooAsset.asset`),
         /// transforms it to a relative project asset path (eg, `Assets/FooAsset.asset`).
         /// </summary>
         public static string AbsoluteToAssetPath (string absolutePath)
         {
             absolutePath = absolutePath.Replace("\\", "/");
+            if (!absolutePath.StartsWithFast(Application.dataPath)) return null;
             return "Assets" + absolutePath.Replace(Application.dataPath, string.Empty);
         }
 
@@ -20,7 +21,7 @@ namespace UnityCommon
         /// </summary>
         public static string Combine (params string[] paths)
         {
-            return Path.Combine(paths)?.Replace("\\", "/");
+            return Path.Combine(paths).Replace("\\", "/");
         }
     }
 }
