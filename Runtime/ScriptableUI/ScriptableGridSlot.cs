@@ -9,13 +9,13 @@ namespace UnityCommon
     public class ScriptableGridSlot : ScriptableButton, IPointerEnterHandler, IPointerExitHandler, ISelectHandler, IDeselectHandler
     {
         [Serializable]
-        private class OnClickedEvent : UnityEvent<string> { }
+        private class OnSlotClickedEvent : UnityEvent<string> { }
 
-        public virtual string Id { get; set; }
+        public virtual string Id { get; }
 
         [Tooltip("Opacity to fade to when the slot is hovered or selected; set to zero to disable the fade behaviour.")]
         [SerializeField] private float hoverOpacityFade = .25f;
-        [SerializeField] private OnClickedEvent onClicked = default;
+        [SerializeField] private OnSlotClickedEvent onSlotClicked = default;
 
         private readonly Tweener<FloatTween> fadeTweener = new Tweener<FloatTween>();
 
@@ -39,7 +39,7 @@ namespace UnityCommon
         {
             base.OnButtonClick();
 
-            onClicked?.Invoke(Id);
+            onSlotClicked?.Invoke(Id);
         }
 
         protected virtual void FadeInSlot ()
