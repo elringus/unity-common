@@ -334,19 +334,19 @@ namespace UnityCommon
             EditorGUI.showMixedValue = false;
         }
 
-        public static void FolderField (SerializedProperty property, bool local = false,
+        public static void FolderField (SerializedProperty property, bool local = true,
             string title = default, string defaultPath = default)
         {
             PathField(property, (t, p) => EditorUtility.OpenFolderPanel(t, p, ""), local, title, defaultPath);
         }
 
-        public static void FileField (SerializedProperty property, string extension, bool local = false,
+        public static void FileField (SerializedProperty property, string extension, bool local = true,
             string title = default, string defaultPath = default)
         {
             PathField(property, (t, p) => EditorUtility.OpenFilePanel(t, p, extension), local, title, defaultPath);
         }
 
-        public static void FileField (SerializedProperty property, string[] filters, bool local = false,
+        public static void FileField (SerializedProperty property, string[] filters, bool local = true,
             string title = default, string defaultPath = default)
         {
             PathField(property, (t, p) => EditorUtility.OpenFilePanelWithFilters(t, p, filters), local, title, defaultPath);
@@ -362,7 +362,7 @@ namespace UnityCommon
             if (GUILayout.Button("Select", EditorStyles.miniButton, GUILayout.Width(65)))
             {
                 var selectedPath = openPanel(title, defaultPath);
-                if (local) selectedPath = selectedPath.GetAfterFirst(Application.dataPath);
+                if (local) selectedPath = PathUtils.AbsoluteToAssetPath(selectedPath);
                 property.stringValue = selectedPath;
             }
             EditorGUILayout.EndHorizontal();
