@@ -334,36 +334,37 @@ namespace UnityCommon
             EditorGUI.showMixedValue = false;
         }
 
-        public static void FolderField (SerializedProperty property, string title = default, string defaultPath = default)
+        public static void FolderField (SerializedProperty property, bool local = true,
+            string title = default, string defaultPath = default)
         {
-            if (title is null) title = property.displayName;
-            if (defaultPath is null) defaultPath = Application.dataPath;
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.PropertyField(property);
-            if (GUILayout.Button("Select", EditorStyles.miniButton, GUILayout.Width(65)))
-                property.stringValue = EditorUtility.OpenFolderPanel(title, defaultPath, "");
-            EditorGUILayout.EndHorizontal();
+            PathField(property, (t, p) => EditorUtility.OpenFolderPanel(t, p, ""), local, title, defaultPath);
         }
 
-        public static void FileField (SerializedProperty property, string extension, string title = default, string defaultPath = default)
+        public static void FileField (SerializedProperty property, string extension, bool local = true,
+            string title = default, string defaultPath = default)
         {
-            if (title is null) title = property.displayName;
-            if (defaultPath is null) defaultPath = Application.dataPath;
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.PropertyField(property);
-            if (GUILayout.Button("Select", EditorStyles.miniButton, GUILayout.Width(65)))
-                property.stringValue = EditorUtility.OpenFilePanel(title, defaultPath, extension);
-            EditorGUILayout.EndHorizontal();
+            PathField(property, (t, p) => EditorUtility.OpenFilePanel(t, p, extension), local, title, defaultPath);
         }
 
-        public static void FileField (SerializedProperty property, string[] filters, string title = default, string defaultPath = default)
+        public static void FileField (SerializedProperty property, string[] filters, bool local = true,
+            string title = default, string defaultPath = default)
+        {
+            PathField(property, (t, p) => EditorUtility.OpenFilePanelWithFilters(t, p, filters), local, title, defaultPath);
+        }
+
+        public static void PathField (SerializedProperty property, Func<string, string, string> openPanel,
+            bool local = false, string title = default, string defaultPath = default)
         {
             if (title is null) title = property.displayName;
             if (defaultPath is null) defaultPath = Application.dataPath;
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.PropertyField(property);
             if (GUILayout.Button("Select", EditorStyles.miniButton, GUILayout.Width(65)))
-                property.stringValue = EditorUtility.OpenFilePanelWithFilters(title, defaultPath, filters);
+            {
+                var path = openPanel(title, defaultPath);
+                if (local) path = PathUtils.AbsoluteToAssetPath(path);
+                property.stringValue = path;
+            }
             EditorGUILayout.EndHorizontal();
         }
 
