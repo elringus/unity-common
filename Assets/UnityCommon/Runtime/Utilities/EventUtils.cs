@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
 namespace UnityCommon
@@ -47,4 +48,16 @@ namespace UnityCommon
             action?.Invoke(arg0, arg1, arg2);
         }
     }
+
+    [Serializable]
+    public class StringUnityEvent : UnityEvent<string> { }
+
+    [Serializable]
+    public class FloatUnityEvent : UnityEvent<float> { }
+
+    [Serializable]
+    public class IntUnityEvent : UnityEvent<int> { }
+
+    [Serializable]
+    public class BoolUnityEvent : UnityEvent<bool> { }
 }
