@@ -19,6 +19,7 @@ namespace UnityCommon
         IReadOnlyCollection<Resource> IResourceProvider.LoadedResources => LoadedResources.Values;
 
         protected readonly Dictionary<string, Resource> LoadedResources = new Dictionary<string, Resource>();
+        protected readonly Dictionary<string, List<WeakReference>> Holders = new Dictionary<string, List<WeakReference>>();
         protected readonly Dictionary<string, List<Folder>> LocatedFolders = new Dictionary<string, List<Folder>>();
         protected readonly Dictionary<string, ResourceRunner> LoadRunners = new Dictionary<string, ResourceRunner>();
         protected readonly Dictionary<Tuple<string, Type>, ResourceRunner> LocateRunners = new Dictionary<Tuple<string, Type>, ResourceRunner>();
@@ -127,7 +128,7 @@ namespace UnityCommon
             if (!SupportsType<T>()) return null;
             if (path is null) path = string.Empty;
 
-            if (LocationsCache.Count > 0) 
+            if (LocationsCache.Count > 0)
                 return LocateCached<T>(path);
 
             var locateKey = new Tuple<string, Type>(path, typeof(T));
@@ -171,12 +172,34 @@ namespace UnityCommon
 
             RunFoldersLocator(locateRunner);
 
-            var locatedFolders  = await locateRunner;
+            var locatedFolders = await locateRunner;
             HandleFoldersLocated(locatedFolders, path);
             return locatedFolders;
         }
 
         public void LogMessage (string message) => OnMessage?.Invoke(message);
+
+        public void Hold (string path, object holder)
+        {
+            GetHoldersFor(path).Add(new WeakReference(holder));
+        }
+
+        public void Release (string path, object holder, bool unload = true)
+        {
+            var holders = GetHoldersFor(path);
+            Release(path, holders, holder, unload);
+        }
+
+        public void ReleaseAll (object holder, bool unload = true)
+        {
+            foreach (var kv in Holders)
+                if (IsHeldBy(kv.Value, holder))
+                    Release(kv.Key, kv.Value, holder, unload);
+        }
+
+        public bool IsHeldBy (string path, object holder) => IsHeldBy(GetHoldersFor(path), holder);
+
+        public int CountHolders (string path) => CountHolders(GetHoldersFor(path));
 
         protected abstract LoadResourceRunner<T> CreateLoadResourceRunner<T> (string path) where T : UnityEngine.Object;
         protected abstract LocateResourcesRunner<T> CreateLocateResourcesRunner<T> (string path) where T : UnityEngine.Object;
@@ -251,7 +274,7 @@ namespace UnityCommon
             else LoadProgress = Mathf.Min(1f / runnersCount, .999f);
             if (!Mathf.Approximately(prevProgress, LoadProgress)) OnLoadProgress?.Invoke(LoadProgress);
         }
-        
+
         protected virtual bool AreTypesCompatible (Type sourceType, Type targetType) => sourceType == targetType;
 
         protected virtual bool IsLocationCached<T> (string path)
@@ -264,7 +287,32 @@ namespace UnityCommon
         {
             var targetType = typeof(T);
             return LocationsCache.Where(r => AreTypesCompatible(r.Type, targetType))
-                                 .Select(r => r.Path).LocateResourcePathsAtFolder(path);
+                .Select(r => r.Path).LocateResourcePathsAtFolder(path);
+        }
+
+        private List<WeakReference> GetHoldersFor (string path)
+        {
+            if (Holders.TryGetValue(path, out var holders)) return holders;
+            holders = new List<WeakReference>();
+            Holders[path] = holders;
+            return holders;
+        }
+
+        private int CountHolders (List<WeakReference> holders)
+        {
+            return holders.Count(wr => wr.IsAlive);
+        }
+
+        private void Release (string path, List<WeakReference> holders, object holder, bool unload)
+        {
+            holders.RemoveAll(wr => !wr.IsAlive || wr.Target == holder);
+            if (unload && CountHolders(holders) == 0)
+                UnloadResource(path);
+        }
+
+        private bool IsHeldBy (List<WeakReference> holders, object holder)
+        {
+            return holders.Any(wr => wr.IsAlive && wr.Target == holder);
         }
     }
 }

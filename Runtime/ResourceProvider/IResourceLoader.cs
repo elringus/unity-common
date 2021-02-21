@@ -60,26 +60,26 @@ namespace UnityCommon
         /// </summary>
         void UnloadAll ();
         /// <summary>
-        /// Registers the provided object as a holder of a loaded resource with the specified path.
+        /// Registers the provided object as a holder of a resource with the specified path.
         /// The resource won't be unloaded by <see cref="Release"/> while it's held by at least one object.
         /// </summary>
         void Hold (string path, object holder);
         /// <summary>
-        /// Removes the provided object from the holders list of a loaded resource with the specified path.
+        /// Removes the provided object from the holders list of a resource with the specified path.
         /// Will (optionally) unload the resource after the release in case no other objects are holding it.
         /// </summary>
         void Release (string path, object holder, bool unload = true);
         /// <summary>
-        /// Removes the provided holder object from all the loaded resources.
+        /// Removes the provided holder object from all the resources managed this loader.
         /// Will (optionally) unload the affected resources after the release in case no other objects are holding them.
         /// </summary>
         void ReleaseAll (object holder, bool unload = true);
         /// <summary>
-        /// Checks whether a loaded resource with the provided path is being held by the object.
+        /// Checks whether a resource with the provided path is being held by the object.
         /// </summary>
         bool IsHeldBy (string path, object holder);
         /// <summary>
-        /// Returns number of objects currently holding a loaded resource with the specified path.
+        /// Returns number of objects currently holding a resource with the specified path.
         /// </summary>
         int CountHolders (string path);
     }

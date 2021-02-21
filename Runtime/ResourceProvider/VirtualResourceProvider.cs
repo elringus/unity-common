@@ -153,5 +153,30 @@ namespace UnityCommon
             if (!ResourceLoaded(path)) return null;
             return LoadResource<T>(path);
         }
+
+        public void Hold (string path, object holder)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Release (string path, object holder, bool unload = true)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ReleaseAll (object holder, bool unload = true)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool IsHeldBy (string path, object holder)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int CountHolders (string path)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
