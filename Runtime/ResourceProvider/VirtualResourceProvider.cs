@@ -25,9 +25,11 @@ namespace UnityCommon
 
         protected readonly Dictionary<string, Resource> Resources;
         protected readonly HashSet<string> FolderPaths;
+        protected readonly ResourcesHolder Holder;
 
         public VirtualResourceProvider ()
         {
+            Holder = new ResourcesHolder(UnloadResource);
             Resources = new Dictionary<string, Resource>();
             FolderPaths = new HashSet<string>();
         }
@@ -154,29 +156,10 @@ namespace UnityCommon
             return LoadResource<T>(path);
         }
 
-        public void Hold (string path, object holder)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Release (string path, object holder, bool unload = true)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void ReleaseAll (object holder, bool unload = true)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool IsHeldBy (string path, object holder)
-        {
-            throw new NotImplementedException();
-        }
-
-        public int CountHolders (string path)
-        {
-            throw new NotImplementedException();
-        }
+        public void Hold (string path, object holder) => Holder.Hold(path, holder);
+        public void Release (string path, object holder, bool unload = true) => Holder.Release(path, holder, unload);
+        public void ReleaseAll (object holder, bool unload = true) => Holder.ReleaseAll(holder, unload);
+        public bool IsHeldBy (string path, object holder) => Holder.IsHeldBy(path, holder);
+        public int CountHolders (string path) => Holder.CountHolders(path);
     }
 }
