@@ -25,9 +25,11 @@ namespace UnityCommon
 
         protected readonly Dictionary<string, Resource> Resources;
         protected readonly HashSet<string> FolderPaths;
+        protected readonly ResourcesHolder Holder;
 
         public VirtualResourceProvider ()
         {
+            Holder = new ResourcesHolder(UnloadResource);
             Resources = new Dictionary<string, Resource>();
             FolderPaths = new HashSet<string>();
         }
@@ -42,11 +44,13 @@ namespace UnityCommon
         public void RemoveResource (string path)
         {
             Resources.Remove(path);
+            Holder.ClearFor(path);
         }
 
         public void RemoveAllResources ()
         {
             Resources.Clear();
+            Holder.ClearAll();
         }
 
         public void AddFolder (string folderPath)
@@ -153,5 +157,11 @@ namespace UnityCommon
             if (!ResourceLoaded(path)) return null;
             return LoadResource<T>(path);
         }
+
+        public void Hold (string path, object holder) => Holder.Hold(path, holder);
+        public void Release (string path, object holder, bool unload = true) => Holder.Release(path, holder, unload);
+        public void ReleaseAll (object holder, bool unload = true) => Holder.ReleaseAll(holder, unload);
+        public bool IsHeldBy (string path, object holder) => Holder.IsHeldBy(path, holder);
+        public int CountHolders (string path) => Holder.CountHolders(path);
     }
 }

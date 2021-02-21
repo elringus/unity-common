@@ -87,5 +87,28 @@ namespace UnityCommon
         /// Attempts to retrieve a loaded (cached) resource with the provided path; returns null if the resource is not loaded.
         /// </summary>
         Resource<T> GetLoadedResourceOrNull<T> (string path) where T : UnityEngine.Object;
+        /// <summary>
+        /// Registers the provided object as a holder of a resource with the specified path.
+        /// The resource won't be unloaded by <see cref="Release"/> while it's held by at least one object.
+        /// </summary>
+        void Hold (string path, object holder);
+        /// <summary>
+        /// Removes the provided object from the holders list of a resource with the specified path.
+        /// Will (optionally) unload the resource after the release in case no other objects are holding it.
+        /// </summary>
+        void Release (string path, object holder, bool unload = true);
+        /// <summary>
+        /// Removes the provided holder object from all the resources managed this provider.
+        /// Will (optionally) unload the affected resources after the release in case no other objects are holding them.
+        /// </summary>
+        void ReleaseAll (object holder, bool unload = true);
+        /// <summary>
+        /// Checks whether a resource with the provided path is being held by the object.
+        /// </summary>
+        bool IsHeldBy (string path, object holder);
+        /// <summary>
+        /// Returns number of objects currently holding a resource with the specified path.
+        /// </summary>
+        int CountHolders (string path);
     }
 }
