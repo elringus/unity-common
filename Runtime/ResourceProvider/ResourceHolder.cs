@@ -32,6 +32,18 @@ namespace UnityCommon
                     Release(kv.Key, kv.Value, holder, unload);
         }
 
+        public void ClearFor (string path)
+        {
+            if (pathToHolders.TryGetValue(path, out var holders))
+                holders.Clear();
+        }
+
+        public void ClearAll ()
+        {
+            foreach (var holders in pathToHolders.Values)
+                holders.Clear();
+        }
+
         public bool IsHeldBy (string path, object holder) => IsHeldBy(GetHoldersFor(path), holder);
 
         public int CountHolders (string path) => CountHolders(GetHoldersFor(path));

@@ -81,6 +81,8 @@ namespace UnityCommon
 
         public virtual void UnloadResource (string path)
         {
+            Holder.ClearFor(path);
+            
             if (ResourceLoading(path))
                 CancelResourceLoading(path);
 
@@ -98,6 +100,7 @@ namespace UnityCommon
 
         public virtual void UnloadResources ()
         {
+            Holder.ClearAll();
             var loadedPaths = LoadedResources.Values.Select(r => r.Path).ToList();
             foreach (var path in loadedPaths)
                 UnloadResource(path);

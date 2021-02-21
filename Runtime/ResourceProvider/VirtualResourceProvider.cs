@@ -44,11 +44,13 @@ namespace UnityCommon
         public void RemoveResource (string path)
         {
             Resources.Remove(path);
+            Holder.ClearFor(path);
         }
 
         public void RemoveAllResources ()
         {
             Resources.Clear();
+            Holder.ClearAll();
         }
 
         public void AddFolder (string folderPath)
