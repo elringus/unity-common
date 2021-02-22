@@ -60,6 +60,28 @@ namespace UnityCommon
             return -1;
         }
 
+        public static int IndexOf<T> (this IList<T> list, Predicate<T> predicate)
+        {
+            var i = 0;
+            foreach (T item in list)
+            {
+                if (predicate(item)) return i;
+                i++;
+            }
+            return -1;
+        }
+
+        public static int IndexOf<T> (this IReadOnlyList<T> list, Predicate<T> predicate)
+        {
+            var i = 0;
+            foreach (T item in list)
+            {
+                if (predicate(item)) return i;
+                i++;
+            }
+            return -1;
+        }
+
         public static T Random<T> (this IList<T> list)
         {
             if (list == null || list.Count == 0) return default;
