@@ -1,25 +1,27 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UniRx.Async;
+using UnityEngine;
 
 namespace UnityCommon
 {
     /// <summary>
     /// Allows to load and unload <see cref="Resource{TResource}"/> objects via a prioritized <see cref="ProvisionSource"/> list.
     /// </summary>
-    public class ResourceLoader<TResource> : IResourceLoader<TResource> 
-        where TResource : UnityEngine.Object
+    public class ResourceLoader<TResource> : IResourceLoader<TResource>
+        where TResource : Object
     {
         protected class LoadedResource
         {
             public readonly Resource<TResource> Resource;
             public readonly ProvisionSource ProvisionSource;
             public readonly string LocalPath;
+            public Object Object => Resource.Object;
             public string FullPath => Resource.Path;
             public bool Valid => Resource.Valid;
+            public int HoldersCount => holders.Count;
 
-            private readonly List<WeakReference> holders = new List<WeakReference>();
+            private readonly HashSet<object> holders = new HashSet<object>();
 
             public LoadedResource (Resource<TResource> resource, ProvisionSource provisionSource)
             {
@@ -28,15 +30,12 @@ namespace UnityCommon
                 LocalPath = provisionSource.BuildLocalPath(resource.Path);
             }
 
-            public void AddHolder (object holder) => holders.Add(new WeakReference(holder));
-            public void RemoveHolder (object holder) => holders.RemoveAll(wr => !wr.IsAlive || wr.Target == holder);
-            public bool IsHeldBy (object holder) => holders.Any(wr => wr.IsAlive && wr.Target == holder);
-            public int CountHolders () => holders.Count(wr => wr.IsAlive);
+            public void AddHolder (object holder) => holders.Add(holder);
+            public void RemoveHolder (object holder) => holders.Remove(holder);
+            public bool IsHeldBy (object holder) => holders.Contains(holder);
+            public void AddHoldersFrom (LoadedResource resource) => holders.UnionWith(resource.holders);
         }
 
-        public event Action<string> OnResourceLoaded;
-        public event Action<string> OnResourceUnloaded;
-        
         /// <summary>
         /// Whether any of the providers used by this loader is currently loading anything.
         /// </summary>
@@ -50,16 +49,19 @@ namespace UnityCommon
         /// Resources loaded by the loader.
         /// </summary>
         protected readonly List<LoadedResource> LoadedResources = new List<LoadedResource>();
+        protected readonly IHoldersTracker HoldersTracker;
 
-        public ResourceLoader (IList<ProvisionSource> provisionSources)
-        { 
+        public ResourceLoader (IList<ProvisionSource> provisionSources, IHoldersTracker holdersTracker)
+        {
             ProvisionSources.AddRange(provisionSources);
+            HoldersTracker = holdersTracker;
         }
-        
-        public ResourceLoader (IList<IResourceProvider> providersList, string pathPrefix = null)
-        { 
+
+        public ResourceLoader (IList<IResourceProvider> providersList, IHoldersTracker holdersTracker, string pathPrefix = null)
+        {
             foreach (var provider in providersList)
                 ProvisionSources.Add(new ProvisionSource(provider, pathPrefix));
+            HoldersTracker = holdersTracker;
         }
 
         public string GetLocalPath (Resource resource)
@@ -71,20 +73,26 @@ namespace UnityCommon
         public virtual void Hold (string path, object holder)
         {
             var resource = GetLoadedResource(path);
-            resource?.AddHolder(holder);
+            if (resource is null || !resource.Valid) return;
+
+            resource.AddHolder(holder);
+
+            if (resource.HoldersCount == 1)
+                HoldersTracker.Hold(resource.Object, this);
         }
 
         public virtual void Release (string path, object holder, bool unload = true)
         {
             var resource = GetLoadedResource(path);
-            if (resource is null) return;
+            if (resource is null || !resource.Valid) return;
 
             resource.RemoveHolder(holder);
-            
-            if (unload && resource.CountHolders() == 0)
-                Unload(path);
+
+            if (resource.HoldersCount == 0)
+                if (HoldersTracker.Release(resource.Object, this) == 0 && unload)
+                    Unload(path);
         }
-        
+
         public virtual void ReleaseAll (object holder, bool unload = true)
         {
             var pathsToRelease = LoadedResources
@@ -96,13 +104,12 @@ namespace UnityCommon
 
         public virtual bool IsHeldBy (string path, object holder)
         {
-            var resource = GetLoadedResource(path);
-            return resource?.IsHeldBy(holder) ?? false;
+            return GetLoadedResource(path)?.IsHeldBy(holder) ?? false;
         }
 
         public int CountHolders (string path)
         {
-            return GetLoadedResource(path)?.CountHolders() ?? 0;
+            return GetLoadedResource(path)?.HoldersCount ?? 0;
         }
 
         public virtual bool IsLoaded (string path)
@@ -124,13 +131,12 @@ namespace UnityCommon
             {
                 var fullPath = source.BuildFullPath(path);
                 if (!await source.Provider.ResourceExistsAsync<TResource>(fullPath)) continue;
-                
+
                 var resource = await source.Provider.LoadResourceAsync<TResource>(fullPath);
                 LoadedResources.Add(new LoadedResource(resource, source));
-                OnResourceLoaded?.Invoke(path);
                 return resource;
             }
-            
+
             return Resource<TResource>.Invalid;
         }
 
@@ -140,7 +146,7 @@ namespace UnityCommon
             var addedPaths = new HashSet<string>();
             var loadTasks = new List<UniTask<Resource<TResource>>>();
             var loadData = new Dictionary<string, (ProvisionSource, string)>();
-            
+
             foreach (var source in ProvisionSources)
             {
                 var fullPath = source.BuildFullPath(path);
@@ -148,16 +154,16 @@ namespace UnityCommon
                 foreach (var locatedResourcePath in locatedResourcePaths)
                 {
                     var localPath = source.BuildLocalPath(locatedResourcePath);
-                    
+
                     if (addedPaths.Contains(localPath)) continue;
                     else addedPaths.Add(localPath);
-                    
+
                     if (IsLoaded(localPath))
                     {
                         result.Add(GetLoadedOrNull(localPath));
                         continue;
                     }
-                    
+
                     loadTasks.Add(source.Provider.LoadResourceAsync<TResource>(locatedResourcePath));
                     loadData[locatedResourcePath] = (source, localPath);
                 }
@@ -169,7 +175,6 @@ namespace UnityCommon
             {
                 var (source, localPath) = loadData[resource.Path];
                 LoadedResources.Add(new LoadedResource(resource, source));
-                OnResourceLoaded?.Invoke(localPath);
                 result.Add(resource);
             }
 
@@ -179,12 +184,12 @@ namespace UnityCommon
         public virtual IReadOnlyCollection<Resource<TResource>> GetAllLoaded ()
         {
             return LoadedResources.Where(r => r.Valid).Select(r => r.Resource).ToArray();
-        } 
+        }
 
         public virtual async UniTask<IReadOnlyCollection<string>> LocateAsync (string path = null)
         {
             var tasks = new List<UniTask<IEnumerable<string>>>();
-            
+
             foreach (var source in ProvisionSources)
             {
                 var fullPath = source.BuildFullPath(path);
@@ -199,13 +204,13 @@ namespace UnityCommon
 
         public virtual async UniTask<bool> ExistsAsync (string path)
         {
-            if (IsLoaded(path)) 
+            if (IsLoaded(path))
                 return true;
 
             foreach (var source in ProvisionSources)
             {
                 var fullPath = source.BuildFullPath(path);
-                if (await source.Provider.ResourceExistsAsync<TResource>(fullPath)) 
+                if (await source.Provider.ResourceExistsAsync<TResource>(fullPath))
                     return true;
             }
 
@@ -218,20 +223,15 @@ namespace UnityCommon
             resource?.ProvisionSource.Provider.UnloadResource(resource.FullPath);
 
             LoadedResources.RemoveAll(r => !r.Valid || r.LocalPath.EqualsFast(path));
-            
-            OnResourceUnloaded?.Invoke(path);
         }
 
         public virtual void UnloadAll ()
         {
             foreach (var resource in LoadedResources)
-            {
                 resource.ProvisionSource.Provider.UnloadResource(resource.FullPath);
-                OnResourceUnloaded?.Invoke(resource.LocalPath);
-            }
             LoadedResources.Clear();
         }
-        
+
         /// <summary>
         /// Given resource with the provided local is loaded, returns full path of the resource, null otherwise.
         /// </summary>
@@ -239,7 +239,7 @@ namespace UnityCommon
         {
             return GetLoadedResource(localPath)?.FullPath;
         }
-        
+
         /// <summary>
         /// Given resource with the provided full path is loaded, returns local path of the resource, null otherwise.
         /// </summary>

@@ -248,8 +248,7 @@ public class TestResourceProvider : MonoBehaviour
 
     private async UniTask TestNullPropagation ()
     {
-        var loader = new ResourceLoader<Texture2D>(new List<IResourceProvider> { provider }, "Sprites");
-        var image = await loader.LoadAsync("Image09");
+        var image = await provider.LoadResourceAsync<Texture2D>("Sprites/Image09");
         print(image);
         print("Propagated!");
     }
