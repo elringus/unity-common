@@ -21,13 +21,14 @@ namespace UnityCommon
             public bool Valid => Resource.Valid;
             public int HoldersCount => holders.Count;
 
-            private readonly HashSet<object> holders = new HashSet<object>();
+            private readonly HashSet<object> holders;
 
-            public LoadedResource (Resource<TResource> resource, ProvisionSource provisionSource)
+            public LoadedResource (Resource<TResource> resource, ProvisionSource provisionSource, HashSet<object> holders = null)
             {
                 Resource = resource;
                 ProvisionSource = provisionSource;
                 LocalPath = provisionSource.BuildLocalPath(resource.Path);
+                this.holders = holders ?? new HashSet<object>();
             }
 
             public void AddHolder (object holder) => holders.Add(holder);
