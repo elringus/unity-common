@@ -9,7 +9,7 @@ namespace UnityCommon
     {
         /// <summary>
         /// Adds provided object as a holder of the Unity object.
-        /// The Unity object won't be unloaded (destroyed), as long at it has at least one holder.
+        /// The Unity object won't be unloaded (destroyed), as long as it has at least one holder.
         /// </summary>
         /// <param name="obj">The Unity object to hold.</param>
         /// <param name="holder">Holder of the Unity object.</param>
