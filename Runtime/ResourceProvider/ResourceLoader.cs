@@ -1,7 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UniRx.Async;
+using UnityEngine;
 
 namespace UnityCommon
 {
@@ -9,14 +9,14 @@ namespace UnityCommon
     /// Allows to load and unload <see cref="Resource{TResource}"/> objects via a prioritized <see cref="ProvisionSource"/> list.
     /// </summary>
     public class ResourceLoader<TResource> : IResourceLoader<TResource>
-        where TResource : UnityEngine.Object
+        where TResource : Object
     {
         protected class LoadedResource
         {
             public readonly Resource<TResource> Resource;
             public readonly ProvisionSource ProvisionSource;
             public readonly string LocalPath;
-            public UnityEngine.Object Object => Resource.Object;
+            public Object Object => Resource.Object;
             public string FullPath => Resource.Path;
             public bool Valid => Resource.Valid;
             public int HoldersCount => holders.Count;
@@ -34,9 +34,6 @@ namespace UnityCommon
             public void RemoveHolder (object holder) => holders.Remove(holder);
             public bool IsHeldBy (object holder) => holders.Contains(holder);
         }
-
-        public event Action<string> OnResourceLoaded;
-        public event Action<string> OnResourceUnloaded;
 
         /// <summary>
         /// Whether any of the providers used by this loader is currently loading anything.
@@ -136,7 +133,6 @@ namespace UnityCommon
 
                 var resource = await source.Provider.LoadResourceAsync<TResource>(fullPath);
                 LoadedResources.Add(new LoadedResource(resource, source));
-                OnResourceLoaded?.Invoke(path);
                 return resource;
             }
 
@@ -178,7 +174,6 @@ namespace UnityCommon
             {
                 var (source, localPath) = loadData[resource.Path];
                 LoadedResources.Add(new LoadedResource(resource, source));
-                OnResourceLoaded?.Invoke(localPath);
                 result.Add(resource);
             }
 
@@ -227,17 +222,12 @@ namespace UnityCommon
             resource?.ProvisionSource.Provider.UnloadResource(resource.FullPath);
 
             LoadedResources.RemoveAll(r => !r.Valid || r.LocalPath.EqualsFast(path));
-
-            OnResourceUnloaded?.Invoke(path);
         }
 
         public virtual void UnloadAll ()
         {
             foreach (var resource in LoadedResources)
-            {
                 resource.ProvisionSource.Provider.UnloadResource(resource.FullPath);
-                OnResourceUnloaded?.Invoke(resource.LocalPath);
-            }
             LoadedResources.Clear();
         }
 
