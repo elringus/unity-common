@@ -16,8 +16,12 @@ namespace UnityCommon
             public readonly Resource<TResource> Resource;
             public readonly ProvisionSource ProvisionSource;
             public readonly string LocalPath;
+            public UnityEngine.Object Object => Resource.Object;
             public string FullPath => Resource.Path;
             public bool Valid => Resource.Valid;
+            public int HoldersCount => holders.Count;
+
+            private readonly HashSet<object> holders = new HashSet<object>();
 
             public LoadedResource (Resource<TResource> resource, ProvisionSource provisionSource)
             {
@@ -25,6 +29,10 @@ namespace UnityCommon
                 ProvisionSource = provisionSource;
                 LocalPath = provisionSource.BuildLocalPath(resource.Path);
             }
+
+            public void AddHolder (object holder) => holders.Add(holder);
+            public void RemoveHolder (object holder) => holders.Remove(holder);
+            public bool IsHeldBy (object holder) => holders.Contains(holder);
         }
 
         public event Action<string> OnResourceLoaded;
@@ -43,16 +51,19 @@ namespace UnityCommon
         /// Resources loaded by the loader.
         /// </summary>
         protected readonly List<LoadedResource> LoadedResources = new List<LoadedResource>();
+        protected readonly IHoldersTracker HoldersTracker;
 
-        public ResourceLoader (IList<ProvisionSource> provisionSources)
+        public ResourceLoader (IList<ProvisionSource> provisionSources, IHoldersTracker holdersTracker)
         {
             ProvisionSources.AddRange(provisionSources);
+            HoldersTracker = holdersTracker;
         }
 
-        public ResourceLoader (IList<IResourceProvider> providersList, string pathPrefix = null)
+        public ResourceLoader (IList<IResourceProvider> providersList, IHoldersTracker holdersTracker, string pathPrefix = null)
         {
             foreach (var provider in providersList)
                 ProvisionSources.Add(new ProvisionSource(provider, pathPrefix));
+            HoldersTracker = holdersTracker;
         }
 
         public string GetLocalPath (Resource resource)
@@ -63,49 +74,44 @@ namespace UnityCommon
 
         public virtual void Hold (string path, object holder)
         {
-            foreach (var source in ProvisionSources)
-            {
-                var fullPath = source.BuildFullPath(path);
-                source.Provider.Hold(fullPath, holder);
-            }
+            var resource = GetLoadedResource(path);
+            if (resource is null || !resource.Valid) return;
+
+            resource.AddHolder(holder);
+
+            if (resource.HoldersCount == 1)
+                HoldersTracker.Hold(resource.Object, this);
         }
 
         public virtual void Release (string path, object holder, bool unload = true)
         {
-            foreach (var source in ProvisionSources)
-            {
-                var fullPath = source.BuildFullPath(path);
-                source.Provider.Release(fullPath, holder, unload);
-            }
+            var resource = GetLoadedResource(path);
+            if (resource is null || !resource.Valid) return;
+
+            resource.RemoveHolder(holder);
+
+            if (resource.HoldersCount == 0)
+                if (HoldersTracker.Release(resource.Object, this) == 0 && unload)
+                    Unload(path);
         }
 
         public virtual void ReleaseAll (object holder, bool unload = true)
         {
-            foreach (var source in ProvisionSources)
-                source.Provider.ReleaseAll(holder, unload);
+            var pathsToRelease = LoadedResources
+                .Where(r => r.IsHeldBy(holder))
+                .Select(r => r.LocalPath).ToList();
+            foreach (var path in pathsToRelease)
+                Release(path, holder, unload);
         }
 
         public virtual bool IsHeldBy (string path, object holder)
         {
-            foreach (var source in ProvisionSources)
-            {
-                var fullPath = source.BuildFullPath(path);
-                if (source.Provider.IsHeldBy(fullPath, holder))
-                    return true;
-            }
-            return false;
+            return GetLoadedResource(path)?.IsHeldBy(holder) ?? false;
         }
 
         public int CountHolders (string path)
         {
-            var maxCount = 0;
-            foreach (var source in ProvisionSources)
-            {
-                var fullPath = source.BuildFullPath(path);
-                var count = source.Provider.CountHolders(path);
-                if (count > maxCount) maxCount = count;
-            }
-            return maxCount;
+            return GetLoadedResource(path)?.HoldersCount ?? 0;
         }
 
         public virtual bool IsLoaded (string path)
