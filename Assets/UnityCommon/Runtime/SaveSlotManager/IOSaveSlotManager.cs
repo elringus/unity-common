@@ -27,10 +27,29 @@ namespace UnityCommon
         protected abstract bool Binary { get; }
         protected abstract string Extension { get; }
 
-        protected void InvokeOnBeforeSave () { Saving = true; OnBeforeSave?.Invoke(); }
-        protected void InvokeOnSaved () { Saving = false; OnSaved?.Invoke(); }
-        protected void InvokeOnBeforeLoad () { Loading = true; OnBeforeLoad?.Invoke(); }
-        protected void InvokeOnLoaded () { Loading = false; OnLoaded?.Invoke(); }
+        protected void InvokeOnBeforeSave ()
+        {
+            Saving = true;
+            OnBeforeSave?.Invoke();
+        }
+
+        protected void InvokeOnSaved ()
+        {
+            Saving = false;
+            OnSaved?.Invoke();
+        }
+
+        protected void InvokeOnBeforeLoad ()
+        {
+            Loading = true;
+            OnBeforeLoad?.Invoke();
+        }
+
+        protected void InvokeOnLoaded ()
+        {
+            Loading = false;
+            OnLoaded?.Invoke();
+        }
     }
 
     /// <summary>
@@ -138,7 +157,7 @@ namespace UnityCommon
 
         protected virtual string GetGameDataPath ()
         {
-            #if UNITY_STANDALONE || UNITY_EDITOR
+            #if UNITY_EDITOR
             return Application.dataPath;
             #else
             return Application.persistentDataPath;
