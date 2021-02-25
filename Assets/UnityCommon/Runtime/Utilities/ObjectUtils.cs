@@ -108,7 +108,11 @@ namespace UnityCommon
         {
             if (!IsValid(obj)) return false;
             #if UNITY_EDITOR
+            #if UNITY_2021_2_OR_NEWER
+            return UnityEditor.SceneManagement.PrefabStageUtility.GetPrefabStage(obj) != null;
+            #else
             return UnityEditor.Experimental.SceneManagement.PrefabStageUtility.GetPrefabStage(obj) != null;
+            #endif
             #else
             return false;
             #endif
