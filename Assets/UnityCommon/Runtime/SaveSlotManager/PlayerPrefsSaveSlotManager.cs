@@ -119,6 +119,7 @@ namespace UnityCommon
             var slotKey = SlotIdToKey(slotId);
             PlayerPrefs.DeleteKey(slotKey);
             RemoveKeyIndex(slotKey);
+            PlayerPrefs.Save();
         }
 
         public override void RenameSaveSlot (string sourceSlotId, string destSlotId)
@@ -132,6 +133,7 @@ namespace UnityCommon
             DeleteSaveSlot(sourceSlotId);
             PlayerPrefs.SetString(destKey, sourceValue);
             AddKeyIndexIfNotExist(destKey);
+            PlayerPrefs.Save();
         }
 
         protected virtual string SlotIdToKey (string slotId) => KeyPrefix + slotId;
@@ -149,6 +151,7 @@ namespace UnityCommon
 
             PlayerPrefs.SetString(slotKey, jsonData);
             AddKeyIndexIfNotExist(slotKey);
+            PlayerPrefs.Save();
         }
 
         protected virtual void SerializeData (string slotId, TData data)
@@ -164,6 +167,7 @@ namespace UnityCommon
 
             PlayerPrefs.SetString(slotKey, jsonData);
             AddKeyIndexIfNotExist(slotKey);
+            PlayerPrefs.Save();
         }
 
         protected virtual async UniTask<TData> DeserializeDataAsync (string slotId)
