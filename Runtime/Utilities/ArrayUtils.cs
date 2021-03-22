@@ -165,7 +165,10 @@ namespace UnityCommon
         /// </summary>
         public static bool Contains<T> (T[] array, T item)
         {
-            return Array.Exists(array, i => Equals(i, item));
+            for (int i = 0; i < array.Length; i++)
+                if (Equals(array[i], item))
+                    return true;
+            return false;
         }
 
         /// <summary>
