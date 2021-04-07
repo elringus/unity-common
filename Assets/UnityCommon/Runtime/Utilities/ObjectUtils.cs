@@ -67,17 +67,12 @@ namespace UnityCommon
         /// </summary>
         /// <param name="requiredObjects">Objects to check for validity.</param>
         /// <returns>Whether all the required objects are valid.</returns>
-        public static bool AssertRequiredObjects (this Object unityObject, params Object[] requiredObjects)
+        public static void AssertRequiredObjects (this Component component, params Object[] requiredObjects)
         {
-            for (int i = 0; i < requiredObjects.Length; ++i)
-            {
+            for (int i = 0; i < requiredObjects.Length; i++)
                 if (!requiredObjects[i])
-                {
-                    Debug.LogError($"Object `{unityObject.name}` is missing a required reference. Make sure all the required fields are assigned in the inspector.");
-                    return false;
-                }
-            }
-            return true;
+                    throw new UnityException($"`{component}` component of `{component.gameObject.name}` game object is missing a required dependency." +
+                                             "Make sure all the required fields are assigned in the inspector and are pointing to valid objects.");
         }
 
         /// <summary>
