@@ -71,7 +71,7 @@ namespace UnityCommon
         {
             for (int i = 0; i < requiredObjects.Length; i++)
                 if (!requiredObjects[i])
-                    throw new UnityException($"`{component}` component of `{component.gameObject.name}` game object is missing a required dependency." +
+                    throw new UnityException($"Unity object `{component}` is missing a required dependency. " +
                                              "Make sure all the required fields are assigned in the inspector and are pointing to valid objects.");
         }
 
