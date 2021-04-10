@@ -11,7 +11,11 @@ namespace UnityCommon
     /// </summary>
     public class ScriptableUIBehaviour : UIBehaviour
     {
-        public enum FocusMode { Visibility, Navigation }
+        public enum FocusMode
+        {
+            Visibility,
+            Navigation
+        }
 
         /// <summary>
         /// Event invoked when visibility of the UI changes.
@@ -284,7 +288,8 @@ namespace UnityCommon
             #if ENABLE_INPUT_SYSTEM && INPUT_SYSTEM_AVAILABLE
             var gamepad = UnityEngine.InputSystem.Gamepad.current;
             if (gamepad != null && !navDown)
-                navDown = gamepad.dpad.up.wasPressedThisFrame || gamepad.dpad.down.wasPressedThisFrame || gamepad.dpad.left.wasPressedThisFrame || gamepad.dpad.right.wasPressedThisFrame;
+                navDown = gamepad.leftStick.up.wasPressedThisFrame || gamepad.leftStick.down.wasPressedThisFrame || gamepad.leftStick.left.wasPressedThisFrame || gamepad.leftStick.right.wasPressedThisFrame ||
+                          gamepad.dpad.up.wasPressedThisFrame || gamepad.dpad.down.wasPressedThisFrame || gamepad.dpad.left.wasPressedThisFrame || gamepad.dpad.right.wasPressedThisFrame;
             var keyboard = UnityEngine.InputSystem.Keyboard.current;
             if (keyboard != null && !navDown)
                 navDown = keyboard.downArrowKey.wasPressedThisFrame || keyboard.upArrowKey.wasPressedThisFrame || keyboard.leftArrowKey.wasPressedThisFrame || keyboard.rightArrowKey.wasPressedThisFrame;
