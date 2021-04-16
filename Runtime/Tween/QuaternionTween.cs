@@ -33,18 +33,10 @@ namespace UnityCommon
         {
             if (!TargetValid) return;
 
-            var vector = new Vector3(
-                EasingType.Tween(startValue.x, targetValue.x, tweenPercent),
-                EasingType.Tween(startValue.y, targetValue.y, tweenPercent),
-                EasingType.Tween(startValue.z, targetValue.z, tweenPercent)
-            );
-            var scalar = EasingType.Tween(startValue.w, targetValue.w, tweenPercent);
+            var newValue = EasingType == EasingType.Linear
+                ? Quaternion.Lerp(startValue, targetValue, tweenPercent)
+                : Quaternion.Slerp(startValue, targetValue, tweenPercent);
 
-            var factor = Mathf.Sqrt(vector.sqrMagnitude + scalar * scalar);
-            vector /= factor;
-            scalar /= factor;
-
-            var newValue = new Quaternion(vector.x, vector.y, vector.z, scalar);
             onTween.Invoke(newValue);
         }
 
