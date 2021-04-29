@@ -1,4 +1,4 @@
-﻿#if NET_4_6 || NET_STANDARD_2_0 || CSHARP_7_OR_LATER
+#if NET_4_6 || NET_STANDARD_2_0 || CSHARP_7_OR_LATER
 
 using System;
 
