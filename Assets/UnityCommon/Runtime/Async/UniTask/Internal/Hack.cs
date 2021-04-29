@@ -8,12 +8,12 @@ namespace UniRx.Async.Internal
     {
         // avoid lambda capture
 
-        internal static Action<T> AsFuncOfT<T>(this Action action)
+        internal static Action<T> AsFuncOfT<T> (this Action action)
         {
-            return new Action<T>(action.Invoke);
+            return action.Invoke;
         }
 
-        static void Invoke<T>(this Action action, T unused)
+        private static void Invoke<T> (this Action action, T unused)
         {
             action();
         }

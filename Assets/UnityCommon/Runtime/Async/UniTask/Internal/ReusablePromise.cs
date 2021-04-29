@@ -21,7 +21,7 @@ namespace UniRx.Async.Internal
         // can override for control 'start/reset' timing.
         public virtual bool IsCompleted => status.IsCompleted();
 
-        public virtual void GetResult()
+        public virtual void GetResult ()
         {
             switch (status)
             {
@@ -32,8 +32,6 @@ namespace UniRx.Async.Internal
                     break;
                 case AwaiterStatus.Canceled:
                     throw new OperationCanceledException();
-                default:
-                    break;
             }
 
             throw new InvalidOperationException("Invalid Status:" + status);
@@ -41,12 +39,12 @@ namespace UniRx.Async.Internal
 
         public AwaiterStatus Status => status;
 
-        void IAwaiter.GetResult()
+        void IAwaiter.GetResult ()
         {
             GetResult();
         }
 
-        public void ResetStatus(bool forceReset)
+        public void ResetStatus (bool forceReset)
         {
             if (forceReset)
             {
@@ -58,7 +56,7 @@ namespace UniRx.Async.Internal
             }
         }
 
-        public virtual bool TrySetCanceled()
+        public virtual bool TrySetCanceled ()
         {
             if (status == AwaiterStatus.Pending)
             {
@@ -69,7 +67,7 @@ namespace UniRx.Async.Internal
             return false;
         }
 
-        public virtual bool TrySetException(Exception ex)
+        public virtual bool TrySetException (Exception ex)
         {
             if (status == AwaiterStatus.Pending)
             {
@@ -81,7 +79,7 @@ namespace UniRx.Async.Internal
             return false;
         }
 
-        public virtual bool TrySetResult()
+        public virtual bool TrySetResult ()
         {
             if (status == AwaiterStatus.Pending)
             {
@@ -92,7 +90,7 @@ namespace UniRx.Async.Internal
             return false;
         }
 
-        void TryInvokeContinuation()
+        void TryInvokeContinuation ()
         {
             if (continuation == null) return;
 
@@ -113,12 +111,12 @@ namespace UniRx.Async.Internal
             }
         }
 
-        public void OnCompleted(Action action)
+        public void OnCompleted (Action action)
         {
             UnsafeOnCompleted(action);
         }
 
-        public void UnsafeOnCompleted(Action action)
+        public void UnsafeOnCompleted (Action action)
         {
             if (continuation == null)
             {
@@ -157,12 +155,12 @@ namespace UniRx.Async.Internal
 
         protected T RawResult => result;
 
-        protected void ForceSetResult(T result)
+        protected void ForceSetResult (T result)
         {
             this.result = result;
         }
 
-        public virtual T GetResult()
+        public virtual T GetResult ()
         {
             switch (status)
             {
@@ -173,8 +171,6 @@ namespace UniRx.Async.Internal
                     break;
                 case AwaiterStatus.Canceled:
                     throw new OperationCanceledException();
-                default:
-                    break;
             }
 
             throw new InvalidOperationException("Invalid Status:" + status);
@@ -182,12 +178,12 @@ namespace UniRx.Async.Internal
 
         public AwaiterStatus Status => status;
 
-        void IAwaiter.GetResult()
+        void IAwaiter.GetResult ()
         {
             GetResult();
         }
 
-        public void ResetStatus(bool forceReset)
+        public void ResetStatus (bool forceReset)
         {
             if (forceReset)
             {
@@ -199,7 +195,7 @@ namespace UniRx.Async.Internal
             }
         }
 
-        public virtual bool TrySetCanceled()
+        public virtual bool TrySetCanceled ()
         {
             if (status == AwaiterStatus.Pending)
             {
@@ -210,7 +206,7 @@ namespace UniRx.Async.Internal
             return false;
         }
 
-        public virtual bool TrySetException(Exception ex)
+        public virtual bool TrySetException (Exception ex)
         {
             if (status == AwaiterStatus.Pending)
             {
@@ -222,7 +218,7 @@ namespace UniRx.Async.Internal
             return false;
         }
 
-        public virtual bool TrySetResult(T result)
+        public virtual bool TrySetResult (T result)
         {
             if (status == AwaiterStatus.Pending)
             {
@@ -234,7 +230,7 @@ namespace UniRx.Async.Internal
             return false;
         }
 
-        protected void TryInvokeContinuation()
+        protected void TryInvokeContinuation ()
         {
             if (continuation == null) return;
 
@@ -255,12 +251,12 @@ namespace UniRx.Async.Internal
             }
         }
 
-        public void OnCompleted(Action action)
+        public void OnCompleted (Action action)
         {
             UnsafeOnCompleted(action);
         }
 
-        public void UnsafeOnCompleted(Action action)
+        public void UnsafeOnCompleted (Action action)
         {
             if (continuation == null)
             {
@@ -291,18 +287,18 @@ namespace UniRx.Async.Internal
         protected readonly CancellationToken cancellationToken;
         bool isRunning = false;
 
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         string capturedStackTraceForDebugging;
-#endif
+        #endif
 
-        public PlayerLoopReusablePromiseBase(PlayerLoopTiming timing, CancellationToken cancellationToken, int skipTrackFrameCountAdditive)
+        public PlayerLoopReusablePromiseBase (PlayerLoopTiming timing, CancellationToken cancellationToken, int skipTrackFrameCountAdditive)
         {
             this.timing = timing;
             this.cancellationToken = cancellationToken;
 
-#if UNITY_EDITOR
+            #if UNITY_EDITOR
             this.capturedStackTraceForDebugging = TaskTracker.CaptureStackTrace(skipTrackFrameCountAdditive + 1); // 1 is self,
-#endif
+            #endif
         }
 
         public override bool IsCompleted
@@ -316,26 +312,26 @@ namespace UniRx.Async.Internal
                     isRunning = true;
                     ResetStatus(false);
                     OnRunningStart();
-#if UNITY_EDITOR
+                    #if UNITY_EDITOR
                     TaskTracker.TrackActiveTask(this, capturedStackTraceForDebugging);
-#endif
+                    #endif
                     PlayerLoopHelper.AddAction(timing, this);
                 }
                 return false;
             }
         }
 
-        protected abstract void OnRunningStart();
+        protected abstract void OnRunningStart ();
 
-        protected void Complete()
+        protected void Complete ()
         {
             isRunning = false;
-#if UNITY_EDITOR
+            #if UNITY_EDITOR
             TaskTracker.RemoveTracking(this);
-#endif
+            #endif
         }
 
-        public abstract bool MoveNext();
+        public abstract bool MoveNext ();
     }
 
     public abstract class PlayerLoopReusablePromiseBase<T> : ReusablePromise<T>, IPlayerLoopItem
@@ -344,18 +340,18 @@ namespace UniRx.Async.Internal
         protected readonly CancellationToken cancellationToken;
         bool isRunning = false;
 
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         string capturedStackTraceForDebugging;
-#endif
+        #endif
 
-        public PlayerLoopReusablePromiseBase(PlayerLoopTiming timing, CancellationToken cancellationToken, int skipTrackFrameCountAdditive)
+        public PlayerLoopReusablePromiseBase (PlayerLoopTiming timing, CancellationToken cancellationToken, int skipTrackFrameCountAdditive)
         {
             this.timing = timing;
             this.cancellationToken = cancellationToken;
 
-#if UNITY_EDITOR
+            #if UNITY_EDITOR
             this.capturedStackTraceForDebugging = TaskTracker.CaptureStackTrace(skipTrackFrameCountAdditive + 1); // 1 is self,
-#endif
+            #endif
         }
 
         public override bool IsCompleted
@@ -369,27 +365,26 @@ namespace UniRx.Async.Internal
                     isRunning = true;
                     ResetStatus(false);
                     OnRunningStart();
-#if UNITY_EDITOR
+                    #if UNITY_EDITOR
                     TaskTracker.TrackActiveTask(this, capturedStackTraceForDebugging);
-#endif
+                    #endif
                     PlayerLoopHelper.AddAction(timing, this);
                 }
                 return false;
             }
         }
 
-        protected abstract void OnRunningStart();
+        protected abstract void OnRunningStart ();
 
-        protected void Complete()
+        protected void Complete ()
         {
             isRunning = false;
-#if UNITY_EDITOR
+            #if UNITY_EDITOR
             TaskTracker.RemoveTracking(this);
-#endif
+            #endif
         }
 
-        public abstract bool MoveNext();
+        public abstract bool MoveNext ();
     }
-
 }
 #endif

@@ -22,13 +22,13 @@ namespace UniRx.Async
         readonly IAwaiter awaiter;
 
         [DebuggerHidden]
-        public UniTask(IAwaiter awaiter)
+        public UniTask (IAwaiter awaiter)
         {
             this.awaiter = awaiter;
         }
 
         [DebuggerHidden]
-        public UniTask(Func<UniTask> factory)
+        public UniTask (Func<UniTask> factory)
         {
             this.awaiter = new LazyPromise(factory);
         }
@@ -52,7 +52,7 @@ namespace UniRx.Async
         }
 
         [DebuggerHidden]
-        public void GetResult()
+        public void GetResult ()
         {
             if (awaiter != null)
             {
@@ -61,7 +61,7 @@ namespace UniRx.Async
         }
 
         [DebuggerHidden]
-        public Awaiter GetAwaiter()
+        public Awaiter GetAwaiter ()
         {
             return new Awaiter(this);
         }
@@ -69,7 +69,7 @@ namespace UniRx.Async
         /// <summary>
         /// returns (bool IsCanceled) instead of throws OperationCanceledException.
         /// </summary>
-        public UniTask<bool> SuppressCancellationThrow()
+        public UniTask<bool> SuppressCancellationThrow ()
         {
             var status = Status;
             if (status == AwaiterStatus.Succeeded) return CompletedTasks.False;
@@ -77,7 +77,7 @@ namespace UniRx.Async
             return new UniTask<bool>(new IsCanceledAwaiter(awaiter));
         }
 
-        public bool Equals(UniTask other)
+        public bool Equals (UniTask other)
         {
             if (this.awaiter == null && other.awaiter == null)
             {
@@ -93,7 +93,7 @@ namespace UniRx.Async
             }
         }
 
-        public override int GetHashCode()
+        public override int GetHashCode ()
         {
             if (this.awaiter == null)
             {
@@ -105,14 +105,14 @@ namespace UniRx.Async
             }
         }
 
-        public override string ToString()
+        public override string ToString ()
         {
             return (this.awaiter == null) ? "()"
-                 : (this.awaiter.Status == AwaiterStatus.Succeeded) ? "()"
-                 : "(" + this.awaiter.Status + ")";
+                : (this.awaiter.Status == AwaiterStatus.Succeeded) ? "()"
+                : "(" + this.awaiter.Status + ")";
         }
 
-        public static implicit operator UniTask<AsyncUnit>(UniTask task)
+        public static implicit operator UniTask<AsyncUnit> (UniTask task)
         {
             if (task.awaiter != null)
             {
@@ -136,7 +136,7 @@ namespace UniRx.Async
         {
             readonly IAwaiter awaiter;
 
-            public AsyncUnitAwaiter(IAwaiter awaiter)
+            public AsyncUnitAwaiter (IAwaiter awaiter)
             {
                 this.awaiter = awaiter;
             }
@@ -145,23 +145,23 @@ namespace UniRx.Async
 
             public AwaiterStatus Status => awaiter.Status;
 
-            public AsyncUnit GetResult()
+            public AsyncUnit GetResult ()
             {
                 awaiter.GetResult();
                 return AsyncUnit.Default;
             }
 
-            public void OnCompleted(Action continuation)
+            public void OnCompleted (Action continuation)
             {
                 awaiter.OnCompleted(continuation);
             }
 
-            public void UnsafeOnCompleted(Action continuation)
+            public void UnsafeOnCompleted (Action continuation)
             {
                 awaiter.UnsafeOnCompleted(continuation);
             }
 
-            void IAwaiter.GetResult()
+            void IAwaiter.GetResult ()
             {
                 awaiter.GetResult();
             }
@@ -171,7 +171,7 @@ namespace UniRx.Async
         {
             readonly IAwaiter awaiter;
 
-            public IsCanceledAwaiter(IAwaiter awaiter)
+            public IsCanceledAwaiter (IAwaiter awaiter)
             {
                 this.awaiter = awaiter;
             }
@@ -180,7 +180,7 @@ namespace UniRx.Async
 
             public AwaiterStatus Status => awaiter.Status;
 
-            public bool GetResult()
+            public bool GetResult ()
             {
                 if (awaiter.Status == AwaiterStatus.Canceled)
                 {
@@ -190,17 +190,17 @@ namespace UniRx.Async
                 return false;
             }
 
-            public void OnCompleted(Action continuation)
+            public void OnCompleted (Action continuation)
             {
                 awaiter.OnCompleted(continuation);
             }
 
-            public void UnsafeOnCompleted(Action continuation)
+            public void UnsafeOnCompleted (Action continuation)
             {
                 awaiter.UnsafeOnCompleted(continuation);
             }
 
-            void IAwaiter.GetResult()
+            void IAwaiter.GetResult ()
             {
                 awaiter.GetResult();
             }
@@ -211,7 +211,7 @@ namespace UniRx.Async
             readonly UniTask task;
 
             [DebuggerHidden]
-            public Awaiter(UniTask task)
+            public Awaiter (UniTask task)
             {
                 this.task = task;
             }
@@ -223,10 +223,11 @@ namespace UniRx.Async
             public AwaiterStatus Status => task.Status;
 
             [DebuggerHidden]
-            public void GetResult() => task.GetResult();
+            // ReSharper disable once PossiblyImpureMethodCallOnReadonlyVariable
+            public void GetResult () => task.GetResult();
 
             [DebuggerHidden]
-            public void OnCompleted(Action continuation)
+            public void OnCompleted (Action continuation)
             {
                 if (task.awaiter != null)
                 {
@@ -239,7 +240,7 @@ namespace UniRx.Async
             }
 
             [DebuggerHidden]
-            public void UnsafeOnCompleted(Action continuation)
+            public void UnsafeOnCompleted (Action continuation)
             {
                 if (task.awaiter != null)
                 {
@@ -263,21 +264,21 @@ namespace UniRx.Async
         readonly IAwaiter<T> awaiter;
 
         [DebuggerHidden]
-        public UniTask(T result)
+        public UniTask (T result)
         {
             this.result = result;
             this.awaiter = null;
         }
 
         [DebuggerHidden]
-        public UniTask(IAwaiter<T> awaiter)
+        public UniTask (IAwaiter<T> awaiter)
         {
             this.result = default(T);
             this.awaiter = awaiter;
         }
 
         [DebuggerHidden]
-        public UniTask(Func<UniTask<T>> factory)
+        public UniTask (Func<UniTask<T>> factory)
         {
             this.result = default(T);
             this.awaiter = new LazyPromise<T>(factory);
@@ -318,7 +319,7 @@ namespace UniRx.Async
         }
 
         [DebuggerHidden]
-        public Awaiter GetAwaiter()
+        public Awaiter GetAwaiter ()
         {
             return new Awaiter(this);
         }
@@ -326,7 +327,7 @@ namespace UniRx.Async
         /// <summary>
         /// returns (bool IsCanceled, T Result) instead of throws OperationCanceledException.
         /// </summary>
-        public UniTask<(bool IsCanceled, T Result)> SuppressCancellationThrow()
+        public UniTask<(bool IsCanceled, T Result)> SuppressCancellationThrow ()
         {
             var status = Status;
             if (status == AwaiterStatus.Succeeded)
@@ -340,7 +341,7 @@ namespace UniRx.Async
             return new UniTask<(bool, T)>(new IsCanceledAwaiter(awaiter));
         }
 
-        public bool Equals(UniTask<T> other)
+        public bool Equals (UniTask<T> other)
         {
             if (this.awaiter == null && other.awaiter == null)
             {
@@ -356,7 +357,7 @@ namespace UniRx.Async
             }
         }
 
-        public override int GetHashCode()
+        public override int GetHashCode ()
         {
             if (this.awaiter == null)
             {
@@ -369,14 +370,14 @@ namespace UniRx.Async
             }
         }
 
-        public override string ToString()
+        public override string ToString ()
         {
             return (this.awaiter == null) ? result.ToString()
-                 : (this.awaiter.Status == AwaiterStatus.Succeeded) ? this.awaiter.GetResult().ToString()
-                 : "(" + this.awaiter.Status + ")";
+                : (this.awaiter.Status == AwaiterStatus.Succeeded) ? this.awaiter.GetResult().ToString()
+                : "(" + this.awaiter.Status + ")";
         }
 
-        public static implicit operator UniTask(UniTask<T> task)
+        public static implicit operator UniTask (UniTask<T> task)
         {
             if (task.awaiter != null)
             {
@@ -392,7 +393,7 @@ namespace UniRx.Async
         {
             readonly IAwaiter<T> awaiter;
 
-            public IsCanceledAwaiter(IAwaiter<T> awaiter)
+            public IsCanceledAwaiter (IAwaiter<T> awaiter)
             {
                 this.awaiter = awaiter;
             }
@@ -401,7 +402,7 @@ namespace UniRx.Async
 
             public AwaiterStatus Status => awaiter.Status;
 
-            public (bool, T) GetResult()
+            public (bool, T) GetResult ()
             {
                 if (awaiter.Status == AwaiterStatus.Canceled)
                 {
@@ -410,17 +411,17 @@ namespace UniRx.Async
                 return (false, awaiter.GetResult());
             }
 
-            public void OnCompleted(Action continuation)
+            public void OnCompleted (Action continuation)
             {
                 awaiter.OnCompleted(continuation);
             }
 
-            public void UnsafeOnCompleted(Action continuation)
+            public void UnsafeOnCompleted (Action continuation)
             {
                 awaiter.UnsafeOnCompleted(continuation);
             }
 
-            void IAwaiter.GetResult()
+            void IAwaiter.GetResult ()
             {
                 awaiter.GetResult();
             }
@@ -431,7 +432,7 @@ namespace UniRx.Async
             readonly UniTask<T> task;
 
             [DebuggerHidden]
-            public Awaiter(UniTask<T> task)
+            public Awaiter (UniTask<T> task)
             {
                 this.task = task;
             }
@@ -443,13 +444,13 @@ namespace UniRx.Async
             public AwaiterStatus Status => task.Status;
 
             [DebuggerHidden]
-            void IAwaiter.GetResult() => GetResult();
+            void IAwaiter.GetResult () => GetResult();
 
             [DebuggerHidden]
-            public T GetResult() => task.Result;
+            public T GetResult () => task.Result;
 
             [DebuggerHidden]
-            public void OnCompleted(Action continuation)
+            public void OnCompleted (Action continuation)
             {
                 if (task.awaiter != null)
                 {
@@ -462,7 +463,7 @@ namespace UniRx.Async
             }
 
             [DebuggerHidden]
-            public void UnsafeOnCompleted(Action continuation)
+            public void UnsafeOnCompleted (Action continuation)
             {
                 if (task.awaiter != null)
                 {

@@ -31,7 +31,7 @@ namespace UniRx.Async
         // cache delegate.
         static readonly SendOrPostCallback handleExceptionInvoke = InvokeUnobservedTaskException;
 
-        internal static void PublishUnobservedTaskException(Exception ex)
+        internal static void PublishUnobservedTaskException (Exception ex)
         {
             if (ex != null)
             {
@@ -77,16 +77,14 @@ namespace UniRx.Async
                         case UnityEngine.LogType.Exception:
                             UnityEngine.Debug.LogException(ex);
                             break;
-                        default:
-                            break;
                     }
                 }
             }
         }
 
-        static void InvokeUnobservedTaskException(object state)
+        static void InvokeUnobservedTaskException (object state)
         {
-            UnobservedTaskException((Exception)state);
+            UnobservedTaskException?.Invoke((Exception)state);
         }
     }
 }

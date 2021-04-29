@@ -9,21 +9,21 @@ using UnityEngine.Networking;
 
 namespace UniRx.Async
 {
-    public static partial class UnityAsyncExtensions
+    public static class UnityAsyncExtensions
     {
-        public static AsyncOperationAwaiter GetAwaiter(this AsyncOperation asyncOperation)
+        public static AsyncOperationAwaiter GetAwaiter (this AsyncOperation asyncOperation)
         {
             Error.ThrowArgumentNullException(asyncOperation, nameof(asyncOperation));
             return new AsyncOperationAwaiter(asyncOperation);
         }
 
-        public static UniTask ToUniTask(this AsyncOperation asyncOperation)
+        public static UniTask ToUniTask (this AsyncOperation asyncOperation)
         {
             Error.ThrowArgumentNullException(asyncOperation, nameof(asyncOperation));
             return new UniTask(new AsyncOperationAwaiter(asyncOperation));
         }
 
-        public static UniTask ConfigureAwait(this AsyncOperation asyncOperation, IProgress<float> progress = null, PlayerLoopTiming timing = PlayerLoopTiming.Update, CancellationToken cancellation = default(CancellationToken))
+        public static UniTask ConfigureAwait (this AsyncOperation asyncOperation, IProgress<float> progress = null, PlayerLoopTiming timing = PlayerLoopTiming.Update, CancellationToken cancellation = default(CancellationToken))
         {
             Error.ThrowArgumentNullException(asyncOperation, nameof(asyncOperation));
 
@@ -35,19 +35,19 @@ namespace UniRx.Async
             return new UniTask(awaiter);
         }
 
-        public static ResourceRequestAwaiter GetAwaiter(this ResourceRequest resourceRequest)
+        public static ResourceRequestAwaiter GetAwaiter (this ResourceRequest resourceRequest)
         {
             Error.ThrowArgumentNullException(resourceRequest, nameof(resourceRequest));
             return new ResourceRequestAwaiter(resourceRequest);
         }
 
-        public static UniTask<UnityEngine.Object> ToUniTask(this ResourceRequest resourceRequest)
+        public static UniTask<UnityEngine.Object> ToUniTask (this ResourceRequest resourceRequest)
         {
             Error.ThrowArgumentNullException(resourceRequest, nameof(resourceRequest));
             return new UniTask<UnityEngine.Object>(new ResourceRequestAwaiter(resourceRequest));
         }
 
-        public static UniTask<UnityEngine.Object> ConfigureAwait(this ResourceRequest resourceRequest, IProgress<float> progress = null, PlayerLoopTiming timing = PlayerLoopTiming.Update, CancellationToken cancellation = default(CancellationToken))
+        public static UniTask<UnityEngine.Object> ConfigureAwait (this ResourceRequest resourceRequest, IProgress<float> progress = null, PlayerLoopTiming timing = PlayerLoopTiming.Update, CancellationToken cancellation = default(CancellationToken))
         {
             Error.ThrowArgumentNullException(resourceRequest, nameof(resourceRequest));
 
@@ -59,19 +59,19 @@ namespace UniRx.Async
             return new UniTask<UnityEngine.Object>(awaiter);
         }
 
-        public static AssetBundleRequestAwaiter GetAwaiter(this AssetBundleRequest resourceRequest)
+        public static AssetBundleRequestAwaiter GetAwaiter (this AssetBundleRequest resourceRequest)
         {
             Error.ThrowArgumentNullException(resourceRequest, nameof(resourceRequest));
             return new AssetBundleRequestAwaiter(resourceRequest);
         }
 
-        public static UniTask<UnityEngine.Object> ToUniTask(this AssetBundleRequest resourceRequest)
+        public static UniTask<UnityEngine.Object> ToUniTask (this AssetBundleRequest resourceRequest)
         {
             Error.ThrowArgumentNullException(resourceRequest, nameof(resourceRequest));
             return new UniTask<UnityEngine.Object>(new AssetBundleRequestAwaiter(resourceRequest));
         }
 
-        public static UniTask<UnityEngine.Object> ConfigureAwait(this AssetBundleRequest resourceRequest, IProgress<float> progress = null, PlayerLoopTiming timing = PlayerLoopTiming.Update, CancellationToken cancellation = default(CancellationToken))
+        public static UniTask<UnityEngine.Object> ConfigureAwait (this AssetBundleRequest resourceRequest, IProgress<float> progress = null, PlayerLoopTiming timing = PlayerLoopTiming.Update, CancellationToken cancellation = default(CancellationToken))
         {
             Error.ThrowArgumentNullException(resourceRequest, nameof(resourceRequest));
 
@@ -83,19 +83,19 @@ namespace UniRx.Async
             return new UniTask<UnityEngine.Object>(awaiter);
         }
 
-        public static AssetBundleCreateRequestAwaiter GetAwaiter(this AssetBundleCreateRequest resourceRequest)
+        public static AssetBundleCreateRequestAwaiter GetAwaiter (this AssetBundleCreateRequest resourceRequest)
         {
             Error.ThrowArgumentNullException(resourceRequest, nameof(resourceRequest));
             return new AssetBundleCreateRequestAwaiter(resourceRequest);
         }
 
-        public static UniTask<AssetBundle> ToUniTask(this AssetBundleCreateRequest resourceRequest)
+        public static UniTask<AssetBundle> ToUniTask (this AssetBundleCreateRequest resourceRequest)
         {
             Error.ThrowArgumentNullException(resourceRequest, nameof(resourceRequest));
             return new UniTask<AssetBundle>(new AssetBundleCreateRequestAwaiter(resourceRequest));
         }
 
-        public static UniTask<AssetBundle> ConfigureAwait(this AssetBundleCreateRequest resourceRequest, IProgress<float> progress = null, PlayerLoopTiming timing = PlayerLoopTiming.Update, CancellationToken cancellation = default(CancellationToken))
+        public static UniTask<AssetBundle> ConfigureAwait (this AssetBundleCreateRequest resourceRequest, IProgress<float> progress = null, PlayerLoopTiming timing = PlayerLoopTiming.Update, CancellationToken cancellation = default(CancellationToken))
         {
             Error.ThrowArgumentNullException(resourceRequest, nameof(resourceRequest));
 
@@ -107,13 +107,13 @@ namespace UniRx.Async
             return new UniTask<AssetBundle>(awaiter);
         }
 
-#if ENABLE_WWW
+        #if ENABLE_WWW
 
-#if UNITY_2018_3_OR_NEWER
-#pragma warning disable CS0618
-#endif
+        #if UNITY_2018_3_OR_NEWER
+        #pragma warning disable CS0618
+        #endif
 
-        public static IAwaiter GetAwaiter(this WWW www)
+        public static IAwaiter GetAwaiter (this WWW www)
         {
             Error.ThrowArgumentNullException(www, nameof(www));
 
@@ -125,7 +125,7 @@ namespace UniRx.Async
             return awaiter;
         }
 
-        public static UniTask ToUniTask(this WWW www)
+        public static UniTask ToUniTask (this WWW www)
         {
             Error.ThrowArgumentNullException(www, nameof(www));
 
@@ -137,7 +137,7 @@ namespace UniRx.Async
             return new UniTask(awaiter);
         }
 
-        public static UniTask ConfigureAwait(this WWW www, IProgress<float> progress = null, PlayerLoopTiming timing = PlayerLoopTiming.Update, CancellationToken cancellation = default(CancellationToken))
+        public static UniTask ConfigureAwait (this WWW www, IProgress<float> progress = null, PlayerLoopTiming timing = PlayerLoopTiming.Update, CancellationToken cancellation = default(CancellationToken))
         {
             Error.ThrowArgumentNullException(www, nameof(www));
 
@@ -149,27 +149,27 @@ namespace UniRx.Async
             return new UniTask(awaiter);
         }
 
-#if UNITY_2018_3_OR_NEWER
-#pragma warning restore CS0618
-#endif
+        #if UNITY_2018_3_OR_NEWER
+        #pragma warning restore CS0618
+        #endif
 
-#endif
+        #endif
 
-#if ENABLE_UNITYWEBREQUEST
+        #if ENABLE_UNITYWEBREQUEST
 
-        public static UnityWebRequestAsyncOperationAwaiter GetAwaiter(this UnityWebRequestAsyncOperation asyncOperation)
+        public static UnityWebRequestAsyncOperationAwaiter GetAwaiter (this UnityWebRequestAsyncOperation asyncOperation)
         {
             Error.ThrowArgumentNullException(asyncOperation, nameof(asyncOperation));
             return new UnityWebRequestAsyncOperationAwaiter(asyncOperation);
         }
 
-        public static UniTask<UnityWebRequest> ToUniTask(this UnityWebRequestAsyncOperation asyncOperation)
+        public static UniTask<UnityWebRequest> ToUniTask (this UnityWebRequestAsyncOperation asyncOperation)
         {
             Error.ThrowArgumentNullException(asyncOperation, nameof(asyncOperation));
             return new UniTask<UnityWebRequest>(new UnityWebRequestAsyncOperationAwaiter(asyncOperation));
         }
 
-        public static UniTask<UnityWebRequest> ConfigureAwait(this UnityWebRequestAsyncOperation asyncOperation, IProgress<float> progress = null, PlayerLoopTiming timing = PlayerLoopTiming.Update, CancellationToken cancellation = default(CancellationToken))
+        public static UniTask<UnityWebRequest> ConfigureAwait (this UnityWebRequestAsyncOperation asyncOperation, IProgress<float> progress = null, PlayerLoopTiming timing = PlayerLoopTiming.Update, CancellationToken cancellation = default(CancellationToken))
         {
             Error.ThrowArgumentNullException(asyncOperation, nameof(asyncOperation));
 
@@ -181,7 +181,7 @@ namespace UniRx.Async
             return new UniTask<UnityWebRequest>(awaiter);
         }
 
-#endif
+        #endif
 
         public struct AsyncOperationAwaiter : IAwaiter
         {
@@ -189,7 +189,7 @@ namespace UniRx.Async
             Action<AsyncOperation> continuationAction;
             AwaiterStatus status;
 
-            public AsyncOperationAwaiter(AsyncOperation asyncOperation)
+            public AsyncOperationAwaiter (AsyncOperation asyncOperation)
             {
                 this.status = asyncOperation.isDone ? AwaiterStatus.Succeeded : AwaiterStatus.Pending;
                 this.asyncOperation = (this.status.IsCompleted()) ? null : asyncOperation;
@@ -199,7 +199,7 @@ namespace UniRx.Async
             public bool IsCompleted => status.IsCompleted();
             public AwaiterStatus Status => status;
 
-            public void GetResult()
+            public void GetResult ()
             {
                 if (status == AwaiterStatus.Succeeded) return;
 
@@ -228,12 +228,12 @@ namespace UniRx.Async
                 }
             }
 
-            public void OnCompleted(Action continuation)
+            public void OnCompleted (Action continuation)
             {
                 UnsafeOnCompleted(continuation);
             }
 
-            public void UnsafeOnCompleted(Action continuation)
+            public void UnsafeOnCompleted (Action continuation)
             {
                 Error.ThrowWhenContinuationIsAlreadyRegistered(continuationAction);
                 continuationAction = continuation.AsFuncOfT<AsyncOperation>();
@@ -249,11 +249,11 @@ namespace UniRx.Async
             AwaiterStatus status;
             Action continuation;
 
-            public AsyncOperationConfiguredAwaiter(AsyncOperation asyncOperation, IProgress<float> progress, CancellationToken cancellationToken)
+            public AsyncOperationConfiguredAwaiter (AsyncOperation asyncOperation, IProgress<float> progress, CancellationToken cancellationToken)
             {
                 this.status = cancellationToken.IsCancellationRequested ? AwaiterStatus.Canceled
-                            : asyncOperation.isDone ? AwaiterStatus.Succeeded
-                            : AwaiterStatus.Pending;
+                    : asyncOperation.isDone ? AwaiterStatus.Succeeded
+                    : AwaiterStatus.Pending;
 
                 if (this.status.IsCompleted()) return;
 
@@ -268,7 +268,7 @@ namespace UniRx.Async
             public bool IsCompleted => status.IsCompleted();
             public AwaiterStatus Status => status;
 
-            public void GetResult()
+            public void GetResult ()
             {
                 if (status == AwaiterStatus.Succeeded)
                 {
@@ -282,7 +282,7 @@ namespace UniRx.Async
                 Error.ThrowNotYetCompleted();
             }
 
-            public bool MoveNext()
+            public bool MoveNext ()
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -304,7 +304,7 @@ namespace UniRx.Async
                 return true;
             }
 
-            void InvokeContinuation(AwaiterStatus status)
+            void InvokeContinuation (AwaiterStatus status)
             {
                 this.status = status;
                 var cont = this.continuation;
@@ -319,12 +319,12 @@ namespace UniRx.Async
                 if (cont != null) cont.Invoke();
             }
 
-            public void OnCompleted(Action continuation)
+            public void OnCompleted (Action continuation)
             {
                 UnsafeOnCompleted(continuation);
             }
 
-            public void UnsafeOnCompleted(Action continuation)
+            public void UnsafeOnCompleted (Action continuation)
             {
                 Error.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
                 this.continuation = continuation;
@@ -338,7 +338,7 @@ namespace UniRx.Async
             AwaiterStatus status;
             UnityEngine.Object result;
 
-            public ResourceRequestAwaiter(ResourceRequest asyncOperation)
+            public ResourceRequestAwaiter (ResourceRequest asyncOperation)
             {
                 this.status = asyncOperation.isDone ? AwaiterStatus.Succeeded : AwaiterStatus.Pending;
                 this.asyncOperation = (this.status.IsCompleted()) ? null : asyncOperation;
@@ -349,7 +349,7 @@ namespace UniRx.Async
             public bool IsCompleted => status.IsCompleted();
             public AwaiterStatus Status => status;
 
-            public UnityEngine.Object GetResult()
+            public UnityEngine.Object GetResult ()
             {
                 if (status == AwaiterStatus.Succeeded) return this.result;
 
@@ -382,14 +382,14 @@ namespace UniRx.Async
                 return this.result;
             }
 
-            void IAwaiter.GetResult() => GetResult();
+            void IAwaiter.GetResult () => GetResult();
 
-            public void OnCompleted(Action continuation)
+            public void OnCompleted (Action continuation)
             {
                 UnsafeOnCompleted(continuation);
             }
 
-            public void UnsafeOnCompleted(Action continuation)
+            public void UnsafeOnCompleted (Action continuation)
             {
                 Error.ThrowWhenContinuationIsAlreadyRegistered(continuationAction);
                 continuationAction = continuation.AsFuncOfT<AsyncOperation>();
@@ -406,11 +406,11 @@ namespace UniRx.Async
             Action continuation;
             UnityEngine.Object result;
 
-            public ResourceRequestConfiguredAwaiter(ResourceRequest asyncOperation, IProgress<float> progress, CancellationToken cancellationToken)
+            public ResourceRequestConfiguredAwaiter (ResourceRequest asyncOperation, IProgress<float> progress, CancellationToken cancellationToken)
             {
                 this.status = cancellationToken.IsCancellationRequested ? AwaiterStatus.Canceled
-                            : asyncOperation.isDone ? AwaiterStatus.Succeeded
-                            : AwaiterStatus.Pending;
+                    : asyncOperation.isDone ? AwaiterStatus.Succeeded
+                    : AwaiterStatus.Pending;
 
                 if (this.status.IsCompletedSuccessfully()) this.result = asyncOperation.asset;
                 if (this.status.IsCompleted()) return;
@@ -426,9 +426,9 @@ namespace UniRx.Async
 
             public bool IsCompleted => status.IsCompleted();
             public AwaiterStatus Status => status;
-            void IAwaiter.GetResult() => GetResult();
+            void IAwaiter.GetResult () => GetResult();
 
-            public UnityEngine.Object GetResult()
+            public UnityEngine.Object GetResult ()
             {
                 if (status == AwaiterStatus.Succeeded) return this.result;
 
@@ -440,7 +440,7 @@ namespace UniRx.Async
                 return Error.ThrowNotYetCompleted<UnityEngine.Object>();
             }
 
-            public bool MoveNext()
+            public bool MoveNext ()
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -463,7 +463,7 @@ namespace UniRx.Async
                 return true;
             }
 
-            void InvokeContinuation(AwaiterStatus status)
+            void InvokeContinuation (AwaiterStatus status)
             {
                 this.status = status;
                 var cont = this.continuation;
@@ -478,13 +478,13 @@ namespace UniRx.Async
                 if (cont != null) cont.Invoke();
             }
 
-            public void OnCompleted(Action continuation)
+            public void OnCompleted (Action continuation)
             {
                 Error.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
                 this.continuation = continuation;
             }
 
-            public void UnsafeOnCompleted(Action continuation)
+            public void UnsafeOnCompleted (Action continuation)
             {
                 Error.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
                 this.continuation = continuation;
@@ -498,7 +498,7 @@ namespace UniRx.Async
             AwaiterStatus status;
             UnityEngine.Object result;
 
-            public AssetBundleRequestAwaiter(AssetBundleRequest asyncOperation)
+            public AssetBundleRequestAwaiter (AssetBundleRequest asyncOperation)
             {
                 this.status = asyncOperation.isDone ? AwaiterStatus.Succeeded : AwaiterStatus.Pending;
                 this.asyncOperation = (this.status.IsCompleted()) ? null : asyncOperation;
@@ -509,7 +509,7 @@ namespace UniRx.Async
             public bool IsCompleted => status.IsCompleted();
             public AwaiterStatus Status => status;
 
-            public UnityEngine.Object GetResult()
+            public UnityEngine.Object GetResult ()
             {
                 if (status == AwaiterStatus.Succeeded) return this.result;
 
@@ -542,14 +542,14 @@ namespace UniRx.Async
                 return this.result;
             }
 
-            void IAwaiter.GetResult() => GetResult();
+            void IAwaiter.GetResult () => GetResult();
 
-            public void OnCompleted(Action continuation)
+            public void OnCompleted (Action continuation)
             {
                 UnsafeOnCompleted(continuation);
             }
 
-            public void UnsafeOnCompleted(Action continuation)
+            public void UnsafeOnCompleted (Action continuation)
             {
                 Error.ThrowWhenContinuationIsAlreadyRegistered(continuationAction);
                 continuationAction = continuation.AsFuncOfT<AsyncOperation>();
@@ -566,11 +566,11 @@ namespace UniRx.Async
             Action continuation;
             UnityEngine.Object result;
 
-            public AssetBundleRequestConfiguredAwaiter(AssetBundleRequest asyncOperation, IProgress<float> progress, CancellationToken cancellationToken)
+            public AssetBundleRequestConfiguredAwaiter (AssetBundleRequest asyncOperation, IProgress<float> progress, CancellationToken cancellationToken)
             {
                 this.status = cancellationToken.IsCancellationRequested ? AwaiterStatus.Canceled
-                            : asyncOperation.isDone ? AwaiterStatus.Succeeded
-                            : AwaiterStatus.Pending;
+                    : asyncOperation.isDone ? AwaiterStatus.Succeeded
+                    : AwaiterStatus.Pending;
 
                 if (this.status.IsCompletedSuccessfully()) this.result = asyncOperation.asset;
                 if (this.status.IsCompleted()) return;
@@ -586,9 +586,9 @@ namespace UniRx.Async
 
             public bool IsCompleted => status.IsCompleted();
             public AwaiterStatus Status => status;
-            void IAwaiter.GetResult() => GetResult();
+            void IAwaiter.GetResult () => GetResult();
 
-            public UnityEngine.Object GetResult()
+            public UnityEngine.Object GetResult ()
             {
                 if (status == AwaiterStatus.Succeeded) return this.result;
 
@@ -600,7 +600,7 @@ namespace UniRx.Async
                 return Error.ThrowNotYetCompleted<UnityEngine.Object>();
             }
 
-            public bool MoveNext()
+            public bool MoveNext ()
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -623,7 +623,7 @@ namespace UniRx.Async
                 return true;
             }
 
-            void InvokeContinuation(AwaiterStatus status)
+            void InvokeContinuation (AwaiterStatus status)
             {
                 this.status = status;
                 var cont = this.continuation;
@@ -638,13 +638,13 @@ namespace UniRx.Async
                 if (cont != null) cont.Invoke();
             }
 
-            public void OnCompleted(Action continuation)
+            public void OnCompleted (Action continuation)
             {
                 Error.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
                 this.continuation = continuation;
             }
 
-            public void UnsafeOnCompleted(Action continuation)
+            public void UnsafeOnCompleted (Action continuation)
             {
                 Error.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
                 this.continuation = continuation;
@@ -658,7 +658,7 @@ namespace UniRx.Async
             AwaiterStatus status;
             AssetBundle result;
 
-            public AssetBundleCreateRequestAwaiter(AssetBundleCreateRequest asyncOperation)
+            public AssetBundleCreateRequestAwaiter (AssetBundleCreateRequest asyncOperation)
             {
                 this.status = asyncOperation.isDone ? AwaiterStatus.Succeeded : AwaiterStatus.Pending;
                 this.asyncOperation = (this.status.IsCompleted()) ? null : asyncOperation;
@@ -669,7 +669,7 @@ namespace UniRx.Async
             public bool IsCompleted => status.IsCompleted();
             public AwaiterStatus Status => status;
 
-            public AssetBundle GetResult()
+            public AssetBundle GetResult ()
             {
                 if (status == AwaiterStatus.Succeeded) return this.result;
 
@@ -702,14 +702,14 @@ namespace UniRx.Async
                 return this.result;
             }
 
-            void IAwaiter.GetResult() => GetResult();
+            void IAwaiter.GetResult () => GetResult();
 
-            public void OnCompleted(Action continuation)
+            public void OnCompleted (Action continuation)
             {
                 UnsafeOnCompleted(continuation);
             }
 
-            public void UnsafeOnCompleted(Action continuation)
+            public void UnsafeOnCompleted (Action continuation)
             {
                 Error.ThrowWhenContinuationIsAlreadyRegistered(continuationAction);
                 continuationAction = continuation.AsFuncOfT<AsyncOperation>();
@@ -726,11 +726,11 @@ namespace UniRx.Async
             Action continuation;
             AssetBundle result;
 
-            public AssetBundleCreateRequestConfiguredAwaiter(AssetBundleCreateRequest asyncOperation, IProgress<float> progress, CancellationToken cancellationToken)
+            public AssetBundleCreateRequestConfiguredAwaiter (AssetBundleCreateRequest asyncOperation, IProgress<float> progress, CancellationToken cancellationToken)
             {
                 this.status = cancellationToken.IsCancellationRequested ? AwaiterStatus.Canceled
-                            : asyncOperation.isDone ? AwaiterStatus.Succeeded
-                            : AwaiterStatus.Pending;
+                    : asyncOperation.isDone ? AwaiterStatus.Succeeded
+                    : AwaiterStatus.Pending;
 
                 if (this.status.IsCompletedSuccessfully()) this.result = asyncOperation.assetBundle;
                 if (this.status.IsCompleted()) return;
@@ -746,9 +746,9 @@ namespace UniRx.Async
 
             public bool IsCompleted => status.IsCompleted();
             public AwaiterStatus Status => status;
-            void IAwaiter.GetResult() => GetResult();
+            void IAwaiter.GetResult () => GetResult();
 
-            public AssetBundle GetResult()
+            public AssetBundle GetResult ()
             {
                 if (status == AwaiterStatus.Succeeded) return this.result;
 
@@ -760,7 +760,7 @@ namespace UniRx.Async
                 return Error.ThrowNotYetCompleted<AssetBundle>();
             }
 
-            public bool MoveNext()
+            public bool MoveNext ()
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -783,7 +783,7 @@ namespace UniRx.Async
                 return true;
             }
 
-            void InvokeContinuation(AwaiterStatus status)
+            void InvokeContinuation (AwaiterStatus status)
             {
                 this.status = status;
                 var cont = this.continuation;
@@ -798,23 +798,23 @@ namespace UniRx.Async
                 if (cont != null) cont.Invoke();
             }
 
-            public void OnCompleted(Action continuation)
+            public void OnCompleted (Action continuation)
             {
                 Error.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
                 this.continuation = continuation;
             }
 
-            public void UnsafeOnCompleted(Action continuation)
+            public void UnsafeOnCompleted (Action continuation)
             {
                 Error.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
                 this.continuation = continuation;
             }
         }
-#if ENABLE_WWW
+        #if ENABLE_WWW
 
-#if UNITY_2018_3_OR_NEWER
-#pragma warning disable CS0618
-#endif
+        #if UNITY_2018_3_OR_NEWER
+        #pragma warning disable CS0618
+        #endif
 
         class WWWConfiguredAwaiter : IAwaiter, IPlayerLoopItem
         {
@@ -824,11 +824,11 @@ namespace UniRx.Async
             AwaiterStatus status;
             Action continuation;
 
-            public WWWConfiguredAwaiter(WWW asyncOperation, IProgress<float> progress, CancellationToken cancellationToken)
+            public WWWConfiguredAwaiter (WWW asyncOperation, IProgress<float> progress, CancellationToken cancellationToken)
             {
                 this.status = cancellationToken.IsCancellationRequested ? AwaiterStatus.Canceled
-                            : asyncOperation.isDone ? AwaiterStatus.Succeeded
-                            : AwaiterStatus.Pending;
+                    : asyncOperation.isDone ? AwaiterStatus.Succeeded
+                    : AwaiterStatus.Pending;
 
                 if (this.status.IsCompleted()) return;
 
@@ -843,7 +843,7 @@ namespace UniRx.Async
             public bool IsCompleted => status.IsCompleted();
             public AwaiterStatus Status => status;
 
-            public void GetResult()
+            public void GetResult ()
             {
                 if (status == AwaiterStatus.Succeeded)
                 {
@@ -857,7 +857,7 @@ namespace UniRx.Async
                 Error.ThrowNotYetCompleted();
             }
 
-            public bool MoveNext()
+            public bool MoveNext ()
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -879,7 +879,7 @@ namespace UniRx.Async
                 return true;
             }
 
-            void InvokeContinuation(AwaiterStatus status)
+            void InvokeContinuation (AwaiterStatus status)
             {
                 this.status = status;
                 var cont = this.continuation;
@@ -894,25 +894,25 @@ namespace UniRx.Async
                 if (cont != null) cont.Invoke();
             }
 
-            public void OnCompleted(Action continuation)
+            public void OnCompleted (Action continuation)
             {
                 UnsafeOnCompleted(continuation);
             }
 
-            public void UnsafeOnCompleted(Action continuation)
+            public void UnsafeOnCompleted (Action continuation)
             {
                 Error.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
                 this.continuation = continuation;
             }
         }
 
-#if UNITY_2018_3_OR_NEWER
-#pragma warning restore CS0618
-#endif
+        #if UNITY_2018_3_OR_NEWER
+        #pragma warning restore CS0618
+        #endif
 
-#endif
+        #endif
 
-#if ENABLE_UNITYWEBREQUEST
+        #if ENABLE_UNITYWEBREQUEST
 
         public struct UnityWebRequestAsyncOperationAwaiter : IAwaiter<UnityWebRequest>
         {
@@ -921,7 +921,7 @@ namespace UniRx.Async
             AwaiterStatus status;
             UnityWebRequest result;
 
-            public UnityWebRequestAsyncOperationAwaiter(UnityWebRequestAsyncOperation asyncOperation)
+            public UnityWebRequestAsyncOperationAwaiter (UnityWebRequestAsyncOperation asyncOperation)
             {
                 this.status = asyncOperation.isDone ? AwaiterStatus.Succeeded : AwaiterStatus.Pending;
                 this.asyncOperation = (this.status.IsCompleted()) ? null : asyncOperation;
@@ -932,7 +932,7 @@ namespace UniRx.Async
             public bool IsCompleted => status.IsCompleted();
             public AwaiterStatus Status => status;
 
-            public UnityWebRequest GetResult()
+            public UnityWebRequest GetResult ()
             {
                 if (status == AwaiterStatus.Succeeded) return this.result;
 
@@ -962,18 +962,17 @@ namespace UniRx.Async
                     asyncOperation = null; // remove reference.
                 }
 
-
                 return this.result;
             }
 
-            void IAwaiter.GetResult() => GetResult();
+            void IAwaiter.GetResult () => GetResult();
 
-            public void OnCompleted(Action continuation)
+            public void OnCompleted (Action continuation)
             {
                 UnsafeOnCompleted(continuation);
             }
 
-            public void UnsafeOnCompleted(Action continuation)
+            public void UnsafeOnCompleted (Action continuation)
             {
                 Error.ThrowWhenContinuationIsAlreadyRegistered(continuationAction);
                 continuationAction = continuation.AsFuncOfT<AsyncOperation>();
@@ -990,11 +989,11 @@ namespace UniRx.Async
             Action continuation;
             UnityWebRequest result;
 
-            public UnityWebRequestAsyncOperationConfiguredAwaiter(UnityWebRequestAsyncOperation asyncOperation, IProgress<float> progress, CancellationToken cancellationToken)
+            public UnityWebRequestAsyncOperationConfiguredAwaiter (UnityWebRequestAsyncOperation asyncOperation, IProgress<float> progress, CancellationToken cancellationToken)
             {
                 this.status = cancellationToken.IsCancellationRequested ? AwaiterStatus.Canceled
-                            : asyncOperation.isDone ? AwaiterStatus.Succeeded
-                            : AwaiterStatus.Pending;
+                    : asyncOperation.isDone ? AwaiterStatus.Succeeded
+                    : AwaiterStatus.Pending;
 
                 if (this.status.IsCompletedSuccessfully()) this.result = asyncOperation.webRequest;
                 if (this.status.IsCompleted()) return;
@@ -1010,9 +1009,9 @@ namespace UniRx.Async
 
             public bool IsCompleted => status.IsCompleted();
             public AwaiterStatus Status => status;
-            void IAwaiter.GetResult() => GetResult();
+            void IAwaiter.GetResult () => GetResult();
 
-            public UnityWebRequest GetResult()
+            public UnityWebRequest GetResult ()
             {
                 if (status == AwaiterStatus.Succeeded) return this.result;
 
@@ -1024,7 +1023,7 @@ namespace UniRx.Async
                 return Error.ThrowNotYetCompleted<UnityWebRequest>();
             }
 
-            public bool MoveNext()
+            public bool MoveNext ()
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -1047,7 +1046,7 @@ namespace UniRx.Async
                 return true;
             }
 
-            void InvokeContinuation(AwaiterStatus status)
+            void InvokeContinuation (AwaiterStatus status)
             {
                 this.status = status;
                 var cont = this.continuation;
@@ -1062,20 +1061,20 @@ namespace UniRx.Async
                 if (cont != null) cont.Invoke();
             }
 
-            public void OnCompleted(Action continuation)
+            public void OnCompleted (Action continuation)
             {
                 Error.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
                 this.continuation = continuation;
             }
 
-            public void UnsafeOnCompleted(Action continuation)
+            public void UnsafeOnCompleted (Action continuation)
             {
                 Error.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
                 this.continuation = continuation;
             }
         }
 
-#endif
+        #endif
     }
 }
 #endif

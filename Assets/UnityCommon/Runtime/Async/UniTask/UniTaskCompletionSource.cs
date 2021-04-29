@@ -16,12 +16,12 @@ namespace UniRx.Async
         ExceptionDispatchInfo exception;
         bool calledGet = false;
 
-        public ExceptionHolder(ExceptionDispatchInfo exception)
+        public ExceptionHolder (ExceptionDispatchInfo exception)
         {
             this.exception = exception;
         }
 
-        public ExceptionDispatchInfo GetException()
+        public ExceptionDispatchInfo GetException ()
         {
             if (!calledGet)
             {
@@ -31,7 +31,7 @@ namespace UniRx.Async
             return exception;
         }
 
-        ~ExceptionHolder()
+        ~ExceptionHolder ()
         {
             UniTaskScheduler.PublishUnobservedTaskException(exception.SourceException);
         }
@@ -39,31 +39,27 @@ namespace UniRx.Async
 
     public interface IResolvePromise
     {
-        bool TrySetResult();
+        bool TrySetResult ();
     }
 
     public interface IResolvePromise<T>
     {
-        bool TrySetResult(T value);
+        bool TrySetResult (T value);
     }
 
     public interface IRejectPromise
     {
-        bool TrySetException(Exception exception);
+        bool TrySetException (Exception exception);
     }
 
     public interface ICancelPromise
     {
-        bool TrySetCanceled();
+        bool TrySetCanceled ();
     }
 
-    public interface IPromise<T> : IResolvePromise<T>, IRejectPromise, ICancelPromise
-    {
-    }
+    public interface IPromise<T> : IResolvePromise<T>, IRejectPromise, ICancelPromise { }
 
-    public interface IPromise : IResolvePromise, IRejectPromise, ICancelPromise
-    {
-    }
+    public interface IPromise : IResolvePromise, IRejectPromise, ICancelPromise { }
 
     public class UniTaskCompletionSource : IAwaiter, IPromise
     {
@@ -84,13 +80,13 @@ namespace UniRx.Async
 
         public UniTask Task => new UniTask(this);
 
-        public UniTaskCompletionSource()
+        public UniTaskCompletionSource ()
         {
             TaskTracker.TrackActiveTask(this, 2);
         }
 
         [Conditional("UNITY_EDITOR")]
-        internal void MarkHandled()
+        internal void MarkHandled ()
         {
             if (!handled)
             {
@@ -99,7 +95,7 @@ namespace UniRx.Async
             }
         }
 
-        void IAwaiter.GetResult()
+        void IAwaiter.GetResult ()
         {
             MarkHandled();
 
@@ -126,9 +122,9 @@ namespace UniRx.Async
             }
         }
 
-        void ICriticalNotifyCompletion.UnsafeOnCompleted(Action action)
+        void ICriticalNotifyCompletion.UnsafeOnCompleted (Action action)
         {
-            if (Interlocked.CompareExchange(ref continuation, (object)action, null) == null)
+            if (Interlocked.CompareExchange(ref continuation, action, null) == null)
             {
                 if (state != Pending)
                 {
@@ -163,7 +159,7 @@ namespace UniRx.Async
             }
         }
 
-        void TryInvokeContinuation()
+        void TryInvokeContinuation ()
         {
             var c = Interlocked.Exchange(ref continuation, null);
             if (c != null)
@@ -184,7 +180,7 @@ namespace UniRx.Async
             }
         }
 
-        public bool TrySetResult()
+        public bool TrySetResult ()
         {
             if (Interlocked.CompareExchange(ref state, Succeeded, Pending) == Pending)
             {
@@ -194,7 +190,7 @@ namespace UniRx.Async
             return false;
         }
 
-        public bool TrySetException(Exception exception)
+        public bool TrySetException (Exception exception)
         {
             if (Interlocked.CompareExchange(ref state, Faulted, Pending) == Pending)
             {
@@ -205,7 +201,7 @@ namespace UniRx.Async
             return false;
         }
 
-        public bool TrySetCanceled()
+        public bool TrySetCanceled ()
         {
             if (Interlocked.CompareExchange(ref state, Canceled, Pending) == Pending)
             {
@@ -215,7 +211,7 @@ namespace UniRx.Async
             return false;
         }
 
-        public bool TrySetCanceled(OperationCanceledException exception)
+        public bool TrySetCanceled (OperationCanceledException exception)
         {
             if (Interlocked.CompareExchange(ref state, Canceled, Pending) == Pending)
             {
@@ -226,7 +222,7 @@ namespace UniRx.Async
             return false;
         }
 
-        void INotifyCompletion.OnCompleted(Action continuation)
+        void INotifyCompletion.OnCompleted (Action continuation)
         {
             ((ICriticalNotifyCompletion)this).UnsafeOnCompleted(continuation);
         }
@@ -253,13 +249,13 @@ namespace UniRx.Async
 
         AwaiterStatus IAwaiter.Status => (AwaiterStatus)state;
 
-        public UniTaskCompletionSource()
+        public UniTaskCompletionSource ()
         {
             TaskTracker.TrackActiveTask(this, 2);
         }
 
         [Conditional("UNITY_EDITOR")]
-        internal void MarkHandled()
+        internal void MarkHandled ()
         {
             if (!handled)
             {
@@ -268,7 +264,7 @@ namespace UniRx.Async
             }
         }
 
-        T IAwaiter<T>.GetResult()
+        T IAwaiter<T>.GetResult ()
         {
             MarkHandled();
 
@@ -297,9 +293,9 @@ namespace UniRx.Async
             return default(T);
         }
 
-        void ICriticalNotifyCompletion.UnsafeOnCompleted(Action action)
+        void ICriticalNotifyCompletion.UnsafeOnCompleted (Action action)
         {
-            if (Interlocked.CompareExchange(ref continuation, (object)action, null) == null)
+            if (Interlocked.CompareExchange(ref continuation, action, null) == null)
             {
                 if (state != Pending)
                 {
@@ -334,7 +330,7 @@ namespace UniRx.Async
             }
         }
 
-        void TryInvokeContinuation()
+        void TryInvokeContinuation ()
         {
             var c = Interlocked.Exchange(ref continuation, null);
             if (c != null)
@@ -355,7 +351,7 @@ namespace UniRx.Async
             }
         }
 
-        public bool TrySetResult(T value)
+        public bool TrySetResult (T value)
         {
             if (Interlocked.CompareExchange(ref state, Succeeded, Pending) == Pending)
             {
@@ -366,7 +362,7 @@ namespace UniRx.Async
             return false;
         }
 
-        public bool TrySetException(Exception exception)
+        public bool TrySetException (Exception exception)
         {
             if (Interlocked.CompareExchange(ref state, Faulted, Pending) == Pending)
             {
@@ -377,7 +373,7 @@ namespace UniRx.Async
             return false;
         }
 
-        public bool TrySetCanceled()
+        public bool TrySetCanceled ()
         {
             if (Interlocked.CompareExchange(ref state, Canceled, Pending) == Pending)
             {
@@ -387,7 +383,7 @@ namespace UniRx.Async
             return false;
         }
 
-        public bool TrySetCanceled(OperationCanceledException exception)
+        public bool TrySetCanceled (OperationCanceledException exception)
         {
             if (Interlocked.CompareExchange(ref state, Canceled, Pending) == Pending)
             {
@@ -398,12 +394,12 @@ namespace UniRx.Async
             return false;
         }
 
-        void IAwaiter.GetResult()
+        void IAwaiter.GetResult ()
         {
             ((IAwaiter<T>)this).GetResult();
         }
 
-        void INotifyCompletion.OnCompleted(Action continuation)
+        void INotifyCompletion.OnCompleted (Action continuation)
         {
             ((ICriticalNotifyCompletion)this).UnsafeOnCompleted(continuation);
         }

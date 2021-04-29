@@ -18,12 +18,12 @@ namespace UniRx.Async.Internal
         IPlayerLoopItem[] loopItems = new IPlayerLoopItem[InitialSize];
         MinimumQueue<IPlayerLoopItem> waitQueue = new MinimumQueue<IPlayerLoopItem>(InitialSize);
 
-        public PlayerLoopRunner()
+        public PlayerLoopRunner ()
         {
             this.unhandledExceptionCallback = ex => Debug.LogException(ex);
         }
 
-        public void AddAction(IPlayerLoopItem item)
+        public void AddAction (IPlayerLoopItem item)
         {
             lock (runningAndQueueLock)
             {
@@ -45,7 +45,7 @@ namespace UniRx.Async.Internal
             }
         }
 
-        public void Clear()
+        public void Clear ()
         {
             lock (arrayLock)
             {
@@ -56,7 +56,7 @@ namespace UniRx.Async.Internal
             }
         }
 
-        public void Run()
+        public void Run ()
         {
             lock (runningAndQueueLock)
             {
@@ -91,7 +91,10 @@ namespace UniRx.Async.Internal
                             {
                                 unhandledExceptionCallback(ex);
                             }
-                            catch { }
+                            catch
+                            {
+                                // ignored
+                            }
                         }
                     }
 
@@ -126,7 +129,10 @@ namespace UniRx.Async.Internal
                                 {
                                     unhandledExceptionCallback(ex);
                                 }
-                                catch { }
+                                catch
+                                {
+                                    // ignored
+                                }
                                 continue; // next j
                             }
                         }
@@ -142,7 +148,6 @@ namespace UniRx.Async.Internal
                     NEXT_LOOP:
                     continue;
                 }
-
 
                 lock (runningAndQueueLock)
                 {

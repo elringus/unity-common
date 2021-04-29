@@ -18,7 +18,7 @@ namespace UniRx.Async.Internal
         readonly float loadFactor;
         readonly IEqualityComparer<TKey> keyEqualityComparer;
 
-        public WeakDictionary(int capacity = 4, float loadFactor = 0.75f, IEqualityComparer<TKey> keyComparer = null)
+        public WeakDictionary (int capacity = 4, float loadFactor = 0.75f, IEqualityComparer<TKey> keyComparer = null)
         {
             var tableSize = CalculateCapacity(capacity, loadFactor);
             this.buckets = new Entry[tableSize];
@@ -27,7 +27,7 @@ namespace UniRx.Async.Internal
             this.keyEqualityComparer = keyComparer ?? EqualityComparer<TKey>.Default;
         }
 
-        public bool TryAdd(TKey key, TValue value)
+        public bool TryAdd (TKey key, TValue value)
         {
             bool lockTaken = false;
             try
@@ -41,7 +41,7 @@ namespace UniRx.Async.Internal
             }
         }
 
-        public bool TryGetValue(TKey key, out TValue value)
+        public bool TryGetValue (TKey key, out TValue value)
         {
             bool lockTaken = false;
             try
@@ -62,7 +62,7 @@ namespace UniRx.Async.Internal
             }
         }
 
-        public bool TryRemove(TKey key)
+        public bool TryRemove (TKey key)
         {
             bool lockTaken = false;
             try
@@ -82,7 +82,7 @@ namespace UniRx.Async.Internal
             }
         }
 
-        bool TryAddInternal(TKey key, TValue value)
+        bool TryAddInternal (TKey key, TValue value)
         {
             var nextCapacity = CalculateCapacity(size + 1, loadFactor);
 
@@ -113,7 +113,7 @@ namespace UniRx.Async.Internal
             }
         }
 
-        bool AddToBuckets(Entry[] targetBuckets, TKey newKey, TValue value, int keyHash)
+        bool AddToBuckets (Entry[] targetBuckets, TKey newKey, TValue value, int keyHash)
         {
             var h = keyHash;
             var hashIndex = h & (targetBuckets.Length - 1);
@@ -121,8 +121,7 @@ namespace UniRx.Async.Internal
             TRY_ADD_AGAIN:
             if (targetBuckets[hashIndex] == null)
             {
-                targetBuckets[hashIndex] = new Entry
-                {
+                targetBuckets[hashIndex] = new Entry {
                     Key = new WeakReference<TKey>(newKey, false),
                     Value = value,
                     Hash = h
@@ -156,8 +155,7 @@ namespace UniRx.Async.Internal
                     else
                     {
                         // found last
-                        entry.Next = new Entry
-                        {
+                        entry.Next = new Entry {
                             Key = new WeakReference<TKey>(newKey, false),
                             Value = value,
                             Hash = h
@@ -170,7 +168,7 @@ namespace UniRx.Async.Internal
             }
         }
 
-        bool TryGetEntry(TKey key, out int hashIndex, out Entry entry)
+        bool TryGetEntry (TKey key, out int hashIndex, out Entry entry)
         {
             var table = buckets;
             var hash = keyEqualityComparer.GetHashCode(key);
@@ -198,7 +196,7 @@ namespace UniRx.Async.Internal
             return false;
         }
 
-        void Remove(int hashIndex, Entry entry)
+        void Remove (int hashIndex, Entry entry)
         {
             if (entry.Prev == null && entry.Next == null)
             {
@@ -222,7 +220,7 @@ namespace UniRx.Async.Internal
             size--;
         }
 
-        public List<KeyValuePair<TKey, TValue>> ToList()
+        public List<KeyValuePair<TKey, TValue>> ToList ()
         {
             var list = new List<KeyValuePair<TKey, TValue>>(size);
             ToList(ref list, false);
@@ -230,7 +228,7 @@ namespace UniRx.Async.Internal
         }
 
         // avoid allocate everytime.
-        public int ToList(ref List<KeyValuePair<TKey, TValue>> list, bool clear = true)
+        public int ToList (ref List<KeyValuePair<TKey, TValue>> list, bool clear = true)
         {
             if (clear)
             {
@@ -239,48 +237,40 @@ namespace UniRx.Async.Internal
 
             var listIndex = 0;
 
-            bool lockTaken = false;
-            try
+            for (int i = 0; i < buckets.Length; i++)
             {
-                for (int i = 0; i < buckets.Length; i++)
+                var entry = buckets[i];
+                while (entry != null)
                 {
-                    var entry = buckets[i];
-                    while (entry != null)
+                    if (entry.Key.TryGetTarget(out var target))
                     {
-                        if (entry.Key.TryGetTarget(out var target))
+                        var item = new KeyValuePair<TKey, TValue>(target, entry.Value);
+                        if (listIndex < list.Count)
                         {
-                            var item = new KeyValuePair<TKey, TValue>(target, entry.Value);
-                            if (listIndex < list.Count)
-                            {
-                                list[listIndex++] = item;
-                            }
-                            else
-                            {
-                                list.Add(item);
-                                listIndex++;
-                            }
+                            list[listIndex++] = item;
                         }
                         else
                         {
-                            // sweap
-                            Remove(i, entry);
+                            list.Add(item);
+                            listIndex++;
                         }
-
-                        entry = entry.Next;
                     }
+                    else
+                    {
+                        // sweap
+                        Remove(i, entry);
+                    }
+
+                    entry = entry.Next;
                 }
-            }
-            finally
-            {
-                if (lockTaken) gate.Exit(false);
             }
 
             return listIndex;
         }
 
-        static int CalculateCapacity(int collectionSize, float loadFactor)
+        static int CalculateCapacity (int collectionSize, float loadFactor)
         {
-            var size = (int)(((float)collectionSize) / loadFactor);
+            var size = (int)(collectionSize / loadFactor);
 
             size--;
             size |= size >> 1;
@@ -306,7 +296,7 @@ namespace UniRx.Async.Internal
             public Entry Next;
 
             // debug only
-            public override string ToString()
+            public override string ToString ()
             {
                 if (Key.TryGetTarget(out var target))
                 {
@@ -318,7 +308,7 @@ namespace UniRx.Async.Internal
                 }
             }
 
-            int Count()
+            int Count ()
             {
                 var count = 1;
                 var n = this;

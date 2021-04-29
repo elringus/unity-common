@@ -22,8 +22,7 @@ namespace UniRx.Async
 
         static readonly Regex typeBeautifyRegex = new Regex("`.+$", RegexOptions.Compiled);
 
-        static readonly Dictionary<Type, string> builtInTypeNames = new Dictionary<Type, string>
-        {
+        static readonly Dictionary<Type, string> builtInTypeNames = new Dictionary<Type, string> {
             { typeof(void), "void" },
             { typeof(bool), "bool" },
             { typeof(byte), "byte" },
@@ -45,7 +44,7 @@ namespace UniRx.Async
             { typeof(UniTaskVoid), "UniTaskVoid" }
         };
 
-        public static string ToStringWithCleanupAsyncStackTrace(this Exception exception)
+        public static string ToStringWithCleanupAsyncStackTrace (this Exception exception)
         {
             if (exception == null) return "";
 
@@ -75,7 +74,7 @@ namespace UniRx.Async
             return s;
         }
 
-        public static string CleanupAsyncStackTrace(this StackTrace stackTrace)
+        public static string CleanupAsyncStackTrace (this StackTrace stackTrace)
         {
             if (stackTrace == null) return "";
 
@@ -152,38 +151,25 @@ namespace UniRx.Async
             return sb.ToString();
         }
 
-
-        static bool IsAsync(MethodBase methodInfo)
+        private static bool IsAsync (MethodBase methodInfo)
         {
             var declareType = methodInfo.DeclaringType;
             return typeof(IAsyncStateMachine).IsAssignableFrom(declareType);
         }
 
         // code from Ben.Demystifier/EnhancedStackTrace.Frame.cs
-        static bool TryResolveStateMachineMethod(ref MethodBase method, out Type declaringType)
+        // ReSharper disable once UnusedMethodReturnValue.Local
+        private static bool TryResolveStateMachineMethod (ref MethodBase method, out Type declaringType)
         {
             declaringType = method.DeclaringType;
 
-            var parentType = declaringType.DeclaringType;
-            if (parentType == null)
-            {
-                return false;
-            }
-
-            var methods = parentType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-            if (methods == null)
-            {
-                return false;
-            }
+            var parentType = declaringType?.DeclaringType;
+            var methods = parentType?.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            if (methods == null) return false;
 
             foreach (var candidateMethod in methods)
             {
                 var attributes = candidateMethod.GetCustomAttributes<StateMachineAttribute>();
-                if (attributes == null)
-                {
-                    continue;
-                }
-
                 foreach (var asma in attributes)
                 {
                     if (asma.StateMachineType == declaringType)
@@ -200,7 +186,7 @@ namespace UniRx.Async
             return false;
         }
 
-        static string BeautifyType(Type t, bool shortName)
+        private static string BeautifyType (Type t, bool shortName)
         {
             if (builtInTypeNames.TryGetValue(t, out var builtin))
             {
@@ -225,44 +211,23 @@ namespace UniRx.Async
             return typeBeautifyRegex.Replace(genericType, "") + "<" + innerFormat + ">";
         }
 
-        static bool IgnoreLine(MethodBase methodInfo)
+        private static bool IgnoreLine (MethodBase methodInfo)
         {
-            var declareType = methodInfo.DeclaringType.FullName;
-            if (declareType == "System.Threading.ExecutionContext")
-            {
-                return true;
-            }
-            else if (declareType.StartsWith("System.Runtime.CompilerServices"))
-            {
-                return true;
-            }
-            else if (declareType.StartsWith("UniRx.Async.CompilerServices"))
-            {
-                return true;
-            }
-            else if (declareType == "System.Threading.Tasks.AwaitTaskContinuation")
-            {
-                return true;
-            }
-            else if (declareType.StartsWith("System.Threading.Tasks.Task"))
-            {
-                return true;
-            }
-
+            var declareType = methodInfo.DeclaringType?.FullName;
+            if (declareType is null) return false;
+            if (declareType == "System.Threading.ExecutionContext") return true;
+            else if (declareType.StartsWith("System.Runtime.CompilerServices")) return true;
+            else if (declareType.StartsWith("UniRx.Async.CompilerServices")) return true;
+            else if (declareType == "System.Threading.Tasks.AwaitTaskContinuation") return true;
+            else if (declareType.StartsWith("System.Threading.Tasks.Task")) return true;
             return false;
         }
 
-        static string SimplifyPath(string path)
+        private static string SimplifyPath (string path)
         {
             var fi = new FileInfo(path);
-            if (fi.Directory == null)
-            {
-                return fi.Name;
-            }
-            else
-            {
-                return fi.Directory.Name + "/" + fi.Name;
-            }
+            if (fi.Directory == null) return fi.Name;
+            else return fi.Directory.Name + "/" + fi.Name;
         }
     }
 }

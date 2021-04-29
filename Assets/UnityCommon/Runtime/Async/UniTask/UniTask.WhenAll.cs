@@ -14,12 +14,12 @@ namespace UniRx.Async
     {
         // UniTask
 
-        public static async UniTask<T[]> WhenAll<T>(params UniTask<T>[] tasks)
+        public static async UniTask<T[]> WhenAll<T> (params UniTask<T>[] tasks)
         {
             return await new WhenAllPromise<T>(tasks, tasks.Length);
         }
 
-        public static async UniTask<T[]> WhenAll<T>(IEnumerable<UniTask<T>> tasks)
+        public static async UniTask<T[]> WhenAll<T> (IEnumerable<UniTask<T>> tasks)
         {
             WhenAllPromise<T> promise;
             using (var span = ArrayPoolUtil.Materialize(tasks))
@@ -30,12 +30,12 @@ namespace UniRx.Async
             return await promise;
         }
 
-        public static async UniTask WhenAll(params UniTask[] tasks)
+        public static async UniTask WhenAll (params UniTask[] tasks)
         {
             await new WhenAllPromise(tasks, tasks.Length);
         }
 
-        public static async UniTask WhenAll(IEnumerable<UniTask> tasks)
+        public static async UniTask WhenAll (IEnumerable<UniTask> tasks)
         {
             WhenAllPromise promise;
             using (var span = ArrayPoolUtil.Materialize(tasks))
@@ -53,7 +53,7 @@ namespace UniRx.Async
             Action whenComplete;
             ExceptionDispatchInfo exception;
 
-            public WhenAllPromise(UniTask<T>[] tasks, int tasksLength)
+            public WhenAllPromise (UniTask<T>[] tasks, int tasksLength)
             {
                 this.completeCount = 0;
                 this.whenComplete = null;
@@ -90,7 +90,7 @@ namespace UniRx.Async
                 }
             }
 
-            void TryCallContinuation()
+            void TryCallContinuation ()
             {
                 var action = Interlocked.Exchange(ref whenComplete, null);
                 if (action != null)
@@ -99,7 +99,7 @@ namespace UniRx.Async
                 }
             }
 
-            async UniTaskVoid RunTask(UniTask<T> task, int index)
+            async UniTaskVoid RunTask (UniTask<T> task, int index)
             {
                 T value = default(T);
                 try
@@ -121,16 +121,17 @@ namespace UniRx.Async
                 }
             }
 
-            public Awaiter GetAwaiter()
+            public Awaiter GetAwaiter ()
             {
                 return new Awaiter(this);
             }
 
+            // ReSharper disable once MemberHidesStaticFromOuterClass
             public struct Awaiter : ICriticalNotifyCompletion
             {
                 WhenAllPromise<T> parent;
 
-                public Awaiter(WhenAllPromise<T> parent)
+                public Awaiter (WhenAllPromise<T> parent)
                 {
                     this.parent = parent;
                 }
@@ -143,7 +144,7 @@ namespace UniRx.Async
                     }
                 }
 
-                public T[] GetResult()
+                public T[] GetResult ()
                 {
                     if (parent.exception != null)
                     {
@@ -153,12 +154,12 @@ namespace UniRx.Async
                     return parent.result;
                 }
 
-                public void OnCompleted(Action continuation)
+                public void OnCompleted (Action continuation)
                 {
                     UnsafeOnCompleted(continuation);
                 }
 
-                public void UnsafeOnCompleted(Action continuation)
+                public void UnsafeOnCompleted (Action continuation)
                 {
                     parent.whenComplete = continuation;
                     if (IsCompleted)
@@ -180,7 +181,7 @@ namespace UniRx.Async
             Action whenComplete;
             ExceptionDispatchInfo exception;
 
-            public WhenAllPromise(UniTask[] tasks, int tasksLength)
+            public WhenAllPromise (UniTask[] tasks, int tasksLength)
             {
                 this.completeCount = 0;
                 this.whenComplete = null;
@@ -215,7 +216,7 @@ namespace UniRx.Async
                 }
             }
 
-            void TryCallContinuation()
+            void TryCallContinuation ()
             {
                 var action = Interlocked.Exchange(ref whenComplete, null);
                 if (action != null)
@@ -224,7 +225,7 @@ namespace UniRx.Async
                 }
             }
 
-            async UniTaskVoid RunTask(UniTask task, int index)
+            async UniTaskVoid RunTask (UniTask task, int index)
             {
                 try
                 {
@@ -244,16 +245,17 @@ namespace UniRx.Async
                 }
             }
 
-            public Awaiter GetAwaiter()
+            public Awaiter GetAwaiter ()
             {
                 return new Awaiter(this);
             }
 
+            // ReSharper disable once MemberHidesStaticFromOuterClass
             public struct Awaiter : ICriticalNotifyCompletion
             {
                 WhenAllPromise parent;
 
-                public Awaiter(WhenAllPromise parent)
+                public Awaiter (WhenAllPromise parent)
                 {
                     this.parent = parent;
                 }
@@ -266,7 +268,7 @@ namespace UniRx.Async
                     }
                 }
 
-                public void GetResult()
+                public void GetResult ()
                 {
                     if (parent.exception != null)
                     {
@@ -274,12 +276,12 @@ namespace UniRx.Async
                     }
                 }
 
-                public void OnCompleted(Action continuation)
+                public void OnCompleted (Action continuation)
                 {
                     UnsafeOnCompleted(continuation);
                 }
 
-                public void UnsafeOnCompleted(Action continuation)
+                public void UnsafeOnCompleted (Action continuation)
                 {
                     parent.whenComplete = continuation;
                     if (IsCompleted)

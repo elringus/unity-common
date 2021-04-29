@@ -18,7 +18,7 @@ namespace UniRx.Async.Internal
         int tail;
         int size;
 
-        public MinimumQueue(int capacity)
+        public MinimumQueue (int capacity)
         {
             if (capacity < 0) throw new ArgumentOutOfRangeException("capacity");
             array = new T[capacity];
@@ -27,22 +27,22 @@ namespace UniRx.Async.Internal
 
         public int Count
         {
-#if NET_4_6 || NET_STANDARD_2_0
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
+            #if NET_4_6 || NET_STANDARD_2_0
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            #endif
             get { return size; }
         }
 
-        public T Peek()
+        public T Peek ()
         {
             if (size == 0) ThrowForEmptyQueue();
             return array[head];
         }
 
-#if NET_4_6 || NET_STANDARD_2_0
+        #if NET_4_6 || NET_STANDARD_2_0
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public void Enqueue(T item)
+        #endif
+        public void Enqueue (T item)
         {
             if (size == array.Length)
             {
@@ -54,10 +54,10 @@ namespace UniRx.Async.Internal
             size++;
         }
 
-#if NET_4_6 || NET_STANDARD_2_0
+        #if NET_4_6 || NET_STANDARD_2_0
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        public T Dequeue()
+        #endif
+        public T Dequeue ()
         {
             if (size == 0) ThrowForEmptyQueue();
 
@@ -70,9 +70,9 @@ namespace UniRx.Async.Internal
             return removed;
         }
 
-        void Grow()
+        void Grow ()
         {
-            int newcapacity = (int)((long)array.Length * (long)GrowFactor / 100);
+            int newcapacity = (int)(array.Length * (long)GrowFactor / 100);
             if (newcapacity < array.Length + MinimumGrow)
             {
                 newcapacity = array.Length + MinimumGrow;
@@ -80,7 +80,7 @@ namespace UniRx.Async.Internal
             SetCapacity(newcapacity);
         }
 
-        void SetCapacity(int capacity)
+        void SetCapacity (int capacity)
         {
             T[] newarray = new T[capacity];
             if (size > 0)
@@ -101,10 +101,10 @@ namespace UniRx.Async.Internal
             tail = (size == capacity) ? 0 : size;
         }
 
-#if NET_4_6 || NET_STANDARD_2_0
+        #if NET_4_6 || NET_STANDARD_2_0
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
-        void MoveNext(ref int index)
+        #endif
+        void MoveNext (ref int index)
         {
             int tmp = index + 1;
             if (tmp == array.Length)
@@ -114,7 +114,7 @@ namespace UniRx.Async.Internal
             index = tmp;
         }
 
-        void ThrowForEmptyQueue()
+        void ThrowForEmptyQueue ()
         {
             throw new InvalidOperationException("EmptyQueue");
         }
