@@ -530,11 +530,11 @@ namespace UnityCommon
 
             // If holding down bump up our movement amount and turn off one way platform detection for a frame.
             // This lets us jump down through one way platforms.
-            if (IsGrounded && vertiacalAxis < 0)
-            {
-                inputVelocity.y *= 3f;
-                ignoreOneWayPlatformsThisFrame = true;
-            }
+            // if (IsGrounded && vertiacalAxis < 0)
+            // {
+            //     inputVelocity.y *= 3f;
+            //     ignoreOneWayPlatformsThisFrame = true;
+            // }
 
             Move(inputVelocity * Time.deltaTime);
 
