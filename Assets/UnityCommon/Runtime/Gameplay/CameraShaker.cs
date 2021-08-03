@@ -5,7 +5,7 @@ namespace UnityCommon
 {
     public class CameraShaker : MonoBehaviour
     {
-        public bool IsShaking { get { return Time.time < shakeEndTime; } }
+        public bool IsShaking => Time.time < shakeEndTime;
 
         [SerializeField] private float shakeAmount = 10f;
         [SerializeField] private float shakeDuration = .5f;
