@@ -8,6 +8,9 @@ namespace UnityCommon
     public class AsyncOperationCanceledException : OperationCanceledException
     {
         public AsyncOperationCanceledException (AsyncToken asyncToken)
-            : base(asyncToken.CancellationToken) { }
+            : base(asyncToken.CancellationToken)
+        {
+            if (!asyncToken.Canceled) throw new ArgumentException("Provided token is not canceled.", nameof(asyncToken));
+        }
     }
 }
