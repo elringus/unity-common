@@ -112,7 +112,7 @@ namespace UnityCommon
         /// <summary>
         /// Gradually changes <see cref="Visible"/> with fade animation over <see cref="FadeTime"/> or specified time (in seconds).
         /// </summary>
-        public virtual async UniTask ChangeVisibilityAsync (bool visible, float? duration = null, CancellationToken cancellationToken = default)
+        public virtual async UniTask ChangeVisibilityAsync (bool visible, float? duration = null, AsyncToken asyncToken = default)
         {
             if (fadeTweener.Running)
                 fadeTweener.Stop();
@@ -141,7 +141,7 @@ namespace UnityCommon
             }
 
             var tween = new FloatTween(CanvasGroup.alpha, targetOpacity, fadeDuration, SetOpacity, IgnoreTimeScale, target: this);
-            await fadeTweener.RunAsync(tween, cancellationToken);
+            await fadeTweener.RunAsync(tween, asyncToken);
         }
 
         /// <summary>

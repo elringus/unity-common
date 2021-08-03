@@ -47,7 +47,7 @@ namespace UnityCommon
         /// <summary>
         /// Fades <see cref="Volume"/> to the provided value over the specified time, in seconds.
         /// </summary>
-        UniTask FadeAsync (float volume, float fadeTime, CancellationToken cancellationToken = default);
+        UniTask FadeAsync (float volume, float fadeTime, AsyncToken asyncToken = default);
     }
 
     /// <summary>
@@ -105,14 +105,14 @@ namespace UnityCommon
             OnPlay?.Invoke();
         }
 
-        public async UniTask PlayAsync (float fadeInTime, CancellationToken cancellationToken = default)
+        public async UniTask PlayAsync (float fadeInTime, AsyncToken asyncToken = default)
         {
             CompleteAllRunners();
             if (!Valid) return;
 
             if (!Playing) Play();
             var tween = new FloatTween(0, Volume, fadeInTime, volume => Volume = volume, target: Source);
-            await volumeTweener.RunAsync(tween, cancellationToken);
+            await volumeTweener.RunAsync(tween, asyncToken);
         }
 
         public void Stop ()
@@ -125,24 +125,24 @@ namespace UnityCommon
             OnStop?.Invoke();
         }
 
-        public async UniTask StopAsync (float fadeOutTime, CancellationToken cancellationToken = default)
+        public async UniTask StopAsync (float fadeOutTime, AsyncToken asyncToken = default)
         {
             CompleteAllRunners();
             if (!Valid) return;
 
             var tween = new FloatTween(Volume, 0, fadeOutTime, volume => Volume = volume, target: Source);
-            await volumeTweener.RunAsync(tween, cancellationToken);
-            if (cancellationToken.CancelASAP) return;
+            await volumeTweener.RunAsync(tween, asyncToken);
+            if (asyncToken.Canceled) return;
             Stop();
         }
 
-        public async UniTask FadeAsync (float volume, float fadeTime, CancellationToken cancellationToken = default)
+        public async UniTask FadeAsync (float volume, float fadeTime, AsyncToken asyncToken = default)
         {
             CompleteAllRunners();
             if (!Valid) return;
 
             var tween = new FloatTween(Volume, volume, fadeTime, v => Volume = v, target: Source);
-            await volumeTweener.RunAsync(tween, cancellationToken);
+            await volumeTweener.RunAsync(tween, asyncToken);
         }
 
         private void CompleteAllRunners ()
