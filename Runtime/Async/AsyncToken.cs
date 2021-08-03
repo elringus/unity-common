@@ -5,7 +5,7 @@ using System.Threading;
 namespace UnityCommon
 {
     /// <summary>
-    /// Controls execution of the async routines.
+    /// Controls execution flow of the async routines.
     /// </summary>
     /// <remarks>
     /// When the token is provided for an async method, implementation is expected to check for
