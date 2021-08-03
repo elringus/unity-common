@@ -14,23 +14,13 @@ namespace UnityCommon
     public readonly struct AsyncToken : IEquatable<AsyncToken>
     {
         /// <summary>
-        /// A token in a permanent cancellation state.
-        /// </summary>
-        public static AsyncToken CanceledToken { get; } = new AsyncToken(new CancellationToken(true));
-        /// <summary>
-        /// A token in a permanent completion state.
-        /// </summary>
-        public static AsyncToken CompletedToken { get; } = new AsyncToken(new CancellationToken(true), true);
-
-        /// <summary>
         /// Source token for cancellation scenario.
         /// </summary>
-        public readonly CancellationToken CancellationToken;
+        public CancellationToken CancellationToken { get; }
         /// <summary>
         /// Source token for completion scenario.
         /// </summary>
-        public readonly CancellationToken CompletionToken;
-
+        public CancellationToken CompletionToken { get; }
         /// <summary>
         /// Whether cancellation of the async operation is requested.
         /// </summary>
