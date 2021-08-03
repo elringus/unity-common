@@ -66,12 +66,12 @@ namespace UnityCommon
 
         /// <summary>
         /// Throws <see cref="AsyncOperationCanceledException"/> in case cancellation is requested;
-        /// otherwise returns false.
+        /// otherwise returns true.
         /// </summary>
         public bool EnsureNotCanceled ()
         {
             ThrowIfCanceled();
-            return false;
+            return true;
         }
         
         /// <summary>
