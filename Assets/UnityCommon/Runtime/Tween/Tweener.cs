@@ -78,14 +78,13 @@ namespace UnityCommon
             if (TweenValue.TweenDuration <= 0f) { CompleteInstantly(); return; }
 
             var currentRunGuid = lastRunGuid;
-            while (!asyncToken.CanceledOrCompleted && TweenValue.TargetValid && elapsedTime <= TweenValue.TweenDuration)
+            while (asyncToken.EnsureNotCanceledOrCompleted() && TweenValue.TargetValid && elapsedTime <= TweenValue.TweenDuration)
             {
                 PerformTween();
                 await AsyncUtils.WaitEndOfFrame;
                 if (lastRunGuid != currentRunGuid) return; // The tweener was completed instantly or stopped.
             }
 
-            if (asyncToken.Canceled) return;
             if (asyncToken.Completed) CompleteInstantly();
             else FinishTween();
         }
@@ -98,14 +97,13 @@ namespace UnityCommon
             if (TweenValue.TweenDuration <= 0f) { CompleteInstantly(); return; }
 
             var currentRunGuid = lastRunGuid;
-            while (!asyncToken.CanceledOrCompleted && TweenValue.TargetValid && elapsedTime <= TweenValue.TweenDuration)
+            while (asyncToken.EnsureNotCanceledOrCompleted() && TweenValue.TargetValid && elapsedTime <= TweenValue.TweenDuration)
             {
                 PerformTween();
                 await AsyncUtils.WaitEndOfFrame;
                 if (lastRunGuid != currentRunGuid) return; // The tweener was completed instantly or stopped.
             }
 
-            if (asyncToken.Canceled) return;
             if (asyncToken.Completed) CompleteInstantly();
             else FinishTween();
         }

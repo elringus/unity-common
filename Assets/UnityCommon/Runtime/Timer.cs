@@ -66,10 +66,10 @@ namespace UnityCommon
             var currentRunGuid = lastRunGuid;
             var startTime = GetTime();
 
-            while (!WaitedEnough(startTime) && !asyncToken.CanceledOrCompleted)
+            while (!WaitedEnough(startTime) && asyncToken.EnsureNotCanceledOrCompleted() && TargetValid)
                 await AsyncUtils.WaitEndOfFrame;
-            
-            if (asyncToken.Canceled || !TargetValid) return;
+
+            if (!TargetValid) return;
             if (lastRunGuid != currentRunGuid) return; // The timer was completed instantly or stopped.
 
             if (asyncToken.Completed) CompleteInstantly();
@@ -86,10 +86,10 @@ namespace UnityCommon
             var currentRunGuid = lastRunGuid;
             var startTime = GetTime();
             
-            while (!asyncToken.CanceledOrCompleted)
+            while (asyncToken.EnsureNotCanceledOrCompleted())
             {
                 await AsyncUtils.WaitEndOfFrame;
-                if (asyncToken.Canceled || !TargetValid) return;
+                if (!TargetValid) return;
                 if (lastRunGuid != currentRunGuid) return; // The timer was stopped.
                 if (WaitedEnough(startTime))
                 {

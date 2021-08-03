@@ -5,7 +5,7 @@ using System.Threading;
 namespace UnityCommon
 {
     /// <summary>
-    /// Controls execution flow of the async routines.
+    /// Controls execution flow of the async operations.
     /// </summary>
     /// <remarks>
     /// When the token is provided for an async method, implementation is expected to check for
@@ -14,35 +14,21 @@ namespace UnityCommon
     public readonly struct AsyncToken : IEquatable<AsyncToken>
     {
         /// <summary>
-        /// A token in a permanent cancellation state.
-        /// </summary>
-        public static AsyncToken CanceledToken { get; } = new AsyncToken(new CancellationToken(true));
-        /// <summary>
-        /// A token in a permanent completion state.
-        /// </summary>
-        public static AsyncToken CompletedToken { get; } = new AsyncToken(new CancellationToken(true), true);
-
-        /// <summary>
         /// Source token for cancellation scenario.
         /// </summary>
-        public readonly CancellationToken CancellationToken;
+        public CancellationToken CancellationToken { get; }
         /// <summary>
         /// Source token for completion scenario.
         /// </summary>
-        public readonly CancellationToken CompletionToken;
-
+        public CancellationToken CompletionToken { get; }
         /// <summary>
-        /// Whether cancellation of the async routine is requested as soon as possible.
+        /// Whether cancellation of the async operation is requested.
         /// </summary>
         public bool Canceled => CancellationToken.IsCancellationRequested;
         /// <summary>
-        /// Whether completion of the async routine is requested as soon as possible, but it's not canceled.
+        /// Whether completion of the async operation is requested as soon as possible, but it's not canceled.
         /// </summary>
         public bool Completed => !Canceled && CompletionToken.IsCancellationRequested;
-        /// <summary>
-        /// Whether cancellation or completion of the async routine is requested.
-        /// </summary>
-        public bool CanceledOrCompleted => CancellationToken.IsCancellationRequested || CompletionToken.IsCancellationRequested;
 
         /// <param name="cancellationToken">Source cancellation token.</param>
         /// <param name="completion">Whether the provided token is for completion.</param>
@@ -58,6 +44,34 @@ namespace UnityCommon
         {
             CancellationToken = cancellationToken;
             CompletionToken = completionToken;
+        }
+
+        /// <summary>
+        /// Throws <see cref="AsyncOperationCanceledException"/> in case cancellation is requested.
+        /// </summary>
+        public void ThrowIfCanceled ()
+        {
+            if (Canceled) throw new AsyncOperationCanceledException(this);
+        }
+
+        /// <summary>
+        /// Throws <see cref="AsyncOperationCanceledException"/> in case cancellation is requested;
+        /// otherwise returns true.
+        /// </summary>
+        public bool EnsureNotCanceled ()
+        {
+            ThrowIfCanceled();
+            return true;
+        }
+        
+        /// <summary>
+        /// Throws <see cref="AsyncOperationCanceledException"/> in case cancellation is requested;
+        /// otherwise returns whether completion is not requested.
+        /// </summary>
+        public bool EnsureNotCanceledOrCompleted ()
+        {
+            ThrowIfCanceled();
+            return !Completed;
         }
 
         /// <summary>
