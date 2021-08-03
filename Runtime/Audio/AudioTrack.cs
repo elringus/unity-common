@@ -132,7 +132,6 @@ namespace UnityCommon
 
             var tween = new FloatTween(Volume, 0, fadeOutTime, volume => Volume = volume, target: Source);
             await volumeTweener.RunAsync(tween, asyncToken);
-            if (asyncToken.Canceled) return;
             Stop();
         }
 
