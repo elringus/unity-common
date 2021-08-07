@@ -47,30 +47,34 @@ namespace UnityCommon
         }
 
         /// <summary>
-        /// Throws <see cref="AsyncOperationCanceledException"/> in case cancellation is requested.
+        /// Throws <see cref="AsyncOperationCanceledException"/> in case cancellation is requested
+        /// or <see cref="AsyncOperationDestroyedException"/> in case provided Unity object is destroyed.
         /// </summary>
-        public void ThrowIfCanceled ()
+        public void ThrowIfCanceled (UnityEngine.Object obj = null)
         {
             if (Canceled) throw new AsyncOperationCanceledException(this);
+            if (!(obj is null) && !obj) throw new AsyncOperationDestroyedException(obj);
+        }
+
+        /// <summary>
+        /// Throws <see cref="AsyncOperationCanceledException"/> in case cancellation is requested
+        /// or <see cref="AsyncOperationDestroyedException"/> in case provided Unity object is destroyed;
+        /// otherwise returns true.
+        /// </summary>
+        public bool EnsureNotCanceled (UnityEngine.Object obj = null)
+        {
+            ThrowIfCanceled(obj);
+            return true;
         }
 
         /// <summary>
         /// Throws <see cref="AsyncOperationCanceledException"/> in case cancellation is requested;
-        /// otherwise returns true.
-        /// </summary>
-        public bool EnsureNotCanceled ()
-        {
-            ThrowIfCanceled();
-            return true;
-        }
-        
-        /// <summary>
-        /// Throws <see cref="AsyncOperationCanceledException"/> in case cancellation is requested;
+        /// or <see cref="AsyncOperationDestroyedException"/> in case provided Unity object is destroyed;
         /// otherwise returns whether completion is not requested.
         /// </summary>
-        public bool EnsureNotCanceledOrCompleted ()
+        public bool EnsureNotCanceledOrCompleted (UnityEngine.Object obj = null)
         {
-            ThrowIfCanceled();
+            ThrowIfCanceled(obj);
             return !Completed;
         }
 

@@ -10,7 +10,6 @@ namespace UnityCommon
         public bool Loop { get; private set; }
         public bool TimeScaleIgnored { get; private set; }
         public float Duration { get; private set; }
-        public bool TargetValid => !targetProvided || target;
 
         private readonly Action onLoop;
         private readonly Action onCompleted;
@@ -66,10 +65,9 @@ namespace UnityCommon
             var currentRunGuid = lastRunGuid;
             var startTime = GetTime();
 
-            while (!WaitedEnough(startTime) && asyncToken.EnsureNotCanceledOrCompleted() && TargetValid)
-                await AsyncUtils.WaitEndOfFrame;
+            while (!WaitedEnough(startTime) && asyncToken.EnsureNotCanceledOrCompleted(targetProvided ? target : null))
+                await AsyncUtils.WaitEndOfFrameAsync(asyncToken);
 
-            if (!TargetValid) return;
             if (lastRunGuid != currentRunGuid) return; // The timer was completed instantly or stopped.
 
             if (asyncToken.Completed) CompleteInstantly();
@@ -86,10 +84,10 @@ namespace UnityCommon
             var currentRunGuid = lastRunGuid;
             var startTime = GetTime();
             
-            while (asyncToken.EnsureNotCanceledOrCompleted())
+            while (asyncToken.EnsureNotCanceledOrCompleted(targetProvided ? target : null))
             {
-                await AsyncUtils.WaitEndOfFrame;
-                if (!TargetValid) return;
+                await AsyncUtils.WaitEndOfFrameAsync(asyncToken);
+                if (targetProvided && !target) throw new AsyncOperationDestroyedException(target);
                 if (lastRunGuid != currentRunGuid) return; // The timer was stopped.
                 if (WaitedEnough(startTime))
                 {

@@ -11,10 +11,6 @@ namespace UnityCommon
         /// </summary>
         bool TimeScaleIgnored { get; }
         /// <summary>
-        /// Whether tweened target is valid.
-        /// </summary>
-        bool TargetValid { get; }
-        /// <summary>
         /// Duration of the tween, in seconds.
         /// </summary>
         float TweenDuration { get; }

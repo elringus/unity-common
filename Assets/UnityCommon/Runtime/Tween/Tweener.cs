@@ -13,10 +13,10 @@ namespace UnityCommon
         TTweenValue TweenValue { get; }
         bool Running { get; }
 
-        void Run (in TTweenValue tweenValue, in AsyncToken asyncToken = default);
-        void Run (in AsyncToken asyncToken = default);
-        UniTask RunAsync (in TTweenValue tweenValue, in AsyncToken asyncToken = default);
-        UniTask RunAsync (in AsyncToken asyncToken = default);
+        void Run (in TTweenValue tweenValue, in AsyncToken asyncToken = default, UnityEngine.Object target = default);
+        void Run (in AsyncToken asyncToken = default, UnityEngine.Object target = default);
+        UniTask RunAsync (in TTweenValue tweenValue, in AsyncToken asyncToken = default, UnityEngine.Object target = default);
+        UniTask RunAsync (in AsyncToken asyncToken = default, UnityEngine.Object target = default);
         void Stop ();
         void CompleteInstantly ();
     }
@@ -31,6 +31,8 @@ namespace UnityCommon
         private readonly Action onCompleted;
         private float elapsedTime;
         private Guid lastRunGuid;
+        private UnityEngine.Object target;
+        private bool targetProvided;
 
         public Tweener (Action onCompleted = null)
         {
@@ -43,21 +45,29 @@ namespace UnityCommon
             TweenValue = tweenValue;
         }
 
-        public void Run (in TTweenValue tweenValue, in AsyncToken asyncToken = default)
+        public void Run (in AsyncToken asyncToken = default, UnityEngine.Object target = default)
         {
-            TweenValue = tweenValue;
-            Run(asyncToken);
+            targetProvided = this.target = target;
+            TweenAsyncAndForget(asyncToken).Forget();
         }
 
-        public void Run (in AsyncToken asyncToken = default) => TweenAsyncAndForget(asyncToken).Forget();
-
-        public UniTask RunAsync (in TTweenValue tweenValue, in AsyncToken asyncToken = default)
+        public void Run (in TTweenValue tweenValue, in AsyncToken asyncToken = default, UnityEngine.Object target = default)
         {
             TweenValue = tweenValue;
-            return RunAsync(asyncToken);
+            Run(asyncToken, target);
         }
 
-        public UniTask RunAsync (in AsyncToken asyncToken = default) => TweenAsync(asyncToken);
+        public UniTask RunAsync (in AsyncToken asyncToken = default, UnityEngine.Object target = default)
+        {
+            targetProvided = this.target = target;
+            return TweenAsync(asyncToken);
+        }
+
+        public UniTask RunAsync (in TTweenValue tweenValue, in AsyncToken asyncToken = default, UnityEngine.Object target = default)
+        {
+            TweenValue = tweenValue;
+            return RunAsync(asyncToken, target);
+        }
 
         public void Stop ()
         {
@@ -71,17 +81,21 @@ namespace UnityCommon
             TweenValue.TweenValue(1f);
             onCompleted?.Invoke();
         }
-        
+
         protected async UniTask TweenAsync (AsyncToken asyncToken = default)
         {
             PrepareTween();
-            if (TweenValue.TweenDuration <= 0f) { CompleteInstantly(); return; }
+            if (TweenValue.TweenDuration <= 0f)
+            {
+                CompleteInstantly();
+                return;
+            }
 
             var currentRunGuid = lastRunGuid;
-            while (asyncToken.EnsureNotCanceledOrCompleted() && TweenValue.TargetValid && elapsedTime <= TweenValue.TweenDuration)
+            while (elapsedTime <= TweenValue.TweenDuration && asyncToken.EnsureNotCanceledOrCompleted(targetProvided ? target : null))
             {
                 PerformTween();
-                await AsyncUtils.WaitEndOfFrame;
+                await AsyncUtils.WaitEndOfFrameAsync(asyncToken);
                 if (lastRunGuid != currentRunGuid) return; // The tweener was completed instantly or stopped.
             }
 
@@ -94,13 +108,17 @@ namespace UnityCommon
         protected async UniTaskVoid TweenAsyncAndForget (AsyncToken asyncToken = default)
         {
             PrepareTween();
-            if (TweenValue.TweenDuration <= 0f) { CompleteInstantly(); return; }
+            if (TweenValue.TweenDuration <= 0f)
+            {
+                CompleteInstantly();
+                return;
+            }
 
             var currentRunGuid = lastRunGuid;
-            while (asyncToken.EnsureNotCanceledOrCompleted() && TweenValue.TargetValid && elapsedTime <= TweenValue.TweenDuration)
+            while (elapsedTime <= TweenValue.TweenDuration && asyncToken.EnsureNotCanceledOrCompleted(targetProvided ? target : null))
             {
                 PerformTween();
-                await AsyncUtils.WaitEndOfFrame;
+                await AsyncUtils.WaitEndOfFrameAsync(asyncToken);
                 if (lastRunGuid != currentRunGuid) return; // The tweener was completed instantly or stopped.
             }
 

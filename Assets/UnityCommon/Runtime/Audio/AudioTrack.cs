@@ -40,10 +40,12 @@ namespace UnityCommon
         /// Starts playing the track.
         /// </summary>
         void Play ();
+
         /// <summary>
         /// Stops playing the track.
         /// </summary>
         void Stop ();
+
         /// <summary>
         /// Fades <see cref="Volume"/> to the provided value over the specified time, in seconds.
         /// </summary>
@@ -111,8 +113,8 @@ namespace UnityCommon
             if (!Valid) return;
 
             if (!Playing) Play();
-            var tween = new FloatTween(0, Volume, fadeInTime, volume => Volume = volume, target: Source);
-            await volumeTweener.RunAsync(tween, asyncToken);
+            var tween = new FloatTween(0, Volume, fadeInTime, volume => Volume = volume);
+            await volumeTweener.RunAsync(tween, asyncToken, Source);
         }
 
         public void Stop ()
@@ -130,8 +132,8 @@ namespace UnityCommon
             CompleteAllRunners();
             if (!Valid) return;
 
-            var tween = new FloatTween(Volume, 0, fadeOutTime, volume => Volume = volume, target: Source);
-            await volumeTweener.RunAsync(tween, asyncToken);
+            var tween = new FloatTween(Volume, 0, fadeOutTime, volume => Volume = volume);
+            await volumeTweener.RunAsync(tween, asyncToken, Source);
             Stop();
         }
 
@@ -140,8 +142,8 @@ namespace UnityCommon
             CompleteAllRunners();
             if (!Valid) return;
 
-            var tween = new FloatTween(Volume, volume, fadeTime, v => Volume = v, target: Source);
-            await volumeTweener.RunAsync(tween, asyncToken);
+            var tween = new FloatTween(Volume, volume, fadeTime, v => Volume = v);
+            await volumeTweener.RunAsync(tween, asyncToken, Source);
         }
 
         private void CompleteAllRunners ()

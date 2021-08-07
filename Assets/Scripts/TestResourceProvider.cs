@@ -36,7 +36,7 @@ public class TestResourceProvider : MonoBehaviour
 
     private async void Start ()
     {
-        await AsyncUtils.WaitEndOfFrame;
+        await AsyncUtils.WaitEndOfFrameAsync();
 
         await ResolveByFullPathAsync();
         await ResolveTextByPathAsync();

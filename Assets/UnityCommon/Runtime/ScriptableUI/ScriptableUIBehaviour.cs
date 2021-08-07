@@ -140,8 +140,8 @@ namespace UnityCommon
                 return;
             }
 
-            var tween = new FloatTween(CanvasGroup.alpha, targetOpacity, fadeDuration, SetOpacity, IgnoreTimeScale, target: this);
-            await fadeTweener.RunAsync(tween, asyncToken);
+            var tween = new FloatTween(CanvasGroup.alpha, targetOpacity, fadeDuration, SetOpacity, IgnoreTimeScale);
+            await fadeTweener.RunAsync(tween, asyncToken, this);
         }
 
         /// <summary>
