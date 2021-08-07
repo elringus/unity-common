@@ -40,8 +40,8 @@ namespace UnityCommon
             if (listenerVolumeTweener.Running)
                 listenerVolumeTweener.CompleteInstantly();
 
-            var tween = new FloatTween(Volume, volume, time, value => Volume = value, ignoreTimeScale: true, target: this);
-            listenerVolumeTweener.Run(tween);
+            var tween = new FloatTween(Volume, volume, time, value => Volume = value, ignoreTimeScale: true);
+            listenerVolumeTweener.Run(tween, target: this);
         }
 
         public bool ClipPlaying (AudioClip clip)

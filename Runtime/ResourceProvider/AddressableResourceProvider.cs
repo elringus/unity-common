@@ -82,7 +82,7 @@ namespace UnityCommon
                 ? Addressables.LoadResourceLocationsAsync(ExtraLabels, Addressables.MergeMode.Intersection)
                 : Addressables.LoadResourceLocationsAsync(MainLabel);
             while (!task.IsDone) // When awaiting the method directly it fails on WebGL (they're using multithreaded Task fot GetAwaiter)
-                await AsyncUtils.WaitEndOfFrame;
+                await AsyncUtils.WaitEndOfFrameAsync();
             var locations = task.Result?.ToList() ?? new List<IResourceLocation>();
             CacheLocations(locations);
             return locations;

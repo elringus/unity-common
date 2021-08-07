@@ -34,7 +34,7 @@ namespace UnityCommon
             {
                 var task = Addressables.LoadAssetAsync<TResource>(resourceAddress);
                 while (!task.IsDone) // When awaiting the method directly it fails on WebGL (they're using multithreaded Task fot GetAwaiter)
-                    await AsyncUtils.WaitEndOfFrame;
+                    await AsyncUtils.WaitEndOfFrameAsync();
                 asset = task.Result;
             }
 

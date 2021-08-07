@@ -67,7 +67,7 @@ namespace UnityCommon
         public async UniTask SaveAsync (string slotId, TData data)
         {
             while (saveInProgress && Application.isPlaying)
-                await AsyncUtils.WaitEndOfFrame;
+                await AsyncUtils.WaitEndOfFrameAsync();
 
             saveInProgress = true;
 

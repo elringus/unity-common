@@ -46,16 +46,16 @@ namespace UnityCommon
         {
             if (hoverOpacityFade <= 0) return;
             if (fadeTweener.Running) fadeTweener.CompleteInstantly();
-            var tween = new FloatTween(Opacity, 1f, FadeTime, SetOpacity, true, target: this);
-            fadeTweener.Run(tween);
+            var tween = new FloatTween(Opacity, 1f, FadeTime, SetOpacity, true);
+            fadeTweener.Run(tween, target: this);
         }
 
         protected virtual void FadeOutSlot ()
         {
             if (hoverOpacityFade <= 0) return;
             if (fadeTweener.Running) fadeTweener.CompleteInstantly();
-            var tween = new FloatTween(Opacity, 1f - hoverOpacityFade, FadeTime, SetOpacity, true, target: this);
-            fadeTweener.Run(tween);
+            var tween = new FloatTween(Opacity, 1f - hoverOpacityFade, FadeTime, SetOpacity, true);
+            fadeTweener.Run(tween, target: this);
         }
     }
 }

@@ -12,5 +12,7 @@ namespace UnityCommon
         {
             if (!asyncToken.Canceled) throw new ArgumentException("Provided token is not canceled.", nameof(asyncToken));
         }
+
+        protected AsyncOperationCanceledException () { }
     }
 }
