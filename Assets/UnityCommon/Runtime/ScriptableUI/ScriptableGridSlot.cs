@@ -12,6 +12,7 @@ namespace UnityCommon
         private class OnSlotClickedEvent : UnityEvent<string> { }
 
         public virtual string Id { get; }
+        public virtual bool Selected { get; private set; }
 
         [Tooltip("Opacity to fade to when the slot is hovered or selected; set to zero to disable the fade behaviour.")]
         [SerializeField] private float hoverOpacityFade = .25f;
@@ -23,9 +24,17 @@ namespace UnityCommon
 
         public virtual void OnPointerExit (PointerEventData eventData) => FadeOutSlot();
 
-        public virtual void OnSelect (BaseEventData eventData) => FadeInSlot();
+        public virtual void OnSelect (BaseEventData eventData)
+        {
+            Selected = true;
+            FadeInSlot();
+        }
 
-        public virtual void OnDeselect (BaseEventData eventData) => FadeOutSlot();
+        public virtual void OnDeselect (BaseEventData eventData)
+        {
+            Selected = false;
+            FadeOutSlot();
+        }
 
         protected override void Start ()
         {
