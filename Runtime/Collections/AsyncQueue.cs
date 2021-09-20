@@ -1,15 +1,13 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Security.Permissions;
 using System.Threading;
 using UniRx.Async;
 
 namespace UnityCommon
 {
-    [HostProtection(SecurityAction.LinkDemand, ExternalThreading = true, Synchronization = true)]
-    public class AsyncQueue<T> : IDisposable, IReadOnlyCollection<T>
+    public class AsyncQueue<T> : IReadOnlyCollection<T>, IDisposable
     {
         public int Count => queue.Count;
 
