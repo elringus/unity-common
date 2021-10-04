@@ -280,32 +280,53 @@ namespace UnityCommon
 
         protected virtual void HandleNavigationFocus ()
         {
-            if (focusMode != FocusMode.Navigation || !ObjectUtils.IsValid(FocusOnNavigation) || !Visible || !EventSystem.current) return;
+            if (focusMode != FocusMode.Navigation || !FocusOnNavigation || !Visible || !EventSystem.current) return;
 
-            var navDown = false;
-
-            // ReSharper disable ConditionIsAlwaysTrueOrFalse
-            #if ENABLE_INPUT_SYSTEM && INPUT_SYSTEM_AVAILABLE
-            var gamepad = UnityEngine.InputSystem.Gamepad.current;
-            if (gamepad != null && !navDown)
-                navDown = gamepad.leftStick.up.wasPressedThisFrame || gamepad.leftStick.down.wasPressedThisFrame || gamepad.leftStick.left.wasPressedThisFrame || gamepad.leftStick.right.wasPressedThisFrame ||
-                          gamepad.dpad.up.wasPressedThisFrame || gamepad.dpad.down.wasPressedThisFrame || gamepad.dpad.left.wasPressedThisFrame || gamepad.dpad.right.wasPressedThisFrame;
-            var keyboard = UnityEngine.InputSystem.Keyboard.current;
-            if (keyboard != null && !navDown)
-                navDown = keyboard.downArrowKey.wasPressedThisFrame || keyboard.upArrowKey.wasPressedThisFrame || keyboard.leftArrowKey.wasPressedThisFrame || keyboard.rightArrowKey.wasPressedThisFrame;
-            #endif
-
-            #if ENABLE_LEGACY_INPUT_MANAGER
-            if (!navDown)
-                navDown = Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow);
-            #endif
-            // ReSharper restore ConditionIsAlwaysTrueOrFalse
-
-            if (navDown)
+            if (SampleInputSystemNavigation() || SampleLegacyInputNavigation())
             {
                 EventSystem.current.SetSelectedGameObject(FocusOnNavigation);
                 FocusOnNavigation = null;
             }
+        }
+
+        protected virtual bool SampleInputSystemNavigation ()
+        {
+            #if ENABLE_INPUT_SYSTEM && INPUT_SYSTEM_AVAILABLE
+            return UnityEngine.InputSystem.Gamepad.current is UnityEngine.InputSystem.Gamepad gamepad &&
+                   (gamepad.leftStick.up.wasPressedThisFrame ||
+                    gamepad.leftStick.down.wasPressedThisFrame ||
+                    gamepad.leftStick.left.wasPressedThisFrame ||
+                    gamepad.leftStick.right.wasPressedThisFrame ||
+                    gamepad.dpad.up.wasPressedThisFrame ||
+                    gamepad.dpad.down.wasPressedThisFrame ||
+                    gamepad.dpad.left.wasPressedThisFrame ||
+                    gamepad.dpad.right.wasPressedThisFrame) ||
+                   // Generic HID gamepads are detected as joysticks by the input system.
+                   UnityEngine.InputSystem.Joystick.current is UnityEngine.InputSystem.Joystick joystick &&
+                   (joystick.stick.up.wasPressedThisFrame ||
+                    joystick.stick.down.wasPressedThisFrame ||
+                    joystick.stick.left.wasPressedThisFrame ||
+                    joystick.stick.right.wasPressedThisFrame) ||
+                   UnityEngine.InputSystem.Keyboard.current is UnityEngine.InputSystem.Keyboard keyboard &&
+                   (keyboard.downArrowKey.wasPressedThisFrame ||
+                    keyboard.upArrowKey.wasPressedThisFrame ||
+                    keyboard.leftArrowKey.wasPressedThisFrame ||
+                    keyboard.rightArrowKey.wasPressedThisFrame);
+            #else
+            return false;
+            #endif
+        }
+
+        protected virtual bool SampleLegacyInputNavigation ()
+        {
+            #if ENABLE_LEGACY_INPUT_MANAGER
+            return Input.GetKeyDown(KeyCode.UpArrow) ||
+                   Input.GetKeyDown(KeyCode.DownArrow) ||
+                   Input.GetKeyDown(KeyCode.LeftArrow) ||
+                   Input.GetKeyDown(KeyCode.RightArrow);
+            #else
+            return false;
+            #endif
         }
 
         private RectTransform GetRectTransform ()
