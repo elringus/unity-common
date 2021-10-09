@@ -5,7 +5,7 @@ using System;
 
 namespace UniRx.Async
 {
-    public partial struct UniTask
+    public readonly partial struct UniTask
     {
         /// <summary>Run action on the threadPool and return to main thread if configureAwait = true.</summary>
         public static async UniTask Run(Action action, bool configureAwait = true)

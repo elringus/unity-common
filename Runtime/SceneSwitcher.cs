@@ -12,13 +12,20 @@ namespace UnityCommon
         private void OnGUI ()
         {
             for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++)
-            {
-                var yPos = Screen.height - (buttonHeight + (buttonHeight * i));
-                var scenePath = SceneUtility.GetScenePathByBuildIndex(i);
-                var sceneName = Path.GetFileNameWithoutExtension(scenePath);
-                var buttonRect = new Rect(0, yPos, buttonWidth, buttonHeight);
-                if (GUI.Button(buttonRect, sceneName)) SceneManager.LoadScene(i);
-            }
+                if (GUI.Button(GetRectForSceneAt(i), GetNameForSceneAt(i)))
+                    SceneManager.LoadScene(i);
+        }
+
+        private static Rect GetRectForSceneAt (int index)
+        {
+            var yPos = Screen.height - (buttonHeight + buttonHeight * index);
+            return new Rect(0, yPos, buttonWidth, buttonHeight);
+        }
+
+        private static string GetNameForSceneAt (int index)
+        {
+            var scenePath = SceneUtility.GetScenePathByBuildIndex(index);
+            return Path.GetFileNameWithoutExtension(scenePath);
         }
     }
 }

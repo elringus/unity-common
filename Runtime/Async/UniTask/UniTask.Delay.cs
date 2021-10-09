@@ -5,24 +5,19 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using UniRx.Async.Internal;
+using UnityCommon;
 using UnityEngine;
 
 namespace UniRx.Async
 {
-    public partial struct UniTask
+    public readonly partial struct UniTask
     {
-        public static YieldAwaitable Yield(PlayerLoopTiming timing = PlayerLoopTiming.Update)
+        public static YieldAwaitable Yield (PlayerLoopTiming timing = PlayerLoopTiming.Update, AsyncToken asyncToken = default)
         {
-            // optimized for single continuation
-            return new YieldAwaitable(timing);
+            return new YieldAwaitable(timing, asyncToken);
         }
 
-        public static UniTask Yield(PlayerLoopTiming timing, CancellationToken cancellationToken)
-        {
-            return new UniTask(new YieldPromise(timing, cancellationToken));
-        }
-
-        public static UniTask<int> DelayFrame(int delayFrameCount, PlayerLoopTiming delayTiming = PlayerLoopTiming.Update, CancellationToken cancellationToken = default(CancellationToken))
+        public static UniTask<int> DelayFrame (int delayFrameCount, PlayerLoopTiming delayTiming = PlayerLoopTiming.Update, CancellationToken cancellationToken = default)
         {
             if (delayFrameCount < 0)
             {
@@ -33,7 +28,7 @@ namespace UniRx.Async
             return source.Task;
         }
 
-        public static UniTask Delay(int millisecondsDelay, bool ignoreTimeScale = false, PlayerLoopTiming delayTiming = PlayerLoopTiming.Update, CancellationToken cancellationToken = default(CancellationToken))
+        public static UniTask Delay (int millisecondsDelay, bool ignoreTimeScale = false, PlayerLoopTiming delayTiming = PlayerLoopTiming.Update, CancellationToken cancellationToken = default)
         {
             var delayTimeSpan = TimeSpan.FromMilliseconds(millisecondsDelay);
             if (delayTimeSpan < TimeSpan.Zero)
@@ -46,7 +41,7 @@ namespace UniRx.Async
                 : new DelayPromise(delayTimeSpan, delayTiming, cancellationToken).Task;
         }
 
-        public static UniTask Delay(TimeSpan delayTimeSpan, bool ignoreTimeScale = false, PlayerLoopTiming delayTiming = PlayerLoopTiming.Update, CancellationToken cancellationToken = default(CancellationToken))
+        public static UniTask Delay (TimeSpan delayTimeSpan, bool ignoreTimeScale = false, PlayerLoopTiming delayTiming = PlayerLoopTiming.Update, CancellationToken cancellationToken = default)
         {
             if (delayTimeSpan < TimeSpan.Zero)
             {
@@ -58,51 +53,24 @@ namespace UniRx.Async
                 : new DelayPromise(delayTimeSpan, delayTiming, cancellationToken).Task;
         }
 
-        class YieldPromise : PlayerLoopReusablePromiseBase
+        private class DelayFramePromise : PlayerLoopReusablePromiseBase<int>
         {
-            public YieldPromise(PlayerLoopTiming timing, CancellationToken cancellationToken)
-                : base(timing, cancellationToken, 2)
-            {
-            }
+            private readonly int delayFrameCount;
+            private int currentFrameCount;
 
-            protected override void OnRunningStart()
-            {
-            }
-
-            public override bool MoveNext()
-            {
-                Complete();
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    TrySetCanceled();
-                }
-                else
-                {
-                    TrySetResult();
-                }
-
-                return false;
-            }
-        }
-
-        class DelayFramePromise : PlayerLoopReusablePromiseBase<int>
-        {
-            readonly int delayFrameCount;
-            int currentFrameCount;
-
-            public DelayFramePromise(int delayFrameCount, PlayerLoopTiming timing, CancellationToken cancellationToken)
+            public DelayFramePromise (int delayFrameCount, PlayerLoopTiming timing, CancellationToken cancellationToken)
                 : base(timing, cancellationToken, 2)
             {
                 this.delayFrameCount = delayFrameCount;
                 this.currentFrameCount = 0;
             }
 
-            protected override void OnRunningStart()
+            protected override void OnRunningStart ()
             {
                 currentFrameCount = 0;
             }
 
-            public override bool MoveNext()
+            public override bool MoveNext ()
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -123,23 +91,23 @@ namespace UniRx.Async
             }
         }
 
-        class DelayPromise : PlayerLoopReusablePromiseBase
+        private class DelayPromise : PlayerLoopReusablePromiseBase
         {
-            readonly float delayFrameTimeSpan;
-            float elapsed;
+            private readonly float delayFrameTimeSpan;
+            private float elapsed;
 
-            public DelayPromise(TimeSpan delayFrameTimeSpan, PlayerLoopTiming timing, CancellationToken cancellationToken)
+            public DelayPromise (TimeSpan delayFrameTimeSpan, PlayerLoopTiming timing, CancellationToken cancellationToken)
                 : base(timing, cancellationToken, 2)
             {
                 this.delayFrameTimeSpan = (float)delayFrameTimeSpan.TotalSeconds;
             }
 
-            protected override void OnRunningStart()
+            protected override void OnRunningStart ()
             {
                 this.elapsed = 0.0f;
             }
 
-            public override bool MoveNext()
+            public override bool MoveNext ()
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -160,23 +128,23 @@ namespace UniRx.Async
             }
         }
 
-        class DelayIgnoreTimeScalePromise : PlayerLoopReusablePromiseBase
+        private class DelayIgnoreTimeScalePromise : PlayerLoopReusablePromiseBase
         {
-            readonly float delayFrameTimeSpan;
-            float elapsed;
+            private readonly float delayFrameTimeSpan;
+            private float elapsed;
 
-            public DelayIgnoreTimeScalePromise(TimeSpan delayFrameTimeSpan, PlayerLoopTiming timing, CancellationToken cancellationToken)
+            public DelayIgnoreTimeScalePromise (TimeSpan delayFrameTimeSpan, PlayerLoopTiming timing, CancellationToken cancellationToken)
                 : base(timing, cancellationToken, 2)
             {
                 this.delayFrameTimeSpan = (float)delayFrameTimeSpan.TotalSeconds;
             }
 
-            protected override void OnRunningStart()
+            protected override void OnRunningStart ()
             {
                 this.elapsed = 0.0f;
             }
 
-            public override bool MoveNext()
+            public override bool MoveNext ()
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -199,45 +167,49 @@ namespace UniRx.Async
         }
     }
 
-    public struct YieldAwaitable
+    public readonly struct YieldAwaitable
     {
-        readonly PlayerLoopTiming timing;
+        private readonly PlayerLoopTiming timing;
+        private readonly AsyncToken token;
 
-        public YieldAwaitable(PlayerLoopTiming timing)
+        public YieldAwaitable (PlayerLoopTiming timing, AsyncToken token = default)
         {
             this.timing = timing;
+            this.token = token;
         }
 
-        public Awaiter GetAwaiter()
+        public Awaiter GetAwaiter ()
         {
-            return new Awaiter(timing);
+            return new Awaiter(timing, token);
         }
 
-        public UniTask ToUniTask()
+        public readonly struct Awaiter : ICriticalNotifyCompletion
         {
-            return UniTask.Yield(timing, CancellationToken.None);
-        }
-
-        public struct Awaiter : ICriticalNotifyCompletion
-        {
-            readonly PlayerLoopTiming timing;
-
-            public Awaiter(PlayerLoopTiming timing)
-            {
-                this.timing = timing;
-            }
-
             public bool IsCompleted => false;
 
-            public void GetResult() { }
+            private readonly PlayerLoopTiming timing;
+            private readonly AsyncToken token;
 
-            public void OnCompleted(Action continuation)
+            public Awaiter (PlayerLoopTiming timing, AsyncToken token = default)
             {
+                this.timing = timing;
+                this.token = token;
+            }
+
+            public void GetResult ()
+            {
+                token.ThrowIfCanceled();
+            }
+
+            public void OnCompleted (Action continuation)
+            {
+                token.ThrowIfCanceled();
                 PlayerLoopHelper.AddContinuation(timing, continuation);
             }
 
-            public void UnsafeOnCompleted(Action continuation)
+            public void UnsafeOnCompleted (Action continuation)
             {
+                token.ThrowIfCanceled();
                 PlayerLoopHelper.AddContinuation(timing, continuation);
             }
         }

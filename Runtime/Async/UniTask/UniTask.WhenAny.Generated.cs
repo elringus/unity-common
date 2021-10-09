@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace UniRx.Async
 {
-    public partial struct UniTask
+    public readonly partial struct UniTask
     {
         public static async UniTask<(int winArgumentIndex, (bool hasResult, T0 result0), (bool hasResult, T1 result1))> WhenAny<T0, T1>(UniTask<T0> task0, UniTask<T1> task1)
         {

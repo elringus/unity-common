@@ -6,7 +6,7 @@ using System.Threading;
 
 namespace UniRx.Async
 {
-    public partial struct UniTask
+    public readonly partial struct UniTask
     {
         static readonly UniTask CanceledUniTask = new Func<UniTask>(() =>
         {

@@ -8,7 +8,7 @@ namespace UniRx.Async
 {
     // UnityEngine Bridges.
 
-    public partial struct UniTask
+    public readonly partial struct UniTask
     {
         public static IEnumerator ToCoroutine(Func<UniTask> taskFactory)
         {

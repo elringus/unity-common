@@ -15,7 +15,7 @@ namespace UniRx.Async
     /// Lightweight unity specified task-like object.
     /// </summary>
     [AsyncMethodBuilder(typeof(AsyncUniTaskMethodBuilder))]
-    public partial struct UniTask : IEquatable<UniTask>
+    public readonly partial struct UniTask : IEquatable<UniTask>
     {
         static readonly UniTask<AsyncUnit> DefaultAsyncUnitTask = new UniTask<AsyncUnit>(AsyncUnit.Default);
 
