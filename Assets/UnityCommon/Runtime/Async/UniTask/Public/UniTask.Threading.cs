@@ -1,35 +1,33 @@
-#if CSHARP_7_OR_LATER || (UNITY_2018_3_OR_NEWER && (NET_STANDARD_2_0 || NET_4_6))
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
 using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using UniRx.Async.Internal;
+using UnityCommon.Async;
+using UnityCommon.Async.Internal;
 
-namespace UniRx.Async
+namespace UnityCommon
 {
     public readonly partial struct UniTask
     {
         /// <summary>
         /// If running on mainthread, do nothing. Otherwise, same as UniTask.Yield(PlayerLoopTiming.Update).
         /// </summary>
-        public static SwitchToMainThreadAwaitable SwitchToMainThread()
+        public static SwitchToMainThreadAwaitable SwitchToMainThread ()
         {
             return new SwitchToMainThreadAwaitable();
         }
 
-        public static SwitchToThreadPoolAwaitable SwitchToThreadPool()
+        public static SwitchToThreadPoolAwaitable SwitchToThreadPool ()
         {
             return new SwitchToThreadPoolAwaitable();
         }
 
-        public static SwitchToTaskPoolAwaitable SwitchToTaskPool()
+        public static SwitchToTaskPoolAwaitable SwitchToTaskPool ()
         {
             return new SwitchToTaskPoolAwaitable();
         }
 
-        public static SwitchToSynchronizationContextAwaitable SwitchToSynchronizationContext(SynchronizationContext syncContext)
+        public static SwitchToSynchronizationContextAwaitable SwitchToSynchronizationContext (SynchronizationContext syncContext)
         {
             Error.ThrowArgumentNullException(syncContext, nameof(syncContext));
             return new SwitchToSynchronizationContextAwaitable(syncContext);
@@ -38,7 +36,7 @@ namespace UniRx.Async
 
     public struct SwitchToMainThreadAwaitable
     {
-        public Awaiter GetAwaiter() => new Awaiter();
+        public Awaiter GetAwaiter () => new Awaiter();
 
         public struct Awaiter : ICriticalNotifyCompletion
         {
@@ -46,7 +44,7 @@ namespace UniRx.Async
             {
                 get
                 {
-                    var currentThreadId = System.Threading.Thread.CurrentThread.ManagedThreadId;
+                    var currentThreadId = Thread.CurrentThread.ManagedThreadId;
                     if (PlayerLoopHelper.MainThreadId == currentThreadId)
                     {
                         return true; // run immediate.
@@ -58,14 +56,14 @@ namespace UniRx.Async
                 }
             }
 
-            public void GetResult() { }
+            public void GetResult () { }
 
-            public void OnCompleted(Action continuation)
+            public void OnCompleted (Action continuation)
             {
                 PlayerLoopHelper.AddContinuation(PlayerLoopTiming.Update, continuation);
             }
 
-            public void UnsafeOnCompleted(Action continuation)
+            public void UnsafeOnCompleted (Action continuation)
             {
                 PlayerLoopHelper.AddContinuation(PlayerLoopTiming.Update, continuation);
             }
@@ -74,26 +72,26 @@ namespace UniRx.Async
 
     public struct SwitchToThreadPoolAwaitable
     {
-        public Awaiter GetAwaiter() => new Awaiter();
+        public Awaiter GetAwaiter () => new Awaiter();
 
         public struct Awaiter : ICriticalNotifyCompletion
         {
-            static readonly WaitCallback switchToCallback = Callback;
+            private static readonly WaitCallback switchToCallback = Callback;
 
             public bool IsCompleted => false;
-            public void GetResult() { }
+            public void GetResult () { }
 
-            public void OnCompleted(Action continuation)
+            public void OnCompleted (Action continuation)
             {
                 ThreadPool.UnsafeQueueUserWorkItem(switchToCallback, continuation);
             }
 
-            public void UnsafeOnCompleted(Action continuation)
+            public void UnsafeOnCompleted (Action continuation)
             {
                 ThreadPool.UnsafeQueueUserWorkItem(switchToCallback, continuation);
             }
 
-            static void Callback(object state)
+            private static void Callback (object state)
             {
                 var continuation = (Action)state;
                 continuation();
@@ -103,26 +101,26 @@ namespace UniRx.Async
 
     public struct SwitchToTaskPoolAwaitable
     {
-        public Awaiter GetAwaiter() => new Awaiter();
+        public Awaiter GetAwaiter () => new Awaiter();
 
         public struct Awaiter : ICriticalNotifyCompletion
         {
-            static readonly Action<object> switchToCallback = Callback;
+            private static readonly Action<object> switchToCallback = Callback;
 
             public bool IsCompleted => false;
-            public void GetResult() { }
+            public void GetResult () { }
 
-            public void OnCompleted(Action continuation)
+            public void OnCompleted (Action continuation)
             {
                 Task.Factory.StartNew(switchToCallback, continuation, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
             }
 
-            public void UnsafeOnCompleted(Action continuation)
+            public void UnsafeOnCompleted (Action continuation)
             {
                 Task.Factory.StartNew(switchToCallback, continuation, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
             }
 
-            static void Callback(object state)
+            private static void Callback (object state)
             {
                 var continuation = (Action)state;
                 continuation();
@@ -130,41 +128,41 @@ namespace UniRx.Async
         }
     }
 
-    public struct SwitchToSynchronizationContextAwaitable
+    public readonly struct SwitchToSynchronizationContextAwaitable
     {
-        readonly SynchronizationContext synchronizationContext;
+        private readonly SynchronizationContext synchronizationContext;
 
-        public SwitchToSynchronizationContextAwaitable(SynchronizationContext synchronizationContext)
+        public SwitchToSynchronizationContextAwaitable (SynchronizationContext synchronizationContext)
         {
             this.synchronizationContext = synchronizationContext;
         }
 
-        public Awaiter GetAwaiter() => new Awaiter(synchronizationContext);
+        public Awaiter GetAwaiter () => new Awaiter(synchronizationContext);
 
-        public struct Awaiter : ICriticalNotifyCompletion
+        public readonly struct Awaiter : ICriticalNotifyCompletion
         {
-            static readonly SendOrPostCallback switchToCallback = Callback;
-            readonly SynchronizationContext synchronizationContext;
+            private static readonly SendOrPostCallback switchToCallback = Callback;
+            private readonly SynchronizationContext synchronizationContext;
 
-            public Awaiter(SynchronizationContext synchronizationContext)
+            public Awaiter (SynchronizationContext synchronizationContext)
             {
                 this.synchronizationContext = synchronizationContext;
             }
 
             public bool IsCompleted => false;
-            public void GetResult() { }
+            public void GetResult () { }
 
-            public void OnCompleted(Action continuation)
+            public void OnCompleted (Action continuation)
             {
                 synchronizationContext.Post(switchToCallback, continuation);
             }
 
-            public void UnsafeOnCompleted(Action continuation)
+            public void UnsafeOnCompleted (Action continuation)
             {
                 synchronizationContext.Post(switchToCallback, continuation);
             }
 
-            static void Callback(object state)
+            private static void Callback (object state)
             {
                 var continuation = (Action)state;
                 continuation();
@@ -172,5 +170,3 @@ namespace UniRx.Async
         }
     }
 }
-
-#endif

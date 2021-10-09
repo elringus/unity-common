@@ -194,7 +194,7 @@ public class PlayerPrefsEditor : EditorWindow
         else registryKey = Registry.CurrentUser.OpenSubKey("Software\\Unity\\UnityEditor\\" + companyName + "\\" + productName);
 
         // No prefs saved for the project.
-        if (registryKey is null) return new PrefPair[0];
+        if (registryKey is null) return Array.Empty<PrefPair>();
 
         var valueNames = registryKey.GetValueNames();
         var tempPlayerPrefs = new PrefPair[valueNames.Length];
@@ -272,7 +272,7 @@ public class PlayerPrefsEditor : EditorWindow
         {
             // Reset.
             lastDeserialization = null;
-            showEditorPrefs = (newIndex == 1);
+            showEditorPrefs = newIndex == 1;
         }
     }
 

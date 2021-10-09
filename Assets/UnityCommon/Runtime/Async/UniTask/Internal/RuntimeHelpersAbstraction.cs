@@ -1,20 +1,17 @@
-#if CSHARP_7_OR_LATER || (UNITY_2018_3_OR_NEWER && (NET_STANDARD_2_0 || NET_4_6))
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
 using System;
 using UnityEngine;
 
-namespace UniRx.Async.Internal
+namespace UnityCommon.Async.Internal
 {
     internal static class RuntimeHelpersAbstraction
     {
         // If we can use RuntimeHelpers.IsReferenceOrContainsReferences(.NET Core 2.0), use it.
-        public static bool IsWellKnownNoReferenceContainsType<T>()
+        public static bool IsWellKnownNoReferenceContainsType<T> ()
         {
             return WellKnownNoReferenceContainsType<T>.IsWellKnownType;
         }
 
-        static bool WellKnownNoReferenceContainsTypeInitialize(Type t)
+        private static bool WellKnownNoReferenceContainsTypeInitialize (Type t)
         {
             // The primitive types are Boolean, Byte, SByte, Int16, UInt16, Int32, UInt32, Int64, UInt64, IntPtr, UIntPtr, Char, Double, and Single.
             if (t.IsPrimitive) return true;
@@ -45,16 +42,14 @@ namespace UniRx.Async.Internal
             return false;
         }
 
-        static class WellKnownNoReferenceContainsType<T>
+        private static class WellKnownNoReferenceContainsType<T>
         {
             public static readonly bool IsWellKnownType;
 
-            static WellKnownNoReferenceContainsType()
+            static WellKnownNoReferenceContainsType ()
             {
                 IsWellKnownType = WellKnownNoReferenceContainsTypeInitialize(typeof(T));
             }
         }
     }
 }
-
-#endif

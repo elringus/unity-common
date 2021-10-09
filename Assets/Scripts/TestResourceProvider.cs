@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UniRx.Async;
 using UnityCommon;
 using UnityEngine;
 
@@ -10,7 +9,11 @@ public class TestResourceProvider : MonoBehaviour
     public static IResourceProvider EditorProvider;
 
     [Serializable]
-    public class PathToObj { public string Path; public UnityEngine.Object Object; }
+    public class PathToObj
+    {
+        public string Path;
+        public UnityEngine.Object Object;
+    }
 
     public SpriteRenderer SpriteRenderer;
     public AudioSource AudioSource;
@@ -28,10 +31,10 @@ public class TestResourceProvider : MonoBehaviour
     private void Awake ()
     {
         provider = InitializeProjectResourceProvider();
-        //provider = InitializeEditorResourceProvider();
-        //provider = InitializeLocalResourceProvider();
-        //provider = InitializeGoogleDriveResourceProvider(true);
-        //provider = InitializeAddresableResourceProvider();
+        // provider = InitializeEditorResourceProvider();
+        // provider = InitializeLocalResourceProvider();
+        // provider = InitializeGoogleDriveResourceProvider(true);
+        // provider = InitializeAddresableResourceProvider();
     }
 
     private async void Start ()
@@ -85,21 +88,14 @@ public class TestResourceProvider : MonoBehaviour
 
     private IResourceProvider InitializeGoogleDriveResourceProvider (bool purgeCache)
     {
-        #if UNITY_GOOGLE_DRIVE_AVAILABLE
         var provider = new GoogleDriveResourceProvider("Resources", GoogleDriveResourceProvider.CachingPolicyType.Smart, 2);
-
         provider.AddConverter(new JpgOrPngToSpriteConverter());
         provider.AddConverter(new JpgOrPngToTextureConverter());
         provider.AddConverter(new GDocToTextAssetConverter());
         //provider.AddConverter(new WavToAudioClipConverter());
         provider.AddConverter(new Mp3ToAudioClipConverter());
-
         if (purgeCache) provider.PurgeCache();
-
         return provider;
-        #else
-        return null;
-        #endif
     }
 
     private static LocalResourceProvider InitializeLocalResourceProvider ()

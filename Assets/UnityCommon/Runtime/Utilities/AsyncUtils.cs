@@ -1,5 +1,3 @@
-using UniRx.Async;
-
 namespace UnityCommon
 {
     public static class AsyncUtils

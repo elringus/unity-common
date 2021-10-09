@@ -59,7 +59,7 @@ namespace UnityCommon
         public static float Spring (float start, float end, float value)
         {
             value = Mathf.Clamp01(value);
-            value = (Mathf.Sin(value * Mathf.PI * (.2f + 2.5f * value * value * value)) * Mathf.Pow(1f - value, 2.2f) + value) * (1f + (1.2f * (1f - value)));
+            value = (Mathf.Sin(value * Mathf.PI * (.2f + 2.5f * value * value * value)) * Mathf.Pow(1f - value, 2.2f) + value) * (1f + 1.2f * (1f - value));
             return start + (end - start) * value;
         }
 
@@ -222,24 +222,24 @@ namespace UnityCommon
         {
             value /= 1f;
             end -= start;
-            if (value < (1 / 2.75f))
+            if (value < 1 / 2.75f)
             {
                 return end * (7.5625f * value * value) + start;
             }
-            else if (value < (2 / 2.75f))
+            else if (value < 2 / 2.75f)
             {
-                value -= (1.5f / 2.75f);
-                return end * (7.5625f * (value) * value + .75f) + start;
+                value -= 1.5f / 2.75f;
+                return end * (7.5625f * value * value + .75f) + start;
             }
-            else if (value < (2.5 / 2.75))
+            else if (value < 2.5 / 2.75)
             {
-                value -= (2.25f / 2.75f);
-                return end * (7.5625f * (value) * value + .9375f) + start;
+                value -= 2.25f / 2.75f;
+                return end * (7.5625f * value * value + .9375f) + start;
             }
             else
             {
-                value -= (2.625f / 2.75f);
-                return end * (7.5625f * (value) * value + .984375f) + start;
+                value -= 2.625f / 2.75f;
+                return end * (7.5625f * value * value + .984375f) + start;
             }
         }
 
@@ -272,14 +272,14 @@ namespace UnityCommon
             float s = 1.70158f;
             end -= start;
             value /= .5f;
-            if ((value) < 1)
+            if (value < 1)
             {
-                s *= (1.525f);
+                s *= 1.525f;
                 return end * .5f * (value * value * ((s + 1) * value - s)) + start;
             }
             value -= 2;
-            s *= (1.525f);
-            return end * .5f * ((value) * value * ((s + 1) * value + s) + 2) + start;
+            s *= 1.525f;
+            return end * .5f * (value * value * ((s + 1) * value + s) + 2) + start;
         }
 
         public static float EaseInElastic (float start, float end, float value)

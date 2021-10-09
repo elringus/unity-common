@@ -143,7 +143,7 @@ namespace UnityCommon
                         trans = obj.transform;
                         if (parent != null)
                         {
-                            bool worldPositionStays = (parent.GetComponent<RectTransform>() == null);
+                            bool worldPositionStays = parent.GetComponent<RectTransform>() == null;
                             trans.SetParent(parent, worldPositionStays);
                         }
                         trans.position = position;
@@ -157,7 +157,7 @@ namespace UnityCommon
                 trans = obj.transform;
                 if (parent != null)
                 {
-                    bool worldPositionStays = (parent.GetComponent<RectTransform>() == null);
+                    bool worldPositionStays = parent.GetComponent<RectTransform>() == null;
                     trans.SetParent(parent, worldPositionStays);
                 }
                 trans.position = position;

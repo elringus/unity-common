@@ -1,77 +1,56 @@
-#if CSHARP_7_OR_LATER || (UNITY_2018_3_OR_NEWER && (NET_STANDARD_2_0 || NET_4_6))
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
 using System;
 using System.Linq;
-using UnityEngine;
-using UniRx.Async.Internal;
 using System.Threading;
-
-#if UNITY_2019_3_OR_NEWER
+using UnityCommon.Async.Internal;
+using UnityEngine;
 using UnityEngine.LowLevel;
-#else
-using UnityEngine.Experimental.LowLevel;
-#endif
-
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
-namespace UniRx.Async
+namespace UnityCommon.Async
 {
     public static class UniTaskLoopRunners
     {
-        public struct UniTaskLoopRunnerInitialization { };
-        public struct UniTaskLoopRunnerEarlyUpdate { };
-        public struct UniTaskLoopRunnerFixedUpdate { };
-        public struct UniTaskLoopRunnerPreUpdate { };
-        public struct UniTaskLoopRunnerUpdate { };
-        public struct UniTaskLoopRunnerPreLateUpdate { };
-        public struct UniTaskLoopRunnerPostLateUpdate { };
+        public struct UniTaskLoopRunnerInitialization { }
+        public struct UniTaskLoopRunnerEarlyUpdate { }
+        public struct UniTaskLoopRunnerFixedUpdate { }
+        public struct UniTaskLoopRunnerPreUpdate { }
+        public struct UniTaskLoopRunnerUpdate { }
+        public struct UniTaskLoopRunnerPreLateUpdate { }
+        public struct UniTaskLoopRunnerPostLateUpdate { }
 
         // Yield
 
-        public struct UniTaskLoopRunnerYieldInitialization { };
-        public struct UniTaskLoopRunnerYieldEarlyUpdate { };
-        public struct UniTaskLoopRunnerYieldFixedUpdate { };
-        public struct UniTaskLoopRunnerYieldPreUpdate { };
-        public struct UniTaskLoopRunnerYieldUpdate { };
-        public struct UniTaskLoopRunnerYieldPreLateUpdate { };
-        public struct UniTaskLoopRunnerYieldPostLateUpdate { };
-    }
-
-    public enum PlayerLoopTiming
-    {
-        Initialization = 0,
-        EarlyUpdate = 1,
-        FixedUpdate = 2,
-        PreUpdate = 3,
-        Update = 4,
-        PreLateUpdate = 5,
-        PostLateUpdate = 6
+        public struct UniTaskLoopRunnerYieldInitialization { }
+        public struct UniTaskLoopRunnerYieldEarlyUpdate { }
+        public struct UniTaskLoopRunnerYieldFixedUpdate { }
+        public struct UniTaskLoopRunnerYieldPreUpdate { }
+        public struct UniTaskLoopRunnerYieldUpdate { }
+        public struct UniTaskLoopRunnerYieldPreLateUpdate { }
+        public struct UniTaskLoopRunnerYieldPostLateUpdate { }
     }
 
     public interface IPlayerLoopItem
     {
-        bool MoveNext();
+        bool MoveNext ();
     }
 
     public static class PlayerLoopHelper
     {
-        public static SynchronizationContext UnitySynchronizationContext => unitySynchronizationContetext;
+        public static SynchronizationContext UnitySynchronizationContext => unitySynchronizationContext;
         public static int MainThreadId => mainThreadId;
 
-        static int mainThreadId;
-        static SynchronizationContext unitySynchronizationContetext;
-        static ContinuationQueue[] yielders;
-        static PlayerLoopRunner[] runners;
+        private static int mainThreadId;
+        private static SynchronizationContext unitySynchronizationContext;
+        private static ContinuationQueue[] yielders;
+        private static PlayerLoopRunner[] runners;
 
-        static PlayerLoopSystem[] InsertRunner(PlayerLoopSystem loopSystem, Type loopRunnerYieldType,
+        private static PlayerLoopSystem[] InsertRunner (PlayerLoopSystem loopSystem, Type loopRunnerYieldType,
             ContinuationQueue cq, Type loopRunnerType, PlayerLoopRunner runner)
         {
-#if UNITY_EDITOR
-            EditorApplication.playModeStateChanged += (state) =>
-            {
+            #if UNITY_EDITOR
+            EditorApplication.playModeStateChanged += state => {
                 if (state == PlayModeStateChange.EnteredEditMode ||
                     state == PlayModeStateChange.EnteredPlayMode) return;
 
@@ -80,16 +59,14 @@ namespace UniRx.Async
                 if (cq != null)
                     cq.Clear();
             };
-#endif
-            
-            var yieldLoop = new PlayerLoopSystem
-            {
+            #endif
+
+            var yieldLoop = new PlayerLoopSystem {
                 type = loopRunnerYieldType,
                 updateDelegate = cq.Run
             };
 
-            var runnerLoop = new PlayerLoopSystem
-            {
+            var runnerLoop = new PlayerLoopSystem {
                 type = loopRunnerType,
                 updateDelegate = runner.Run
             };
@@ -104,36 +81,30 @@ namespace UniRx.Async
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        static void Init()
+        private static void Init ()
         {
             // capture default(unity) sync-context.
-            unitySynchronizationContetext = SynchronizationContext.Current;
+            unitySynchronizationContext = SynchronizationContext.Current;
             mainThreadId = Thread.CurrentThread.ManagedThreadId;
 
-#if UNITY_EDITOR && UNITY_2019_3_OR_NEWER
+            #if UNITY_EDITOR
             // When domain reload is disabled, re-initialization is required when entering play mode; 
             // otherwise, pending tasks will leak between play mode sessions.
-            var domainReloadDisabled = UnityEditor.EditorSettings.enterPlayModeOptionsEnabled &&
-                UnityEditor.EditorSettings.enterPlayModeOptions.HasFlag(UnityEditor.EnterPlayModeOptions.DisableDomainReload);
+            var domainReloadDisabled = EditorSettings.enterPlayModeOptionsEnabled &&
+                                       EditorSettings.enterPlayModeOptions.HasFlag(EnterPlayModeOptions.DisableDomainReload);
             if (!domainReloadDisabled && runners != null) return;
-#else
+            #else
             if (runners != null) return; // already initialized
-#endif
+            #endif
 
-            var playerLoop =
-#if UNITY_2019_3_OR_NEWER
-                PlayerLoop.GetCurrentPlayerLoop();
-#else
-                PlayerLoop.GetDefaultPlayerLoop();
-#endif
+            var playerLoop = PlayerLoop.GetCurrentPlayerLoop();
 
             Initialize(ref playerLoop);
         }
 
-
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         [InitializeOnLoadMethod]
-        static void InitOnEditor()
+        private static void InitOnEditor ()
         {
             //Execute the play mode init method
             Init();
@@ -142,8 +113,7 @@ namespace UniRx.Async
             EditorApplication.update += ForceEditorPlayerLoopUpdate;
         }
 
-
-        private static void ForceEditorPlayerLoopUpdate()
+        private static void ForceEditorPlayerLoopUpdate ()
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling ||
                 EditorApplication.isUpdating)
@@ -156,9 +126,9 @@ namespace UniRx.Async
             EditorApplication.QueuePlayerLoopUpdate();
         }
 
-#endif
+        #endif
 
-        public static void Initialize(ref PlayerLoopSystem playerLoop)
+        public static void Initialize (ref PlayerLoopSystem playerLoop)
         {
             yielders = new ContinuationQueue[7];
             runners = new PlayerLoopRunner[7];
@@ -177,16 +147,14 @@ namespace UniRx.Async
             PlayerLoop.SetPlayerLoop(playerLoop);
         }
 
-        public static void AddAction(PlayerLoopTiming timing, IPlayerLoopItem action)
+        public static void AddAction (PlayerLoopTiming timing, IPlayerLoopItem action)
         {
             runners[(int)timing].AddAction(action);
         }
 
-        public static void AddContinuation(PlayerLoopTiming timing, Action continuation)
+        public static void AddContinuation (PlayerLoopTiming timing, Action continuation)
         {
             yielders[(int)timing].Enqueue(continuation);
         }
     }
 }
-
-#endif

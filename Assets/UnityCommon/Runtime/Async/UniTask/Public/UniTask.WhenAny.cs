@@ -1,12 +1,9 @@
-#if CSHARP_7_OR_LATER || (UNITY_2018_3_OR_NEWER && (NET_STANDARD_2_0 || NET_4_6))
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 
-namespace UniRx.Async
+namespace UnityCommon
 {
     public readonly partial struct UniTask
     {
@@ -28,15 +25,15 @@ namespace UniRx.Async
             return await new WhenAnyPromise(tasks);
         }
 
-        class UnitWhenAnyPromise<T0>
+        private class UnitWhenAnyPromise<T0>
         {
-            T0 result0;
-            ExceptionDispatchInfo exception;
-            Action whenComplete;
-            int completeCount;
-            int winArgumentIndex;
+            private T0 result0;
+            private ExceptionDispatchInfo exception;
+            private Action whenComplete;
+            private int completeCount;
+            private int winArgumentIndex;
 
-            bool IsCompleted => exception != null || Volatile.Read(ref winArgumentIndex) != -1;
+            private bool IsCompleted => exception != null || Volatile.Read(ref winArgumentIndex) != -1;
 
             public UnitWhenAnyPromise (UniTask<T0> task0, UniTask task1)
             {
@@ -44,22 +41,19 @@ namespace UniRx.Async
                 this.exception = null;
                 this.completeCount = 0;
                 this.winArgumentIndex = -1;
-                this.result0 = default(T0);
+                this.result0 = default;
 
                 RunTask0(task0).Forget();
                 RunTask1(task1).Forget();
             }
 
-            void TryCallContinuation ()
+            private void TryCallContinuation ()
             {
                 var action = Interlocked.Exchange(ref whenComplete, null);
-                if (action != null)
-                {
-                    action.Invoke();
-                }
+                action?.Invoke();
             }
 
-            async UniTaskVoid RunTask0 (UniTask<T0> task)
+            private async UniTaskVoid RunTask0 (UniTask<T0> task)
             {
                 T0 value;
                 try
@@ -82,7 +76,7 @@ namespace UniRx.Async
                 }
             }
 
-            async UniTaskVoid RunTask1 (UniTask task)
+            private async UniTaskVoid RunTask1 (UniTask task)
             {
                 try
                 {
@@ -111,27 +105,18 @@ namespace UniRx.Async
             // ReSharper disable once MemberHidesStaticFromOuterClass
             public struct Awaiter : ICriticalNotifyCompletion
             {
-                UnitWhenAnyPromise<T0> parent;
+                private UnitWhenAnyPromise<T0> parent;
 
                 public Awaiter (UnitWhenAnyPromise<T0> parent)
                 {
                     this.parent = parent;
                 }
 
-                public bool IsCompleted
-                {
-                    get
-                    {
-                        return parent.IsCompleted;
-                    }
-                }
+                public bool IsCompleted => parent.IsCompleted;
 
                 public (bool, T0) GetResult ()
                 {
-                    if (parent.exception != null)
-                    {
-                        parent.exception.Throw();
-                    }
+                    parent.exception?.Throw();
 
                     return (parent.winArgumentIndex == 0, parent.result0);
                 }
@@ -147,22 +132,19 @@ namespace UniRx.Async
                     if (IsCompleted)
                     {
                         var action = Interlocked.Exchange(ref parent.whenComplete, null);
-                        if (action != null)
-                        {
-                            action();
-                        }
+                        action?.Invoke();
                     }
                 }
             }
         }
 
-        class WhenAnyPromise<T>
+        private class WhenAnyPromise<T>
         {
-            T result;
-            int completeCount;
-            int winArgumentIndex;
-            Action whenComplete;
-            ExceptionDispatchInfo exception;
+            private T result;
+            private int completeCount;
+            private int winArgumentIndex;
+            private Action whenComplete;
+            private ExceptionDispatchInfo exception;
 
             public bool IsComplete => exception != null || Volatile.Read(ref winArgumentIndex) != -1;
 
@@ -172,7 +154,7 @@ namespace UniRx.Async
                 this.winArgumentIndex = -1;
                 this.whenComplete = null;
                 this.exception = null;
-                this.result = default(T);
+                this.result = default;
 
                 for (int i = 0; i < tasks.Length; i++)
                 {
@@ -180,7 +162,7 @@ namespace UniRx.Async
                 }
             }
 
-            async UniTaskVoid RunTask (UniTask<T> task, int index)
+            private async UniTaskVoid RunTask (UniTask<T> task, int index)
             {
                 T value;
                 try
@@ -203,13 +185,10 @@ namespace UniRx.Async
                 }
             }
 
-            void TryCallContinuation ()
+            private void TryCallContinuation ()
             {
                 var action = Interlocked.Exchange(ref whenComplete, null);
-                if (action != null)
-                {
-                    action.Invoke();
-                }
+                action?.Invoke();
             }
 
             public Awaiter GetAwaiter ()
@@ -220,27 +199,18 @@ namespace UniRx.Async
             // ReSharper disable once MemberHidesStaticFromOuterClass
             public struct Awaiter : ICriticalNotifyCompletion
             {
-                WhenAnyPromise<T> parent;
+                private WhenAnyPromise<T> parent;
 
                 public Awaiter (WhenAnyPromise<T> parent)
                 {
                     this.parent = parent;
                 }
 
-                public bool IsCompleted
-                {
-                    get
-                    {
-                        return parent.IsComplete;
-                    }
-                }
+                public bool IsCompleted => parent.IsComplete;
 
                 public (int, T) GetResult ()
                 {
-                    if (parent.exception != null)
-                    {
-                        parent.exception.Throw();
-                    }
+                    parent.exception?.Throw();
 
                     return (parent.winArgumentIndex, parent.result);
                 }
@@ -256,21 +226,18 @@ namespace UniRx.Async
                     if (IsCompleted)
                     {
                         var action = Interlocked.Exchange(ref parent.whenComplete, null);
-                        if (action != null)
-                        {
-                            action();
-                        }
+                        action?.Invoke();
                     }
                 }
             }
         }
 
-        class WhenAnyPromise
+        private class WhenAnyPromise
         {
-            int completeCount;
-            int winArgumentIndex;
-            Action whenComplete;
-            ExceptionDispatchInfo exception;
+            private int completeCount;
+            private int winArgumentIndex;
+            private Action whenComplete;
+            private ExceptionDispatchInfo exception;
 
             public bool IsComplete => exception != null || Volatile.Read(ref winArgumentIndex) != -1;
 
@@ -287,7 +254,7 @@ namespace UniRx.Async
                 }
             }
 
-            async UniTaskVoid RunTask (UniTask task, int index)
+            private async UniTaskVoid RunTask (UniTask task, int index)
             {
                 try
                 {
@@ -308,7 +275,7 @@ namespace UniRx.Async
                 }
             }
 
-            void TryCallContinuation ()
+            private void TryCallContinuation ()
             {
                 var action = Interlocked.Exchange(ref whenComplete, null);
                 if (action != null)
@@ -325,27 +292,18 @@ namespace UniRx.Async
             // ReSharper disable once MemberHidesStaticFromOuterClass
             public struct Awaiter : ICriticalNotifyCompletion
             {
-                WhenAnyPromise parent;
+                private WhenAnyPromise parent;
 
                 public Awaiter (WhenAnyPromise parent)
                 {
                     this.parent = parent;
                 }
 
-                public bool IsCompleted
-                {
-                    get
-                    {
-                        return parent.IsComplete;
-                    }
-                }
+                public bool IsCompleted => parent.IsComplete;
 
                 public int GetResult ()
                 {
-                    if (parent.exception != null)
-                    {
-                        parent.exception.Throw();
-                    }
+                    parent.exception?.Throw();
 
                     return parent.winArgumentIndex;
                 }
@@ -361,15 +319,10 @@ namespace UniRx.Async
                     if (IsCompleted)
                     {
                         var action = Interlocked.Exchange(ref parent.whenComplete, null);
-                        if (action != null)
-                        {
-                            action();
-                        }
+                        action?.Invoke();
                     }
                 }
             }
         }
     }
 }
-
-#endif

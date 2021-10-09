@@ -1,20 +1,18 @@
-#if CSHARP_7_OR_LATER || (UNITY_2018_3_OR_NEWER && (NET_STANDARD_2_0 || NET_4_6))
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Threading;
-using UniRx.Async.Internal;
+using UnityCommon.Async;
+using UnityCommon.Async.Internal;
 
-namespace UniRx.Async
+namespace UnityCommon
 {
     internal class ExceptionHolder
     {
-        ExceptionDispatchInfo exception;
-        bool calledGet = false;
+        private ExceptionDispatchInfo exception;
+        private bool calledGet = false;
 
         public ExceptionHolder (ExceptionDispatchInfo exception)
         {
@@ -64,15 +62,15 @@ namespace UniRx.Async
     public class UniTaskCompletionSource : IAwaiter, IPromise
     {
         // State(= AwaiterStatus)
-        const int Pending = 0;
-        const int Succeeded = 1;
-        const int Faulted = 2;
-        const int Canceled = 3;
+        private const int Pending = 0;
+        private const int Succeeded = 1;
+        private const int Faulted = 2;
+        private const int Canceled = 3;
 
-        int state = 0;
-        bool handled = false;
-        ExceptionHolder exception;
-        object continuation; // action or list
+        private int state = 0;
+        private bool handled = false;
+        private ExceptionHolder exception;
+        private object continuation; // action or list
 
         AwaiterStatus IAwaiter.Status => (AwaiterStatus)state;
 
@@ -109,10 +107,7 @@ namespace UniRx.Async
             }
             else if (state == Canceled)
             {
-                if (exception != null)
-                {
-                    exception.GetException().Throw(); // guranteed operation canceled exception.
-                }
+                exception?.GetException().Throw(); // guranteed operation canceled exception.
 
                 throw new OperationCanceledException();
             }
@@ -159,7 +154,7 @@ namespace UniRx.Async
             }
         }
 
-        void TryInvokeContinuation ()
+        private void TryInvokeContinuation ()
         {
             var c = Interlocked.Exchange(ref continuation, null);
             if (c != null)
@@ -231,16 +226,16 @@ namespace UniRx.Async
     public class UniTaskCompletionSource<T> : IAwaiter<T>, IPromise<T>
     {
         // State(= AwaiterStatus)
-        const int Pending = 0;
-        const int Succeeded = 1;
-        const int Faulted = 2;
-        const int Canceled = 3;
+        private const int Pending = 0;
+        private const int Succeeded = 1;
+        private const int Faulted = 2;
+        private const int Canceled = 3;
 
-        int state = 0;
-        T value;
-        bool handled = false;
-        ExceptionHolder exception;
-        object continuation; // action or list
+        private int state = 0;
+        private T value;
+        private bool handled = false;
+        private ExceptionHolder exception;
+        private object continuation; // action or list
 
         bool IAwaiter.IsCompleted => state != Pending;
 
@@ -290,7 +285,7 @@ namespace UniRx.Async
                 throw new NotSupportedException("UniTask does not allow call GetResult directly when task not completed. Please use 'await'.");
             }
 
-            return default(T);
+            return default;
         }
 
         void ICriticalNotifyCompletion.UnsafeOnCompleted (Action action)
@@ -330,7 +325,7 @@ namespace UniRx.Async
             }
         }
 
-        void TryInvokeContinuation ()
+        private void TryInvokeContinuation ()
         {
             var c = Interlocked.Exchange(ref continuation, null);
             if (c != null)
@@ -405,5 +400,3 @@ namespace UniRx.Async
         }
     }
 }
-
-#endif

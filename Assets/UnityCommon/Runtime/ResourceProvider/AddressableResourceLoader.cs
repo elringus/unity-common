@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using UniRx.Async;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.ResourceLocations;

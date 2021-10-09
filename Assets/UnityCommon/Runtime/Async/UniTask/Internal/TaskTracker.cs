@@ -1,20 +1,17 @@
-#if CSHARP_7_OR_LATER || (UNITY_2018_3_OR_NEWER && (NET_STANDARD_2_0 || NET_4_6))
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 
-namespace UniRx.Async.Internal
+namespace UnityCommon.Async.Internal
 {
     // public for add user custom.
 
     public static class TaskTracker
     {
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
 
-        static int trackingId = 0;
+        private static int trackingId = 0;
 
         public const string EnableAutoReloadKey = "UniTaskTrackerWindow_EnableAutoReloadKey";
         public const string EnableTrackingKey = "UniTaskTrackerWindow_EnableTrackingKey";
@@ -22,7 +19,7 @@ namespace UniRx.Async.Internal
 
         public static class EditorEnableState
         {
-            static bool enableAutoReload;
+            private static bool enableAutoReload;
             public static bool EnableAutoReload
             {
                 get { return enableAutoReload; }
@@ -33,7 +30,7 @@ namespace UniRx.Async.Internal
                 }
             }
 
-            static bool enableTracking;
+            private static bool enableTracking;
             public static bool EnableTracking
             {
                 get { return enableTracking; }
@@ -44,7 +41,7 @@ namespace UniRx.Async.Internal
                 }
             }
 
-            static bool enableStackTrace;
+            private static bool enableStackTrace;
             public static bool EnableStackTrace
             {
                 get { return enableStackTrace; }
@@ -56,58 +53,57 @@ namespace UniRx.Async.Internal
             }
         }
 
-#endif
+        #endif
 
+        private static List<KeyValuePair<IAwaiter, (int trackingId, DateTime addTime, string stackTrace)>> listPool = new List<KeyValuePair<IAwaiter, (int trackingId, DateTime addTime, string stackTrace)>>();
 
-        static List<KeyValuePair<IAwaiter, (int trackingId, DateTime addTime, string stackTrace)>> listPool = new List<KeyValuePair<IAwaiter, (int trackingId, DateTime addTime, string stackTrace)>>();
-
-        static readonly WeakDictionary<IAwaiter, (int trackingId, DateTime addTime, string stackTrace)> tracking = new WeakDictionary<IAwaiter, (int trackingId, DateTime addTime, string stackTrace)>();
+        private static readonly WeakDictionary<IAwaiter, (int trackingId, DateTime addTime, string stackTrace)> tracking = new WeakDictionary<IAwaiter, (int trackingId, DateTime addTime, string stackTrace)>();
 
         [Conditional("UNITY_EDITOR")]
-        public static void TrackActiveTask(IAwaiter task, int skipFrame = 1)
+        public static void TrackActiveTask (IAwaiter task, int skipFrame = 1)
         {
-#if UNITY_EDITOR
+            #if UNITY_EDITOR
             dirty = true;
             if (!EditorEnableState.EnableTracking) return;
             var stackTrace = EditorEnableState.EnableStackTrace ? new StackTrace(skipFrame, true).CleanupAsyncStackTrace() : "";
             tracking.TryAdd(task, (Interlocked.Increment(ref trackingId), DateTime.UtcNow, stackTrace));
-#endif
+            #endif
         }
 
         [Conditional("UNITY_EDITOR")]
-        public static void TrackActiveTask(IAwaiter task, string stackTrace)
+        public static void TrackActiveTask (IAwaiter task, string stackTrace)
         {
-#if UNITY_EDITOR
+            #if UNITY_EDITOR
             dirty = true;
             if (!EditorEnableState.EnableTracking) return;
             var success = tracking.TryAdd(task, (Interlocked.Increment(ref trackingId), DateTime.UtcNow, stackTrace));
-#endif
+            #endif
         }
 
-        public static string CaptureStackTrace(int skipFrame)
+        public static string CaptureStackTrace (int skipFrame)
         {
-#if UNITY_EDITOR
+            #if UNITY_EDITOR
             if (!EditorEnableState.EnableTracking) return "";
             var stackTrace = EditorEnableState.EnableStackTrace ? new StackTrace(skipFrame + 1, true).CleanupAsyncStackTrace() : "";
             return stackTrace;
-#else
+            #else
             return null;
-#endif
+            #endif
         }
 
         [Conditional("UNITY_EDITOR")]
-        public static void RemoveTracking(IAwaiter task)
+        public static void RemoveTracking (IAwaiter task)
         {
-#if UNITY_EDITOR
+            #if UNITY_EDITOR
             dirty = true;
             if (!EditorEnableState.EnableTracking) return;
             var success = tracking.TryRemove(task);
-#endif
+            #endif
         }
 
-        static bool dirty;
+        private static bool dirty;
 
-        public static bool CheckAndResetDirty()
+        public static bool CheckAndResetDirty ()
         {
             var current = dirty;
             dirty = false;
@@ -115,7 +111,7 @@ namespace UniRx.Async.Internal
         }
 
         /// <summary>(trackingId, awaiterType, awaiterStatus, createdTime, stackTrace)</summary>
-        public static void ForEachActiveTask(Action<int, string, AwaiterStatus, DateTime, string> action)
+        public static void ForEachActiveTask (Action<int, string, AwaiterStatus, DateTime, string> action)
         {
             lock (listPool)
             {
@@ -128,7 +124,7 @@ namespace UniRx.Async.Internal
                         var keyType = listPool[i].Key.GetType();
                         if (keyType.IsNested)
                         {
-                            typeName = keyType.DeclaringType.Name + "." + keyType.Name;
+                            typeName = keyType.DeclaringType?.Name + "." + keyType.Name;
                         }
                         else
                         {
@@ -136,7 +132,7 @@ namespace UniRx.Async.Internal
                         }
 
                         action(listPool[i].Value.trackingId, typeName, listPool[i].Key.Status, listPool[i].Value.addTime, listPool[i].Value.stackTrace);
-                        listPool[i] = new KeyValuePair<IAwaiter, (int trackingId, DateTime addTime, string stackTrace)>(null, (0, default(DateTime), null)); // clear
+                        listPool[i] = new KeyValuePair<IAwaiter, (int trackingId, DateTime addTime, string stackTrace)>(null, (0, default, null)); // clear
                     }
                 }
                 catch
@@ -148,5 +144,3 @@ namespace UniRx.Async.Internal
         }
     }
 }
-
-#endif

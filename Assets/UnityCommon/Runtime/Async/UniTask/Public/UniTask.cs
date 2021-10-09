@@ -1,15 +1,12 @@
-#if CSHARP_7_OR_LATER || (UNITY_2018_3_OR_NEWER && (NET_STANDARD_2_0 || NET_4_6))
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-#pragma warning disable CS0436
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using UniRx.Async.CompilerServices;
-using UniRx.Async.Internal;
+using UnityCommon.Async;
+using UnityCommon.Async.CompilerServices;
+using UnityCommon.Async.Internal;
 
-namespace UniRx.Async
+namespace UnityCommon
 {
     /// <summary>
     /// Lightweight unity specified task-like object.
@@ -17,9 +14,9 @@ namespace UniRx.Async
     [AsyncMethodBuilder(typeof(AsyncUniTaskMethodBuilder))]
     public readonly partial struct UniTask : IEquatable<UniTask>
     {
-        static readonly UniTask<AsyncUnit> DefaultAsyncUnitTask = new UniTask<AsyncUnit>(AsyncUnit.Default);
+        private static readonly UniTask<AsyncUnit> DefaultAsyncUnitTask = new UniTask<AsyncUnit>(AsyncUnit.Default);
 
-        readonly IAwaiter awaiter;
+        private readonly IAwaiter awaiter;
 
         [DebuggerHidden]
         public UniTask (IAwaiter awaiter)
@@ -34,30 +31,15 @@ namespace UniRx.Async
         }
 
         [DebuggerHidden]
-        public AwaiterStatus Status
-        {
-            get
-            {
-                return awaiter == null ? AwaiterStatus.Succeeded : awaiter.Status;
-            }
-        }
+        public AwaiterStatus Status => awaiter?.Status ?? AwaiterStatus.Succeeded;
 
         [DebuggerHidden]
-        public bool IsCompleted
-        {
-            get
-            {
-                return awaiter == null ? true : awaiter.IsCompleted;
-            }
-        }
+        public bool IsCompleted => awaiter == null || awaiter.IsCompleted;
 
         [DebuggerHidden]
         public void GetResult ()
         {
-            if (awaiter != null)
-            {
-                awaiter.GetResult();
-            }
+            awaiter?.GetResult();
         }
 
         [DebuggerHidden]
@@ -107,8 +89,8 @@ namespace UniRx.Async
 
         public override string ToString ()
         {
-            return (this.awaiter == null) ? "()"
-                : (this.awaiter.Status == AwaiterStatus.Succeeded) ? "()"
+            return this.awaiter == null ? "()"
+                : this.awaiter.Status == AwaiterStatus.Succeeded ? "()"
                 : "(" + this.awaiter.Status + ")";
         }
 
@@ -132,9 +114,9 @@ namespace UniRx.Async
             }
         }
 
-        class AsyncUnitAwaiter : IAwaiter<AsyncUnit>
+        private class AsyncUnitAwaiter : IAwaiter<AsyncUnit>
         {
-            readonly IAwaiter awaiter;
+            private readonly IAwaiter awaiter;
 
             public AsyncUnitAwaiter (IAwaiter awaiter)
             {
@@ -167,9 +149,9 @@ namespace UniRx.Async
             }
         }
 
-        class IsCanceledAwaiter : IAwaiter<bool>
+        private class IsCanceledAwaiter : IAwaiter<bool>
         {
-            readonly IAwaiter awaiter;
+            private readonly IAwaiter awaiter;
 
             public IsCanceledAwaiter (IAwaiter awaiter)
             {
@@ -206,9 +188,9 @@ namespace UniRx.Async
             }
         }
 
-        public struct Awaiter : IAwaiter
+        public readonly struct Awaiter : IAwaiter
         {
-            readonly UniTask task;
+            private readonly UniTask task;
 
             [DebuggerHidden]
             public Awaiter (UniTask task)
@@ -258,10 +240,10 @@ namespace UniRx.Async
     /// Lightweight unity specified task-like object.
     /// </summary>
     [AsyncMethodBuilder(typeof(AsyncUniTaskMethodBuilder<>))]
-    public struct UniTask<T> : IEquatable<UniTask<T>>
+    public readonly struct UniTask<T> : IEquatable<UniTask<T>>
     {
-        readonly T result;
-        readonly IAwaiter<T> awaiter;
+        private readonly T result;
+        private readonly IAwaiter<T> awaiter;
 
         [DebuggerHidden]
         public UniTask (T result)
@@ -273,34 +255,22 @@ namespace UniRx.Async
         [DebuggerHidden]
         public UniTask (IAwaiter<T> awaiter)
         {
-            this.result = default(T);
+            this.result = default;
             this.awaiter = awaiter;
         }
 
         [DebuggerHidden]
         public UniTask (Func<UniTask<T>> factory)
         {
-            this.result = default(T);
+            this.result = default;
             this.awaiter = new LazyPromise<T>(factory);
         }
 
         [DebuggerHidden]
-        public AwaiterStatus Status
-        {
-            get
-            {
-                return awaiter == null ? AwaiterStatus.Succeeded : awaiter.Status;
-            }
-        }
+        public AwaiterStatus Status => awaiter?.Status ?? AwaiterStatus.Succeeded;
 
         [DebuggerHidden]
-        public bool IsCompleted
-        {
-            get
-            {
-                return awaiter == null ? true : awaiter.IsCompleted;
-            }
-        }
+        public bool IsCompleted => awaiter == null || awaiter.IsCompleted;
 
         [DebuggerHidden]
         public T Result
@@ -336,7 +306,7 @@ namespace UniRx.Async
             }
             else if (status == AwaiterStatus.Canceled)
             {
-                return new UniTask<(bool, T)>((true, default(T)));
+                return new UniTask<(bool, T)>((true, default));
             }
             return new UniTask<(bool, T)>(new IsCanceledAwaiter(awaiter));
         }
@@ -372,8 +342,8 @@ namespace UniRx.Async
 
         public override string ToString ()
         {
-            return (this.awaiter == null) ? result.ToString()
-                : (this.awaiter.Status == AwaiterStatus.Succeeded) ? this.awaiter.GetResult().ToString()
+            return this.awaiter == null ? result.ToString()
+                : this.awaiter.Status == AwaiterStatus.Succeeded ? this.awaiter.GetResult().ToString()
                 : "(" + this.awaiter.Status + ")";
         }
 
@@ -389,9 +359,9 @@ namespace UniRx.Async
             }
         }
 
-        class IsCanceledAwaiter : IAwaiter<(bool, T)>
+        private class IsCanceledAwaiter : IAwaiter<(bool, T)>
         {
-            readonly IAwaiter<T> awaiter;
+            private readonly IAwaiter<T> awaiter;
 
             public IsCanceledAwaiter (IAwaiter<T> awaiter)
             {
@@ -406,7 +376,7 @@ namespace UniRx.Async
             {
                 if (awaiter.Status == AwaiterStatus.Canceled)
                 {
-                    return (true, default(T));
+                    return (true, default);
                 }
                 return (false, awaiter.GetResult());
             }
@@ -427,9 +397,9 @@ namespace UniRx.Async
             }
         }
 
-        public struct Awaiter : IAwaiter<T>
+        public readonly struct Awaiter : IAwaiter<T>
         {
-            readonly UniTask<T> task;
+            private readonly UniTask<T> task;
 
             [DebuggerHidden]
             public Awaiter (UniTask<T> task)
@@ -477,5 +447,3 @@ namespace UniRx.Async
         }
     }
 }
-
-#endif

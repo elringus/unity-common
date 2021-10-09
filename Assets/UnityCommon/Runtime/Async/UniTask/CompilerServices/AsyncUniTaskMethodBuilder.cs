@@ -1,22 +1,18 @@
-#if CSHARP_7_OR_LATER || (UNITY_2018_3_OR_NEWER && (NET_STANDARD_2_0 || NET_4_6))
-
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
 using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Security;
 
-namespace UniRx.Async.CompilerServices
+namespace UnityCommon.Async.CompilerServices
 {
     public struct AsyncUniTaskMethodBuilder
     {
-        UniTaskCompletionSource promise;
-        Action moveNext;
+        private UniTaskCompletionSource promise;
+        private Action moveNext;
 
         // 1. Static Create method.
         [DebuggerHidden]
-        public static AsyncUniTaskMethodBuilder Create()
+        public static AsyncUniTaskMethodBuilder Create ()
         {
             var builder = new AsyncUniTaskMethodBuilder();
             return builder;
@@ -47,7 +43,7 @@ namespace UniRx.Async.CompilerServices
 
         // 3. SetException
         [DebuggerHidden]
-        public void SetException(Exception exception)
+        public void SetException (Exception exception)
         {
             if (promise == null)
             {
@@ -65,11 +61,9 @@ namespace UniRx.Async.CompilerServices
 
         // 4. SetResult
         [DebuggerHidden]
-        public void SetResult()
+        public void SetResult ()
         {
-            if (moveNext == null)
-            {
-            }
+            if (moveNext == null) { }
             else
             {
                 if (promise == null)
@@ -82,7 +76,7 @@ namespace UniRx.Async.CompilerServices
 
         // 5. AwaitOnCompleted
         [DebuggerHidden]
-        public void AwaitOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
+        public void AwaitOnCompleted<TAwaiter, TStateMachine> (ref TAwaiter awaiter, ref TStateMachine stateMachine)
             where TAwaiter : INotifyCompletion
             where TStateMachine : IAsyncStateMachine
         {
@@ -104,7 +98,7 @@ namespace UniRx.Async.CompilerServices
         // 6. AwaitUnsafeOnCompleted
         [DebuggerHidden]
         [SecuritySafeCritical]
-        public void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
+        public void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine> (ref TAwaiter awaiter, ref TStateMachine stateMachine)
             where TAwaiter : ICriticalNotifyCompletion
             where TStateMachine : IAsyncStateMachine
         {
@@ -125,7 +119,7 @@ namespace UniRx.Async.CompilerServices
 
         // 7. Start
         [DebuggerHidden]
-        public void Start<TStateMachine>(ref TStateMachine stateMachine)
+        public void Start<TStateMachine> (ref TStateMachine stateMachine)
             where TStateMachine : IAsyncStateMachine
         {
             stateMachine.MoveNext();
@@ -133,14 +127,12 @@ namespace UniRx.Async.CompilerServices
 
         // 8. SetStateMachine
         [DebuggerHidden]
-        public void SetStateMachine(IAsyncStateMachine stateMachine)
-        {
-        }
+        public void SetStateMachine (IAsyncStateMachine stateMachine) { }
 
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         // Important for IDE debugger.
-        object debuggingId;
-        private object ObjectIdForDebugger 
+        private object debuggingId;
+        private object ObjectIdForDebugger
         {
             get
             {
@@ -148,22 +140,21 @@ namespace UniRx.Async.CompilerServices
                 {
                     debuggingId = new object();
                 }
-                return debuggingId; 
+                return debuggingId;
             }
         }
-#endif
+        #endif
     }
-
 
     public struct AsyncUniTaskMethodBuilder<T>
     {
-        T result;
-        UniTaskCompletionSource<T> promise;
-        Action moveNext;
+        private T result;
+        private UniTaskCompletionSource<T> promise;
+        private Action moveNext;
 
         // 1. Static Create method.
         [DebuggerHidden]
-        public static AsyncUniTaskMethodBuilder<T> Create()
+        public static AsyncUniTaskMethodBuilder<T> Create ()
         {
             var builder = new AsyncUniTaskMethodBuilder<T>();
             return builder;
@@ -194,7 +185,7 @@ namespace UniRx.Async.CompilerServices
 
         // 3. SetException
         [DebuggerHidden]
-        public void SetException(Exception exception)
+        public void SetException (Exception exception)
         {
             if (promise == null)
             {
@@ -212,7 +203,7 @@ namespace UniRx.Async.CompilerServices
 
         // 4. SetResult
         [DebuggerHidden]
-        public void SetResult(T result)
+        public void SetResult (T result)
         {
             if (moveNext == null)
             {
@@ -230,7 +221,7 @@ namespace UniRx.Async.CompilerServices
 
         // 5. AwaitOnCompleted
         [DebuggerHidden]
-        public void AwaitOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
+        public void AwaitOnCompleted<TAwaiter, TStateMachine> (ref TAwaiter awaiter, ref TStateMachine stateMachine)
             where TAwaiter : INotifyCompletion
             where TStateMachine : IAsyncStateMachine
         {
@@ -252,7 +243,7 @@ namespace UniRx.Async.CompilerServices
         // 6. AwaitUnsafeOnCompleted
         [DebuggerHidden]
         [SecuritySafeCritical]
-        public void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
+        public void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine> (ref TAwaiter awaiter, ref TStateMachine stateMachine)
             where TAwaiter : ICriticalNotifyCompletion
             where TStateMachine : IAsyncStateMachine
         {
@@ -273,7 +264,7 @@ namespace UniRx.Async.CompilerServices
 
         // 7. Start
         [DebuggerHidden]
-        public void Start<TStateMachine>(ref TStateMachine stateMachine)
+        public void Start<TStateMachine> (ref TStateMachine stateMachine)
             where TStateMachine : IAsyncStateMachine
         {
             stateMachine.MoveNext();
@@ -281,13 +272,11 @@ namespace UniRx.Async.CompilerServices
 
         // 8. SetStateMachine
         [DebuggerHidden]
-        public void SetStateMachine(IAsyncStateMachine stateMachine)
-        {
-        }
+        public void SetStateMachine (IAsyncStateMachine stateMachine) { }
 
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         // Important for IDE debugger.
-        object debuggingId;
+        private object debuggingId;
         private object ObjectIdForDebugger
         {
             get
@@ -299,8 +288,6 @@ namespace UniRx.Async.CompilerServices
                 return debuggingId;
             }
         }
-#endif
+        #endif
     }
 }
-
-#endif

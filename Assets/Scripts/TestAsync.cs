@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using UniRx.Async;
+using UnityCommon;
 using UnityEngine;
 
 public class TestAsync : MonoBehaviour

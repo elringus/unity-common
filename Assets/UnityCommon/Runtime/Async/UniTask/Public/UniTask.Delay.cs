@@ -1,14 +1,11 @@
-#if CSHARP_7_OR_LATER || (UNITY_2018_3_OR_NEWER && (NET_STANDARD_2_0 || NET_4_6))
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
 using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using UniRx.Async.Internal;
-using UnityCommon;
+using UnityCommon.Async;
+using UnityCommon.Async.Internal;
 using UnityEngine;
 
-namespace UniRx.Async
+namespace UnityCommon
 {
     public readonly partial struct UniTask
     {
@@ -36,7 +33,7 @@ namespace UniRx.Async
                 throw new ArgumentOutOfRangeException("Delay does not allow minus delayFrameCount. delayTimeSpan:" + delayTimeSpan);
             }
 
-            return (ignoreTimeScale)
+            return ignoreTimeScale
                 ? new DelayIgnoreTimeScalePromise(delayTimeSpan, delayTiming, cancellationToken).Task
                 : new DelayPromise(delayTimeSpan, delayTiming, cancellationToken).Task;
         }
@@ -48,7 +45,7 @@ namespace UniRx.Async
                 throw new ArgumentOutOfRangeException("Delay does not allow minus delayFrameCount. delayTimeSpan:" + delayTimeSpan);
             }
 
-            return (ignoreTimeScale)
+            return ignoreTimeScale
                 ? new DelayIgnoreTimeScalePromise(delayTimeSpan, delayTiming, cancellationToken).Task
                 : new DelayPromise(delayTimeSpan, delayTiming, cancellationToken).Task;
         }
@@ -215,4 +212,3 @@ namespace UniRx.Async
         }
     }
 }
-#endif

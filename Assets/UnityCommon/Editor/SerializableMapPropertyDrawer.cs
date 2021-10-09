@@ -300,8 +300,8 @@ namespace UnityCommon
                 return DrawKeyValueLineExpand(keyProperty, valueProperty, linePosition);
             else
             {
-                var keyLabel = keyCanBeExpanded ? ("Key " + index.ToString()) : "";
-                var valueLabel = valueCanBeExpanded ? ("Value " + index.ToString()) : "";
+                var keyLabel = keyCanBeExpanded ? "Key " + index.ToString() : "";
+                var valueLabel = valueCanBeExpanded ? "Value " + index.ToString() : "";
                 return DrawKeyValueLineSimple(keyProperty, valueProperty, keyLabel, valueLabel, linePosition);
             }
         }

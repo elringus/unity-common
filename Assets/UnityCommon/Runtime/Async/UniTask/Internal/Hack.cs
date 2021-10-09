@@ -1,8 +1,6 @@
-#if NET_4_6 || NET_STANDARD_2_0 || CSHARP_7_OR_LATER
-
 using System;
 
-namespace UniRx.Async.Internal
+namespace UnityCommon.Async.Internal
 {
     internal static class FuncExtensions
     {
@@ -19,5 +17,3 @@ namespace UniRx.Async.Internal
         }
     }
 }
-
-#endif

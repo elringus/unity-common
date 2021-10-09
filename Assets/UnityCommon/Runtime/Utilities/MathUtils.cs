@@ -74,7 +74,7 @@ namespace UnityCommon
 
         public static int ToNearestEven (this int value, int upperLimit = int.MaxValue)
         {
-            return (value % 2 == 0) ? value : Mathf.Min(value + 1, upperLimit);
+            return value % 2 == 0 ? value : Mathf.Min(value + 1, upperLimit);
         }
 
         public static float LinearToDecibel (float linear)

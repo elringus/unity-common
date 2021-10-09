@@ -261,11 +261,11 @@ namespace UnityCommon
         {
             // figure out the distance between our rays in both directions
             // horizontal
-            var colliderUseableHeight = boxCollider.size.y * Mathf.Abs(transform.localScale.y) - (2f * skinWidth);
+            var colliderUseableHeight = boxCollider.size.y * Mathf.Abs(transform.localScale.y) - 2f * skinWidth;
             verticalDistanceBetweenRays = colliderUseableHeight / (TotalHorizontalRays - 1);
 
             // vertical
-            var colliderUseableWidth = boxCollider.size.x * Mathf.Abs(transform.localScale.x) - (2f * skinWidth);
+            var colliderUseableWidth = boxCollider.size.x * Mathf.Abs(transform.localScale.x) - 2f * skinWidth;
             horizontalDistanceBetweenRays = colliderUseableWidth / (TotalVerticalRays - 1);
         }
 
@@ -422,7 +422,7 @@ namespace UnityCommon
 
             // if we are moving up, we should ignore the layers in oneWayPlatformMask
             var mask = PlatformMask;
-            if ((isGoingUp && !collisionState.WasGroundedLastFrame) || ignoreOneWayPlatformsThisFrame)
+            if (isGoingUp && !collisionState.WasGroundedLastFrame || ignoreOneWayPlatformsThisFrame)
                 mask &= ~OneWayPlatformMask;
 
             for (var i = 0; i < TotalVerticalRays; i++)

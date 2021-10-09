@@ -58,7 +58,7 @@ namespace UnityCommon
 
         public static implicit operator TValue (Nullable<TValue> nullable)
         {
-            return (nullable is null || !nullable.HasValue) ? default : nullable.Value;
+            return nullable is null || !nullable.HasValue ? default : nullable.Value;
         }
 
         public static implicit operator Nullable<TValue> (TValue value)
@@ -113,7 +113,7 @@ namespace UnityCommon
     public class NullableString : Nullable<string>
     {
         public static implicit operator NullableString (string value) => new NullableString { Value = value };
-        public static implicit operator string (NullableString nullable) => (nullable is null || !nullable.HasValue) ? null : nullable.Value;
+        public static implicit operator string (NullableString nullable) => nullable is null || !nullable.HasValue ? null : nullable.Value;
     }
 
     /// <summary>
@@ -123,7 +123,7 @@ namespace UnityCommon
     public class NullableInteger : Nullable<int>
     {
         public static implicit operator NullableInteger (int value) => new NullableInteger { Value = value };
-        public static implicit operator int? (NullableInteger nullable) => (nullable is null || !nullable.HasValue) ? null : (int?)nullable.Value;
+        public static implicit operator int? (NullableInteger nullable) => nullable is null || !nullable.HasValue ? null : (int?)nullable.Value;
     }
 
     /// <summary>
@@ -133,7 +133,7 @@ namespace UnityCommon
     public class NullableFloat : Nullable<float>
     {
         public static implicit operator NullableFloat (float value) => new NullableFloat { Value = value };
-        public static implicit operator float? (NullableFloat nullable) => (nullable is null || !nullable.HasValue) ? null : (float?)nullable.Value;
+        public static implicit operator float? (NullableFloat nullable) => nullable is null || !nullable.HasValue ? null : (float?)nullable.Value;
     }
 
     /// <summary>
@@ -143,7 +143,7 @@ namespace UnityCommon
     public class NullableBoolean : Nullable<bool>
     {
         public static implicit operator NullableBoolean (bool value) => new NullableBoolean { Value = value };
-        public static implicit operator bool? (NullableBoolean nullable) => (nullable is null || !nullable.HasValue) ? null : (bool?)nullable.Value;
+        public static implicit operator bool? (NullableBoolean nullable) => nullable is null || !nullable.HasValue ? null : (bool?)nullable.Value;
     }
 
     /// <summary>
@@ -153,7 +153,7 @@ namespace UnityCommon
     public class NullableVector2 : Nullable<Vector2>
     {
         public static implicit operator NullableVector2 (Vector2 value) => new NullableVector2 { Value = value };
-        public static implicit operator Vector2? (NullableVector2 nullable) => (nullable is null || !nullable.HasValue) ? null : (Vector2?)nullable.Value;
+        public static implicit operator Vector2? (NullableVector2 nullable) => nullable is null || !nullable.HasValue ? null : (Vector2?)nullable.Value;
     }
 
     /// <summary>
@@ -163,7 +163,7 @@ namespace UnityCommon
     public class NullableVector3 : Nullable<Vector3>
     {
         public static implicit operator NullableVector3 (Vector3 value) => new NullableVector3 { Value = value };
-        public static implicit operator Vector3? (NullableVector3 nullable) => (nullable is null || !nullable.HasValue) ? null : (Vector3?)nullable.Value;
+        public static implicit operator Vector3? (NullableVector3 nullable) => nullable is null || !nullable.HasValue ? null : (Vector3?)nullable.Value;
     }
 
     /// <summary>
@@ -173,7 +173,7 @@ namespace UnityCommon
     public class NullableVector4 : Nullable<Vector4>
     {
         public static implicit operator NullableVector4 (Vector4 value) => new NullableVector4 { Value = value };
-        public static implicit operator Vector4? (NullableVector4 nullable) => (nullable is null || !nullable.HasValue) ? null : (Vector4?)nullable.Value;
+        public static implicit operator Vector4? (NullableVector4 nullable) => nullable is null || !nullable.HasValue ? null : (Vector4?)nullable.Value;
     }
 
     /// <summary>
@@ -183,7 +183,7 @@ namespace UnityCommon
     public class NullableQuaternion : Nullable<Quaternion>
     {
         public static implicit operator NullableQuaternion (Quaternion value) => new NullableQuaternion { Value = value };
-        public static implicit operator Quaternion? (NullableQuaternion nullable) => (nullable is null || !nullable.HasValue) ? null : (Quaternion?)nullable.Value;
+        public static implicit operator Quaternion? (NullableQuaternion nullable) => nullable is null || !nullable.HasValue ? null : (Quaternion?)nullable.Value;
     }
 
     /// <summary>
@@ -193,7 +193,7 @@ namespace UnityCommon
     public class NullableNamedString : NullableNamed<NamedString, NullableString>
     {
         public static implicit operator NullableNamedString (NamedString value) => new NullableNamedString { Value = value };
-        public static implicit operator NamedString (NullableNamedString nullable) => (nullable is null || !nullable.HasValue) ? null : nullable.Value;
+        public static implicit operator NamedString (NullableNamedString nullable) => nullable is null || !nullable.HasValue ? null : nullable.Value;
     }
 
     /// <summary>
@@ -203,7 +203,7 @@ namespace UnityCommon
     public class NullableNamedInteger : NullableNamed<NamedInteger, NullableInteger>
     {
         public static implicit operator NullableNamedInteger (NamedInteger value) => new NullableNamedInteger { Value = value };
-        public static implicit operator NamedInteger (NullableNamedInteger nullable) => (nullable is null || !nullable.HasValue) ? null : nullable.Value;
+        public static implicit operator NamedInteger (NullableNamedInteger nullable) => nullable is null || !nullable.HasValue ? null : nullable.Value;
     }
 
     /// <summary>
@@ -213,7 +213,7 @@ namespace UnityCommon
     public class NullableNamedFloat : NullableNamed<NamedFloat, NullableFloat>
     {
         public static implicit operator NullableNamedFloat (NamedFloat value) => new NullableNamedFloat { Value = value };
-        public static implicit operator NamedFloat (NullableNamedFloat nullable) => (nullable is null || !nullable.HasValue) ? null : nullable.Value;
+        public static implicit operator NamedFloat (NullableNamedFloat nullable) => nullable is null || !nullable.HasValue ? null : nullable.Value;
     }
 
     /// <summary>
@@ -223,7 +223,7 @@ namespace UnityCommon
     public class NullableNamedBoolean : NullableNamed<NamedBoolean, NullableBoolean>
     {
         public static implicit operator NullableNamedBoolean (NamedBoolean value) => new NullableNamedBoolean { Value = value };
-        public static implicit operator NamedBoolean (NullableNamedBoolean nullable) => (nullable is null || !nullable.HasValue) ? null : nullable.Value;
+        public static implicit operator NamedBoolean (NullableNamedBoolean nullable) => nullable is null || !nullable.HasValue ? null : nullable.Value;
     }
 
     /// <summary>
@@ -233,7 +233,7 @@ namespace UnityCommon
     public class NullableNamedVector2 : NullableNamed<NamedVector2, NullableVector2>
     {
         public static implicit operator NullableNamedVector2 (NamedVector2 value) => new NullableNamedVector2 { Value = value };
-        public static implicit operator NamedVector2 (NullableNamedVector2 nullable) => (nullable is null || !nullable.HasValue) ? null : nullable.Value;
+        public static implicit operator NamedVector2 (NullableNamedVector2 nullable) => nullable is null || !nullable.HasValue ? null : nullable.Value;
     }
 
     /// <summary>
@@ -243,7 +243,7 @@ namespace UnityCommon
     public class NullableNamedVector3 : NullableNamed<NamedVector3, NullableVector3>
     {
         public static implicit operator NullableNamedVector3 (NamedVector3 value) => new NullableNamedVector3 { Value = value };
-        public static implicit operator NamedVector3 (NullableNamedVector3 nullable) => (nullable is null || !nullable.HasValue) ? null : nullable.Value;
+        public static implicit operator NamedVector3 (NullableNamedVector3 nullable) => nullable is null || !nullable.HasValue ? null : nullable.Value;
     }
 
     /// <summary>
@@ -253,7 +253,7 @@ namespace UnityCommon
     public class NullableNamedVector4 : NullableNamed<NamedVector4, NullableVector4>
     {
         public static implicit operator NullableNamedVector4 (NamedVector4 value) => new NullableNamedVector4 { Value = value };
-        public static implicit operator NamedVector4 (NullableNamedVector4 nullable) => (nullable is null || !nullable.HasValue) ? null : nullable.Value;
+        public static implicit operator NamedVector4 (NullableNamedVector4 nullable) => nullable is null || !nullable.HasValue ? null : nullable.Value;
     }
 
     /// <summary>
@@ -263,6 +263,6 @@ namespace UnityCommon
     public class NullableNamedQuaternion : NullableNamed<NamedQuaternion, NullableQuaternion>
     {
         public static implicit operator NullableNamedQuaternion (NamedQuaternion value) => new NullableNamedQuaternion { Value = value };
-        public static implicit operator NamedQuaternion (NullableNamedQuaternion nullable) => (nullable is null || !nullable.HasValue) ? null : nullable.Value;
+        public static implicit operator NamedQuaternion (NullableNamedQuaternion nullable) => nullable is null || !nullable.HasValue ? null : nullable.Value;
     }
 }
