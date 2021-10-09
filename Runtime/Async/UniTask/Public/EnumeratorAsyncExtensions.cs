@@ -1,15 +1,13 @@
-#if CSHARP_7_OR_LATER || (UNITY_2018_3_OR_NEWER && (NET_STANDARD_2_0 || NET_4_6))
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
 using System;
 using System.Collections;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading;
-using UniRx.Async.Internal;
+using UnityCommon.Async;
+using UnityCommon.Async.Internal;
 using UnityEngine;
 
-namespace UniRx.Async
+namespace UnityCommon
 {
     public static class EnumeratorAsyncExtensions
     {
@@ -33,7 +31,7 @@ namespace UniRx.Async
             return new UniTask(awaiter);
         }
 
-        public static UniTask ConfigureAwait (this IEnumerator enumerator, PlayerLoopTiming timing = PlayerLoopTiming.Update, CancellationToken cancellationToken = default(CancellationToken))
+        public static UniTask ConfigureAwait (this IEnumerator enumerator, PlayerLoopTiming timing = PlayerLoopTiming.Update, CancellationToken cancellationToken = default)
         {
             var awaiter = new EnumeratorAwaiter(enumerator, cancellationToken);
             if (!awaiter.IsCompleted)
@@ -43,13 +41,13 @@ namespace UniRx.Async
             return new UniTask(awaiter);
         }
 
-        class EnumeratorAwaiter : IAwaiter, IPlayerLoopItem
+        private class EnumeratorAwaiter : IAwaiter, IPlayerLoopItem
         {
-            IEnumerator innerEnumerator;
-            CancellationToken cancellationToken;
-            Action continuation;
-            AwaiterStatus status;
-            ExceptionDispatchInfo exception;
+            private IEnumerator innerEnumerator;
+            private CancellationToken cancellationToken;
+            private Action continuation;
+            private AwaiterStatus status;
+            private ExceptionDispatchInfo exception;
 
             public EnumeratorAwaiter (IEnumerator innerEnumerator, CancellationToken cancellationToken)
             {
@@ -118,7 +116,7 @@ namespace UniRx.Async
                 return false;
             }
 
-            void InvokeContinuation (AwaiterStatus status)
+            private void InvokeContinuation (AwaiterStatus status)
             {
                 this.status = status;
                 var cont = this.continuation;
@@ -129,7 +127,7 @@ namespace UniRx.Async
                 this.cancellationToken = CancellationToken.None;
                 this.innerEnumerator = null;
 
-                if (cont != null) cont.Invoke();
+                cont?.Invoke();
             }
 
             public void OnCompleted (Action continuation)
@@ -145,7 +143,7 @@ namespace UniRx.Async
 
             // Unwrap YieldInstructions
 
-            static IEnumerator ConsumeEnumerator (IEnumerator enumerator)
+            private static IEnumerator ConsumeEnumerator (IEnumerator enumerator)
             {
                 while (enumerator.MoveNext())
                 {
@@ -154,10 +152,10 @@ namespace UniRx.Async
                     {
                         yield return null;
                     }
-                    else if (current is CustomYieldInstruction)
+                    else if (current is CustomYieldInstruction instruction)
                     {
                         // WWW, WaitForSecondsRealtime
-                        var e2 = UnwrapWaitCustomYieldInstruction((CustomYieldInstruction)current);
+                        var e2 = UnwrapWaitCustomYieldInstruction(instruction);
                         while (e2.MoveNext())
                         {
                             yield return null;
@@ -204,7 +202,7 @@ namespace UniRx.Async
             }
 
             // WWW and others as CustomYieldInstruction.
-            static IEnumerator UnwrapWaitCustomYieldInstruction (CustomYieldInstruction yieldInstruction)
+            private static IEnumerator UnwrapWaitCustomYieldInstruction (CustomYieldInstruction yieldInstruction)
             {
                 while (yieldInstruction.keepWaiting)
                 {
@@ -212,9 +210,9 @@ namespace UniRx.Async
                 }
             }
 
-            static readonly FieldInfo waitForSeconds_Seconds = typeof(WaitForSeconds).GetField("m_Seconds", BindingFlags.Instance | BindingFlags.GetField | BindingFlags.NonPublic);
+            private static readonly FieldInfo waitForSeconds_Seconds = typeof(WaitForSeconds).GetField("m_Seconds", BindingFlags.Instance | BindingFlags.GetField | BindingFlags.NonPublic);
 
-            static IEnumerator UnwrapWaitForSeconds (WaitForSeconds waitForSeconds)
+            private static IEnumerator UnwrapWaitForSeconds (WaitForSeconds waitForSeconds)
             {
                 var second = (float)waitForSeconds_Seconds.GetValue(waitForSeconds);
                 var startTime = DateTimeOffset.UtcNow;
@@ -230,7 +228,7 @@ namespace UniRx.Async
                 }
             }
 
-            static IEnumerator UnwrapWaitAsyncOperation (AsyncOperation asyncOperation)
+            private static IEnumerator UnwrapWaitAsyncOperation (AsyncOperation asyncOperation)
             {
                 while (!asyncOperation.isDone)
                 {
@@ -240,5 +238,3 @@ namespace UniRx.Async
         }
     }
 }
-
-#endif

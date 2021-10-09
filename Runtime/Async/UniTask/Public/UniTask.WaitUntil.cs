@@ -1,53 +1,49 @@
-#if CSHARP_7_OR_LATER || (UNITY_2018_3_OR_NEWER && (NET_STANDARD_2_0 || NET_4_6))
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
 using System;
 using System.Collections.Generic;
 using System.Threading;
-using UniRx.Async.Internal;
+using UnityCommon.Async.Internal;
 
-namespace UniRx.Async
+namespace UnityCommon
 {
     public readonly partial struct UniTask
     {
-        public static UniTask WaitUntil(Func<bool> predicate, PlayerLoopTiming timing = PlayerLoopTiming.Update, CancellationToken cancellationToken = default(CancellationToken))
+        public static UniTask WaitUntil (Func<bool> predicate, PlayerLoopTiming timing = PlayerLoopTiming.Update, CancellationToken cancellationToken = default)
         {
             var promise = new WaitUntilPromise(predicate, timing, cancellationToken);
             return promise.Task;
         }
 
-        public static UniTask WaitWhile(Func<bool> predicate, PlayerLoopTiming timing = PlayerLoopTiming.Update, CancellationToken cancellationToken = default(CancellationToken))
+        public static UniTask WaitWhile (Func<bool> predicate, PlayerLoopTiming timing = PlayerLoopTiming.Update, CancellationToken cancellationToken = default)
         {
             var promise = new WaitWhilePromise(predicate, timing, cancellationToken);
             return promise.Task;
         }
 
-        public static UniTask<U> WaitUntilValueChanged<T, U>(T target, Func<T, U> monitorFunction, PlayerLoopTiming monitorTiming = PlayerLoopTiming.Update, IEqualityComparer<U> equalityComparer = null, CancellationToken cancellationToken = default(CancellationToken))
-          where T : class
+        public static UniTask<U> WaitUntilValueChanged<T, U> (T target, Func<T, U> monitorFunction, PlayerLoopTiming monitorTiming = PlayerLoopTiming.Update, IEqualityComparer<U> equalityComparer = null, CancellationToken cancellationToken = default)
+            where T : class
         {
             var unityObject = target as UnityEngine.Object;
-            var isUnityObject = !object.ReferenceEquals(target, null); // don't use (unityObject == null)
+            var isUnityObject = !ReferenceEquals(target, null); // don't use (unityObject == null)
 
-            return (isUnityObject)
+            return isUnityObject
                 ? new WaitUntilValueChangedUnityObjectPromise<T, U>(target, monitorFunction, equalityComparer, monitorTiming, cancellationToken).Task
+                // ReSharper disable once ExpressionIsAlwaysNull
                 : new WaitUntilValueChangedStandardObjectPromise<T, U>(target, monitorFunction, equalityComparer, monitorTiming, cancellationToken).Task;
         }
 
-        class WaitUntilPromise : PlayerLoopReusablePromiseBase
+        private class WaitUntilPromise : PlayerLoopReusablePromiseBase
         {
-            readonly Func<bool> predicate;
+            private readonly Func<bool> predicate;
 
-            public WaitUntilPromise(Func<bool> predicate, PlayerLoopTiming timing, CancellationToken cancellationToken)
+            public WaitUntilPromise (Func<bool> predicate, PlayerLoopTiming timing, CancellationToken cancellationToken)
                 : base(timing, cancellationToken, 1)
             {
                 this.predicate = predicate;
             }
 
-            protected override void OnRunningStart()
-            {
-            }
+            protected override void OnRunningStart () { }
 
-            public override bool MoveNext()
+            public override bool MoveNext ()
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -79,21 +75,19 @@ namespace UniRx.Async
             }
         }
 
-        class WaitWhilePromise : PlayerLoopReusablePromiseBase
+        private class WaitWhilePromise : PlayerLoopReusablePromiseBase
         {
-            readonly Func<bool> predicate;
+            private readonly Func<bool> predicate;
 
-            public WaitWhilePromise(Func<bool> predicate, PlayerLoopTiming timing, CancellationToken cancellationToken)
+            public WaitWhilePromise (Func<bool> predicate, PlayerLoopTiming timing, CancellationToken cancellationToken)
                 : base(timing, cancellationToken, 1)
             {
                 this.predicate = predicate;
             }
 
-            protected override void OnRunningStart()
-            {
-            }
+            protected override void OnRunningStart () { }
 
-            public override bool MoveNext()
+            public override bool MoveNext ()
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -126,14 +120,14 @@ namespace UniRx.Async
         }
 
         // where T : UnityEngine.Object, can not add constraint
-        class WaitUntilValueChangedUnityObjectPromise<T, U> : PlayerLoopReusablePromiseBase<U>
+        private class WaitUntilValueChangedUnityObjectPromise<T, U> : PlayerLoopReusablePromiseBase<U>
         {
-            readonly T target;
-            readonly Func<T, U> monitorFunction;
-            readonly IEqualityComparer<U> equalityComparer;
-            U currentValue;
+            private readonly T target;
+            private readonly Func<T, U> monitorFunction;
+            private readonly IEqualityComparer<U> equalityComparer;
+            private U currentValue;
 
-            public WaitUntilValueChangedUnityObjectPromise(T target, Func<T, U> monitorFunction, IEqualityComparer<U> equalityComparer, PlayerLoopTiming timing, CancellationToken cancellationToken)
+            public WaitUntilValueChangedUnityObjectPromise (T target, Func<T, U> monitorFunction, IEqualityComparer<U> equalityComparer, PlayerLoopTiming timing, CancellationToken cancellationToken)
                 : base(timing, cancellationToken, 1)
             {
                 this.target = target;
@@ -142,11 +136,9 @@ namespace UniRx.Async
                 this.currentValue = monitorFunction(target);
             }
 
-            protected override void OnRunningStart()
-            {
-            }
+            protected override void OnRunningStart () { }
 
-            public override bool MoveNext()
+            public override bool MoveNext ()
             {
                 if (cancellationToken.IsCancellationRequested || target == null) // destroyed = cancel.
                 {
@@ -178,15 +170,15 @@ namespace UniRx.Async
             }
         }
 
-        class WaitUntilValueChangedStandardObjectPromise<T, U> : PlayerLoopReusablePromiseBase<U>
+        private class WaitUntilValueChangedStandardObjectPromise<T, U> : PlayerLoopReusablePromiseBase<U>
             where T : class
         {
-            readonly WeakReference<T> target;
-            readonly Func<T, U> monitorFunction;
-            readonly IEqualityComparer<U> equalityComparer;
-            U currentValue;
+            private readonly WeakReference<T> target;
+            private readonly Func<T, U> monitorFunction;
+            private readonly IEqualityComparer<U> equalityComparer;
+            private U currentValue;
 
-            public WaitUntilValueChangedStandardObjectPromise(T target, Func<T, U> monitorFunction, IEqualityComparer<U> equalityComparer, PlayerLoopTiming timing, CancellationToken cancellationToken)
+            public WaitUntilValueChangedStandardObjectPromise (T target, Func<T, U> monitorFunction, IEqualityComparer<U> equalityComparer, PlayerLoopTiming timing, CancellationToken cancellationToken)
                 : base(timing, cancellationToken, 1)
             {
                 this.target = new WeakReference<T>(target, false); // wrap in WeakReference.
@@ -195,11 +187,9 @@ namespace UniRx.Async
                 this.currentValue = monitorFunction(target);
             }
 
-            protected override void OnRunningStart()
-            {
-            }
+            protected override void OnRunningStart () { }
 
-            public override bool MoveNext()
+            public override bool MoveNext ()
             {
                 if (cancellationToken.IsCancellationRequested || !target.TryGetTarget(out var t))
                 {
@@ -232,4 +222,3 @@ namespace UniRx.Async
         }
     }
 }
-#endif

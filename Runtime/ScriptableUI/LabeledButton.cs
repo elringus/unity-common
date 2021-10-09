@@ -5,7 +5,7 @@ namespace UnityCommon
 {
     public class LabeledButton : Button
     {
-        public virtual Text Label => labelText ? labelText : (labelText = GetComponentInChildren<Text>());
+        public virtual Text Label => labelText ? labelText : labelText = GetComponentInChildren<Text>();
         public virtual ColorBlock LabelColorBlock => labelColors;
         public virtual Color LabelColorMultiplier
         {

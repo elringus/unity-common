@@ -1,26 +1,23 @@
-#if CSHARP_7_OR_LATER || (UNITY_2018_3_OR_NEWER && (NET_STANDARD_2_0 || NET_4_6))
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
 using System;
 using System.Threading;
 
-namespace UniRx.Async.Internal
+namespace UnityCommon.Async.Internal
 {
     internal class ContinuationQueue
     {
-        const int MaxArrayLength = 0X7FEFFFFF;
-        const int InitialSize = 16;
+        private const int MaxArrayLength = 0X7FEFFFFF;
+        private const int InitialSize = 16;
 
-        SpinLock gate = new SpinLock();
-        bool dequing = false;
+        private SpinLock gate = new SpinLock();
+        private bool dequing = false;
 
-        int actionListCount = 0;
-        Action[] actionList = new Action[InitialSize];
+        private int actionListCount = 0;
+        private Action[] actionList = new Action[InitialSize];
 
-        int waitingListCount = 0;
-        Action[] waitingList = new Action[InitialSize];
+        private int waitingListCount = 0;
+        private Action[] waitingList = new Action[InitialSize];
 
-        public void Enqueue(Action continuation)
+        public void Enqueue (Action continuation)
         {
             bool lockTaken = false;
             try
@@ -64,7 +61,7 @@ namespace UniRx.Async.Internal
             }
         }
 
-        public void Clear()
+        public void Clear ()
         {
             actionListCount = 0;
             actionList = new Action[InitialSize];
@@ -73,7 +70,7 @@ namespace UniRx.Async.Internal
             waitingList = new Action[InitialSize];
         }
 
-        public void Run()
+        public void Run ()
         {
             {
                 bool lockTaken = false;
@@ -120,5 +117,3 @@ namespace UniRx.Async.Internal
         }
     }
 }
-
-#endif

@@ -1,16 +1,13 @@
-#if CSHARP_7_OR_LATER || (UNITY_2018_3_OR_NEWER && (NET_STANDARD_2_0 || NET_4_6))
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
 using System;
 
-namespace UniRx.Async
+namespace UnityCommon
 {
     public readonly partial struct UniTask
     {
         /// <summary>Run action on the threadPool and return to main thread if configureAwait = true.</summary>
-        public static async UniTask Run(Action action, bool configureAwait = true)
+        public static async UniTask Run (Action action, bool configureAwait = true)
         {
-            await UniTask.SwitchToThreadPool();
+            await SwitchToThreadPool();
 
             if (configureAwait)
             {
@@ -20,7 +17,7 @@ namespace UniRx.Async
                 }
                 finally
                 {
-                    await UniTask.Yield();
+                    await Yield();
                 }
             }
             else
@@ -30,9 +27,9 @@ namespace UniRx.Async
         }
 
         /// <summary>Run action on the threadPool and return to main thread if configureAwait = true.</summary>
-        public static async UniTask Run(Action<object> action, object state, bool configureAwait = true)
+        public static async UniTask Run (Action<object> action, object state, bool configureAwait = true)
         {
-            await UniTask.SwitchToThreadPool();
+            await SwitchToThreadPool();
 
             if (configureAwait)
             {
@@ -42,7 +39,7 @@ namespace UniRx.Async
                 }
                 finally
                 {
-                    await UniTask.Yield();
+                    await Yield();
                 }
             }
             else
@@ -52,9 +49,9 @@ namespace UniRx.Async
         }
 
         /// <summary>Run action on the threadPool and return to main thread if configureAwait = true.</summary>
-        public static async UniTask<T> Run<T>(Func<T> func, bool configureAwait = true)
+        public static async UniTask<T> Run<T> (Func<T> func, bool configureAwait = true)
         {
-            await UniTask.SwitchToThreadPool();
+            await SwitchToThreadPool();
             if (configureAwait)
             {
                 try
@@ -63,7 +60,7 @@ namespace UniRx.Async
                 }
                 finally
                 {
-                    await UniTask.Yield();
+                    await Yield();
                 }
             }
             else
@@ -73,9 +70,9 @@ namespace UniRx.Async
         }
 
         /// <summary>Run action on the threadPool and return to main thread if configureAwait = true.</summary>
-        public static async UniTask<T> Run<T>(Func<object, T> func, object state, bool configureAwait = true)
+        public static async UniTask<T> Run<T> (Func<object, T> func, object state, bool configureAwait = true)
         {
-            await UniTask.SwitchToThreadPool();
+            await SwitchToThreadPool();
 
             if (configureAwait)
             {
@@ -85,7 +82,7 @@ namespace UniRx.Async
                 }
                 finally
                 {
-                    await UniTask.Yield();
+                    await Yield();
                 }
             }
             else
@@ -95,5 +92,3 @@ namespace UniRx.Async
         }
     }
 }
-
-#endif

@@ -204,7 +204,7 @@ namespace UnityCommon
         {
             var prop = property.Invoke(obj);
             if (propertyComparer != null) return propertyComparer.GetHashCode(prop);
-            return (prop == null) ? 0 : prop.GetHashCode();
+            return prop == null ? 0 : prop.GetHashCode();
         }
     }
 

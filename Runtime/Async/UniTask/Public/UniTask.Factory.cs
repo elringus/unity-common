@@ -1,30 +1,21 @@
-#if CSHARP_7_OR_LATER || (UNITY_2018_3_OR_NEWER && (NET_STANDARD_2_0 || NET_4_6))
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
 using System;
 using System.Threading;
+using UnityCommon.Async;
 
-namespace UniRx.Async
+namespace UnityCommon
 {
     public readonly partial struct UniTask
     {
-        static readonly UniTask CanceledUniTask = new Func<UniTask>(() =>
-        {
+        private static readonly UniTask CanceledUniTask = new Func<UniTask>(() => {
             var promise = new UniTaskCompletionSource<AsyncUnit>();
             promise.TrySetCanceled();
             promise.MarkHandled();
             return new UniTask(promise);
         })();
 
-        public static UniTask CompletedTask
-        {
-            get
-            {
-                return new UniTask();
-            }
-        }
+        public static UniTask CompletedTask => new UniTask();
 
-        public static UniTask FromException(Exception ex)
+        public static UniTask FromException (Exception ex)
         {
             var promise = new UniTaskCompletionSource<AsyncUnit>();
             promise.TrySetException(ex);
@@ -32,7 +23,7 @@ namespace UniRx.Async
             return new UniTask(promise);
         }
 
-        public static UniTask<T> FromException<T>(Exception ex)
+        public static UniTask<T> FromException<T> (Exception ex)
         {
             var promise = new UniTaskCompletionSource<T>();
             promise.TrySetException(ex);
@@ -40,22 +31,22 @@ namespace UniRx.Async
             return new UniTask<T>(promise);
         }
 
-        public static UniTask<T> FromResult<T>(T value)
+        public static UniTask<T> FromResult<T> (T value)
         {
             return new UniTask<T>(value);
         }
 
-        public static UniTask FromCanceled()
+        public static UniTask FromCanceled ()
         {
             return CanceledUniTask;
         }
 
-        public static UniTask<T> FromCanceled<T>()
+        public static UniTask<T> FromCanceled<T> ()
         {
             return CanceledUniTaskCache<T>.Task;
         }
 
-        public static UniTask FromCanceled(CancellationToken token)
+        public static UniTask FromCanceled (CancellationToken token)
         {
             var promise = new UniTaskCompletionSource<AsyncUnit>();
             promise.TrySetException(new OperationCanceledException(token));
@@ -63,7 +54,7 @@ namespace UniRx.Async
             return new UniTask(promise);
         }
 
-        public static UniTask<T> FromCanceled<T>(CancellationToken token)
+        public static UniTask<T> FromCanceled<T> (CancellationToken token)
         {
             var promise = new UniTaskCompletionSource<T>();
             promise.TrySetException(new OperationCanceledException(token));
@@ -72,7 +63,7 @@ namespace UniRx.Async
         }
 
         /// <summary>shorthand of new UniTask[T](Func[UniTask[T]] factory)</summary>
-        public static UniTask<T> Lazy<T>(Func<UniTask<T>> factory)
+        public static UniTask<T> Lazy<T> (Func<UniTask<T>> factory)
         {
             return new UniTask<T>(factory);
         }
@@ -81,7 +72,7 @@ namespace UniRx.Async
         /// helper of create add UniTaskVoid to delegate.
         /// For example: FooEvent += () => UniTask.Void(async () => { /* */ })
         /// </summary>
-        public static void Void(Func<UniTask> asyncAction)
+        public static void Void (Func<UniTask> asyncAction)
         {
             asyncAction().Forget();
         }
@@ -90,16 +81,16 @@ namespace UniRx.Async
         /// helper of create add UniTaskVoid to delegate.
         /// For example: FooEvent += (sender, e) => UniTask.Void(async arg => { /* */ }, (sender, e))
         /// </summary>
-        public static void Void<T>(Func<T, UniTask> asyncAction, T state)
+        public static void Void<T> (Func<T, UniTask> asyncAction, T state)
         {
             asyncAction(state).Forget();
         }
 
-        static class CanceledUniTaskCache<T>
+        private static class CanceledUniTaskCache<T>
         {
             public static readonly UniTask<T> Task;
 
-            static CanceledUniTaskCache()
+            static CanceledUniTaskCache ()
             {
                 var promise = new UniTaskCompletionSource<T>();
                 promise.TrySetCanceled();
@@ -118,4 +109,3 @@ namespace UniRx.Async
         public static readonly UniTask<int> One = UniTask.FromResult(1);
     }
 }
-#endif

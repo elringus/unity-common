@@ -1,16 +1,13 @@
-#if CSHARP_7_OR_LATER || (UNITY_2018_3_OR_NEWER && (NET_STANDARD_2_0 || NET_4_6))
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-namespace UniRx.Async.Internal
+namespace UnityCommon.Async.Internal
 {
     internal static class ArrayPoolUtil
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void EnsureCapacity<T>(ref T[] array, int index, ArrayPool<T> pool)
+        internal static void EnsureCapacity<T> (ref T[] array, int index, ArrayPool<T> pool)
         {
             if (array.Length <= index)
             {
@@ -19,12 +16,12 @@ namespace UniRx.Async.Internal
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        static void EnsureCapacityCore<T>(ref T[] array, int index, ArrayPool<T> pool)
+        private static void EnsureCapacityCore<T> (ref T[] array, int index, ArrayPool<T> pool)
         {
             if (array.Length <= index)
             {
                 var newSize = array.Length * 2;
-                var newArray = pool.Rent((index < newSize) ? newSize : (index * 2));
+                var newArray = pool.Rent(index < newSize ? newSize : index * 2);
                 Array.Copy(array, 0, newArray, 0, array.Length);
 
                 pool.Return(array, clearArray: !RuntimeHelpersAbstraction.IsWellKnownNoReferenceContainsType<T>());
@@ -33,7 +30,7 @@ namespace UniRx.Async.Internal
             }
         }
 
-        public static RentArray<T> Materialize<T>(IEnumerable<T> source)
+        public static RentArray<T> Materialize<T> (IEnumerable<T> source)
         {
             if (source is T[] array)
             {
@@ -78,21 +75,21 @@ namespace UniRx.Async.Internal
         {
             public readonly T[] Array;
             public readonly int Length;
-            ArrayPool<T> pool;
+            private ArrayPool<T> pool;
 
-            public RentArray(T[] array, int length, ArrayPool<T> pool)
+            public RentArray (T[] array, int length, ArrayPool<T> pool)
             {
                 this.Array = array;
                 this.Length = length;
                 this.pool = pool;
             }
 
-            public void Dispose()
+            public void Dispose ()
             {
                 DisposeManually(!RuntimeHelpersAbstraction.IsWellKnownNoReferenceContainsType<T>());
             }
 
-            public void DisposeManually(bool clearArray)
+            public void DisposeManually (bool clearArray)
             {
                 if (pool != null)
                 {
@@ -108,5 +105,3 @@ namespace UniRx.Async.Internal
         }
     }
 }
-
-#endif

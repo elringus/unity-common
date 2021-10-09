@@ -1,26 +1,23 @@
-#if CSHARP_7_OR_LATER || (UNITY_2018_3_OR_NEWER && (NET_STANDARD_2_0 || NET_4_6))
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
 using System;
 using System.Threading;
 
-namespace UniRx.Async.Internal
+namespace UnityCommon.Async.Internal
 {
     // Same interface as System.Buffers.ArrayPool<T> but only provides Shared.
 
     internal sealed class ArrayPool<T>
     {
         // Same size as System.Buffers.DefaultArrayPool<T>
-        const int DefaultMaxNumberOfArraysPerBucket = 50;
+        private const int DefaultMaxNumberOfArraysPerBucket = 50;
 
-        static readonly T[] EmptyArray = new T[0];
+        private static readonly T[] EmptyArray = Array.Empty<T>();
 
         public static readonly ArrayPool<T> Shared = new ArrayPool<T>();
 
-        readonly MinimumQueue<T[]>[] buckets;
-        readonly SpinLock[] locks;
+        private readonly MinimumQueue<T[]>[] buckets;
+        private readonly SpinLock[] locks;
 
-        ArrayPool()
+        private ArrayPool ()
         {
             // see: GetQueueIndex
             buckets = new MinimumQueue<T[]>[18];
@@ -32,11 +29,11 @@ namespace UniRx.Async.Internal
             }
         }
 
-        public T[] Rent(int minimumLength)
+        public T[] Rent (int minimumLength)
         {
             if (minimumLength < 0)
             {
-                throw new ArgumentOutOfRangeException("minimumLength");
+                throw new ArgumentOutOfRangeException(nameof(minimumLength));
             }
             else if (minimumLength == 0)
             {
@@ -67,7 +64,7 @@ namespace UniRx.Async.Internal
             return new T[size];
         }
 
-        public void Return(T[] array, bool clearArray = false)
+        public void Return (T[] array, bool clearArray = false)
         {
             if (array == null || array.Length == 0)
             {
@@ -103,7 +100,7 @@ namespace UniRx.Async.Internal
             }
         }
 
-        static int CalculateSize(int size)
+        private static int CalculateSize (int size)
         {
             size--;
             size |= size >> 1;
@@ -121,7 +118,7 @@ namespace UniRx.Async.Internal
             return size;
         }
 
-        static int GetQueueIndex(int size)
+        private static int GetQueueIndex (int size)
         {
             switch (size)
             {
@@ -149,4 +146,3 @@ namespace UniRx.Async.Internal
         }
     }
 }
-#endif

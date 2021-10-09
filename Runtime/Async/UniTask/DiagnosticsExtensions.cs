@@ -1,6 +1,3 @@
-#if CSHARP_7_OR_LATER || (UNITY_2018_3_OR_NEWER && (NET_STANDARD_2_0 || NET_4_6))
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,15 +11,15 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace UniRx.Async
+namespace UnityCommon.Async
 {
     public static class DiagnosticsExtensions
     {
-        static bool displayFilenames = true;
+        private static bool displayFilenames = true;
 
-        static readonly Regex typeBeautifyRegex = new Regex("`.+$", RegexOptions.Compiled);
+        private static readonly Regex typeBeautifyRegex = new Regex("`.+$", RegexOptions.Compiled);
 
-        static readonly Dictionary<Type, string> builtInTypeNames = new Dictionary<Type, string> {
+        private static readonly Dictionary<Type, string> builtInTypeNames = new Dictionary<Type, string> {
             { typeof(void), "void" },
             { typeof(bool), "bool" },
             { typeof(byte), "byte" },
@@ -122,7 +119,7 @@ namespace UniRx.Async
                 sb.Append(")");
 
                 // file name
-                if (displayFilenames && (sf.GetILOffset() != -1))
+                if (displayFilenames && sf.GetILOffset() != -1)
                 {
                     String fileName = null;
 
@@ -217,7 +214,7 @@ namespace UniRx.Async
             if (declareType is null) return false;
             if (declareType == "System.Threading.ExecutionContext") return true;
             else if (declareType.StartsWith("System.Runtime.CompilerServices")) return true;
-            else if (declareType.StartsWith("UniRx.Async.CompilerServices")) return true;
+            else if (declareType.StartsWith("UnityCommon.Async.CompilerServices")) return true;
             else if (declareType == "System.Threading.Tasks.AwaitTaskContinuation") return true;
             else if (declareType.StartsWith("System.Threading.Tasks.Task")) return true;
             return false;
@@ -231,5 +228,3 @@ namespace UniRx.Async
         }
     }
 }
-
-#endif

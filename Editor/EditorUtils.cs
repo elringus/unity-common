@@ -47,7 +47,7 @@ namespace UnityCommon
                     if (!int.TryParse(indexString[1], out var index))
                         throw new FormatException($"Property path '{propertyPath}' is malformed.");
 
-                    if (i == (paths.Length - 1)) // Our property is an array.
+                    if (i == paths.Length - 1) // Our property is an array.
                     {
                         var targetArray = (System.Collections.IList)targetObject;
                         return (TValue)targetArray[index];
@@ -117,7 +117,7 @@ namespace UnityCommon
                     if (!int.TryParse(indexString[1], out var index))
                         throw new FormatException($"Property path '{propertyPath}' is malformed.");
 
-                    if (i == (paths.Length - 1)) // Our property is an array.
+                    if (i == paths.Length - 1) // Our property is an array.
                     {
                         var targetArray = (System.Collections.IList)targetObject;
                         targetArray[index] = value;

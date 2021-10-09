@@ -9,7 +9,7 @@ namespace UnityCommon
 
         [SerializeField] private float updateDelay = 0f;
 
-        private Action[] actions = new Action[0];
+        private Action[] actions = Array.Empty<Action>();
         private float lastUpdateTime = 0f;
 
         private void Update ()
@@ -26,7 +26,7 @@ namespace UnityCommon
 
         private void OnDestroy ()
         {
-            actions = new Action[0];
+            actions = Array.Empty<Action>();
         }
 
         public void AddAction (Action action)

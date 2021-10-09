@@ -1,22 +1,19 @@
-#if CSHARP_7_OR_LATER || (UNITY_2018_3_OR_NEWER && (NET_STANDARD_2_0 || NET_4_6))
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
 using System;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace UniRx.Async.Internal
+namespace UnityCommon.Async.Internal
 {
     // Add, Remove, Enumerate with sweep. All operations are thread safe(in spinlock).
     internal class WeakDictionary<TKey, TValue>
         where TKey : class
     {
-        Entry[] buckets;
-        int size;
-        SpinLock gate; // mutable struct(not readonly)
+        private Entry[] buckets;
+        private int size;
+        private SpinLock gate; // mutable struct(not readonly)
 
-        readonly float loadFactor;
-        readonly IEqualityComparer<TKey> keyEqualityComparer;
+        private readonly float loadFactor;
+        private readonly IEqualityComparer<TKey> keyEqualityComparer;
 
         public WeakDictionary (int capacity = 4, float loadFactor = 0.75f, IEqualityComparer<TKey> keyComparer = null)
         {
@@ -53,7 +50,7 @@ namespace UniRx.Async.Internal
                     return true;
                 }
 
-                value = default(TValue);
+                value = default;
                 return false;
             }
             finally
@@ -82,7 +79,7 @@ namespace UniRx.Async.Internal
             }
         }
 
-        bool TryAddInternal (TKey key, TValue value)
+        private bool TryAddInternal (TKey key, TValue value)
         {
             var nextCapacity = CalculateCapacity(size + 1, loadFactor);
 
@@ -113,7 +110,7 @@ namespace UniRx.Async.Internal
             }
         }
 
-        bool AddToBuckets (Entry[] targetBuckets, TKey newKey, TValue value, int keyHash)
+        private bool AddToBuckets (Entry[] targetBuckets, TKey newKey, TValue value, int keyHash)
         {
             var h = keyHash;
             var hashIndex = h & (targetBuckets.Length - 1);
@@ -168,7 +165,7 @@ namespace UniRx.Async.Internal
             }
         }
 
-        bool TryGetEntry (TKey key, out int hashIndex, out Entry entry)
+        private bool TryGetEntry (TKey key, out int hashIndex, out Entry entry)
         {
             var table = buckets;
             var hash = keyEqualityComparer.GetHashCode(key);
@@ -196,7 +193,7 @@ namespace UniRx.Async.Internal
             return false;
         }
 
-        void Remove (int hashIndex, Entry entry)
+        private void Remove (int hashIndex, Entry entry)
         {
             if (entry.Prev == null && entry.Next == null)
             {
@@ -268,7 +265,7 @@ namespace UniRx.Async.Internal
             return listIndex;
         }
 
-        static int CalculateCapacity (int collectionSize, float loadFactor)
+        private static int CalculateCapacity (int collectionSize, float loadFactor)
         {
             var size = (int)(collectionSize / loadFactor);
 
@@ -287,7 +284,7 @@ namespace UniRx.Async.Internal
             return size;
         }
 
-        class Entry
+        private class Entry
         {
             public WeakReference<TKey> Key;
             public TValue Value;
@@ -308,7 +305,7 @@ namespace UniRx.Async.Internal
                 }
             }
 
-            int Count ()
+            private int Count ()
             {
                 var count = 1;
                 var n = this;
@@ -322,5 +319,3 @@ namespace UniRx.Async.Internal
         }
     }
 }
-
-#endif

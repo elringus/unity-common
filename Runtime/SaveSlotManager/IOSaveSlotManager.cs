@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using UniRx.Async;
 using UnityEngine;
 
 namespace UnityCommon

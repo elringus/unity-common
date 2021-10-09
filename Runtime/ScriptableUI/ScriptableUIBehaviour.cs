@@ -1,5 +1,4 @@
 using System;
-using UniRx.Async;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -66,7 +65,7 @@ namespace UnityCommon
         /// <summary>
         /// Topmost parent (in the game object hierarchy) canvas component.
         /// </summary>
-        public virtual Canvas TopmostCanvas => ObjectUtils.IsValid(topmostCanvasCache) ? topmostCanvasCache : (topmostCanvasCache = gameObject.FindTopmostComponent<Canvas>());
+        public virtual Canvas TopmostCanvas => ObjectUtils.IsValid(topmostCanvasCache) ? topmostCanvasCache : topmostCanvasCache = gameObject.FindTopmostComponent<Canvas>();
         /// <summary>
         /// Current sort order of the UI element, as per <see cref="TopmostCanvas"/>.
         /// </summary>

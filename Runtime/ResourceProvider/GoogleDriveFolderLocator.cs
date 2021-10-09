@@ -1,7 +1,6 @@
 #if UNITY_GOOGLE_DRIVE_AVAILABLE
 
 using System.Collections.Generic;
-using UniRx.Async;
 using UnityGoogleDrive;
 
 namespace UnityCommon

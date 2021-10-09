@@ -1,23 +1,17 @@
-#if CSHARP_7_OR_LATER || (UNITY_2018_3_OR_NEWER && (NET_STANDARD_2_0 || NET_4_6))
-#pragma warning disable CS1591
-#pragma warning disable CS0436
-
 using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using UniRx.Async.CompilerServices;
+using UnityCommon.Async.CompilerServices;
 
-namespace UniRx.Async
+namespace UnityCommon
 {
     [AsyncMethodBuilder(typeof(AsyncUniTaskVoidMethodBuilder))]
     public struct UniTaskVoid
     {
-        public void Forget()
-        {
-        }
+        public void Forget () { }
 
         [DebuggerHidden]
-        public Awaiter GetAwaiter()
+        public Awaiter GetAwaiter ()
         {
             return new Awaiter();
         }
@@ -28,22 +22,16 @@ namespace UniRx.Async
             public bool IsCompleted => true;
 
             [DebuggerHidden]
-            public void GetResult()
+            public void GetResult ()
             {
                 UnityEngine.Debug.LogWarning("UniTaskVoid can't await, always fire-and-forget. use Forget instead of await.");
             }
 
             [DebuggerHidden]
-            public void OnCompleted(Action continuation)
-            {
-            }
+            public void OnCompleted (Action continuation) { }
 
             [DebuggerHidden]
-            public void UnsafeOnCompleted(Action continuation)
-            {
-            }
+            public void UnsafeOnCompleted (Action continuation) { }
         }
     }
 }
-
-#endif

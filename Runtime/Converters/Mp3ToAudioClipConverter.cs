@@ -1,7 +1,6 @@
 using NLayer;
 using System;
 using System.IO;
-using UniRx.Async;
 using UnityEngine;
 
 namespace UnityCommon
@@ -85,7 +84,7 @@ namespace UnityCommon
             {
                 var samplesRead = mpegFile.ReadSamples(samplesBuffer, 0, bufferLength);
                 if (samplesRead < bufferLength) Array.Resize(ref samplesBuffer, samplesRead);
-                audioClip.SetData(samplesBuffer, (sampleOffset / sizeof(float)) * mpegFile.Channels);
+                audioClip.SetData(samplesBuffer, sampleOffset / sizeof(float) * mpegFile.Channels);
                 if (samplesRead < bufferLength) break;
                 sampleOffset += samplesRead;
             }
@@ -100,7 +99,7 @@ namespace UnityCommon
             {
                 var samplesRead = await UniTask.Run(() => mpegFile.ReadSamples(samplesBuffer, 0, bufferLength));
                 if (samplesRead < bufferLength) Array.Resize(ref samplesBuffer, samplesRead);
-                audioClip.SetData(samplesBuffer, (sampleOffset / sizeof(float)) * mpegFile.Channels);
+                audioClip.SetData(samplesBuffer, sampleOffset / sizeof(float) * mpegFile.Channels);
                 if (samplesRead < bufferLength) break;
                 sampleOffset += samplesRead;
             }

@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
-using UniRx.Async;
 using UnityEngine;
 
 namespace UnityCommon
@@ -289,7 +288,7 @@ namespace UnityCommon
             {
                 if (IsUpperOrNumber(source[i]))
                 {
-                    if (source[i - 1] != insert && !IsUpperOrNumber(source[i - 1]) || (preserveAcronyms && IsUpperOrNumber(source[i - 1]) && i < source.Length - 1 && !IsUpperOrNumber(source[i + 1])))
+                    if (source[i - 1] != insert && !IsUpperOrNumber(source[i - 1]) || preserveAcronyms && IsUpperOrNumber(source[i - 1]) && i < source.Length - 1 && !IsUpperOrNumber(source[i + 1]))
                         builder.Append(insert);
                 }
                 builder.Append(source[i]);

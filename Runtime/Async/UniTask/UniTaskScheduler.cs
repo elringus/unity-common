@@ -1,10 +1,7 @@
-#if CSHARP_7_OR_LATER || (UNITY_2018_3_OR_NEWER && (NET_STANDARD_2_0 || NET_4_6))
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
 using System;
 using System.Threading;
 
-namespace UniRx.Async
+namespace UnityCommon.Async
 {
     // UniTask has no scheduler like TaskScheduler.
     // Only handle unobserved exception.
@@ -29,7 +26,7 @@ namespace UniRx.Async
         public static bool DispatchUnityMainThread = true;
 
         // cache delegate.
-        static readonly SendOrPostCallback handleExceptionInvoke = InvokeUnobservedTaskException;
+        private static readonly SendOrPostCallback handleExceptionInvoke = InvokeUnobservedTaskException;
 
         internal static void PublishUnobservedTaskException (Exception ex)
         {
@@ -82,11 +79,9 @@ namespace UniRx.Async
             }
         }
 
-        static void InvokeUnobservedTaskException (object state)
+        private static void InvokeUnobservedTaskException (object state)
         {
             UnobservedTaskException?.Invoke((Exception)state);
         }
     }
 }
-
-#endif

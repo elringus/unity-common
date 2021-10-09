@@ -1,14 +1,11 @@
-#if CSHARP_7_OR_LATER || (UNITY_2018_3_OR_NEWER && (NET_STANDARD_2_0 || NET_4_6))
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Threading;
-using UniRx.Async.Internal;
+using UnityCommon.Async.Internal;
 
-namespace UniRx.Async
+namespace UnityCommon
 {
     public readonly partial struct UniTask
     {
@@ -46,12 +43,12 @@ namespace UniRx.Async
             await promise;
         }
 
-        class WhenAllPromise<T>
+        private class WhenAllPromise<T>
         {
-            readonly T[] result;
-            int completeCount;
-            Action whenComplete;
-            ExceptionDispatchInfo exception;
+            private readonly T[] result;
+            private int completeCount;
+            private Action whenComplete;
+            private ExceptionDispatchInfo exception;
 
             public WhenAllPromise (UniTask<T>[] tasks, int tasksLength)
             {
@@ -90,16 +87,13 @@ namespace UniRx.Async
                 }
             }
 
-            void TryCallContinuation ()
+            private void TryCallContinuation ()
             {
                 var action = Interlocked.Exchange(ref whenComplete, null);
-                if (action != null)
-                {
-                    action.Invoke();
-                }
+                action?.Invoke();
             }
 
-            async UniTaskVoid RunTask (UniTask<T> task, int index)
+            private async UniTaskVoid RunTask (UniTask<T> task, int index)
             {
                 T value = default(T);
                 try
@@ -129,27 +123,18 @@ namespace UniRx.Async
             // ReSharper disable once MemberHidesStaticFromOuterClass
             public struct Awaiter : ICriticalNotifyCompletion
             {
-                WhenAllPromise<T> parent;
+                private WhenAllPromise<T> parent;
 
                 public Awaiter (WhenAllPromise<T> parent)
                 {
                     this.parent = parent;
                 }
 
-                public bool IsCompleted
-                {
-                    get
-                    {
-                        return parent.exception != null || parent.result.Length == parent.completeCount;
-                    }
-                }
+                public bool IsCompleted => parent.exception != null || parent.result.Length == parent.completeCount;
 
                 public T[] GetResult ()
                 {
-                    if (parent.exception != null)
-                    {
-                        parent.exception.Throw();
-                    }
+                    parent.exception?.Throw();
 
                     return parent.result;
                 }
@@ -165,21 +150,18 @@ namespace UniRx.Async
                     if (IsCompleted)
                     {
                         var action = Interlocked.Exchange(ref parent.whenComplete, null);
-                        if (action != null)
-                        {
-                            action();
-                        }
+                        action?.Invoke();
                     }
                 }
             }
         }
 
-        class WhenAllPromise
+        private class WhenAllPromise
         {
-            int completeCount;
-            int resultLength;
-            Action whenComplete;
-            ExceptionDispatchInfo exception;
+            private int completeCount;
+            private int resultLength;
+            private Action whenComplete;
+            private ExceptionDispatchInfo exception;
 
             public WhenAllPromise (UniTask[] tasks, int tasksLength)
             {
@@ -216,16 +198,13 @@ namespace UniRx.Async
                 }
             }
 
-            void TryCallContinuation ()
+            private void TryCallContinuation ()
             {
                 var action = Interlocked.Exchange(ref whenComplete, null);
-                if (action != null)
-                {
-                    action.Invoke();
-                }
+                action?.Invoke();
             }
 
-            async UniTaskVoid RunTask (UniTask task, int index)
+            private async UniTaskVoid RunTask (UniTask task, int index)
             {
                 try
                 {
@@ -253,27 +232,18 @@ namespace UniRx.Async
             // ReSharper disable once MemberHidesStaticFromOuterClass
             public struct Awaiter : ICriticalNotifyCompletion
             {
-                WhenAllPromise parent;
+                private WhenAllPromise parent;
 
                 public Awaiter (WhenAllPromise parent)
                 {
                     this.parent = parent;
                 }
 
-                public bool IsCompleted
-                {
-                    get
-                    {
-                        return parent.exception != null || parent.resultLength == parent.completeCount;
-                    }
-                }
+                public bool IsCompleted => parent.exception != null || parent.resultLength == parent.completeCount;
 
                 public void GetResult ()
                 {
-                    if (parent.exception != null)
-                    {
-                        parent.exception.Throw();
-                    }
+                    parent.exception?.Throw();
                 }
 
                 public void OnCompleted (Action continuation)
@@ -287,14 +257,10 @@ namespace UniRx.Async
                     if (IsCompleted)
                     {
                         var action = Interlocked.Exchange(ref parent.whenComplete, null);
-                        if (action != null)
-                        {
-                            action();
-                        }
+                        action?.Invoke();
                     }
                 }
             }
         }
     }
 }
-#endif

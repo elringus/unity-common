@@ -3,20 +3,20 @@
 using System;
 using UnityEngine;
 
-namespace UniRx.Async.Internal
+namespace UnityCommon.Async.Internal
 {
     internal sealed class PlayerLoopRunner
     {
-        const int InitialSize = 16;
+        private const int InitialSize = 16;
 
-        readonly object runningAndQueueLock = new object();
-        readonly object arrayLock = new object();
-        readonly Action<Exception> unhandledExceptionCallback;
+        private readonly object runningAndQueueLock = new object();
+        private readonly object arrayLock = new object();
+        private readonly Action<Exception> unhandledExceptionCallback;
 
-        int tail = 0;
-        bool running = false;
-        IPlayerLoopItem[] loopItems = new IPlayerLoopItem[InitialSize];
-        MinimumQueue<IPlayerLoopItem> waitQueue = new MinimumQueue<IPlayerLoopItem>(InitialSize);
+        private int tail = 0;
+        private bool running = false;
+        private IPlayerLoopItem[] loopItems = new IPlayerLoopItem[InitialSize];
+        private MinimumQueue<IPlayerLoopItem> waitQueue = new MinimumQueue<IPlayerLoopItem>(InitialSize);
 
         public PlayerLoopRunner ()
         {

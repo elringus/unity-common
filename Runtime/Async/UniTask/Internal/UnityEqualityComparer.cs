@@ -1,12 +1,8 @@
-#if CSHARP_7_OR_LATER || (UNITY_2018_3_OR_NEWER && (NET_STANDARD_2_0 || NET_4_6))
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-#endif
-
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace UniRx.Async.Internal
+namespace UnityCommon.Async.Internal
 {
     internal static class UnityEqualityComparer
     {
@@ -19,16 +15,14 @@ namespace UniRx.Async.Internal
         public static readonly IEqualityComparer<Bounds> Bounds = new BoundsEqualityComparer();
         public static readonly IEqualityComparer<Quaternion> Quaternion = new QuaternionEqualityComparer();
 
-        static readonly RuntimeTypeHandle vector2Type = typeof(Vector2).TypeHandle;
-        static readonly RuntimeTypeHandle vector3Type = typeof(Vector3).TypeHandle;
-        static readonly RuntimeTypeHandle vector4Type = typeof(Vector4).TypeHandle;
-        static readonly RuntimeTypeHandle colorType = typeof(Color).TypeHandle;
-        static readonly RuntimeTypeHandle color32Type = typeof(Color32).TypeHandle;
-        static readonly RuntimeTypeHandle rectType = typeof(Rect).TypeHandle;
-        static readonly RuntimeTypeHandle boundsType = typeof(Bounds).TypeHandle;
-        static readonly RuntimeTypeHandle quaternionType = typeof(Quaternion).TypeHandle;
-
-        #if UNITY_2017_2_OR_NEWER
+        private static readonly RuntimeTypeHandle vector2Type = typeof(Vector2).TypeHandle;
+        private static readonly RuntimeTypeHandle vector3Type = typeof(Vector3).TypeHandle;
+        private static readonly RuntimeTypeHandle vector4Type = typeof(Vector4).TypeHandle;
+        private static readonly RuntimeTypeHandle colorType = typeof(Color).TypeHandle;
+        private static readonly RuntimeTypeHandle color32Type = typeof(Color32).TypeHandle;
+        private static readonly RuntimeTypeHandle rectType = typeof(Rect).TypeHandle;
+        private static readonly RuntimeTypeHandle boundsType = typeof(Bounds).TypeHandle;
+        private static readonly RuntimeTypeHandle quaternionType = typeof(Quaternion).TypeHandle;
 
         public static readonly IEqualityComparer<Vector2Int> Vector2Int = new Vector2IntEqualityComparer();
         public static readonly IEqualityComparer<Vector3Int> Vector3Int = new Vector3IntEqualityComparer();
@@ -36,15 +30,13 @@ namespace UniRx.Async.Internal
         public static readonly IEqualityComparer<RectInt> RectInt = new RectIntEqualityComparer();
         public static readonly IEqualityComparer<BoundsInt> BoundsInt = new BoundsIntEqualityComparer();
 
-        static readonly RuntimeTypeHandle vector2IntType = typeof(Vector2Int).TypeHandle;
-        static readonly RuntimeTypeHandle vector3IntType = typeof(Vector3Int).TypeHandle;
-        static readonly RuntimeTypeHandle rangeIntType = typeof(RangeInt).TypeHandle;
-        static readonly RuntimeTypeHandle rectIntType = typeof(RectInt).TypeHandle;
-        static readonly RuntimeTypeHandle boundsIntType = typeof(BoundsInt).TypeHandle;
+        private static readonly RuntimeTypeHandle vector2IntType = typeof(Vector2Int).TypeHandle;
+        private static readonly RuntimeTypeHandle vector3IntType = typeof(Vector3Int).TypeHandle;
+        private static readonly RuntimeTypeHandle rangeIntType = typeof(RangeInt).TypeHandle;
+        private static readonly RuntimeTypeHandle rectIntType = typeof(RectInt).TypeHandle;
+        private static readonly RuntimeTypeHandle boundsIntType = typeof(BoundsInt).TypeHandle;
 
-        #endif
-
-        static class Cache<T>
+        private static class Cache<T>
         {
             public static readonly IEqualityComparer<T> Comparer;
 
@@ -67,7 +59,7 @@ namespace UniRx.Async.Internal
             return Cache<T>.Comparer;
         }
 
-        static object GetDefaultHelper (Type type)
+        private static object GetDefaultHelper (Type type)
         {
             var t = type.TypeHandle;
 
@@ -80,19 +72,16 @@ namespace UniRx.Async.Internal
             if (t.Equals(boundsType)) return Bounds;
             if (t.Equals(quaternionType)) return Quaternion;
 
-            #if UNITY_2017_2_OR_NEWER
-
             if (t.Equals(vector2IntType)) return Vector2Int;
             if (t.Equals(vector3IntType)) return Vector3Int;
             if (t.Equals(rangeIntType)) return RangeInt;
             if (t.Equals(rectIntType)) return RectInt;
             if (t.Equals(boundsIntType)) return BoundsInt;
-            #endif
 
             return null;
         }
 
-        sealed class Vector2EqualityComparer : IEqualityComparer<Vector2>
+        private sealed class Vector2EqualityComparer : IEqualityComparer<Vector2>
         {
             public bool Equals (Vector2 self, Vector2 vector)
             {
@@ -105,7 +94,7 @@ namespace UniRx.Async.Internal
             }
         }
 
-        sealed class Vector3EqualityComparer : IEqualityComparer<Vector3>
+        private sealed class Vector3EqualityComparer : IEqualityComparer<Vector3>
         {
             public bool Equals (Vector3 self, Vector3 vector)
             {
@@ -118,7 +107,7 @@ namespace UniRx.Async.Internal
             }
         }
 
-        sealed class Vector4EqualityComparer : IEqualityComparer<Vector4>
+        private sealed class Vector4EqualityComparer : IEqualityComparer<Vector4>
         {
             public bool Equals (Vector4 self, Vector4 vector)
             {
@@ -131,7 +120,7 @@ namespace UniRx.Async.Internal
             }
         }
 
-        sealed class ColorEqualityComparer : IEqualityComparer<Color>
+        private sealed class ColorEqualityComparer : IEqualityComparer<Color>
         {
             public bool Equals (Color self, Color other)
             {
@@ -144,7 +133,7 @@ namespace UniRx.Async.Internal
             }
         }
 
-        sealed class RectEqualityComparer : IEqualityComparer<Rect>
+        private sealed class RectEqualityComparer : IEqualityComparer<Rect>
         {
             public bool Equals (Rect self, Rect other)
             {
@@ -157,7 +146,7 @@ namespace UniRx.Async.Internal
             }
         }
 
-        sealed class BoundsEqualityComparer : IEqualityComparer<Bounds>
+        private sealed class BoundsEqualityComparer : IEqualityComparer<Bounds>
         {
             public bool Equals (Bounds self, Bounds vector)
             {
@@ -170,7 +159,7 @@ namespace UniRx.Async.Internal
             }
         }
 
-        sealed class QuaternionEqualityComparer : IEqualityComparer<Quaternion>
+        private sealed class QuaternionEqualityComparer : IEqualityComparer<Quaternion>
         {
             public bool Equals (Quaternion self, Quaternion vector)
             {
@@ -183,7 +172,7 @@ namespace UniRx.Async.Internal
             }
         }
 
-        sealed class Color32EqualityComparer : IEqualityComparer<Color32>
+        private sealed class Color32EqualityComparer : IEqualityComparer<Color32>
         {
             public bool Equals (Color32 self, Color32 vector)
             {
@@ -196,9 +185,7 @@ namespace UniRx.Async.Internal
             }
         }
 
-        #if UNITY_2017_2_OR_NEWER
-
-        sealed class Vector2IntEqualityComparer : IEqualityComparer<Vector2Int>
+        private sealed class Vector2IntEqualityComparer : IEqualityComparer<Vector2Int>
         {
             public bool Equals (Vector2Int self, Vector2Int vector)
             {
@@ -211,7 +198,7 @@ namespace UniRx.Async.Internal
             }
         }
 
-        sealed class Vector3IntEqualityComparer : IEqualityComparer<Vector3Int>
+        private sealed class Vector3IntEqualityComparer : IEqualityComparer<Vector3Int>
         {
             public static readonly Vector3IntEqualityComparer Default = new Vector3IntEqualityComparer();
 
@@ -226,7 +213,7 @@ namespace UniRx.Async.Internal
             }
         }
 
-        sealed class RangeIntEqualityComparer : IEqualityComparer<RangeInt>
+        private sealed class RangeIntEqualityComparer : IEqualityComparer<RangeInt>
         {
             public bool Equals (RangeInt self, RangeInt vector)
             {
@@ -239,7 +226,7 @@ namespace UniRx.Async.Internal
             }
         }
 
-        sealed class RectIntEqualityComparer : IEqualityComparer<RectInt>
+        private sealed class RectIntEqualityComparer : IEqualityComparer<RectInt>
         {
             public bool Equals (RectInt self, RectInt other)
             {
@@ -252,7 +239,7 @@ namespace UniRx.Async.Internal
             }
         }
 
-        sealed class BoundsIntEqualityComparer : IEqualityComparer<BoundsInt>
+        private sealed class BoundsIntEqualityComparer : IEqualityComparer<BoundsInt>
         {
             public bool Equals (BoundsInt self, BoundsInt vector)
             {
@@ -265,7 +252,5 @@ namespace UniRx.Async.Internal
                 return Vector3IntEqualityComparer.Default.GetHashCode(obj.position) ^ Vector3IntEqualityComparer.Default.GetHashCode(obj.size) << 2;
             }
         }
-
-        #endif
     }
 }
