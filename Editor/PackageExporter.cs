@@ -238,7 +238,7 @@ namespace UnityCommon
                     if (!string.IsNullOrEmpty(OverrideNamespace))
                         scriptText = scriptText
                             .Replace($"namespace {PackageName}", $"namespace {OverrideNamespace}")
-                            .Replace($"using {PackageName};{newLine}", $"using {OverrideNamespace};{newLine}");
+                            .Replace($"using {PackageName}", $"using {OverrideNamespace}");
 
                     File.WriteAllText(fullPath, scriptText);
 
