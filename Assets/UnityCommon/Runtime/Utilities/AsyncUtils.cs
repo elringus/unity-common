@@ -14,10 +14,12 @@ namespace UnityCommon
             return task?.GetAwaiter() ?? UniTask.FromResult<T>(default).GetAwaiter();
         }
 
-        public static async UniTask WaitEndOfFrameAsync (AsyncToken asyncToken = default)
+        /// <summary>
+        /// Waits till the end of the current update loop. Doesn't allocate on heap.
+        /// </summary>
+        public static YieldAwaitable WaitEndOfFrameAsync (AsyncToken asyncToken = default)
         {
-            await UniTask.Yield(PlayerLoopTiming.PostLateUpdate);
-            asyncToken.ThrowIfCanceled();
+            return UniTask.Yield(PlayerLoopTiming.PostLateUpdate, asyncToken);
         }
 
         public static async UniTask DelayFrameAsync (int frameCount, AsyncToken asyncToken = default)

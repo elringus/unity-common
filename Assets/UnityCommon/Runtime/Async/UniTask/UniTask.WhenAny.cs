@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace UniRx.Async
 {
-    public partial struct UniTask
+    public readonly partial struct UniTask
     {
         // UniTask
 
