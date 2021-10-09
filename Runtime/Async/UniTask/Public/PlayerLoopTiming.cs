@@ -1,4 +1,4 @@
-﻿namespace UnityCommon
+namespace UnityCommon
 {
     public enum PlayerLoopTiming
     {
