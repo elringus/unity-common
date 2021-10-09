@@ -237,7 +237,9 @@ namespace UnityCommon
                     scriptText += originalScriptText;
 
                     if (!string.IsNullOrEmpty(OverrideNamespace))
-                        scriptText = scriptText.Replace($"namespace {PackageName}{newLine}{{", $"namespace {OverrideNamespace}{newLine}{{");
+                        scriptText = scriptText
+                            .Replace($"namespace {PackageName}{newLine}{{", $"namespace {OverrideNamespace}{newLine}{{")
+                            .Replace($"using {PackageName};{newLine}", $"using {OverrideNamespace};{newLine}");
 
                     File.WriteAllText(fullPath, scriptText);
 
@@ -262,7 +264,7 @@ namespace UnityCommon
                         .Select(d => d.FullName).ToList();
                     var packageFiles = sourceDir.GetFiles("*.*", SearchOption.AllDirectories)
                         .Where(f => (f.Attributes & FileAttributes.Hidden) == 0 &&
-                        !hiddenFolders.Any(d => f.FullName.StartsWith(d))).ToList();
+                                    !hiddenFolders.Any(d => f.FullName.StartsWith(d))).ToList();
 
                     foreach (var packageFile in packageFiles)
                     {
