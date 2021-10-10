@@ -123,10 +123,7 @@ namespace UnityCommon
             if (!CanvasGroup) return;
 
             if (!disableInteraction)
-            {
-                CanvasGroup.interactable = visible;
                 CanvasGroup.blocksRaycasts = visible;
-            }
 
             if (!controlOpacity) return;
 
@@ -158,10 +155,7 @@ namespace UnityCommon
             if (!CanvasGroup) return;
 
             if (!disableInteraction)
-            {
-                CanvasGroup.interactable = visible;
                 CanvasGroup.blocksRaycasts = visible;
-            }
 
             if (controlOpacity)
                 CanvasGroup.alpha = visible ? 1f : 0f;
@@ -240,10 +234,7 @@ namespace UnityCommon
             CanvasGroup = GetComponent<CanvasGroup>();
 
             if (CanvasGroup && disableInteraction)
-            {
-                CanvasGroup.interactable = false;
                 CanvasGroup.blocksRaycasts = false;
-            }
 
             SetVisibility(VisibleOnAwake);
         }

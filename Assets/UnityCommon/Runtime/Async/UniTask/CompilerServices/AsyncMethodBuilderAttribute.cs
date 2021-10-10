@@ -1,4 +1,5 @@
 #pragma warning disable CS0436
+#pragma warning disable CS0436
 
 namespace System.Runtime.CompilerServices
 {
