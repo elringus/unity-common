@@ -1,3 +1,5 @@
+#pragma warning disable CS0436
+
 using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
