@@ -55,7 +55,7 @@ namespace UnityCommon.Async
                     string msg = null;
                     if (UnobservedExceptionWriteLogType != UnityEngine.LogType.Exception)
                     {
-                        msg = "UnobservedTaskException:" + ex.ToString();
+                        msg = ex.ToString();
                     }
                     switch (UnobservedExceptionWriteLogType)
                     {
