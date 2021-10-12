@@ -283,18 +283,10 @@ namespace UnityCommon.Async.Internal
         protected readonly CancellationToken cancellationToken;
         private bool isRunning = false;
 
-        #if UNITY_EDITOR
-        private string capturedStackTraceForDebugging;
-        #endif
-
         protected PlayerLoopReusablePromiseBase (PlayerLoopTiming timing, CancellationToken cancellationToken, int skipTrackFrameCountAdditive)
         {
             this.timing = timing;
             this.cancellationToken = cancellationToken;
-
-            #if UNITY_EDITOR
-            this.capturedStackTraceForDebugging = TaskTracker.CaptureStackTrace(skipTrackFrameCountAdditive + 1); // 1 is self,
-            #endif
         }
 
         public override bool IsCompleted
@@ -308,9 +300,6 @@ namespace UnityCommon.Async.Internal
                     isRunning = true;
                     ResetStatus(false);
                     OnRunningStart();
-                    #if UNITY_EDITOR
-                    TaskTracker.TrackActiveTask(this, capturedStackTraceForDebugging);
-                    #endif
                     PlayerLoopHelper.AddAction(timing, this);
                 }
                 return false;
@@ -322,9 +311,6 @@ namespace UnityCommon.Async.Internal
         protected void Complete ()
         {
             isRunning = false;
-            #if UNITY_EDITOR
-            TaskTracker.RemoveTracking(this);
-            #endif
         }
 
         public abstract bool MoveNext ();
@@ -336,18 +322,10 @@ namespace UnityCommon.Async.Internal
         protected readonly CancellationToken cancellationToken;
         private bool isRunning = false;
 
-        #if UNITY_EDITOR
-        private string capturedStackTraceForDebugging;
-        #endif
-
         protected PlayerLoopReusablePromiseBase (PlayerLoopTiming timing, CancellationToken cancellationToken, int skipTrackFrameCountAdditive)
         {
             this.timing = timing;
             this.cancellationToken = cancellationToken;
-
-            #if UNITY_EDITOR
-            this.capturedStackTraceForDebugging = TaskTracker.CaptureStackTrace(skipTrackFrameCountAdditive + 1); // 1 is self,
-            #endif
         }
 
         public override bool IsCompleted
@@ -361,9 +339,6 @@ namespace UnityCommon.Async.Internal
                     isRunning = true;
                     ResetStatus(false);
                     OnRunningStart();
-                    #if UNITY_EDITOR
-                    TaskTracker.TrackActiveTask(this, capturedStackTraceForDebugging);
-                    #endif
                     PlayerLoopHelper.AddAction(timing, this);
                 }
                 return false;
@@ -375,9 +350,6 @@ namespace UnityCommon.Async.Internal
         protected void Complete ()
         {
             isRunning = false;
-            #if UNITY_EDITOR
-            TaskTracker.RemoveTracking(this);
-            #endif
         }
 
         public abstract bool MoveNext ();

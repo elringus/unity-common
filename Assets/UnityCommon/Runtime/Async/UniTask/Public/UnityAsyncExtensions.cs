@@ -211,8 +211,6 @@ namespace UnityCommon
                 this.progress = progress;
                 this.cancellationToken = cancellationToken;
                 this.continuation = null;
-
-                TaskTracker.TrackActiveTask(this, 2);
             }
 
             public bool IsCompleted => status.IsCompleted();
@@ -260,7 +258,6 @@ namespace UnityCommon
                 var cont = this.continuation;
 
                 // cleanup
-                TaskTracker.RemoveTracking(this);
                 this.continuation = null;
                 this.cancellationToken = CancellationToken.None;
                 this.progress = null;
@@ -370,8 +367,6 @@ namespace UnityCommon
                 this.cancellationToken = cancellationToken;
                 this.continuation = null;
                 this.result = null;
-
-                TaskTracker.TrackActiveTask(this, 2);
             }
 
             public bool IsCompleted => status.IsCompleted();
@@ -419,7 +414,6 @@ namespace UnityCommon
                 var cont = this.continuation;
 
                 // cleanup
-                TaskTracker.RemoveTracking(this);
                 this.continuation = null;
                 this.cancellationToken = CancellationToken.None;
                 this.progress = null;
@@ -530,8 +524,6 @@ namespace UnityCommon
                 this.cancellationToken = cancellationToken;
                 this.continuation = null;
                 this.result = null;
-
-                TaskTracker.TrackActiveTask(this, 2);
             }
 
             public bool IsCompleted => status.IsCompleted();
@@ -579,7 +571,6 @@ namespace UnityCommon
                 var cont = this.continuation;
 
                 // cleanup
-                TaskTracker.RemoveTracking(this);
                 this.continuation = null;
                 this.cancellationToken = CancellationToken.None;
                 this.progress = null;
@@ -690,8 +681,6 @@ namespace UnityCommon
                 this.cancellationToken = cancellationToken;
                 this.continuation = null;
                 this.result = null;
-
-                TaskTracker.TrackActiveTask(this, 2);
             }
 
             public bool IsCompleted => status.IsCompleted();
@@ -739,7 +728,6 @@ namespace UnityCommon
                 var cont = this.continuation;
 
                 // cleanup
-                TaskTracker.RemoveTracking(this);
                 this.continuation = null;
                 this.cancellationToken = CancellationToken.None;
                 this.progress = null;
@@ -852,8 +840,6 @@ namespace UnityCommon
                 this.cancellationToken = cancellationToken;
                 this.continuation = null;
                 this.result = null;
-
-                TaskTracker.TrackActiveTask(this, 2);
             }
 
             public bool IsCompleted => status.IsCompleted();
@@ -901,7 +887,6 @@ namespace UnityCommon
                 var cont = this.continuation;
 
                 // cleanup
-                TaskTracker.RemoveTracking(this);
                 this.continuation = null;
                 this.cancellationToken = CancellationToken.None;
                 this.progress = null;

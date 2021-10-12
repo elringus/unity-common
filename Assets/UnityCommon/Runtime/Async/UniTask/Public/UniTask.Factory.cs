@@ -9,7 +9,6 @@ namespace UnityCommon
         private static readonly UniTask CanceledUniTask = new Func<UniTask>(() => {
             var promise = new UniTaskCompletionSource<AsyncUnit>();
             promise.TrySetCanceled();
-            promise.MarkHandled();
             return new UniTask(promise);
         })();
 
@@ -19,7 +18,6 @@ namespace UnityCommon
         {
             var promise = new UniTaskCompletionSource<AsyncUnit>();
             promise.TrySetException(ex);
-            promise.MarkHandled();
             return new UniTask(promise);
         }
 
@@ -27,7 +25,6 @@ namespace UnityCommon
         {
             var promise = new UniTaskCompletionSource<T>();
             promise.TrySetException(ex);
-            promise.MarkHandled();
             return new UniTask<T>(promise);
         }
 
@@ -50,7 +47,6 @@ namespace UnityCommon
         {
             var promise = new UniTaskCompletionSource<AsyncUnit>();
             promise.TrySetException(new OperationCanceledException(token));
-            promise.MarkHandled();
             return new UniTask(promise);
         }
 
@@ -58,7 +54,6 @@ namespace UnityCommon
         {
             var promise = new UniTaskCompletionSource<T>();
             promise.TrySetException(new OperationCanceledException(token));
-            promise.MarkHandled();
             return new UniTask<T>(promise);
         }
 
@@ -94,7 +89,6 @@ namespace UnityCommon
             {
                 var promise = new UniTaskCompletionSource<T>();
                 promise.TrySetCanceled();
-                promise.MarkHandled();
                 Task = new UniTask<T>(promise);
             }
         }

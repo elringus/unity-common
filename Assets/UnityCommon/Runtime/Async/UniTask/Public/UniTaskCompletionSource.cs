@@ -5,7 +5,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using UnityCommon.Async;
-using UnityCommon.Async.Internal;
 
 namespace UnityCommon
 {
@@ -68,7 +67,6 @@ namespace UnityCommon
         private const int Canceled = 3;
 
         private int state = 0;
-        private bool handled = false;
         private ExceptionHolder exception;
         private object continuation; // action or list
 
@@ -78,25 +76,8 @@ namespace UnityCommon
 
         public UniTask Task => new UniTask(this);
 
-        public UniTaskCompletionSource ()
-        {
-            TaskTracker.TrackActiveTask(this, 2);
-        }
-
-        [Conditional("UNITY_EDITOR")]
-        internal void MarkHandled ()
-        {
-            if (!handled)
-            {
-                handled = true;
-                TaskTracker.RemoveTracking(this);
-            }
-        }
-
         void IAwaiter.GetResult ()
         {
-            MarkHandled();
-
             if (state == Succeeded)
             {
                 return;
@@ -233,7 +214,6 @@ namespace UnityCommon
 
         private int state = 0;
         private T value;
-        private bool handled = false;
         private ExceptionHolder exception;
         private object continuation; // action or list
 
@@ -244,25 +224,8 @@ namespace UnityCommon
 
         AwaiterStatus IAwaiter.Status => (AwaiterStatus)state;
 
-        public UniTaskCompletionSource ()
-        {
-            TaskTracker.TrackActiveTask(this, 2);
-        }
-
-        [Conditional("UNITY_EDITOR")]
-        internal void MarkHandled ()
-        {
-            if (!handled)
-            {
-                handled = true;
-                TaskTracker.RemoveTracking(this);
-            }
-        }
-
         T IAwaiter<T>.GetResult ()
         {
-            MarkHandled();
-
             if (state == Succeeded)
             {
                 return value;

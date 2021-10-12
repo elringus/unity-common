@@ -61,8 +61,6 @@ namespace UnityCommon
                 this.status = AwaiterStatus.Pending;
                 this.cancellationToken = cancellationToken;
                 this.continuation = null;
-
-                TaskTracker.TrackActiveTask(this, 2);
             }
 
             public bool IsCompleted => status.IsCompleted();
@@ -122,7 +120,6 @@ namespace UnityCommon
                 var cont = this.continuation;
 
                 // cleanup
-                TaskTracker.RemoveTracking(this);
                 this.continuation = null;
                 this.cancellationToken = CancellationToken.None;
                 this.innerEnumerator = null;
