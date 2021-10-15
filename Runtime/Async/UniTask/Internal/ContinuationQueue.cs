@@ -3,12 +3,14 @@ using System.Threading;
 
 namespace UnityCommon.Async.Internal
 {
-    internal class ContinuationQueue
+    internal sealed class ContinuationQueue
     {
         private const int MaxArrayLength = 0X7FEFFFFF;
         private const int InitialSize = 16;
 
-        private SpinLock gate = new SpinLock();
+        private readonly PlayerLoopTiming timing;
+
+        private SpinLock gate = new SpinLock(false);
         private bool dequing = false;
 
         private int actionListCount = 0;
@@ -16,6 +18,11 @@ namespace UnityCommon.Async.Internal
 
         private int waitingListCount = 0;
         private Action[] waitingList = new Action[InitialSize];
+
+        public ContinuationQueue (PlayerLoopTiming timing)
+        {
+            this.timing = timing;
+        }
 
         public void Enqueue (Action continuation)
         {
@@ -61,16 +68,105 @@ namespace UnityCommon.Async.Internal
             }
         }
 
-        public void Clear ()
+        public int Clear ()
         {
+            var rest = actionListCount + waitingListCount;
+
             actionListCount = 0;
             actionList = new Action[InitialSize];
 
             waitingListCount = 0;
             waitingList = new Action[InitialSize];
+
+            return rest;
         }
 
+        // delegate entrypoint.
         public void Run ()
+        {
+            // for debugging, create named stacktrace.
+            #if DEBUG
+            switch (timing)
+            {
+                case PlayerLoopTiming.Initialization:
+                    Initialization();
+                    break;
+                case PlayerLoopTiming.LastInitialization:
+                    LastInitialization();
+                    break;
+                case PlayerLoopTiming.EarlyUpdate:
+                    EarlyUpdate();
+                    break;
+                case PlayerLoopTiming.LastEarlyUpdate:
+                    LastEarlyUpdate();
+                    break;
+                case PlayerLoopTiming.FixedUpdate:
+                    FixedUpdate();
+                    break;
+                case PlayerLoopTiming.LastFixedUpdate:
+                    LastFixedUpdate();
+                    break;
+                case PlayerLoopTiming.PreUpdate:
+                    PreUpdate();
+                    break;
+                case PlayerLoopTiming.LastPreUpdate:
+                    LastPreUpdate();
+                    break;
+                case PlayerLoopTiming.Update:
+                    Update();
+                    break;
+                case PlayerLoopTiming.LastUpdate:
+                    LastUpdate();
+                    break;
+                case PlayerLoopTiming.PreLateUpdate:
+                    PreLateUpdate();
+                    break;
+                case PlayerLoopTiming.LastPreLateUpdate:
+                    LastPreLateUpdate();
+                    break;
+                case PlayerLoopTiming.PostLateUpdate:
+                    PostLateUpdate();
+                    break;
+                case PlayerLoopTiming.LastPostLateUpdate:
+                    LastPostLateUpdate();
+                    break;
+                #if UNITY_2020_2_OR_NEWER
+                case PlayerLoopTiming.TimeUpdate:
+                    TimeUpdate();
+                    break;
+                case PlayerLoopTiming.LastTimeUpdate:
+                    LastTimeUpdate();
+                    break;
+                #endif
+                default:
+                    break;
+            }
+            #else
+            RunCore();
+            #endif
+        }
+
+        private void Initialization () => RunCore();
+        private void LastInitialization () => RunCore();
+        private void EarlyUpdate () => RunCore();
+        private void LastEarlyUpdate () => RunCore();
+        private void FixedUpdate () => RunCore();
+        private void LastFixedUpdate () => RunCore();
+        private void PreUpdate () => RunCore();
+        private void LastPreUpdate () => RunCore();
+        private void Update () => RunCore();
+        private void LastUpdate () => RunCore();
+        private void PreLateUpdate () => RunCore();
+        private void LastPreLateUpdate () => RunCore();
+        private void PostLateUpdate () => RunCore();
+        private void LastPostLateUpdate () => RunCore();
+        #if UNITY_2020_2_OR_NEWER
+        void TimeUpdate() => RunCore();
+        void LastTimeUpdate() => RunCore();
+        #endif
+
+        [System.Diagnostics.DebuggerHidden]
+        private void RunCore ()
         {
             {
                 bool lockTaken = false;
@@ -90,8 +186,14 @@ namespace UnityCommon.Async.Internal
             {
                 var action = actionList[i];
                 actionList[i] = null;
-
-                action();
+                try
+                {
+                    action();
+                }
+                catch (Exception ex)
+                {
+                    UnityEngine.Debug.LogException(ex);
+                }
             }
 
             {
