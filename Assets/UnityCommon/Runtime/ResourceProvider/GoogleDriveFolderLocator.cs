@@ -7,7 +7,7 @@ namespace UnityCommon
 {
     public class GoogleDriveFolderLocator : LocateFoldersRunner
     {
-        public readonly string RootPath;
+        public virtual string RootPath { get; }
 
         public GoogleDriveFolderLocator (IResourceProvider provider, string rootPath, string resourcesPath)
             : base (provider, resourcesPath)

@@ -6,7 +6,7 @@ namespace UnityCommon
 {
     public class LocalResourceProvider : ResourceProvider
     {
-        public readonly string RootPath;
+        public string RootPath { get; }
 
         private readonly Dictionary<Type, IConverter> converters = new Dictionary<Type, IConverter>();
 
@@ -40,7 +40,7 @@ namespace UnityCommon
         /// <summary>
         /// Adds a resource type converter.
         /// </summary>
-        public void AddConverter<T> (IRawConverter<T> converter)
+        public virtual void AddConverter<T> (IRawConverter<T> converter)
         {
             if (converters.ContainsKey(typeof(T))) return;
             converters.Add(typeof(T), converter);
@@ -67,7 +67,7 @@ namespace UnityCommon
             ObjectUtils.DestroyOrImmediate(resource.Object);
         }
 
-        private IRawConverter<T> ResolveConverter<T> ()
+        protected virtual IRawConverter<T> ResolveConverter<T> ()
         {
             var resourceType = typeof(T);
             if (!converters.ContainsKey(resourceType))

@@ -10,10 +10,10 @@ using UnityGoogleDrive;
 
 namespace UnityCommon
 {
-    public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource> 
+    public class GoogleDriveResourceLoader<TResource> : LoadResourceRunner<TResource>
         where TResource : UnityEngine.Object
     {
-        public readonly string RootPath;
+        public virtual string RootPath { get; }
 
         private static readonly Type[] nativeRequestTypes = { typeof(AudioClip), typeof(Texture2D) };
 
@@ -27,7 +27,7 @@ namespace UnityCommon
         private byte[] rawData;
 
         public GoogleDriveResourceLoader (IResourceProvider provider, string rootPath, string resourcePath,
-            IRawConverter<TResource> converter, Action<string> logAction) : base (provider, resourcePath)
+            IRawConverter<TResource> converter, Action<string> logAction) : base(provider, resourcePath)
         {
             RootPath = rootPath;
             useNativeRequests = nativeRequestTypes.Contains(typeof(TResource));
@@ -36,7 +36,8 @@ namespace UnityCommon
             // MP3 is not supported in native requests on the standalone platforms. Fallback to raw converters.
             #if UNITY_STANDALONE || UNITY_EDITOR
             foreach (var r in converter.Representations)
-                if (WebUtils.EvaluateAudioTypeFromMime(r.MimeType) == AudioType.MPEG) useNativeRequests = false;
+                if (WebUtils.EvaluateAudioTypeFromMime(r.MimeType) == AudioType.MPEG)
+                    useNativeRequests = false;
             #endif
 
             this.converter = converter;
@@ -89,20 +90,24 @@ namespace UnityCommon
             }
         }
 
-        private async UniTask<UnityGoogleDrive.Data.File> GetFileMetaAsync (string filePath)
+        protected virtual async UniTask<UnityGoogleDrive.Data.File> GetFileMetaAsync (string filePath)
         {
             foreach (var representation in converter.Representations)
             {
                 var fullPath = string.Concat(filePath, representation.Extension);
                 var files = await Helpers.FindFilesByPathAsync(fullPath, fields: new List<string> { "files(id, mimeType, modifiedTime)" }, mime: representation.MimeType);
                 if (files.Count > 1) Debug.LogWarning($"Multiple '{fullPath}' files been found in Google Drive.");
-                if (files.Count > 0) { usedRepresentation = representation; return files[0]; }
+                if (files.Count > 0)
+                {
+                    usedRepresentation = representation;
+                    return files[0];
+                }
             }
 
             throw new Exception($"Failed to retrieve '{Path}' resource from Google Drive.");
         }
 
-        private async UniTask<byte[]> DownloadFileAsync (UnityGoogleDrive.Data.File fileMeta)
+        protected virtual async UniTask<byte[]> DownloadFileAsync (UnityGoogleDrive.Data.File fileMeta)
         {
             if (useNativeRequests)
             {
@@ -124,7 +129,7 @@ namespace UnityCommon
             return downloadRequest.GetResponseData<UnityGoogleDrive.Data.File>().Content;
         }
 
-        private async UniTask<byte[]> ExportFileAsync (UnityGoogleDrive.Data.File fileMeta)
+        protected virtual async UniTask<byte[]> ExportFileAsync (UnityGoogleDrive.Data.File fileMeta)
         {
             Debug.Assert(converter is IGoogleDriveConverter<TResource>);
 
@@ -137,7 +142,7 @@ namespace UnityCommon
             return downloadRequest.GetResponseData<UnityGoogleDrive.Data.File>().Content;
         }
 
-        private async UniTask<byte[]> TryLoadFileCacheAsync (string resourcePath)
+        protected virtual async UniTask<byte[]> TryLoadFileCacheAsync (string resourcePath)
         {
             resourcePath = resourcePath.Replace("/", GoogleDriveResourceProvider.SlashReplace);
             var filePath = string.Concat(GoogleDriveResourceProvider.CacheDirPath, "/", resourcePath);
@@ -172,7 +177,7 @@ namespace UnityCommon
             else return await IOUtils.ReadFileAsync(filePath);
         }
 
-        private async UniTask WriteFileCacheAsync (string resourcePath, string fileId, byte[] fileRawData)
+        protected virtual async UniTask WriteFileCacheAsync (string resourcePath, string fileId, byte[] fileRawData)
         {
             resourcePath = resourcePath.Replace("/", GoogleDriveResourceProvider.SlashReplace);
             var filePath = string.Concat(GoogleDriveResourceProvider.CacheDirPath, "/", resourcePath);

@@ -20,7 +20,7 @@ namespace UnityCommon
         [Serializable]
         public class CacheManifest : SerializableLiteralStringMap
         {
-            public string StartToken { get => ContainsKey(startTokenKey) ? this[startTokenKey] : null; set => this[startTokenKey] = value; }
+            public virtual string StartToken { get => ContainsKey(startTokenKey) ? this[startTokenKey] : null; set => this[startTokenKey] = value; }
 
             private const string startTokenKey = "GDRIVE_CACHE_START_TOKEN";
             private static readonly string filePath = string.Concat(CacheDirPath, "/CacheManifest");
@@ -38,7 +38,7 @@ namespace UnityCommon
                 return JsonUtility.FromJson<CacheManifest>(manifestJson);
             }
 
-            public async UniTask WriteAsync ()
+            public virtual async UniTask WriteAsync ()
             {
                 var manifestJson = JsonUtility.ToJson(this);
                 await IOUtils.WriteTextFileAsync(filePath, manifestJson);
@@ -63,15 +63,15 @@ namespace UnityCommon
         /// <summary>
         /// Path to the drive folder where resources are located.
         /// </summary>
-        public readonly string DriveRootPath;
+        public virtual string DriveRootPath { get; }
         /// <summary>
         /// Limits concurrent requests count using queueing.
         /// </summary>
-        public readonly int ConcurrentRequestsLimit;
+        public virtual int ConcurrentRequestsLimit { get; }
         /// <summary>
         /// Caching policy to use.
         /// </summary>
-        public readonly CachingPolicyType CachingPolicy;
+        public CachingPolicyType CachingPolicy { get; }
         /// <summary>
         /// Current pending concurrent requests count.
         /// </summary>
@@ -99,7 +99,7 @@ namespace UnityCommon
         /// <summary>
         /// Adds a resource type converter.
         /// </summary>
-        public void AddConverter<T> (IRawConverter<T> converter)
+        public virtual void AddConverter<T> (IRawConverter<T> converter)
         {
             if (converters.ContainsKey(typeof(T))) return;
             converters.Add(typeof(T), converter);
@@ -117,7 +117,7 @@ namespace UnityCommon
             LogMessage("All cached resources purged.");
         }
 
-        public void PurgeCachedResources (string resourcesPath)
+        public virtual void PurgeCachedResources (string resourcesPath)
         {
             if (!Directory.Exists(CacheDirPath)) return;
 
@@ -185,7 +185,7 @@ namespace UnityCommon
             ObjectUtils.DestroyOrImmediate(resource.Object);
         }
 
-        private IRawConverter<T> ResolveConverter<T> ()
+        protected virtual IRawConverter<T> ResolveConverter<T> ()
         {
             var resourceType = typeof(T);
             if (!converters.ContainsKey(resourceType))
@@ -193,14 +193,14 @@ namespace UnityCommon
             return converters[resourceType] as IRawConverter<T>;
         }
 
-        private void ProcessLoadQueue ()
+        protected virtual void ProcessLoadQueue ()
         {
             if (requestQueue.Count == 0) return;
 
             requestQueue.Dequeue()();
         }
 
-        private async UniTask RunSmartCachingScanAsync ()
+        protected virtual async UniTask RunSmartCachingScanAsync ()
         {
             smartCachingScanPending = false;
 
@@ -218,7 +218,7 @@ namespace UnityCommon
             LogMessage($"Finished smart caching scan in {(DateTime.Now - startTime).TotalSeconds:0.###} seconds.");
         }
 
-        private async UniTask ProcessChangesListAsync (CacheManifest manifest)
+        protected virtual async UniTask ProcessChangesListAsync (CacheManifest manifest)
         {
             var changeList = await SendRequestAsync(GoogleDriveChanges.List(manifest.StartToken));
             foreach (var change in changeList.Changes)
@@ -242,7 +242,7 @@ namespace UnityCommon
             IOUtils.WebGLSyncFs();
         }
 
-        private async UniTask<T> SendRequestAsync<T> (GoogleDriveRequest<T> request)
+        protected virtual async UniTask<T> SendRequestAsync<T> (GoogleDriveRequest<T> request)
         {
             await request.Send();
             if (request.IsError) throw new WebException(request.Error);

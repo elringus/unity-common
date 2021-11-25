@@ -13,19 +13,19 @@ namespace UnityCommon
         public event Action<float> OnLoadProgress;
         public event Action<string> OnMessage;
 
-        public bool IsLoading => LoadProgress < 1f;
-        public float LoadProgress { get; private set; } = 1f;
+        public virtual bool IsLoading => LoadProgress < 1f;
+        public virtual float LoadProgress { get; private set; } = 1f;
         IReadOnlyCollection<Resource> IResourceProvider.LoadedResources => LoadedResources.Values;
 
-        protected readonly Dictionary<string, Resource> LoadedResources = new Dictionary<string, Resource>();
-        protected readonly Dictionary<string, List<Folder>> LocatedFolders = new Dictionary<string, List<Folder>>();
-        protected readonly Dictionary<string, ResourceRunner> LoadRunners = new Dictionary<string, ResourceRunner>();
-        protected readonly Dictionary<Tuple<string, Type>, ResourceRunner> LocateRunners = new Dictionary<Tuple<string, Type>, ResourceRunner>();
-        protected readonly List<CachedResourceLocation> LocationsCache = new List<CachedResourceLocation>();
+        protected Dictionary<string, Resource> LoadedResources { get; } = new Dictionary<string, Resource>();
+        protected Dictionary<string, List<Folder>> LocatedFolders { get; } = new Dictionary<string, List<Folder>>();
+        protected Dictionary<string, ResourceRunner> LoadRunners { get; } = new Dictionary<string, ResourceRunner>();
+        protected Dictionary<Tuple<string, Type>, ResourceRunner> LocateRunners { get; } = new Dictionary<Tuple<string, Type>, ResourceRunner>();
+        protected List<CachedResourceLocation> LocationsCache { get; } = new List<CachedResourceLocation>();
 
         public abstract bool SupportsType<T> () where T : UnityEngine.Object;
 
-        public Resource<T> GetLoadedResourceOrNull<T> (string path) where T : UnityEngine.Object
+        public virtual Resource<T> GetLoadedResourceOrNull<T> (string path) where T : UnityEngine.Object
         {
             if (!SupportsType<T>() || !ResourceLoaded(path)) return null;
 
@@ -126,7 +126,7 @@ namespace UnityCommon
             if (!SupportsType<T>()) return null;
             if (path is null) path = string.Empty;
 
-            if (LocationsCache.Count > 0) 
+            if (LocationsCache.Count > 0)
                 return LocateCached<T>(path);
 
             var locateKey = new Tuple<string, Type>(path, typeof(T));
@@ -170,12 +170,12 @@ namespace UnityCommon
 
             RunFoldersLocator(locateRunner);
 
-            var locatedFolders  = await locateRunner;
+            var locatedFolders = await locateRunner;
             HandleFoldersLocated(locatedFolders, path);
             return locatedFolders;
         }
 
-        public void LogMessage (string message) => OnMessage?.Invoke(message);
+        public virtual void LogMessage (string message) => OnMessage?.Invoke(message);
 
         protected abstract LoadResourceRunner<T> CreateLoadResourceRunner<T> (string path) where T : UnityEngine.Object;
         protected abstract LocateResourcesRunner<T> CreateLocateResourcesRunner<T> (string path) where T : UnityEngine.Object;
@@ -250,7 +250,7 @@ namespace UnityCommon
             else LoadProgress = Mathf.Min(1f / runnersCount, .999f);
             if (!Mathf.Approximately(prevProgress, LoadProgress)) OnLoadProgress?.Invoke(LoadProgress);
         }
-        
+
         protected virtual bool AreTypesCompatible (Type sourceType, Type targetType) => sourceType == targetType;
 
         protected virtual bool IsLocationCached<T> (string path)
@@ -263,7 +263,7 @@ namespace UnityCommon
         {
             var targetType = typeof(T);
             return LocationsCache.Where(r => AreTypesCompatible(r.Type, targetType))
-                                 .Select(r => r.Path).LocateResourcePathsAtFolder(path);
+                .Select(r => r.Path).LocateResourcePathsAtFolder(path);
         }
     }
 }
