@@ -4,15 +4,15 @@ using System.Linq;
 
 namespace UnityCommon
 {
-    public class LocalResourceLocator<TResource> : LocateResourcesRunner<TResource> 
+    public class LocalResourceLocator<TResource> : LocateResourcesRunner<TResource>
         where TResource : UnityEngine.Object
     {
-        public readonly string RootPath;
+        public virtual string RootPath { get; }
 
         private IRawConverter<TResource> converter;
 
-        public LocalResourceLocator (IResourceProvider provider, string rootPath, string resourcesPath, 
-            IRawConverter<TResource> converter) : base (provider, resourcesPath)
+        public LocalResourceLocator (IResourceProvider provider, string rootPath, string resourcesPath,
+            IRawConverter<TResource> converter) : base(provider, resourcesPath)
         {
             RootPath = rootPath;
             this.converter = converter;

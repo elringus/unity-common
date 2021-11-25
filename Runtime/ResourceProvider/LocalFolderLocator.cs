@@ -5,7 +5,7 @@ namespace UnityCommon
 {
     public class LocalFolderLocator : LocateFoldersRunner
     {
-        public readonly string RootPath;
+        public virtual string RootPath { get; }
 
         public LocalFolderLocator (IResourceProvider provider, string rootPath, string resourcesPath)
             : base (provider, resourcesPath)

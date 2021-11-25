@@ -6,7 +6,7 @@ namespace UnityCommon
     public class ProjectResourceLoader<TResource> : LoadResourceRunner<TResource> 
         where TResource : UnityEngine.Object
     {
-        public readonly string RootPath;
+        public virtual string RootPath { get; }
 
         private readonly Action<string> logAction;
         private readonly ProjectResourceProvider.TypeRedirector redirector;

@@ -12,9 +12,9 @@ namespace UnityCommon
     {
         public class TypeRedirector
         {
-            public Type SourceType { get; }
-            public Type RedirectType { get; }
-            public IConverter RedirectToSourceConverter { get; }
+            public virtual Type SourceType { get; }
+            public virtual Type RedirectType { get; }
+            public virtual IConverter RedirectToSourceConverter { get; }
 
             public TypeRedirector (Type sourceType, Type redirectType, IConverter redirectToSourceConverter)
             {
@@ -23,18 +23,18 @@ namespace UnityCommon
                 RedirectToSourceConverter = redirectToSourceConverter;
             }
 
-            public async UniTask<TSource> ToSourceAsync<TSource> (object obj, string name)
+            public virtual async UniTask<TSource> ToSourceAsync<TSource> (object obj, string name)
             {
                 return (TSource)await RedirectToSourceConverter.ConvertAsync(obj, name);
             }
 
-            public TSource ToSource<TSource> (object obj, string name)
+            public virtual TSource ToSource<TSource> (object obj, string name)
             {
                 return (TSource)RedirectToSourceConverter.Convert(obj, name);
             }
         }
 
-        public readonly string RootPath;
+        public string RootPath { get; }
 
         private readonly IReadOnlyDictionary<string, Type> projectResources;
         private readonly Dictionary<Type, TypeRedirector> redirectors;
@@ -56,7 +56,7 @@ namespace UnityCommon
 
         public override bool SupportsType<T> () => true;
 
-        public void AddRedirector<TSource, TRedirect> (IConverter<TRedirect, TSource> redirectToSourceConverter)
+        public virtual void AddRedirector<TSource, TRedirect> (IConverter<TRedirect, TSource> redirectToSourceConverter)
         {
             var sourceType = typeof(TSource);
             if (!redirectors.ContainsKey(sourceType))

@@ -13,11 +13,11 @@ namespace UnityCommon
         /// All the assets managed by this provider should have this label assigned, 
         /// also their addresses are expected to start with the label followed by a slash.
         /// </summary>
-        public readonly string MainLabel;
+        public virtual string MainLabel { get; }
         /// <summary>
         /// When specified, the provider will only work with assets that have the set of labels.
         /// </summary>
-        public readonly IReadOnlyCollection<string> ExtraLabels;
+        public virtual IReadOnlyCollection<string> ExtraLabels { get; }
 
         private List<IResourceLocation> locations;
 
@@ -74,7 +74,7 @@ namespace UnityCommon
             Addressables.Release(resource.Object);
         }
 
-        private async UniTask<List<IResourceLocation>> LoadAllLocations ()
+        protected virtual async UniTask<List<IResourceLocation>> LoadAllLocations ()
         {
             // ReSharper disable once CoVariantArrayConversion
             var task = ExtraLabels != null
@@ -87,7 +87,7 @@ namespace UnityCommon
             return locations;
         }
 
-        private void CacheLocations (IEnumerable<IResourceLocation> locations)
+        protected virtual void CacheLocations (IEnumerable<IResourceLocation> locations)
         {
             foreach (var location in locations)
             {

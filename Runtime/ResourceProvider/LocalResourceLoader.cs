@@ -8,7 +8,7 @@ namespace UnityCommon
     public class LocalResourceLoader<TResource> : LoadResourceRunner<TResource> 
         where TResource : UnityEngine.Object
     {
-        public readonly string RootPath;
+        public virtual string RootPath { get; }
 
         private Action<string> logAction;
         private IRawConverter<TResource> converter;

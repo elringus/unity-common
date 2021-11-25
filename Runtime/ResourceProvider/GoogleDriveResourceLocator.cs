@@ -9,7 +9,7 @@ namespace UnityCommon
     public class GoogleDriveResourceLocator<TResource> : LocateResourcesRunner<TResource> 
         where TResource : UnityEngine.Object
     {
-        public readonly string RootPath;
+        public virtual string RootPath { get; }
 
         private IRawConverter<TResource> converter;
 
