@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -134,7 +135,12 @@ namespace UnityCommon
 
         public override bool SaveSlotExists (string slotId) => PlayerPrefs.HasKey(SlotIdToKey(slotId));
 
-        public override bool AnySaveExists () => !string.IsNullOrEmpty(PlayerPrefs.GetString(IndexKey));
+        public override bool AnySaveExists ()
+        {
+            var prefsValue = PlayerPrefs.GetString(IndexKey);
+            if (string.IsNullOrEmpty(prefsValue)) return false;
+            return ParseIndexList(prefsValue).Count > 0;
+        }
 
         public override void DeleteSaveSlot (string slotId)
         {
@@ -219,7 +225,7 @@ namespace UnityCommon
             if (!PlayerPrefs.HasKey(IndexKey))
                 PlayerPrefs.SetString(IndexKey, string.Empty);
 
-            var indexList = PlayerPrefs.GetString(IndexKey).Split(new[] { IndexDelimiter }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            var indexList = ParseIndexList(PlayerPrefs.GetString(IndexKey));
             if (indexList.Exists(i => i == slotKey)) return;
 
             indexList.Add(slotKey);
@@ -231,11 +237,16 @@ namespace UnityCommon
         {
             if (!PlayerPrefs.HasKey(IndexKey)) return;
 
-            var indexList = PlayerPrefs.GetString(IndexKey).Split(new[] { IndexDelimiter }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            var indexList = ParseIndexList(PlayerPrefs.GetString(IndexKey));
             if (!indexList.Remove(slotKey)) return;
 
             var index = string.Join(IndexDelimiter, indexList);
             PlayerPrefs.SetString(IndexKey, index);
+        }
+
+        private List<string> ParseIndexList (string prefsValue)
+        {
+            return prefsValue.Split(new[] { IndexDelimiter }, StringSplitOptions.RemoveEmptyEntries).ToList();
         }
     }
 }
