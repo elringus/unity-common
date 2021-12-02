@@ -175,7 +175,7 @@ namespace UnityCommon
             return locatedFolders;
         }
 
-        public virtual void LogMessage (string message) => OnMessage?.Invoke(message);
+        public void LogMessage (string message) => OnMessage?.Invoke(message);
 
         protected abstract LoadResourceRunner<T> CreateLoadResourceRunner<T> (string path) where T : UnityEngine.Object;
         protected abstract LocateResourcesRunner<T> CreateLocateResourcesRunner<T> (string path) where T : UnityEngine.Object;
