@@ -9,20 +9,44 @@ namespace UnityCommon
     {
         /// <summary>
         /// Event invoked before a save (serialization) operation is started.
+        /// Returns ID of the affected save slot.
         /// </summary>
-        event Action OnBeforeSave;
+        event Action<string> OnBeforeSave;
         /// <summary>
         /// Event invoked after a save (serialization) operation is finished.
+        /// Returns ID of the affected save slot.
         /// </summary>
-        event Action OnSaved;
+        event Action<string> OnSaved;
         /// <summary>
         /// Event invoked before a load (de-serialization) operation is started.
+        /// Returns ID of the affected save slot.
         /// </summary>
-        event Action OnBeforeLoad;
+        event Action<string> OnBeforeLoad;
         /// <summary>
         /// Event invoked after a load (de-serialization) operation is finished.
+        /// Returns ID of the affected save slot.
         /// </summary>
-        event Action OnLoaded;
+        event Action<string> OnLoaded;
+        /// <summary>
+        /// Event invoked before a save slot is deleted.
+        /// Returns ID of the affected save slot.
+        /// </summary>
+        event Action<string> OnBeforeDelete;
+        /// <summary>
+        /// Event invoked after a save slot is deleted.
+        /// Returns ID of the affected save slot.
+        /// </summary>
+        event Action<string> OnDeleted;
+        /// <summary>
+        /// Event invoked before a save slot is renamed.
+        /// Returns source (old) and destination (new) IDs.
+        /// </summary>
+        event Action<string, string> OnBeforeRename;
+        /// <summary>
+        /// Event invoked after a save slot is renamed.
+        /// Returns source (old) and destination (new) IDs.
+        /// </summary>
+        event Action<string, string> OnRenamed;
 
         /// <summary>
         /// Whether a save (serialization) operation is currently running.

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -9,10 +10,14 @@ namespace UnityCommon
     /// </summary>
     public abstract class PlayerPrefsSaveSlotManager : ISaveSlotManager
     {
-        public event Action OnBeforeSave;
-        public event Action OnSaved;
-        public event Action OnBeforeLoad;
-        public event Action OnLoaded;
+        public event Action<string> OnBeforeSave;
+        public event Action<string> OnSaved;
+        public event Action<string> OnBeforeLoad;
+        public event Action<string> OnLoaded;
+        public event Action<string> OnBeforeDelete;
+        public event Action<string> OnDeleted;
+        public event Action<string, string> OnBeforeRename;
+        public event Action<string, string> OnRenamed;
 
         public bool Loading { get; private set; }
         public bool Saving { get; private set; }
@@ -25,28 +30,48 @@ namespace UnityCommon
         protected abstract bool PrettifyJson { get; }
         protected abstract bool Binary { get; }
 
-        protected void InvokeOnBeforeSave ()
+        protected void InvokeOnBeforeSave (string slotId)
         {
             Saving = true;
-            OnBeforeSave?.Invoke();
+            OnBeforeSave?.Invoke(slotId);
         }
 
-        protected void InvokeOnSaved ()
+        protected void InvokeOnSaved (string slotId)
         {
             Saving = false;
-            OnSaved?.Invoke();
+            OnSaved?.Invoke(slotId);
         }
 
-        protected void InvokeOnBeforeLoad ()
+        protected void InvokeOnBeforeLoad (string slotId)
         {
             Loading = true;
-            OnBeforeLoad?.Invoke();
+            OnBeforeLoad?.Invoke(slotId);
         }
 
-        protected void InvokeOnLoaded ()
+        protected void InvokeOnLoaded (string slotId)
         {
             Loading = false;
-            OnLoaded?.Invoke();
+            OnLoaded?.Invoke(slotId);
+        }
+
+        protected void InvokeOnBeforeDelete (string slotId)
+        {
+            OnBeforeDelete?.Invoke(slotId);
+        }
+
+        protected void InvokeOnDeleted (string slotId)
+        {
+            OnDeleted?.Invoke(slotId);
+        }
+
+        protected void InvokeOnBeforeRename (string sourceSlotId, string destSlotId)
+        {
+            OnBeforeRename?.Invoke(sourceSlotId, destSlotId);
+        }
+
+        protected void InvokeOnRenamed (string sourceSlotId, string destSlotId)
+        {
+            OnRenamed?.Invoke(sourceSlotId, destSlotId);
         }
     }
 
@@ -70,10 +95,10 @@ namespace UnityCommon
 
             saveInProgress = true;
 
-            InvokeOnBeforeSave();
+            InvokeOnBeforeSave(slotId);
 
             await SerializeDataAsync(slotId, data);
-            InvokeOnSaved();
+            InvokeOnSaved(slotId);
 
             saveInProgress = false;
         }
@@ -81,21 +106,21 @@ namespace UnityCommon
         public void Save (string slotId, TData data)
         {
             saveInProgress = true;
-            InvokeOnBeforeSave();
+            InvokeOnBeforeSave(slotId);
             SerializeData(slotId, data);
-            InvokeOnSaved();
+            InvokeOnSaved(slotId);
             saveInProgress = false;
         }
 
         public async UniTask<TData> LoadAsync (string slotId)
         {
-            InvokeOnBeforeLoad();
+            InvokeOnBeforeLoad(slotId);
 
             if (!SaveSlotExists(slotId))
                 throw new Exception($"Slot '{slotId}' not found when loading '{typeof(TData)}' data.");
 
             var data = await DeserializeDataAsync(slotId);
-            InvokeOnLoaded();
+            InvokeOnLoaded(slotId);
 
             return data;
         }
@@ -110,15 +135,23 @@ namespace UnityCommon
 
         public override bool SaveSlotExists (string slotId) => PlayerPrefs.HasKey(SlotIdToKey(slotId));
 
-        public override bool AnySaveExists () => !string.IsNullOrEmpty(PlayerPrefs.GetString(IndexKey));
+        public override bool AnySaveExists ()
+        {
+            var prefsValue = PlayerPrefs.GetString(IndexKey);
+            if (string.IsNullOrEmpty(prefsValue)) return false;
+            return ParseIndexList(prefsValue).Count > 0;
+        }
 
         public override void DeleteSaveSlot (string slotId)
         {
             if (!SaveSlotExists(slotId)) return;
+
+            InvokeOnBeforeDelete(slotId);
             var slotKey = SlotIdToKey(slotId);
             PlayerPrefs.DeleteKey(slotKey);
             RemoveKeyIndex(slotKey);
             PlayerPrefs.Save();
+            InvokeOnDeleted(slotId);
         }
 
         public override void RenameSaveSlot (string sourceSlotId, string destSlotId)
@@ -129,10 +162,12 @@ namespace UnityCommon
             var destKey = SlotIdToKey(destSlotId);
             var sourceValue = PlayerPrefs.GetString(sourceKey);
 
+            InvokeOnBeforeRename(sourceSlotId, destSlotId);
             DeleteSaveSlot(sourceSlotId);
             PlayerPrefs.SetString(destKey, sourceValue);
             AddKeyIndexIfNotExist(destKey);
             PlayerPrefs.Save();
+            InvokeOnRenamed(sourceSlotId, destSlotId);
         }
 
         protected virtual string SlotIdToKey (string slotId) => KeyPrefix + slotId;
@@ -190,7 +225,7 @@ namespace UnityCommon
             if (!PlayerPrefs.HasKey(IndexKey))
                 PlayerPrefs.SetString(IndexKey, string.Empty);
 
-            var indexList = PlayerPrefs.GetString(IndexKey).Split(new[] { IndexDelimiter }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            var indexList = ParseIndexList(PlayerPrefs.GetString(IndexKey));
             if (indexList.Exists(i => i == slotKey)) return;
 
             indexList.Add(slotKey);
@@ -202,11 +237,16 @@ namespace UnityCommon
         {
             if (!PlayerPrefs.HasKey(IndexKey)) return;
 
-            var indexList = PlayerPrefs.GetString(IndexKey).Split(new[] { IndexDelimiter }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            var indexList = ParseIndexList(PlayerPrefs.GetString(IndexKey));
             if (!indexList.Remove(slotKey)) return;
 
             var index = string.Join(IndexDelimiter, indexList);
             PlayerPrefs.SetString(IndexKey, index);
+        }
+
+        private List<string> ParseIndexList (string prefsValue)
+        {
+            return prefsValue.Split(new[] { IndexDelimiter }, StringSplitOptions.RemoveEmptyEntries).ToList();
         }
     }
 }
