@@ -9,10 +9,14 @@ namespace UnityCommon
     /// </summary>
     public abstract class IOSaveSlotManager : ISaveSlotManager
     {
-        public event Action OnBeforeSave;
-        public event Action OnSaved;
-        public event Action OnBeforeLoad;
-        public event Action OnLoaded;
+        public event Action<string> OnBeforeSave;
+        public event Action<string> OnSaved;
+        public event Action<string> OnBeforeLoad;
+        public event Action<string> OnLoaded;
+        public event Action<string> OnBeforeDelete;
+        public event Action<string> OnDeleted;
+        public event Action<string, string> OnBeforeRename;
+        public event Action<string, string> OnRenamed;
 
         public bool Loading { get; private set; }
         public bool Saving { get; private set; }
@@ -26,28 +30,48 @@ namespace UnityCommon
         protected abstract bool Binary { get; }
         protected abstract string Extension { get; }
 
-        protected void InvokeOnBeforeSave ()
+        protected void InvokeOnBeforeSave (string slotId)
         {
             Saving = true;
-            OnBeforeSave?.Invoke();
+            OnBeforeSave?.Invoke(slotId);
         }
 
-        protected void InvokeOnSaved ()
+        protected void InvokeOnSaved (string slotId)
         {
             Saving = false;
-            OnSaved?.Invoke();
+            OnSaved?.Invoke(slotId);
         }
 
-        protected void InvokeOnBeforeLoad ()
+        protected void InvokeOnBeforeLoad (string slotId)
         {
             Loading = true;
-            OnBeforeLoad?.Invoke();
+            OnBeforeLoad?.Invoke(slotId);
         }
 
-        protected void InvokeOnLoaded ()
+        protected void InvokeOnLoaded (string slotId)
         {
             Loading = false;
-            OnLoaded?.Invoke();
+            OnLoaded?.Invoke(slotId);
+        }
+        
+        protected void InvokeOnBeforeDelete (string slotId)
+        {
+            OnBeforeDelete?.Invoke(slotId);
+        }
+
+        protected void InvokeOnDeleted (string slotId)
+        {
+            OnDeleted?.Invoke(slotId);
+        }
+        
+        protected void InvokeOnBeforeRename (string sourceSlotId, string destSlotId)
+        {
+            OnBeforeRename?.Invoke(sourceSlotId, destSlotId);
+        }
+
+        protected void InvokeOnRenamed (string sourceSlotId, string destSlotId)
+        {
+            OnRenamed?.Invoke(sourceSlotId, destSlotId);
         }
     }
 
@@ -71,23 +95,23 @@ namespace UnityCommon
 
             saveInProgress = true;
 
-            InvokeOnBeforeSave();
+            InvokeOnBeforeSave(slotId);
 
             await SerializeDataAsync(slotId, data);
-            InvokeOnSaved();
+            InvokeOnSaved(slotId);
 
             saveInProgress = false;
         }
 
         public async UniTask<TData> LoadAsync (string slotId)
         {
-            InvokeOnBeforeLoad();
+            InvokeOnBeforeLoad(slotId);
 
             if (!SaveSlotExists(slotId))
                 throw new Exception($"Slot '{slotId}' not found when loading '{typeof(TData)}' data.");
 
             var data = await DeserializeDataAsync(slotId);
-            InvokeOnLoaded();
+            InvokeOnLoaded(slotId);
 
             return data;
         }
@@ -111,16 +135,20 @@ namespace UnityCommon
         public override void DeleteSaveSlot (string slotId)
         {
             if (!SaveSlotExists(slotId)) return;
+            InvokeOnBeforeDelete(slotId);
             IOUtils.DeleteFile(SlotIdToFilePath(slotId));
+            InvokeOnDeleted(slotId);
         }
 
         public override void RenameSaveSlot (string sourceSlotId, string destSlotId)
         {
             if (!SaveSlotExists(sourceSlotId)) return;
 
+            InvokeOnBeforeRename(sourceSlotId, destSlotId);
             var sourceFilePath = SlotIdToFilePath(sourceSlotId);
             var destFilePath = SlotIdToFilePath(destSlotId);
             IOUtils.MoveFile(sourceFilePath, destFilePath);
+            InvokeOnRenamed(sourceSlotId, destSlotId);
         }
 
         protected virtual string SlotIdToFilePath (string slotId) => string.Concat(SaveDataPath, "/", slotId, $".{Extension}");
