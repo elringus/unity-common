@@ -88,8 +88,7 @@ namespace UnityCommon
             ConcurrentRequestsLimit = concurrentRequestsLimit;
 
             IOUtils.CreateDirectory(CacheDirPath);
-
-            LogMessage($"Caching policy: {CachingPolicy}");
+            
             if (CachingPolicy == CachingPolicyType.PurgeAllOnInit) PurgeCache();
             if (CachingPolicy == CachingPolicyType.Smart) smartCachingScanPending = true;
         }
