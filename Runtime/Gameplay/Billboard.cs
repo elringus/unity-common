@@ -9,7 +9,7 @@ namespace UnityCommon
 
         [SerializeField] private bool disableWhenNotRendered = true;
         [Tooltip("Whether to apply a local z-offset to compensate root disposition with the parent transform.")]
-        [SerializeField] private bool applyZOffset = false;
+        [SerializeField] private bool applyZOffset;
         [Tooltip("Used for the z-offset. Should be equal to the parent transform height, in units.")]
         [SerializeField] private float parentHeight = 1f;
 

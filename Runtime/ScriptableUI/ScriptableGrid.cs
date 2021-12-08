@@ -40,17 +40,17 @@ namespace UnityCommon
         protected virtual Button NextPageButton => nextPageButton;
 
         [Tooltip("Prefab representing grid slot.")]
-        [SerializeField] private TSlot slotPrototype = null;
+        [SerializeField] private TSlot slotPrototype;
         [Tooltip("How many slots should be visible per page."), Range(1, 99)]
         [SerializeField] private int itemsPerPage = 9;
         [Tooltip("Container for the page number controls (optional). Will be disabled when grid has only one page.")]
-        [SerializeField] private GameObject paginationPanel = null;
+        [SerializeField] private GameObject paginationPanel;
         [Tooltip("Button inside pagination panel to select next grid page.")]
-        [SerializeField] private Button previousPageButton = null;
+        [SerializeField] private Button previousPageButton;
         [Tooltip("Button inside pagination panel to select previous grid page.")]
-        [SerializeField] private Button nextPageButton = null;
+        [SerializeField] private Button nextPageButton;
         [Tooltip("Event invoked when grid page number changes.")]
-        [SerializeField] private OnGridPageChangedEvent onPageChanged = default;
+        [SerializeField] private OnGridPageChangedEvent onPageChanged;
 
         /// <summary>
         /// Instantiates displayed items (slots) and makes the grid

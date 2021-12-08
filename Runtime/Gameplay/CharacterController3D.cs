@@ -25,7 +25,7 @@ namespace UnityCommon
         [SerializeField] private string horizontalAxisName = "Horizontal";
         [SerializeField] private string verticalAxisName = "Vertical";
         [SerializeField] private string jumpButtonName = "Jump";
-        [SerializeField] private string sprintButtonName = null;
+        [SerializeField] private string sprintButtonName;
 
         [Header("Movement")]
         [SerializeField] private float movementSpeed = 5f;

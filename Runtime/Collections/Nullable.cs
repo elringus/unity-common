@@ -47,8 +47,8 @@ namespace UnityCommon
         /// </summary>
         protected bool IsValueType => typeof(TValue).IsValueType;
 
-        [SerializeField] private TValue value = default;
-        [SerializeField] private bool hasValue = default;
+        [SerializeField] private TValue value;
+        [SerializeField] private bool hasValue;
 
         public override string ToString ()
         {

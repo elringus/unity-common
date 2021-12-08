@@ -24,9 +24,9 @@ namespace UnityCommon
         public bool IsCompleted { get { return GetIsCompleted(); } }
 
         private List<Guid> completedActionIds;
-        private int waitedActionsCount = 0;
-        private int completedActionsCount = 0;
-        private bool isReady = false;
+        private int waitedActionsCount;
+        private int completedActionsCount;
+        private bool isReady;
 
         public ActionWaitHandle (WaitForEnum waitFor, Action onComplete = null)
         {

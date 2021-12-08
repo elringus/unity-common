@@ -130,7 +130,7 @@ namespace UnityCommon
         /// Flag used to mark the case where we are travelling up a slope and we modified our delta.y to allow the climb to occur.
         /// The reason is that if we reach the end of the slope we can make an adjustment to stay grounded.
         /// </summary>
-        private bool isGoingUpSlope = false;
+        private bool isGoingUpSlope;
         private bool wasGroundedLastFrame;
         private MoveDirection2D moveDirectionLastFrame;
         private bool wasMovingLastFrame;
@@ -512,7 +512,6 @@ namespace UnityCommon
                 inputVelocity.y = 0;
 
             normalizedHorizontalSpeed = Input.GetAxis(HorizontalAxisName);
-            var vertiacalAxis = Input.GetAxis(VerticalAxisName);
 
             // We can only jump whilst grounded.
             if (IsGrounded && Input.GetButtonDown(JumpButtonName))
@@ -530,7 +529,7 @@ namespace UnityCommon
 
             // If holding down bump up our movement amount and turn off one way platform detection for a frame.
             // This lets us jump down through one way platforms.
-            // if (IsGrounded && vertiacalAxis < 0)
+            // if (IsGrounded && verticalAxis < 0)
             // {
             //     inputVelocity.y *= 3f;
             //     ignoreOneWayPlatformsThisFrame = true;

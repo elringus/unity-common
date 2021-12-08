@@ -11,19 +11,19 @@ namespace UnityCommon
     {
         public static AsyncOperationAwaiter GetAwaiter (this AsyncOperation asyncOperation)
         {
-            Error.ThrowArgumentNullException(asyncOperation, nameof(asyncOperation));
+            UniTaskError.ThrowArgumentNullException(asyncOperation, nameof(asyncOperation));
             return new AsyncOperationAwaiter(asyncOperation);
         }
 
         public static UniTask ToUniTask (this AsyncOperation asyncOperation)
         {
-            Error.ThrowArgumentNullException(asyncOperation, nameof(asyncOperation));
+            UniTaskError.ThrowArgumentNullException(asyncOperation, nameof(asyncOperation));
             return new UniTask(new AsyncOperationAwaiter(asyncOperation));
         }
 
         public static UniTask ConfigureAwait (this AsyncOperation asyncOperation, IProgress<float> progress = null, PlayerLoopTiming timing = PlayerLoopTiming.Update, CancellationToken cancellation = default)
         {
-            Error.ThrowArgumentNullException(asyncOperation, nameof(asyncOperation));
+            UniTaskError.ThrowArgumentNullException(asyncOperation, nameof(asyncOperation));
 
             var awaiter = new AsyncOperationConfiguredAwaiter(asyncOperation, progress, cancellation);
             if (!awaiter.IsCompleted)
@@ -35,19 +35,19 @@ namespace UnityCommon
 
         public static ResourceRequestAwaiter GetAwaiter (this ResourceRequest resourceRequest)
         {
-            Error.ThrowArgumentNullException(resourceRequest, nameof(resourceRequest));
+            UniTaskError.ThrowArgumentNullException(resourceRequest, nameof(resourceRequest));
             return new ResourceRequestAwaiter(resourceRequest);
         }
 
         public static UniTask<UnityEngine.Object> ToUniTask (this ResourceRequest resourceRequest)
         {
-            Error.ThrowArgumentNullException(resourceRequest, nameof(resourceRequest));
+            UniTaskError.ThrowArgumentNullException(resourceRequest, nameof(resourceRequest));
             return new UniTask<UnityEngine.Object>(new ResourceRequestAwaiter(resourceRequest));
         }
 
         public static UniTask<UnityEngine.Object> ConfigureAwait (this ResourceRequest resourceRequest, IProgress<float> progress = null, PlayerLoopTiming timing = PlayerLoopTiming.Update, CancellationToken cancellation = default)
         {
-            Error.ThrowArgumentNullException(resourceRequest, nameof(resourceRequest));
+            UniTaskError.ThrowArgumentNullException(resourceRequest, nameof(resourceRequest));
 
             var awaiter = new ResourceRequestConfiguredAwaiter(resourceRequest, progress, cancellation);
             if (!awaiter.IsCompleted)
@@ -59,19 +59,19 @@ namespace UnityCommon
 
         public static AssetBundleRequestAwaiter GetAwaiter (this AssetBundleRequest resourceRequest)
         {
-            Error.ThrowArgumentNullException(resourceRequest, nameof(resourceRequest));
+            UniTaskError.ThrowArgumentNullException(resourceRequest, nameof(resourceRequest));
             return new AssetBundleRequestAwaiter(resourceRequest);
         }
 
         public static UniTask<UnityEngine.Object> ToUniTask (this AssetBundleRequest resourceRequest)
         {
-            Error.ThrowArgumentNullException(resourceRequest, nameof(resourceRequest));
+            UniTaskError.ThrowArgumentNullException(resourceRequest, nameof(resourceRequest));
             return new UniTask<UnityEngine.Object>(new AssetBundleRequestAwaiter(resourceRequest));
         }
 
         public static UniTask<UnityEngine.Object> ConfigureAwait (this AssetBundleRequest resourceRequest, IProgress<float> progress = null, PlayerLoopTiming timing = PlayerLoopTiming.Update, CancellationToken cancellation = default)
         {
-            Error.ThrowArgumentNullException(resourceRequest, nameof(resourceRequest));
+            UniTaskError.ThrowArgumentNullException(resourceRequest, nameof(resourceRequest));
 
             var awaiter = new AssetBundleRequestConfiguredAwaiter(resourceRequest, progress, cancellation);
             if (!awaiter.IsCompleted)
@@ -83,19 +83,19 @@ namespace UnityCommon
 
         public static AssetBundleCreateRequestAwaiter GetAwaiter (this AssetBundleCreateRequest resourceRequest)
         {
-            Error.ThrowArgumentNullException(resourceRequest, nameof(resourceRequest));
+            UniTaskError.ThrowArgumentNullException(resourceRequest, nameof(resourceRequest));
             return new AssetBundleCreateRequestAwaiter(resourceRequest);
         }
 
         public static UniTask<AssetBundle> ToUniTask (this AssetBundleCreateRequest resourceRequest)
         {
-            Error.ThrowArgumentNullException(resourceRequest, nameof(resourceRequest));
+            UniTaskError.ThrowArgumentNullException(resourceRequest, nameof(resourceRequest));
             return new UniTask<AssetBundle>(new AssetBundleCreateRequestAwaiter(resourceRequest));
         }
 
         public static UniTask<AssetBundle> ConfigureAwait (this AssetBundleCreateRequest resourceRequest, IProgress<float> progress = null, PlayerLoopTiming timing = PlayerLoopTiming.Update, CancellationToken cancellation = default)
         {
-            Error.ThrowArgumentNullException(resourceRequest, nameof(resourceRequest));
+            UniTaskError.ThrowArgumentNullException(resourceRequest, nameof(resourceRequest));
 
             var awaiter = new AssetBundleCreateRequestConfiguredAwaiter(resourceRequest, progress, cancellation);
             if (!awaiter.IsCompleted)
@@ -109,19 +109,19 @@ namespace UnityCommon
 
         public static UnityWebRequestAsyncOperationAwaiter GetAwaiter (this UnityWebRequestAsyncOperation asyncOperation)
         {
-            Error.ThrowArgumentNullException(asyncOperation, nameof(asyncOperation));
+            UniTaskError.ThrowArgumentNullException(asyncOperation, nameof(asyncOperation));
             return new UnityWebRequestAsyncOperationAwaiter(asyncOperation);
         }
 
         public static UniTask<UnityWebRequest> ToUniTask (this UnityWebRequestAsyncOperation asyncOperation)
         {
-            Error.ThrowArgumentNullException(asyncOperation, nameof(asyncOperation));
+            UniTaskError.ThrowArgumentNullException(asyncOperation, nameof(asyncOperation));
             return new UniTask<UnityWebRequest>(new UnityWebRequestAsyncOperationAwaiter(asyncOperation));
         }
 
         public static UniTask<UnityWebRequest> ConfigureAwait (this UnityWebRequestAsyncOperation asyncOperation, IProgress<float> progress = null, PlayerLoopTiming timing = PlayerLoopTiming.Update, CancellationToken cancellation = default)
         {
-            Error.ThrowArgumentNullException(asyncOperation, nameof(asyncOperation));
+            UniTaskError.ThrowArgumentNullException(asyncOperation, nameof(asyncOperation));
 
             var awaiter = new UnityWebRequestAsyncOperationConfiguredAwaiter(asyncOperation, progress, cancellation);
             if (!awaiter.IsCompleted)
@@ -162,7 +162,7 @@ namespace UnityCommon
                     }
                     else
                     {
-                        Error.ThrowNotYetCompleted();
+                        UniTaskError.ThrowNotYetCompleted();
                     }
                 }
 
@@ -185,7 +185,7 @@ namespace UnityCommon
 
             public void UnsafeOnCompleted (Action continuation)
             {
-                Error.ThrowWhenContinuationIsAlreadyRegistered(continuationAction);
+                UniTaskError.ThrowWhenContinuationIsAlreadyRegistered(continuationAction);
                 continuationAction = continuation.AsFuncOfT<AsyncOperation>();
                 asyncOperation.completed += continuationAction;
             }
@@ -224,10 +224,10 @@ namespace UnityCommon
                 }
                 else if (status == AwaiterStatus.Canceled)
                 {
-                    Error.ThrowOperationCanceledException();
+                    UniTaskError.ThrowOperationCanceledException();
                 }
 
-                Error.ThrowNotYetCompleted();
+                UniTaskError.ThrowNotYetCompleted();
             }
 
             public bool MoveNext ()
@@ -273,7 +273,7 @@ namespace UnityCommon
 
             public void UnsafeOnCompleted (Action continuation)
             {
-                Error.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
+                UniTaskError.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
                 this.continuation = continuation;
             }
         }
@@ -309,7 +309,7 @@ namespace UnityCommon
                     }
                     else
                     {
-                        Error.ThrowNotYetCompleted();
+                        UniTaskError.ThrowNotYetCompleted();
                     }
                 }
 
@@ -338,7 +338,7 @@ namespace UnityCommon
 
             public void UnsafeOnCompleted (Action continuation)
             {
-                Error.ThrowWhenContinuationIsAlreadyRegistered(continuationAction);
+                UniTaskError.ThrowWhenContinuationIsAlreadyRegistered(continuationAction);
                 continuationAction = continuation.AsFuncOfT<AsyncOperation>();
                 asyncOperation.completed += continuationAction;
             }
@@ -379,10 +379,10 @@ namespace UnityCommon
 
                 if (status == AwaiterStatus.Canceled)
                 {
-                    Error.ThrowOperationCanceledException();
+                    UniTaskError.ThrowOperationCanceledException();
                 }
 
-                return Error.ThrowNotYetCompleted<UnityEngine.Object>();
+                return UniTaskError.ThrowNotYetCompleted<UnityEngine.Object>();
             }
 
             public bool MoveNext ()
@@ -424,13 +424,13 @@ namespace UnityCommon
 
             public void OnCompleted (Action continuation)
             {
-                Error.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
+                UniTaskError.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
                 this.continuation = continuation;
             }
 
             public void UnsafeOnCompleted (Action continuation)
             {
-                Error.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
+                UniTaskError.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
                 this.continuation = continuation;
             }
         }
@@ -466,7 +466,7 @@ namespace UnityCommon
                     }
                     else
                     {
-                        Error.ThrowNotYetCompleted();
+                        UniTaskError.ThrowNotYetCompleted();
                     }
                 }
 
@@ -495,7 +495,7 @@ namespace UnityCommon
 
             public void UnsafeOnCompleted (Action continuation)
             {
-                Error.ThrowWhenContinuationIsAlreadyRegistered(continuationAction);
+                UniTaskError.ThrowWhenContinuationIsAlreadyRegistered(continuationAction);
                 continuationAction = continuation.AsFuncOfT<AsyncOperation>();
                 asyncOperation.completed += continuationAction;
             }
@@ -536,10 +536,10 @@ namespace UnityCommon
 
                 if (status == AwaiterStatus.Canceled)
                 {
-                    Error.ThrowOperationCanceledException();
+                    UniTaskError.ThrowOperationCanceledException();
                 }
 
-                return Error.ThrowNotYetCompleted<UnityEngine.Object>();
+                return UniTaskError.ThrowNotYetCompleted<UnityEngine.Object>();
             }
 
             public bool MoveNext ()
@@ -581,13 +581,13 @@ namespace UnityCommon
 
             public void OnCompleted (Action continuation)
             {
-                Error.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
+                UniTaskError.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
                 this.continuation = continuation;
             }
 
             public void UnsafeOnCompleted (Action continuation)
             {
-                Error.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
+                UniTaskError.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
                 this.continuation = continuation;
             }
         }
@@ -623,7 +623,7 @@ namespace UnityCommon
                     }
                     else
                     {
-                        Error.ThrowNotYetCompleted();
+                        UniTaskError.ThrowNotYetCompleted();
                     }
                 }
 
@@ -652,7 +652,7 @@ namespace UnityCommon
 
             public void UnsafeOnCompleted (Action continuation)
             {
-                Error.ThrowWhenContinuationIsAlreadyRegistered(continuationAction);
+                UniTaskError.ThrowWhenContinuationIsAlreadyRegistered(continuationAction);
                 continuationAction = continuation.AsFuncOfT<AsyncOperation>();
                 asyncOperation.completed += continuationAction;
             }
@@ -693,10 +693,10 @@ namespace UnityCommon
 
                 if (status == AwaiterStatus.Canceled)
                 {
-                    Error.ThrowOperationCanceledException();
+                    UniTaskError.ThrowOperationCanceledException();
                 }
 
-                return Error.ThrowNotYetCompleted<AssetBundle>();
+                return UniTaskError.ThrowNotYetCompleted<AssetBundle>();
             }
 
             public bool MoveNext ()
@@ -738,13 +738,13 @@ namespace UnityCommon
 
             public void OnCompleted (Action continuation)
             {
-                Error.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
+                UniTaskError.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
                 this.continuation = continuation;
             }
 
             public void UnsafeOnCompleted (Action continuation)
             {
-                Error.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
+                UniTaskError.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
                 this.continuation = continuation;
             }
         }
@@ -782,7 +782,7 @@ namespace UnityCommon
                     }
                     else
                     {
-                        Error.ThrowNotYetCompleted();
+                        UniTaskError.ThrowNotYetCompleted();
                     }
                 }
 
@@ -811,7 +811,7 @@ namespace UnityCommon
 
             public void UnsafeOnCompleted (Action continuation)
             {
-                Error.ThrowWhenContinuationIsAlreadyRegistered(continuationAction);
+                UniTaskError.ThrowWhenContinuationIsAlreadyRegistered(continuationAction);
                 continuationAction = continuation.AsFuncOfT<AsyncOperation>();
                 asyncOperation.completed += continuationAction;
             }
@@ -852,10 +852,10 @@ namespace UnityCommon
 
                 if (status == AwaiterStatus.Canceled)
                 {
-                    Error.ThrowOperationCanceledException();
+                    UniTaskError.ThrowOperationCanceledException();
                 }
 
-                return Error.ThrowNotYetCompleted<UnityWebRequest>();
+                return UniTaskError.ThrowNotYetCompleted<UnityWebRequest>();
             }
 
             public bool MoveNext ()
@@ -897,13 +897,13 @@ namespace UnityCommon
 
             public void OnCompleted (Action continuation)
             {
-                Error.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
+                UniTaskError.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
                 this.continuation = continuation;
             }
 
             public void UnsafeOnCompleted (Action continuation)
             {
-                Error.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
+                UniTaskError.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
                 this.continuation = continuation;
             }
         }

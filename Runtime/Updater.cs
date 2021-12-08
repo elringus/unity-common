@@ -7,10 +7,10 @@ namespace UnityCommon
     {
         public float UpdateDelay { get => updateDelay; set => updateDelay = value; }
 
-        [SerializeField] private float updateDelay = 0f;
+        [SerializeField] private float updateDelay;
 
         private Action[] actions = Array.Empty<Action>();
-        private float lastUpdateTime = 0f;
+        private float lastUpdateTime;
 
         private void Update ()
         {

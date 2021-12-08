@@ -42,8 +42,8 @@ namespace UnityCommon
         /// </summary>
         public TValue Value { get => value; set => this.value = value; }
 
-        [SerializeField] private NullableString name = default;
-        [SerializeField] private TValue value = default;
+        [SerializeField] private NullableString name;
+        [SerializeField] private TValue value;
 
         public Named () { }
 

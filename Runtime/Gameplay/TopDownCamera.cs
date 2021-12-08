@@ -7,10 +7,10 @@ namespace UnityCommon
         public Transform FollowedTarget { get { return followedTarget; } set { followedTarget = value; } }
 
         [Header("Initial Values")]
-        [SerializeField] private Transform followedTarget = null;
+        [SerializeField] private Transform followedTarget;
         [SerializeField] private Vector3 desiredPosition = Vector3.zero;
-        [SerializeField] private float desiredYAngle = 0f;
-        [SerializeField] private float desiredXAngle = 0f;
+        [SerializeField] private float desiredYAngle;
+        [SerializeField] private float desiredXAngle;
         [SerializeField] private float zoomValue = 1f;
 
         [Header("Input")]

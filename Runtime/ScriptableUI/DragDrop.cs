@@ -8,7 +8,7 @@ namespace UnityCommon
     [RequireComponent(typeof(RectTransform))]
     public class DragDrop : MonoBehaviour
     {
-        [SerializeField] private DragDropHandle handle = default;
+        [SerializeField] private DragDropHandle handle;
         [Tooltip("Whether to prevent dragging over the canvas bounds.")]
         [SerializeField] private bool clipOverCanvas = true;
 

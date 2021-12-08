@@ -13,7 +13,7 @@ namespace UnityCommon
             set { labelColorMultiplier = value; DoStateTransition(currentSelectionState, false); }
         }
 
-        [SerializeField] private Text labelText = default;
+        [SerializeField] private Text labelText;
         [SerializeField] private ColorBlock labelColors = ColorBlock.defaultColorBlock;
 
         private Color labelColorMultiplier = Color.white;

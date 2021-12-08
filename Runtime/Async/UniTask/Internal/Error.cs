@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace UnityCommon.Async.Internal
 {
-    internal static class Error
+    internal static class UniTaskError
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ThrowArgumentNullException<T> (T value, string paramName)

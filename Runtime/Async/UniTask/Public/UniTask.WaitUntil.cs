@@ -19,10 +19,8 @@ namespace UnityCommon
             return promise.Task;
         }
 
-        public static UniTask<U> WaitUntilValueChanged<T, U> (T target, Func<T, U> monitorFunction, PlayerLoopTiming monitorTiming = PlayerLoopTiming.Update, IEqualityComparer<U> equalityComparer = null, CancellationToken cancellationToken = default)
-            where T : class
+        public static UniTask<U> WaitUntilValueChanged<T, U> (T target, Func<T, U> monitorFunction, PlayerLoopTiming monitorTiming = PlayerLoopTiming.Update, IEqualityComparer<U> equalityComparer = null, CancellationToken cancellationToken = default) where T : class
         {
-            var unityObject = target as UnityEngine.Object;
             var isUnityObject = !ReferenceEquals(target, null); // don't use (unityObject == null)
 
             return isUnityObject

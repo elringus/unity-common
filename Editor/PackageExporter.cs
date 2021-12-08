@@ -41,7 +41,7 @@ namespace UnityCommon
 
         private static Dictionary<string, string> modifiedScripts = new Dictionary<string, string>();
         private static List<UnityEngine.Object> ignoredAssets = new List<UnityEngine.Object>();
-        private static SceneSetup[] sceneSetup = null;
+        private static SceneSetup[] sceneSetup;
 
         public static void AddIgnoredAsset (string assetPath)
         {

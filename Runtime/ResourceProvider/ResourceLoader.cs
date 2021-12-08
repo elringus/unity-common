@@ -172,7 +172,7 @@ namespace UnityCommon
 
             foreach (var resource in resources)
             {
-                var (source, localPath) = loadData[resource.Path];
+                var (source, _) = loadData[resource.Path];
                 LoadedResources.Add(new LoadedResource(resource, source));
                 result.Add(resource);
             }

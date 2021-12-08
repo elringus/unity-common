@@ -281,7 +281,7 @@ namespace UnityCommon.Async.Internal
     {
         private readonly PlayerLoopTiming timing;
         protected readonly CancellationToken cancellationToken;
-        private bool isRunning = false;
+        private bool isRunning;
 
         protected PlayerLoopReusablePromiseBase (PlayerLoopTiming timing, CancellationToken cancellationToken, int skipTrackFrameCountAdditive)
         {
@@ -320,7 +320,7 @@ namespace UnityCommon.Async.Internal
     {
         private readonly PlayerLoopTiming timing;
         protected readonly CancellationToken cancellationToken;
-        private bool isRunning = false;
+        private bool isRunning;
 
         protected PlayerLoopReusablePromiseBase (PlayerLoopTiming timing, CancellationToken cancellationToken, int skipTrackFrameCountAdditive)
         {
