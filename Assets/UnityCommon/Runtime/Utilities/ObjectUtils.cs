@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-
 using Object = UnityEngine.Object;
 
 namespace UnityCommon
@@ -28,7 +27,7 @@ namespace UnityCommon
         public static void DestroyAllChildren (Transform trs)
         {
             var childCount = trs.childCount;
-            for (int i = 0; i < childCount; i++)
+            for (var i = 0; i < childCount; i++)
                 DestroyOrImmediate(trs.GetChild(i).gameObject);
         }
 
@@ -38,8 +37,8 @@ namespace UnityCommon
         /// </summary>
         public static T FindObject<T> (Predicate<T> predicate = null) where T : class
         {
-            return Object.FindObjectsOfType<Object>().FirstOrDefault(obj => obj is T &&
-                (predicate == null || predicate(obj as T))) as T;
+            return Object.FindObjectsOfType<Object>().FirstOrDefault(obj => obj is T arg &&
+                                                                            (predicate == null || predicate(arg))) as T;
         }
 
         /// <summary>
@@ -49,7 +48,7 @@ namespace UnityCommon
         public static List<T> FindObjects<T> (Predicate<T> predicate = null) where T : class
         {
             return Object.FindObjectsOfType<Object>().Where(obj => obj is T arg &&
-                (predicate == null || predicate(arg))).Cast<T>().ToList();
+                                                                   (predicate == null || predicate(arg))).Cast<T>().ToList();
         }
 
         /// <summary>
@@ -69,10 +68,9 @@ namespace UnityCommon
         /// <returns>Whether all the required objects are valid.</returns>
         public static void AssertRequiredObjects (this Component component, params Object[] requiredObjects)
         {
-            for (int i = 0; i < requiredObjects.Length; i++)
-                if (!requiredObjects[i])
-                    throw new UnityException($"Unity object `{component}` is missing a required dependency. " +
-                                             "Make sure all the required fields are assigned in the inspector and are pointing to valid objects.");
+            if (requiredObjects.Any(obj => !obj))
+                throw new UnityException($"Unity object `{component}` is missing a required dependency. " +
+                                         "Make sure all the required fields are assigned in the inspector and are pointing to valid objects.");
         }
 
         /// <summary>
@@ -82,7 +80,7 @@ namespace UnityCommon
         {
             if (invokeOnSelf) action?.Invoke(gameObject);
             foreach (Transform childTransform in gameObject.transform)
-                ForEachDescendant(childTransform.gameObject, action, true);
+                ForEachDescendant(childTransform.gameObject, action);
         }
 
         /// <summary>
@@ -90,9 +88,9 @@ namespace UnityCommon
         /// </summary>
         public static bool IsValid (object obj)
         {
-            if (obj is UnityEngine.Object unityObject)
+            if (obj is Object unityObject)
                 return unityObject != null && unityObject;
-            else return false;
+            return false;
         }
 
         /// <summary>
