@@ -47,7 +47,7 @@ namespace UnityCommon
         /// Whether the UI is currently visible.
         /// requires a <see cref="UnityEngine.CanvasGroup"/> on the same game object.
         /// </summary>
-        public virtual bool Visible { get => visible; set => SetVisibility(value); }
+        public virtual bool Visible { get => visibleSelf; set => SetVisibility(value); }
         /// <summary>
         /// Current opacity (alpha) of the UI element, in 0.0 to 1.0 range.
         /// requires a <see cref="UnityEngine.CanvasGroup"/> on the same game object, will always return 1.0 otherwise.
@@ -85,7 +85,7 @@ namespace UnityCommon
         protected virtual bool ControlOpacity => controlOpacity;
 
         [Tooltip("Whether to permanently disable interaction with the object, no matter the visibility. Requires `Canvas Group` component on the same game object.")]
-        [SerializeField] private bool disableInteraction = false;
+        [SerializeField] private bool disableInteraction;
         [Tooltip("Whether UI element should be visible or hidden on awake.")]
         [SerializeField] private bool visibleOnAwake = true;
         [Tooltip("Whether to change opacity (alpha) of Canvas Group in correspondence to visibility of the UI element. Requires `Canvas Group` component on the same game object.")]
@@ -95,18 +95,18 @@ namespace UnityCommon
         [Tooltip("When `Control Opacity` is enabled, controls whether to ignore time scale when changing visibility.")]
         [SerializeField] private bool ignoreTimeScale = true;
         [Tooltip("When assigned, will make the object focused (for keyboard or gamepad control) when the UI becomes visible or upon navigation.")]
-        [SerializeField] private GameObject focusObject = default;
+        [SerializeField] private GameObject focusObject;
         [Tooltip("When `Focus Object` is assigned, determines when to focus the object: on the UI becomes visible or on first navigation attempt (arrow keys or d-pad) while the UI is visible. Be aware, that gamepad support for Navigation mode requires Unity's new input system package installed.")]
-        [SerializeField] private FocusMode focusMode = default;
+        [SerializeField] private FocusMode focusMode;
         [Tooltip("Invoked when the UI element is shown.")]
-        [SerializeField] private UnityEvent onShow = default;
+        [SerializeField] private UnityEvent onShow;
         [Tooltip("Invoked when the UI element is hidden.")]
-        [SerializeField] private UnityEvent onHide = default;
+        [SerializeField] private UnityEvent onHide;
 
         private readonly Tweener<FloatTween> fadeTweener = new Tweener<FloatTween>();
         private RectTransform rectTransform;
         private Canvas topmostCanvasCache;
-        private bool visible;
+        private bool visibleSelf;
 
         /// <summary>
         /// Gradually changes <see cref="Visible"/> with fade animation over <see cref="FadeTime"/> or specified time (in seconds).
@@ -116,7 +116,7 @@ namespace UnityCommon
             if (fadeTweener.Running)
                 fadeTweener.Stop();
 
-            this.visible = visible;
+            visibleSelf = visible;
 
             HandleVisibilityChanged(visible);
 
@@ -151,7 +151,7 @@ namespace UnityCommon
             if (fadeTweener.Running)
                 fadeTweener.Stop();
 
-            this.visible = visible;
+            visibleSelf = visible;
 
             HandleVisibilityChanged(visible);
 
@@ -347,10 +347,10 @@ namespace UnityCommon
             TopmostCanvas.renderMode = renderMode;
         }
 
-        private void SetRenderCamera (Camera camera)
+        private void SetRenderCamera (Camera renderCamera)
         {
             if (!ObjectUtils.IsValid(TopmostCanvas)) return;
-            TopmostCanvas.worldCamera = camera;
+            TopmostCanvas.worldCamera = renderCamera;
         }
     }
 }
