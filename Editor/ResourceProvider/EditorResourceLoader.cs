@@ -31,11 +31,11 @@ namespace UnityCommon
         public static T LoadEditorResource<T> (string path, Dictionary<string, string> pathToGuidMap) where T : UnityEngine.Object
         {
             if (string.IsNullOrEmpty(path) || !pathToGuidMap.TryGetValue(path, out var resourceGuid) || string.IsNullOrEmpty(resourceGuid))
-                throw new Exception($"Resource `{path}` failed to load: resource path is invalid or wasn't mapped to an editor asset GUID.");
+                throw new Error($"Resource `{path}` failed to load: resource path is invalid or wasn't mapped to an editor asset GUID.");
 
             var assetPath = UnityEditor.AssetDatabase.GUIDToAssetPath(resourceGuid);
             if (string.IsNullOrEmpty(assetPath))
-                throw new Exception($"Resource `{path}` failed to load: AssetDatabase failed to find asset path by the mapped editor asset GUID ({resourceGuid}).");
+                throw new Error($"Resource `{path}` failed to load: AssetDatabase failed to find asset path by the mapped editor asset GUID ({resourceGuid}).");
 
             return UnityEditor.AssetDatabase.LoadAssetAtPath<T>(assetPath);
         }

@@ -141,7 +141,7 @@ namespace UnityCommon
         /// </summary>
         protected virtual void Paginate ()
         {
-            if (Slots is null) throw new Exception("The grid is not initialized.");
+            if (Slots is null) throw new Error("The grid is not initialized.");
             for (int i = 0; i < Slots.Count; i++)
                 PaginateSlot(i);
             if (PreviousPageButton)

@@ -1,5 +1,3 @@
-using System;
-
 namespace UnityCommon
 {
     /// <summary>
@@ -35,7 +33,7 @@ namespace UnityCommon
 
         public override string ToString () => $"Resource<{(Valid ? Object.GetType().Name : "INVALID")}>@{Path}";
     }
-    
+
     /// <summary>
     /// Represents a strongly typed <see cref="UnityEngine.Object"/> associated with a string identifier (path).
     /// </summary>
@@ -47,13 +45,13 @@ namespace UnityCommon
         /// A cached invalid resource.
         /// </summary>
         public new static readonly Resource<TResource> Invalid = new Resource<TResource>(null, null);
-        
+
         /// <summary>
         /// Actual object (data) represented by the resource.
         /// </summary>
         public new TResource Object => CastObject(base.Object);
 
-        public Resource (string path, TResource obj) 
+        public Resource (string path, TResource obj)
             : base(path, obj) { }
 
         public static implicit operator TResource (Resource<TResource> resource) => resource?.Object;
@@ -62,9 +60,8 @@ namespace UnityCommon
         {
             if (!Valid) return null;
 
-            var castedObj = obj as TResource;
-            if (castedObj is null)
-                throw new Exception($"Resource `{Path}` is not of type `{typeof(TResource).FullName}`.");
+            if (!(obj is TResource castedObj))
+                throw new Error($"Resource `{Path}` is not of type `{typeof(TResource).FullName}`.");
 
             return castedObj;
         }

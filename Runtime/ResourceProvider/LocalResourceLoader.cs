@@ -40,7 +40,7 @@ namespace UnityCommon
             if (rawData is null)
             {
                 var usedExtensions = string.Join("/", converter.Representations.Select(r => r.Extension));
-                throw new Exception($"Failed to load `{filePath}({usedExtensions})` resource using local file system: File not found.");
+                throw new Error($"Failed to load `{filePath}({usedExtensions})` resource using local file system: File not found.");
             }
 
             var obj = await converter.ConvertAsync(rawData, System.IO.Path.GetFileNameWithoutExtension(Path));

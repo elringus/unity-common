@@ -44,7 +44,7 @@ namespace UnityCommon
             {
                 var prefixAndSlash = $"{pathPrefix}/";
                 if (!fullPath.Contains(prefixAndSlash))
-                    throw new Exception($"Failed to build local path from `{fullPath}`: the provided path doesn't contain `{pathPrefix}` path prefix.");
+                    throw new Error($"Failed to build local path from `{fullPath}`: the provided path doesn't contain `{pathPrefix}` path prefix.");
                 return fullPath.GetAfterFirst(prefixAndSlash);
             }
             else return fullPath;
