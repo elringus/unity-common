@@ -22,21 +22,21 @@ public class PlayerPrefsEditor : EditorWindow
     private static readonly Encoding encoding = new UTF8Encoding();
     private static readonly DateTime missingDateTime = new DateTime(1601, 1, 1);
 
-    private bool showEditorPrefs = false;
-    private SearchField searchField = default;
+    private bool showEditorPrefs;
+    private SearchField searchField;
     private List<PrefPair> deserializedPlayerPrefs = new List<PrefPair>();
     private List<PrefPair> filteredPlayerPrefs = new List<PrefPair>();
-    private DateTime? lastDeserialization = null;
+    private DateTime? lastDeserialization;
     private Vector2 scrollPosition;
     private Vector2 lastScrollPosition;
-    private int inspectorUpdateFrame = 0;
+    private int inspectorUpdateFrame;
     private string searchFilter = string.Empty;
-    private string keyQueuedForDeletion = null;
+    private string keyQueuedForDeletion;
     private PrefType newEntryType = PrefType.String;
     private string newEntryKey = "";
-    private float newEntryValueFloat = 0;
-    private int newEntryValueInt = 0;
-    private bool newEntryValueBool = false;
+    private float newEntryValueFloat;
+    private int newEntryValueInt;
+    private bool newEntryValueBool;
     private string newEntryValueString = "";
 
     private void OnEnable ()

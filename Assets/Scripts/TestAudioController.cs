@@ -5,8 +5,8 @@ using UnityEngine;
 [RequireComponent(typeof(AudioController))]
 public class TestAudioController : MonoBehaviour
 {
-    [SerializeField] private AudioClip intro = default;
-    [SerializeField] private AudioClip main = default;
+    [SerializeField] private AudioClip intro;
+    [SerializeField] private AudioClip main;
 
     private AudioController controller;
 

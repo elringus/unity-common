@@ -117,7 +117,7 @@ namespace UnityCommon
             InvokeOnBeforeLoad(slotId);
 
             if (!SaveSlotExists(slotId))
-                throw new Exception($"Slot '{slotId}' not found when loading '{typeof(TData)}' data.");
+                throw new Error($"Slot '{slotId}' not found when loading '{typeof(TData)}' data.");
 
             var data = await DeserializeDataAsync(slotId);
             InvokeOnLoaded(slotId);

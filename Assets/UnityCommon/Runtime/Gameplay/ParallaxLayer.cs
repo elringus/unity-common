@@ -10,7 +10,7 @@ namespace UnityCommon
         private Transform cameraTrs;
         private float initialOffset;
 
-        [SerializeField] private Camera cameraComponent = null;
+        [SerializeField] private Camera cameraComponent;
         [Range(0f, 1f)]
         [SerializeField] private float parallaxFactor = 1f;
 

@@ -12,8 +12,8 @@ namespace UnityCommon.Async.Internal
         private readonly object arrayLock = new object();
         private readonly Action<Exception> unhandledExceptionCallback;
 
-        private int tail = 0;
-        private bool running = false;
+        private int tail;
+        private bool running;
         private IPlayerLoopItem[] loopItems = new IPlayerLoopItem[InitialSize];
         private MinimumQueue<IPlayerLoopItem> waitQueue = new MinimumQueue<IPlayerLoopItem>(InitialSize);
 

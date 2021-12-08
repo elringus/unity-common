@@ -4,7 +4,7 @@ namespace UnityCommon
 {
     public class ActiveWhenVisible : MonoBehaviour
     {
-        [SerializeField] private MonoBehaviour[] affectedScripts = null;
+        [SerializeField] private MonoBehaviour[] affectedScripts;
 
         private void Start ()
         {

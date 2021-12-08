@@ -11,12 +11,12 @@ namespace UnityCommon.Async.Internal
         private readonly PlayerLoopTiming timing;
 
         private SpinLock gate = new SpinLock(false);
-        private bool dequing = false;
+        private bool dequing;
 
-        private int actionListCount = 0;
+        private int actionListCount;
         private Action[] actionList = new Action[InitialSize];
 
-        private int waitingListCount = 0;
+        private int waitingListCount;
         private Action[] waitingList = new Action[InitialSize];
 
         public ContinuationQueue (PlayerLoopTiming timing)

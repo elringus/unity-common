@@ -74,13 +74,13 @@ namespace UnityCommon
                     case AwaiterStatus.Succeeded:
                         break;
                     case AwaiterStatus.Pending:
-                        Error.ThrowNotYetCompleted();
+                        UniTaskError.ThrowNotYetCompleted();
                         break;
                     case AwaiterStatus.Faulted:
                         exception.Throw();
                         break;
                     case AwaiterStatus.Canceled:
-                        Error.ThrowOperationCanceledException();
+                        UniTaskError.ThrowOperationCanceledException();
                         break;
                 }
             }
@@ -134,7 +134,7 @@ namespace UnityCommon
 
             public void UnsafeOnCompleted (Action continuation)
             {
-                Error.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
+                UniTaskError.ThrowWhenContinuationIsAlreadyRegistered(this.continuation);
                 this.continuation = continuation;
             }
 

@@ -29,7 +29,7 @@ namespace UnityCommon
 
         public static SwitchToSynchronizationContextAwaitable SwitchToSynchronizationContext (SynchronizationContext syncContext)
         {
-            Error.ThrowArgumentNullException(syncContext, nameof(syncContext));
+            UniTaskError.ThrowArgumentNullException(syncContext, nameof(syncContext));
             return new SwitchToSynchronizationContextAwaitable(syncContext);
         }
     }

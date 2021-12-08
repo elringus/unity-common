@@ -10,12 +10,12 @@ namespace UnityCommon.Async.Internal
         private const int InitialSize = 16;
 
         private static SpinLock gate = new SpinLock(false);
-        private static bool dequing = false;
+        private static bool dequing;
 
-        private static int actionListCount = 0;
+        private static int actionListCount;
         private static Callback[] actionList = new Callback[InitialSize];
 
-        private static int waitingListCount = 0;
+        private static int waitingListCount;
         private static Callback[] waitingList = new Callback[InitialSize];
 
         private static int opCount;

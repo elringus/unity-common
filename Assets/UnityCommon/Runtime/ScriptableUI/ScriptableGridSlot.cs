@@ -11,12 +11,12 @@ namespace UnityCommon
         [Serializable]
         private class OnSlotClickedEvent : UnityEvent<string> { }
 
-        public virtual string Id { get; }
+        public virtual string Id { get; } = default;
         public virtual bool Selected { get; private set; }
 
         [Tooltip("Opacity to fade to when the slot is hovered or selected; set to zero to disable the fade behaviour.")]
         [SerializeField] private float hoverOpacityFade = .25f;
-        [SerializeField] private OnSlotClickedEvent onSlotClicked = default;
+        [SerializeField] private OnSlotClickedEvent onSlotClicked;
 
         private readonly Tweener<FloatTween> fadeTweener = new Tweener<FloatTween>();
 

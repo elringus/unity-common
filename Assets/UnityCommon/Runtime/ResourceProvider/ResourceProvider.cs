@@ -32,7 +32,7 @@ namespace UnityCommon
             var loadedResource = LoadedResources[path];
             var loadedResourceType = loadedResource.Valid ? loadedResource.Object.GetType() : default;
             if (loadedResourceType != typeof(T))
-                throw new Exception($"Failed to get a loaded resource with path `{path}`: The loaded resource is of type `{loadedResourceType?.FullName}`, while the requested type is `{typeof(T).FullName}`.");
+                throw new Error($"Failed to get a loaded resource with path `{path}`: The loaded resource is of type `{loadedResourceType?.FullName}`, while the requested type is `{typeof(T).FullName}`.");
             else return LoadedResources[path] as Resource<T>;
         }
 
@@ -134,7 +134,7 @@ namespace UnityCommon
             if (ResourceLocating<T>(path))
             {
                 var locateTask = LocateRunners[locateKey] as LocateResourcesRunner<T>;
-                if (locateTask is null) throw new Exception($"Failed to wait for `{path}` resource location runner.");
+                if (locateTask is null) throw new Error($"Failed to wait for `{path}` resource location runner.");
                 await locateTask;
             }
 
@@ -160,7 +160,7 @@ namespace UnityCommon
             if (ResourceLocating<Folder>(path))
             {
                 var locateTask = LocateRunners[locateKey] as LocateFoldersRunner;
-                if (locateTask is null) throw new Exception($"Failed to wait for `{path}` folder location runner.");
+                if (locateTask is null) throw new Error($"Failed to wait for `{path}` folder location runner.");
                 return await locateTask;
             }
 
@@ -215,7 +215,7 @@ namespace UnityCommon
 
         protected virtual void HandleResourceLoaded<T> (Resource<T> resource) where T : UnityEngine.Object
         {
-            if (!resource.Valid) throw new Exception($"Resource `{resource.Path}` failed to load.");
+            if (!resource.Valid) throw new Error($"Resource `{resource.Path}` failed to load.");
             else LoadedResources[resource.Path] = resource;
 
             if (LoadRunners.ContainsKey(resource.Path))

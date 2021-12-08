@@ -242,7 +242,7 @@ namespace UnityCommon.Async
                 if (playerLoopList[i].type == systemType)
                     return i;
 
-            throw new Exception("Target PlayerLoopSystem does not found. Type:" + systemType.FullName);
+            throw new Error("Target PlayerLoopSystem does not found. Type:" + systemType.FullName);
         }
 
         private static void InsertLoop (PlayerLoopSystem[] copyList, InjectPlayerLoopTimings injectTimings, Type loopType, InjectPlayerLoopTimings targetTimings,

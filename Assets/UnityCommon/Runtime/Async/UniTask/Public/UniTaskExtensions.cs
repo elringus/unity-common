@@ -119,7 +119,7 @@ namespace UnityCommon
 
             if (value.IsCanceled)
             {
-                Error.ThrowOperationCanceledException();
+                UniTaskError.ThrowOperationCanceledException();
             }
 
             return value.Result;
@@ -164,7 +164,7 @@ namespace UnityCommon
 
             if (value.IsCanceled)
             {
-                Error.ThrowOperationCanceledException();
+                UniTaskError.ThrowOperationCanceledException();
             }
 
             return (false, value.Result);
@@ -346,8 +346,8 @@ namespace UnityCommon
         {
             private bool completed;
             private UniTask task;
-            private Action<Exception> exceptionHandler = null;
-            private bool isStarted = false;
+            private Action<Exception> exceptionHandler;
+            private bool isStarted;
             private ExceptionDispatchInfo exception;
 
             public ToCoroutineEnumerator (UniTask task, Action<Exception> exceptionHandler)
@@ -406,11 +406,11 @@ namespace UnityCommon
         private class ToCoroutineEnumerator<T> : IEnumerator
         {
             private bool completed;
-            private Action<T> resultHandler = null;
-            private Action<Exception> exceptionHandler = null;
-            private bool isStarted = false;
+            private Action<T> resultHandler;
+            private Action<Exception> exceptionHandler;
+            private bool isStarted;
             private UniTask<T> task;
-            private object current = null;
+            private object current;
             private ExceptionDispatchInfo exception;
 
             public ToCoroutineEnumerator (UniTask<T> task, Action<T> resultHandler, Action<Exception> exceptionHandler)
