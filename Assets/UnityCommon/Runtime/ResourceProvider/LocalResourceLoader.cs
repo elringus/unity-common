@@ -1,25 +1,26 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
 
 namespace UnityCommon
 {
-    public class LocalResourceLoader<TResource> : LoadResourceRunner<TResource> 
+    public class LocalResourceLoader<TResource> : LoadResourceRunner<TResource>
         where TResource : UnityEngine.Object
     {
         public virtual string RootPath { get; }
 
-        private Action<string> logAction;
-        private IRawConverter<TResource> converter;
+        private readonly Action<string> logAction;
+        private readonly IEnumerable<IRawConverter<TResource>> converters;
         private byte[] rawData;
 
         public LocalResourceLoader (IResourceProvider provider, string rootPath, string resourcePath,
-            IRawConverter<TResource> converter, Action<string> logAction) : base (provider, resourcePath)
+            IEnumerable<IRawConverter<TResource>> converters, Action<string> logAction) : base(provider, resourcePath)
         {
             RootPath = rootPath;
             this.logAction = logAction;
-            this.converter = converter;
+            this.converters = converters;
         }
 
         public override async UniTask RunAsync ()
@@ -27,23 +28,28 @@ namespace UnityCommon
             var startTime = Time.time;
 
             var filePath = string.Concat(RootPath, '/', Path);
+            var selectedConverter = default(IRawConverter<TResource>);
 
+            foreach (var converter in converters)
             foreach (var representation in converter.Representations)
             {
                 var fullPath = string.Concat(filePath, representation.Extension);
                 if (!File.Exists(fullPath)) continue;
-
+                selectedConverter = converter;
                 rawData = await IOUtils.ReadFileAsync(fullPath);
                 break;
             }
 
+            if (selectedConverter is null)
+                throw new Error($"Failed to load `{filePath}` resource using local file system: failed to find compatible converter.");
+
             if (rawData is null)
             {
-                var usedExtensions = string.Join("/", converter.Representations.Select(r => r.Extension));
+                var usedExtensions = string.Join("/", selectedConverter.Representations.Select(r => r.Extension));
                 throw new Error($"Failed to load `{filePath}({usedExtensions})` resource using local file system: File not found.");
             }
 
-            var obj = await converter.ConvertAsync(rawData, System.IO.Path.GetFileNameWithoutExtension(Path));
+            var obj = await selectedConverter.ConvertAsync(rawData, System.IO.Path.GetFileNameWithoutExtension(Path));
             var result = new Resource<TResource>(Path, obj);
 
             SetResult(result);

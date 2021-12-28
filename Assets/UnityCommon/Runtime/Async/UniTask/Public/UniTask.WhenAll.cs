@@ -61,7 +61,7 @@ namespace UnityCommon
                 {
                     if (tasks[i].IsCompleted)
                     {
-                        T value = default(T);
+                        var value = default(T);
                         try
                         {
                             value = tasks[i].Result;
@@ -95,7 +95,7 @@ namespace UnityCommon
 
             private async UniTaskVoid RunTask (UniTask<T> task, int index)
             {
-                T value = default(T);
+                var value = default(T);
                 try
                 {
                     value = await task;

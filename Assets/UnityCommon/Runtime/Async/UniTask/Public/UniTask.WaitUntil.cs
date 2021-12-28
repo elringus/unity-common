@@ -145,7 +145,7 @@ namespace UnityCommon
                     return false;
                 }
 
-                U nextValue = default(U);
+                var nextValue = default(U);
                 try
                 {
                     nextValue = monitorFunction(target);
@@ -196,7 +196,7 @@ namespace UnityCommon
                     return false;
                 }
 
-                U nextValue = default(U);
+                var nextValue = default(U);
                 try
                 {
                     nextValue = monitorFunction(t);

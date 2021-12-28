@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace UnityCommon
@@ -8,7 +9,7 @@ namespace UnityCommon
     {
         public string RootPath { get; }
 
-        private readonly Dictionary<Type, IConverter> converters = new Dictionary<Type, IConverter>();
+        private readonly Dictionary<Type, List<IConverter>> converters = new Dictionary<Type, List<IConverter>>();
 
         /// <param name="rootPath">
         /// An absolute path to the folder where the resources are located,
@@ -42,18 +43,20 @@ namespace UnityCommon
         /// </summary>
         public virtual void AddConverter<T> (IRawConverter<T> converter)
         {
-            if (converters.ContainsKey(typeof(T))) return;
-            converters.Add(typeof(T), converter);
+            var key = typeof(T);
+            if (!converters.ContainsKey(key))
+                converters[key] = new List<IConverter>();
+            converters[key].Add(converter);
         }
 
         protected override LoadResourceRunner<T> CreateLoadResourceRunner<T> (string path)
         {
-            return new LocalResourceLoader<T>(this, RootPath, path, ResolveConverter<T>(), LogMessage);
+            return new LocalResourceLoader<T>(this, RootPath, path, ResolveConverters<T>(), LogMessage);
         }
 
         protected override LocateResourcesRunner<T> CreateLocateResourcesRunner<T> (string path)
         {
-            return new LocalResourceLocator<T>(this, RootPath, path, ResolveConverter<T>());
+            return new LocalResourceLocator<T>(this, RootPath, path, ResolveConverters<T>());
         }
 
         protected override LocateFoldersRunner CreateLocateFoldersRunner (string path)
@@ -67,12 +70,12 @@ namespace UnityCommon
             ObjectUtils.DestroyOrImmediate(resource.Object);
         }
 
-        protected virtual IRawConverter<T> ResolveConverter<T> ()
+        protected virtual IEnumerable<IRawConverter<T>> ResolveConverters<T> ()
         {
             var resourceType = typeof(T);
             if (!converters.ContainsKey(resourceType))
                 throw new Error($"Converter for resource of type '{resourceType.Name}' is not available.");
-            return converters[resourceType] as IRawConverter<T>;
+            return converters[resourceType].Cast<IRawConverter<T>>();
         }
     }
 }

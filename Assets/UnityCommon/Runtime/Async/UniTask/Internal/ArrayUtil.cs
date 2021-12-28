@@ -44,7 +44,7 @@ namespace UnityCommon.Async.Internal
                 coll.CopyTo(buffer, 0);
                 return (buffer, defaultCount);
             }
-            else if (source is IReadOnlyCollection<T> rcoll)
+            if (source is IReadOnlyCollection<T> rcoll)
             {
                 defaultCount = rcoll.Count;
             }

@@ -54,8 +54,8 @@ namespace UnityCommon.Async.Internal
             if (size == 0) ThrowForEmptyQueue();
 
             int head = this.head;
-            T[] array = this.array;
-            T removed = array[head];
+            var array = this.array;
+            var removed = array[head];
             array[head] = default;
             MoveNext(ref this.head);
             size--;
@@ -74,7 +74,7 @@ namespace UnityCommon.Async.Internal
 
         private void SetCapacity (int capacity)
         {
-            T[] newArray = new T[capacity];
+            var newArray = new T[capacity];
             if (size > 0)
             {
                 if (head < tail)

@@ -7,7 +7,7 @@ namespace UnityCommon
         public static int SetLayer (int mask, int layer, bool enabled)
         {
             if (enabled) return mask |= 1 << layer;
-            else return mask &= ~(1 << layer);
+            return mask &= ~(1 << layer);
         }
 
         public static bool GetLayer (int mask, int layer)

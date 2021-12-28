@@ -119,21 +119,15 @@ namespace UnityCommon.Async.Internal
                 continuation = action;
                 return;
             }
-            else
+            if (continuation is Action act)
             {
-                if (continuation is Action act)
-                {
-                    var q = new MinimumQueue<Action>(4);
-                    q.Enqueue(act);
-                    q.Enqueue(action);
-                    continuation = q;
-                    return;
-                }
-                else
-                {
-                    ((MinimumQueue<Action>)continuation).Enqueue(action);
-                }
+                var q = new MinimumQueue<Action>(4);
+                q.Enqueue(act);
+                q.Enqueue(action);
+                continuation = q;
+                return;
             }
+            ((MinimumQueue<Action>)continuation).Enqueue(action);
         }
     }
 
@@ -259,21 +253,15 @@ namespace UnityCommon.Async.Internal
                 continuation = action;
                 return;
             }
-            else
+            if (continuation is Action act)
             {
-                if (continuation is Action act)
-                {
-                    var q = new MinimumQueue<Action>(4);
-                    q.Enqueue(act);
-                    q.Enqueue(action);
-                    continuation = q;
-                    return;
-                }
-                else
-                {
-                    ((MinimumQueue<Action>)continuation).Enqueue(action);
-                }
+                var q = new MinimumQueue<Action>(4);
+                q.Enqueue(act);
+                q.Enqueue(action);
+                continuation = q;
+                return;
             }
+            ((MinimumQueue<Action>)continuation).Enqueue(action);
         }
     }
 

@@ -46,7 +46,7 @@ namespace UnityCommon.Async.Internal
                 coll.CopyTo(buffer, 0);
                 return new RentArray<T>(buffer, coll.Count, pool);
             }
-            else if (source is IReadOnlyCollection<T> rcoll)
+            if (source is IReadOnlyCollection<T> rcoll)
             {
                 defaultCount = rcoll.Count;
             }

@@ -11,14 +11,11 @@ namespace UnityCommon
         public static async UniTask<byte[]> ReadFileAsync (string filePath)
         {
             if (Application.platform == RuntimePlatform.WebGLPlayer) return File.ReadAllBytes(filePath);
-            else
+            using (var fileStream = File.OpenRead(filePath))
             {
-                using (var fileStream = File.OpenRead(filePath))
-                {
-                    var fileData = new byte[fileStream.Length];
-                    await fileStream.ReadAsync(fileData, 0, (int)fileStream.Length);
-                    return fileData;
-                }
+                var fileData = new byte[fileStream.Length];
+                await fileStream.ReadAsync(fileData, 0, (int)fileStream.Length);
+                return fileData;
             }
         }
 
@@ -42,11 +39,8 @@ namespace UnityCommon
         public static async UniTask<string> ReadTextFileAsync (string filePath)
         {
             if (Application.platform == RuntimePlatform.WebGLPlayer) return File.ReadAllText(filePath);
-            else
-            {
-                using (var stream = File.OpenText(filePath))
-                    return await stream.ReadToEndAsync();
-            }
+            using (var stream = File.OpenText(filePath))
+                return await stream.ReadToEndAsync();
         }
 
         /// <summary>

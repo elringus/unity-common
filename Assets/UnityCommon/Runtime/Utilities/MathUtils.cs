@@ -80,7 +80,7 @@ namespace UnityCommon
         public static float LinearToDecibel (float linear)
         {
             if (linear != 0) return 20f * Mathf.Log10(linear);
-            else return -144.0f;
+            return -144.0f;
         }
 
         public static float DecibelToLinear (float dB)

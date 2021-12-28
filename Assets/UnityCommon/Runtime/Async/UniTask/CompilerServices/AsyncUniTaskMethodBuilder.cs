@@ -33,11 +33,8 @@ namespace UnityCommon.Async.CompilerServices
                 {
                     return UniTask.CompletedTask;
                 }
-                else
-                {
-                    promise = new UniTaskCompletionSource();
-                    return promise.Task;
-                }
+                promise = new UniTaskCompletionSource();
+                return promise.Task;
             }
         }
 
@@ -175,11 +172,8 @@ namespace UnityCommon.Async.CompilerServices
                 {
                     return new UniTask<T>(result);
                 }
-                else
-                {
-                    promise = new UniTaskCompletionSource<T>();
-                    return new UniTask<T>(promise);
-                }
+                promise = new UniTaskCompletionSource<T>();
+                return new UniTask<T>(promise);
             }
         }
 

@@ -111,11 +111,8 @@ namespace UnityCommon
 
                 throw new TimeoutException("Exceed Timeout:" + timeout);
             }
-            else
-            {
-                delayCancellationTokenSource.Cancel();
-                delayCancellationTokenSource.Dispose();
-            }
+            delayCancellationTokenSource.Cancel();
+            delayCancellationTokenSource.Dispose();
 
             if (value.IsCanceled)
             {
@@ -156,11 +153,8 @@ namespace UnityCommon
 
                 return (true, default);
             }
-            else
-            {
-                delayCancellationTokenSource.Cancel();
-                delayCancellationTokenSource.Dispose();
-            }
+            delayCancellationTokenSource.Cancel();
+            delayCancellationTokenSource.Dispose();
 
             if (value.IsCanceled)
             {

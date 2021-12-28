@@ -179,10 +179,10 @@ namespace UnityCommon
                 instance.references.TryGetValue(type, out result);
                 return result;
             }
-            else return instance.references
-                    .Where(kv => type.IsAssignableFrom(kv.Key))
-                    .SelectMany(kv => kv.Value)
-                    .ToList();
+            return instance.references
+                .Where(kv => type.IsAssignableFrom(kv.Key))
+                .SelectMany(kv => kv.Value)
+                .ToList();
         }
 
         private static object ConstructAndRegister (Type type, HideFlags hideFlags = HideFlags.None, bool dontDestroyOnLoad = false)

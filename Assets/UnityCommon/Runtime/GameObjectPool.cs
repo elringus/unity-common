@@ -77,7 +77,7 @@ namespace UnityCommon
                 {
                     bool active = prefab.activeSelf;
                     prefab.SetActive(false);
-                    Transform parent = transform;
+                    var parent = transform;
                     while (list.Count < initialPoolSize)
                     {
                         var obj = Instantiate(prefab, parent, true);

@@ -30,9 +30,9 @@ namespace UnityCommon
             if (!string.IsNullOrWhiteSpace(pathPrefix))
             {
                 if (!string.IsNullOrWhiteSpace(localPath)) return $"{pathPrefix}/{localPath}";
-                else return pathPrefix;
+                return pathPrefix;
             }
-            else return localPath;
+            return localPath;
         }
         
         /// <summary>
@@ -47,7 +47,7 @@ namespace UnityCommon
                     throw new Error($"Failed to build local path from `{fullPath}`: the provided path doesn't contain `{pathPrefix}` path prefix.");
                 return fullPath.GetAfterFirst(prefixAndSlash);
             }
-            else return fullPath;
+            return fullPath;
         }
 
         /// <inheritdoc cref="BuildFullPath(string,string)"/>

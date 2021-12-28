@@ -226,21 +226,18 @@ namespace UnityCommon
             {
                 return end * (7.5625f * value * value) + start;
             }
-            else if (value < 2 / 2.75f)
+            if (value < 2 / 2.75f)
             {
                 value -= 1.5f / 2.75f;
                 return end * (7.5625f * value * value + .75f) + start;
             }
-            else if (value < 2.5 / 2.75)
+            if (value < 2.5 / 2.75)
             {
                 value -= 2.25f / 2.75f;
                 return end * (7.5625f * value * value + .9375f) + start;
             }
-            else
-            {
-                value -= 2.625f / 2.75f;
-                return end * (7.5625f * value * value + .984375f) + start;
-            }
+            value -= 2.625f / 2.75f;
+            return end * (7.5625f * value * value + .984375f) + start;
         }
 
         public static float EaseInOutBounce (float start, float end, float value)
@@ -248,7 +245,7 @@ namespace UnityCommon
             end -= start;
             const float d = 1f;
             if (value < d * .5f) return EaseInBounce(0, end, value * 2) * .5f + start;
-            else return EaseOutBounce(0, end, value * 2 - d) * .5f + end * .5f + start;
+            return EaseOutBounce(0, end, value * 2 - d) * .5f + end * .5f + start;
         }
 
         public static float EaseInBack (float start, float end, float value)

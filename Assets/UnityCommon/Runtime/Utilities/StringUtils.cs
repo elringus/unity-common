@@ -99,7 +99,7 @@ namespace UnityCommon
                 var endIndex = content.IndexOf(endMatch, startIndex, comp);
                 return content.Substring(startIndex, endIndex - startIndex);
             }
-            else return null;
+            return null;
         }
 
         /// <summary>
@@ -120,7 +120,7 @@ namespace UnityCommon
                 var endIndex = content.IndexOf(matchString, comp);
                 return content.Substring(0, endIndex);
             }
-            else return null;
+            return null;
         }
 
         /// <summary>
@@ -133,7 +133,7 @@ namespace UnityCommon
                 var endIndex = content.LastIndexOf(matchString, comp);
                 return content.Substring(0, endIndex);
             }
-            else return null;
+            return null;
         }
 
         /// <summary>
@@ -147,7 +147,7 @@ namespace UnityCommon
                 if (content.Length <= startIndex) return string.Empty;
                 return content.Substring(startIndex);
             }
-            else return null;
+            return null;
         }
 
         /// <summary>
@@ -161,7 +161,7 @@ namespace UnityCommon
                 if (content.Length <= startIndex) return string.Empty;
                 return content.Substring(startIndex);
             }
-            else return null;
+            return null;
         }
 
         /// <summary>

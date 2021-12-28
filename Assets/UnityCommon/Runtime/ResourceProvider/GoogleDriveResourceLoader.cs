@@ -174,7 +174,7 @@ namespace UnityCommon
                     return request.downloadHandler.data;
                 }
             }
-            else return await IOUtils.ReadFileAsync(filePath);
+            return await IOUtils.ReadFileAsync(filePath);
         }
 
         protected virtual async UniTask WriteFileCacheAsync (string resourcePath, string fileId, byte[] fileRawData)

@@ -43,13 +43,10 @@ namespace UnityCommon
         {
             if (providers.Count == 1)
                 return await providers[0].LoadResourceAsync<T>(path);
-            else
+            foreach (var provider in providers)
             {
-                foreach (var provider in providers)
-                {
-                    if (!await provider.ResourceExistsAsync<T>(path)) continue;
-                    return await provider.LoadResourceAsync<T>(path);
-                }
+                if (!await provider.ResourceExistsAsync<T>(path)) continue;
+                return await provider.LoadResourceAsync<T>(path);
             }
             return Resource<T>.Invalid;
         }

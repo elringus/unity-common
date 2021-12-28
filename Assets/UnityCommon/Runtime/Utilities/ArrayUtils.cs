@@ -100,7 +100,7 @@ namespace UnityCommon
         /// </summary>
         public static void Insert<T> (ref T[] array, int index, T item)
         {
-            ArrayList a = new ArrayList();
+            var a = new ArrayList();
             a.AddRange(array);
             a.Insert(index, item);
             array = a.ToArray(typeof(T)) as T[];
