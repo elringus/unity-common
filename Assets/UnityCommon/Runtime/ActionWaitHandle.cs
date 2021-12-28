@@ -23,7 +23,7 @@ namespace UnityCommon
         public WaitForEnum WaitFor { get; private set; }
         public bool IsCompleted { get { return GetIsCompleted(); } }
 
-        private List<Guid> completedActionIds;
+        private readonly List<Guid> completedActionIds;
         private int waitedActionsCount;
         private int completedActionsCount;
         private bool isReady;

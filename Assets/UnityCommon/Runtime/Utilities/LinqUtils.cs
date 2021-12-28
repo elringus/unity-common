@@ -181,8 +181,8 @@ namespace UnityCommon
 
     public class GeneralPropertyComparer<T, TKey> : IEqualityComparer<T>
     {
-        private Func<T, TKey> property;
-        private IEqualityComparer<TKey> propertyComparer;
+        private readonly Func<T, TKey> property;
+        private readonly IEqualityComparer<TKey> propertyComparer;
 
         public GeneralPropertyComparer (Func<T, TKey> property, IEqualityComparer<TKey> propertyComparer = null)
         {

@@ -25,7 +25,7 @@ public class PlayerPrefsEditor : EditorWindow
     private bool showEditorPrefs;
     private SearchField searchField;
     private List<PrefPair> deserializedPlayerPrefs = new List<PrefPair>();
-    private List<PrefPair> filteredPlayerPrefs = new List<PrefPair>();
+    private readonly List<PrefPair> filteredPlayerPrefs = new List<PrefPair>();
     private DateTime? lastDeserialization;
     private Vector2 scrollPosition;
     private Vector2 lastScrollPosition;

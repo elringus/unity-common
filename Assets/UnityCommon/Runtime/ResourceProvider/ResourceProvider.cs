@@ -83,7 +83,7 @@ namespace UnityCommon
             LoadedResources.Remove(path);
 
             // Make sure no other resources use the same object before disposing it.
-            if (!LoadedResources.Any(r => r.Value.Object == resource.Object))
+            if (LoadedResources.All(r => r.Value.Object != resource.Object))
                 DisposeResource(resource);
 
             LogMessage($"Resource `{path}` unloaded.");

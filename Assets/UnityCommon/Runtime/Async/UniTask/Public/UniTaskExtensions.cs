@@ -339,8 +339,8 @@ namespace UnityCommon
         private class ToCoroutineEnumerator : IEnumerator
         {
             private bool completed;
-            private UniTask task;
-            private Action<Exception> exceptionHandler;
+            private readonly UniTask task;
+            private readonly Action<Exception> exceptionHandler;
             private bool isStarted;
             private ExceptionDispatchInfo exception;
 
@@ -400,10 +400,10 @@ namespace UnityCommon
         private class ToCoroutineEnumerator<T> : IEnumerator
         {
             private bool completed;
-            private Action<T> resultHandler;
-            private Action<Exception> exceptionHandler;
+            private readonly Action<T> resultHandler;
+            private readonly Action<Exception> exceptionHandler;
             private bool isStarted;
-            private UniTask<T> task;
+            private readonly UniTask<T> task;
             private object current;
             private ExceptionDispatchInfo exception;
 

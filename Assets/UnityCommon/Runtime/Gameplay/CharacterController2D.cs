@@ -100,7 +100,7 @@ namespace UnityCommon
 
         private new Transform transform;
         private BoxCollider2D boxCollider;
-        private CharacterCollisionState2D collisionState = new CharacterCollisionState2D();
+        private readonly CharacterCollisionState2D collisionState = new CharacterCollisionState2D();
         private Vector3 velocity;
         private Vector3 inputVelocity;
         private bool ignoreOneWayPlatformsThisFrame;
@@ -110,7 +110,7 @@ namespace UnityCommon
         /// This is used to calculate the downward ray that is cast to check for slopes. We use the somewhat arbitrary value 75 degrees
         /// to calculate the length of the ray that checks for slopes.
         /// </summary>
-        private float slopeLimitTangent = Mathf.Tan(75f * Mathf.Deg2Rad);
+        private readonly float slopeLimitTangent = Mathf.Tan(75f * Mathf.Deg2Rad);
         /// <summary>
         /// Holder for our raycast origin corners (TR, TL, BR, BL).
         /// </summary>
@@ -123,7 +123,7 @@ namespace UnityCommon
         /// Stores any raycast hits that occur this frame. we have to store them in case we get a hit moving
         /// horizontally and vertically so that we can send the events after all collision state is set.
         /// </summary>
-        private List<RaycastHit2D> raycastHitsThisFrame = new List<RaycastHit2D>(2);
+        private readonly List<RaycastHit2D> raycastHitsThisFrame = new List<RaycastHit2D>(2);
         private float verticalDistanceBetweenRays;
         private float horizontalDistanceBetweenRays;
         /// <summary>

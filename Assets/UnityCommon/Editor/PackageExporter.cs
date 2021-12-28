@@ -39,8 +39,8 @@ namespace UnityCommon
         private const string defaultLicenseFileName = "LICENSE";
         private const char newLine = '\n';
 
-        private static Dictionary<string, string> modifiedScripts = new Dictionary<string, string>();
-        private static List<UnityEngine.Object> ignoredAssets = new List<UnityEngine.Object>();
+        private static readonly Dictionary<string, string> modifiedScripts = new Dictionary<string, string>();
+        private static readonly List<UnityEngine.Object> ignoredAssets = new List<UnityEngine.Object>();
         private static SceneSetup[] sceneSetup;
 
         public static void AddIgnoredAsset (string assetPath)

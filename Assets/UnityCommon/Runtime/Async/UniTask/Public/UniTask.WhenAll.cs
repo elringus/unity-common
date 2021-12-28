@@ -123,7 +123,7 @@ namespace UnityCommon
             // ReSharper disable once MemberHidesStaticFromOuterClass
             public struct Awaiter : ICriticalNotifyCompletion
             {
-                private WhenAllPromise<T> parent;
+                private readonly WhenAllPromise<T> parent;
 
                 public Awaiter (WhenAllPromise<T> parent)
                 {
@@ -159,7 +159,7 @@ namespace UnityCommon
         private class WhenAllPromise
         {
             private int completeCount;
-            private int resultLength;
+            private readonly int resultLength;
             private Action whenComplete;
             private ExceptionDispatchInfo exception;
 
@@ -232,7 +232,7 @@ namespace UnityCommon
             // ReSharper disable once MemberHidesStaticFromOuterClass
             public struct Awaiter : ICriticalNotifyCompletion
             {
-                private WhenAllPromise parent;
+                private readonly WhenAllPromise parent;
 
                 public Awaiter (WhenAllPromise parent)
                 {
