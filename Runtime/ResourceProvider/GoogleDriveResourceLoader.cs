@@ -18,10 +18,10 @@ namespace UnityCommon
         private static readonly Type[] nativeRequestTypes = { typeof(AudioClip), typeof(Texture2D) };
 
         private TResource loadedObject;
-        private bool useNativeRequests;
-        private Action<string> logAction;
+        private readonly bool useNativeRequests;
+        private readonly Action<string> logAction;
         private GoogleDriveRequest downloadRequest;
-        private IRawConverter<TResource> converter;
+        private readonly IRawConverter<TResource> converter;
         private RawDataRepresentation usedRepresentation;
         private GoogleDriveResourceProvider.CacheManifest cacheManifest;
         private byte[] rawData;
@@ -174,7 +174,7 @@ namespace UnityCommon
                     return request.downloadHandler.data;
                 }
             }
-            else return await IOUtils.ReadFileAsync(filePath);
+            return await IOUtils.ReadFileAsync(filePath);
         }
 
         protected virtual async UniTask WriteFileCacheAsync (string resourcePath, string fileId, byte[] fileRawData)

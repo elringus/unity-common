@@ -67,14 +67,11 @@ namespace UnityCommon
             {
                 return true;
             }
-            else if (this.awaiter != null && other.awaiter != null)
+            if (this.awaiter != null && other.awaiter != null)
             {
                 return this.awaiter == other.awaiter;
             }
-            else
-            {
-                return false;
-            }
+            return false;
         }
 
         public override int GetHashCode ()
@@ -83,10 +80,7 @@ namespace UnityCommon
             {
                 return 0;
             }
-            else
-            {
-                return this.awaiter.GetHashCode();
-            }
+            return this.awaiter.GetHashCode();
         }
 
         public override string ToString ()
@@ -104,16 +98,10 @@ namespace UnityCommon
                 {
                     return DefaultAsyncUnitTask;
                 }
-                else
-                {
-                    // UniTask<T> -> UniTask is free but UniTask -> UniTask<T> requires wrapping cost.
-                    return new UniTask<AsyncUnit>(new AsyncUnitAwaiter(task.awaiter));
-                }
+                // UniTask<T> -> UniTask is free but UniTask -> UniTask<T> requires wrapping cost.
+                return new UniTask<AsyncUnit>(new AsyncUnitAwaiter(task.awaiter));
             }
-            else
-            {
-                return DefaultAsyncUnitTask;
-            }
+            return DefaultAsyncUnitTask;
         }
 
         private class AsyncUnitAwaiter : IAwaiter<AsyncUnit>
@@ -283,10 +271,7 @@ namespace UnityCommon
                 {
                     return result;
                 }
-                else
-                {
-                    return awaiter.GetResult();
-                }
+                return awaiter.GetResult();
             }
         }
 
@@ -306,7 +291,7 @@ namespace UnityCommon
             {
                 return new UniTask<(bool, T)>((false, Result));
             }
-            else if (status == AwaiterStatus.Canceled)
+            if (status == AwaiterStatus.Canceled)
             {
                 return new UniTask<(bool, T)>((true, default));
             }
@@ -319,14 +304,11 @@ namespace UnityCommon
             {
                 return EqualityComparer<T>.Default.Equals(this.result, other.result);
             }
-            else if (this.awaiter != null && other.awaiter != null)
+            if (this.awaiter != null && other.awaiter != null)
             {
                 return this.awaiter == other.awaiter;
             }
-            else
-            {
-                return false;
-            }
+            return false;
         }
 
         public override int GetHashCode ()
@@ -336,10 +318,7 @@ namespace UnityCommon
                 if (result == null) return 0;
                 return result.GetHashCode();
             }
-            else
-            {
-                return this.awaiter.GetHashCode();
-            }
+            return this.awaiter.GetHashCode();
         }
 
         public override string ToString ()
@@ -355,10 +334,7 @@ namespace UnityCommon
             {
                 return new UniTask(task.awaiter);
             }
-            else
-            {
-                return new UniTask();
-            }
+            return new UniTask();
         }
 
         private class IsCanceledAwaiter : IAwaiter<(bool, T)>

@@ -52,7 +52,7 @@ namespace UnityCommon
         public static int IndexOf<T> (this IReadOnlyList<T> list, T itemToFind)
         {
             var i = 0;
-            foreach (T item in list)
+            foreach (var item in list)
             {
                 if (Equals(item, itemToFind)) return i;
                 i++;
@@ -63,7 +63,7 @@ namespace UnityCommon
         public static int IndexOf<T> (this IList<T> list, Predicate<T> predicate)
         {
             var i = 0;
-            foreach (T item in list)
+            foreach (var item in list)
             {
                 if (predicate(item)) return i;
                 i++;
@@ -74,7 +74,7 @@ namespace UnityCommon
         public static int IndexOf<T> (this IReadOnlyList<T> list, Predicate<T> predicate)
         {
             var i = 0;
-            foreach (T item in list)
+            foreach (var item in list)
             {
                 if (predicate(item)) return i;
                 i++;
@@ -109,7 +109,7 @@ namespace UnityCommon
 
         public static IList<T> Swap<T> (this IList<T> list, int indexA, int indexB)
         {
-            T tmp = list[indexA];
+            var tmp = list[indexA];
             list[indexA] = list[indexB];
             list[indexB] = tmp;
             return list;
@@ -181,8 +181,8 @@ namespace UnityCommon
 
     public class GeneralPropertyComparer<T, TKey> : IEqualityComparer<T>
     {
-        private Func<T, TKey> property;
-        private IEqualityComparer<TKey> propertyComparer;
+        private readonly Func<T, TKey> property;
+        private readonly IEqualityComparer<TKey> propertyComparer;
 
         public GeneralPropertyComparer (Func<T, TKey> property, IEqualityComparer<TKey> propertyComparer = null)
         {
@@ -196,8 +196,8 @@ namespace UnityCommon
             var secondProperty = property.Invoke(second);
             if (propertyComparer != null) return propertyComparer.Equals(firstProperty, secondProperty);
             if (firstProperty == null && secondProperty == null) return true;
-            else if (firstProperty == null ^ secondProperty == null) return false;
-            else return firstProperty.Equals(secondProperty);
+            if (firstProperty == null ^ secondProperty == null) return false;
+            return firstProperty.Equals(secondProperty);
         }
 
         public int GetHashCode (T obj)
@@ -235,7 +235,7 @@ namespace UnityCommon
             {
                 if (array == null) return 0;
                 var hash = 17;
-                foreach (T item in array)
+                foreach (var item in array)
                     hash = hash * 31 + ITEMS_COMPARER.GetHashCode(item);
                 return hash;
             }

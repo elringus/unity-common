@@ -11,7 +11,7 @@ namespace UnityCommon
     {
         public virtual string RootPath { get; }
 
-        private IRawConverter<TResource> converter;
+        private readonly IRawConverter<TResource> converter;
 
         public GoogleDriveResourceLocator (IResourceProvider provider, string rootPath, string resourcesPath, 
             IRawConverter<TResource> converter) : base (provider, resourcesPath)

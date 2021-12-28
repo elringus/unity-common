@@ -63,10 +63,7 @@ namespace UnityCommon
                     await Yield();
                 }
             }
-            else
-            {
-                return func();
-            }
+            return func();
         }
 
         /// <summary>Run action on the threadPool and return to main thread if configureAwait = true.</summary>
@@ -85,10 +82,7 @@ namespace UnityCommon
                     await Yield();
                 }
             }
-            else
-            {
-                return func(state);
-            }
+            return func(state);
         }
     }
 }

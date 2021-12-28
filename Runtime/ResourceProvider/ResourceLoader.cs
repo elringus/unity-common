@@ -155,7 +155,7 @@ namespace UnityCommon
                     var localPath = source.BuildLocalPath(locatedResourcePath);
 
                     if (addedPaths.Contains(localPath)) continue;
-                    else addedPaths.Add(localPath);
+                    addedPaths.Add(localPath);
 
                     if (IsLoaded(localPath))
                     {

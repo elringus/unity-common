@@ -26,7 +26,7 @@ namespace UnityCommon
     {
         public TResult Result { get; private set; }
 
-        private UniTaskCompletionSource<TResult> completionSource = new UniTaskCompletionSource<TResult>();
+        private readonly UniTaskCompletionSource<TResult> completionSource = new UniTaskCompletionSource<TResult>();
 
         protected ResourceRunner (string path, Type resourceType)
             : base(path, resourceType) { }

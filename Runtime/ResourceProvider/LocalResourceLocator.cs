@@ -9,35 +9,36 @@ namespace UnityCommon
     {
         public virtual string RootPath { get; }
 
-        private IRawConverter<TResource> converter;
+        private readonly IEnumerable<IRawConverter<TResource>> converters;
 
         public LocalResourceLocator (IResourceProvider provider, string rootPath, string resourcesPath,
-            IRawConverter<TResource> converter) : base(provider, resourcesPath)
+            IEnumerable<IRawConverter<TResource>> converters) : base(provider, resourcesPath)
         {
             RootPath = rootPath;
-            this.converter = converter;
+            this.converters = converters;
         }
 
         public override UniTask RunAsync ()
         {
-            var locatedResourcePaths = LocateResources(RootPath, Path, converter);
+            var locatedResourcePaths = LocateResources();
             SetResult(locatedResourcePaths);
             return UniTask.CompletedTask;
         }
 
-        public static IReadOnlyCollection<string> LocateResources (string rootPath, string resourcesPath, IRawConverter<TResource> converter)
+        private IReadOnlyCollection<string> LocateResources ()
         {
             var locatedResources = new List<string>();
 
             // 1. Resolving parent folder.
-            var folderPath = rootPath;
-            if (!string.IsNullOrEmpty(resourcesPath))
-                folderPath += string.Concat('/', resourcesPath);
+            var folderPath = RootPath;
+            if (!string.IsNullOrEmpty(Path))
+                folderPath += string.Concat('/', Path);
             var parentFolder = new DirectoryInfo(folderPath);
             if (!parentFolder.Exists) return locatedResources;
 
             // 2. Searching for the files in the folder.
             var results = new Dictionary<RawDataRepresentation, List<FileInfo>>();
+            foreach (var converter in converters)
             foreach (var representation in converter.Representations.DistinctBy(r => r.Extension))
             {
                 var files = parentFolder.GetFiles(string.Concat("*", representation.Extension)).ToList();
@@ -46,13 +47,11 @@ namespace UnityCommon
 
             // 3. Create resources using located files.
             foreach (var result in results)
+            foreach (var file in result.Value)
             {
-                foreach (var file in result.Value)
-                {
-                    var fileName = string.IsNullOrEmpty(result.Key.Extension) ? file.Name : file.Name.GetBeforeLast(".");
-                    var filePath = string.IsNullOrEmpty(resourcesPath) ? fileName : string.Concat(resourcesPath, '/', fileName);
-                    locatedResources.Add(filePath);
-                }
+                var fileName = string.IsNullOrEmpty(result.Key.Extension) ? file.Name : file.Name.GetBeforeLast(".");
+                var filePath = string.IsNullOrEmpty(Path) ? fileName : string.Concat(Path, '/', fileName);
+                locatedResources.Add(filePath);
             }
 
             return locatedResources;

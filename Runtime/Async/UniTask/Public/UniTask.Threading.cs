@@ -49,10 +49,7 @@ namespace UnityCommon
                     {
                         return true; // run immediate.
                     }
-                    else
-                    {
-                        return false; // register continuation.
-                    }
+                    return false; // register continuation.
                 }
             }
 

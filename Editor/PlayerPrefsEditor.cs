@@ -25,7 +25,7 @@ public class PlayerPrefsEditor : EditorWindow
     private bool showEditorPrefs;
     private SearchField searchField;
     private List<PrefPair> deserializedPlayerPrefs = new List<PrefPair>();
-    private List<PrefPair> filteredPlayerPrefs = new List<PrefPair>();
+    private readonly List<PrefPair> filteredPlayerPrefs = new List<PrefPair>();
     private DateTime? lastDeserialization;
     private Vector2 scrollPosition;
     private Vector2 lastScrollPosition;
@@ -126,25 +126,25 @@ public class PlayerPrefsEditor : EditorWindow
     private int GetInt (string key, int defaultValue = 0)
     {
         if (showEditorPrefs) return EditorPrefs.GetInt(key, defaultValue);
-        else return PlayerPrefs.GetInt(key, defaultValue);
+        return PlayerPrefs.GetInt(key, defaultValue);
     }
 
     private float GetFloat (string key, float defaultValue = 0.0f)
     {
         if (showEditorPrefs) return EditorPrefs.GetFloat(key, defaultValue);
-        else return PlayerPrefs.GetFloat(key, defaultValue);
+        return PlayerPrefs.GetFloat(key, defaultValue);
     }
 
     private string GetString (string key, string defaultValue = "")
     {
         if (showEditorPrefs) return EditorPrefs.GetString(key, defaultValue);
-        else return PlayerPrefs.GetString(key, defaultValue);
+        return PlayerPrefs.GetString(key, defaultValue);
     }
 
     private bool GetBool (string key, bool defaultValue = false)
     {
         if (showEditorPrefs) return EditorPrefs.GetBool(key, defaultValue);
-        else throw new NotSupportedException("PlayerPrefs interface does not natively support booleans.");
+        throw new NotSupportedException("PlayerPrefs interface does not natively support booleans.");
     }
 
     private void SetInt (string key, int value)

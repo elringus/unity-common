@@ -222,7 +222,7 @@ namespace UnityCommon
                 {
                     return;
                 }
-                else if (status == AwaiterStatus.Canceled)
+                if (status == AwaiterStatus.Canceled)
                 {
                     UniTaskError.ThrowOperationCanceledException();
                 }

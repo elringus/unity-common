@@ -15,7 +15,7 @@ namespace UnityCommon.Async.Internal
         private int tail;
         private bool running;
         private IPlayerLoopItem[] loopItems = new IPlayerLoopItem[InitialSize];
-        private MinimumQueue<IPlayerLoopItem> waitQueue = new MinimumQueue<IPlayerLoopItem>(InitialSize);
+        private readonly MinimumQueue<IPlayerLoopItem> waitQueue = new MinimumQueue<IPlayerLoopItem>(InitialSize);
 
         public PlayerLoopRunner (PlayerLoopTiming timing)
         {
@@ -206,14 +206,11 @@ namespace UnityCommon.Async.Internal
                                     j--;
                                     continue; // next j
                                 }
-                                else
-                                {
-                                    // swap
-                                    loopItems[i] = fromTail;
-                                    loopItems[j] = null;
-                                    j--;
-                                    goto NEXT_LOOP; // next i
-                                }
+                                // swap
+                                loopItems[i] = fromTail;
+                                loopItems[j] = null;
+                                j--;
+                                goto NEXT_LOOP; // next i
                             }
                             catch (Exception ex)
                             {
@@ -230,10 +227,7 @@ namespace UnityCommon.Async.Internal
                                 continue; // next j
                             }
                         }
-                        else
-                        {
-                            j--;
-                        }
+                        j--;
                     }
 
                     tail = i; // loop end

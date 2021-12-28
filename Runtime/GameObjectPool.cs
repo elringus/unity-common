@@ -22,9 +22,9 @@ namespace UnityCommon
         public StartupPoolMode PoolMode { get => startupPoolMode; private set => startupPoolMode = value; }
         public StartupPool[] StartupPools { get => startupPools; private set => startupPools = value; }
 
-        private Dictionary<GameObject, List<GameObject>> pooledObjects = new Dictionary<GameObject, List<GameObject>>();
-        private Dictionary<GameObject, GameObject> spawnedObjects = new Dictionary<GameObject, GameObject>();
-        private List<GameObject> tempList = new List<GameObject>();
+        private readonly Dictionary<GameObject, List<GameObject>> pooledObjects = new Dictionary<GameObject, List<GameObject>>();
+        private readonly Dictionary<GameObject, GameObject> spawnedObjects = new Dictionary<GameObject, GameObject>();
+        private readonly List<GameObject> tempList = new List<GameObject>();
         private bool startupPoolsCreated;
 
         [SerializeField] private StartupPoolMode startupPoolMode;
@@ -77,7 +77,7 @@ namespace UnityCommon
                 {
                     bool active = prefab.activeSelf;
                     prefab.SetActive(false);
-                    Transform parent = transform;
+                    var parent = transform;
                     while (list.Count < initialPoolSize)
                     {
                         var obj = Instantiate(prefab, parent, true);

@@ -35,7 +35,7 @@ namespace UnityCommon.Async.Internal
             {
                 throw new ArgumentOutOfRangeException(nameof(minimumLength));
             }
-            else if (minimumLength == 0)
+            if (minimumLength == 0)
             {
                 return EmptyArray;
             }

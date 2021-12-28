@@ -21,7 +21,7 @@ namespace UnityCommon
             EventSystem.current.RaycastAll(pointerEventData, raycastResults);
             if (raycastResults.Count > 0)
                 return raycastResults[0].gameObject;
-            else return null;
+            return null;
             #else
             Debug.LogWarning("`UnityCommon.GetHoveredGameObject` requires legacy input system, which is disabled; the method will always return null.");
             return null;

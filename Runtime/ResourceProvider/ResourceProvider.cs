@@ -33,7 +33,7 @@ namespace UnityCommon
             var loadedResourceType = loadedResource.Valid ? loadedResource.Object.GetType() : default;
             if (loadedResourceType != typeof(T))
                 throw new Error($"Failed to get a loaded resource with path `{path}`: The loaded resource is of type `{loadedResourceType?.FullName}`, while the requested type is `{typeof(T).FullName}`.");
-            else return LoadedResources[path] as Resource<T>;
+            return LoadedResources[path] as Resource<T>;
         }
 
         public virtual async UniTask<Resource<T>> LoadResourceAsync<T> (string path) where T : UnityEngine.Object
@@ -83,7 +83,7 @@ namespace UnityCommon
             LoadedResources.Remove(path);
 
             // Make sure no other resources use the same object before disposing it.
-            if (!LoadedResources.Any(r => r.Value.Object == resource.Object))
+            if (LoadedResources.All(r => r.Value.Object != resource.Object))
                 DisposeResource(resource);
 
             LogMessage($"Resource `{path}` unloaded.");
@@ -216,7 +216,7 @@ namespace UnityCommon
         protected virtual void HandleResourceLoaded<T> (Resource<T> resource) where T : UnityEngine.Object
         {
             if (!resource.Valid) throw new Error($"Resource `{resource.Path}` failed to load.");
-            else LoadedResources[resource.Path] = resource;
+            LoadedResources[resource.Path] = resource;
 
             if (LoadRunners.ContainsKey(resource.Path))
                 LoadRunners.Remove(resource.Path);

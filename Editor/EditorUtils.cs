@@ -254,11 +254,8 @@ namespace UnityCommon
                 AssetDatabase.CreateAsset(asset, path);
                 return asset as T;
             }
-            else
-            {
-                EditorUtility.CopySerialized(asset, existingAsset);
-                return existingAsset;
-            }
+            EditorUtility.CopySerialized(asset, existingAsset);
+            return existingAsset;
         }
 
         public static void SetListValues<T> (this SerializedProperty serializedProperty, List<T> listValues, bool clearSourceList = true) where T : Object

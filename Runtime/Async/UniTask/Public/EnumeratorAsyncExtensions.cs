@@ -100,10 +100,7 @@ namespace UnityCommon
                     {
                         return true;
                     }
-                    else
-                    {
-                        success = true;
-                    }
+                    success = true;
                 }
                 catch (Exception ex)
                 {

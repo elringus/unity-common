@@ -105,7 +105,7 @@ namespace UnityCommon
             // ReSharper disable once MemberHidesStaticFromOuterClass
             public struct Awaiter : ICriticalNotifyCompletion
             {
-                private UnitWhenAnyPromise<T0> parent;
+                private readonly UnitWhenAnyPromise<T0> parent;
 
                 public Awaiter (UnitWhenAnyPromise<T0> parent)
                 {
@@ -199,7 +199,7 @@ namespace UnityCommon
             // ReSharper disable once MemberHidesStaticFromOuterClass
             public struct Awaiter : ICriticalNotifyCompletion
             {
-                private WhenAnyPromise<T> parent;
+                private readonly WhenAnyPromise<T> parent;
 
                 public Awaiter (WhenAnyPromise<T> parent)
                 {
@@ -292,7 +292,7 @@ namespace UnityCommon
             // ReSharper disable once MemberHidesStaticFromOuterClass
             public struct Awaiter : ICriticalNotifyCompletion
             {
-                private WhenAnyPromise parent;
+                private readonly WhenAnyPromise parent;
 
                 public Awaiter (WhenAnyPromise parent)
                 {
