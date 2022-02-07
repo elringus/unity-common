@@ -8,17 +8,21 @@ namespace UnityCommon
 {
     public static class EventUtils
     {
+        private static readonly List<RaycastResult> raycastResults = new List<RaycastResult>();
+
         /// <summary>
         /// Get top-most hovered game object.
         /// </summary>
-        public static GameObject GetHoveredGameObject (this EventSystem eventSystem)
+        public static GameObject GetHoveredGameObject (EventSystem eventSystem)
         {
             #if ENABLE_LEGACY_INPUT_MANAGER
-            var pointerEventData = new PointerEventData(EventSystem.current);
+            if (!eventSystem) throw new UnityException("Provided event system is not valid.");
+
+            var pointerEventData = new PointerEventData(eventSystem);
             pointerEventData.position = Input.touchCount > 0 ? (Vector3)Input.GetTouch(0).position : Input.mousePosition;
 
-            var raycastResults = new List<RaycastResult>();
-            EventSystem.current.RaycastAll(pointerEventData, raycastResults);
+            raycastResults.Clear();
+            eventSystem.RaycastAll(pointerEventData, raycastResults);
             if (raycastResults.Count > 0)
                 return raycastResults[0].gameObject;
             return null;
@@ -51,18 +55,25 @@ namespace UnityCommon
 
     [Serializable]
     public class StringUnityEvent : UnityEvent<string> { }
+
     [Serializable]
     public class FloatUnityEvent : UnityEvent<float> { }
+
     [Serializable]
     public class IntUnityEvent : UnityEvent<int> { }
+
     [Serializable]
     public class BoolUnityEvent : UnityEvent<bool> { }
+
     [Serializable]
     public class Vector3UnityEvent : UnityEvent<Vector3> { }
+
     [Serializable]
     public class Vector2UnityEvent : UnityEvent<Vector2> { }
+
     [Serializable]
     public class QuaternionUnityEvent : UnityEvent<Quaternion> { }
+
     [Serializable]
     public class ColorUnityEvent : UnityEvent<Color> { }
 }
