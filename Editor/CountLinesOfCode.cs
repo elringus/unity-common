@@ -22,7 +22,6 @@ namespace UnityCommon
         {
             var strDir = Directory.GetCurrentDirectory();
             strDir += @"/Assets";
-            var iLengthOfRootPath = strDir.Length;
             var stats = new ArrayList();
             ProcessDirectory(stats, strDir);
 
