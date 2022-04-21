@@ -14,7 +14,7 @@ public class SetEditorProviderToTestScript
 
         foreach (var resource in testProviderObj.EditorResources)
         {
-            AssetDatabase.TryGetGUIDAndLocalFileIdentifier(resource.Object, out string guid, out long id);
+            AssetDatabase.TryGetGUIDAndLocalFileIdentifier(resource.Object, out string guid, out long _);
             provider.AddResourceGuid(resource.Path, guid);
         }
 

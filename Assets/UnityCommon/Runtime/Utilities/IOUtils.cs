@@ -14,6 +14,7 @@ namespace UnityCommon
             using (var fileStream = File.OpenRead(filePath))
             {
                 var fileData = new byte[fileStream.Length];
+                // ReSharper disable once MustUseReturnValue
                 await fileStream.ReadAsync(fileData, 0, (int)fileStream.Length);
                 return fileData;
             }

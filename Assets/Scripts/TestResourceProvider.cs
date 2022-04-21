@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using UnityCommon;
 using UnityEngine;
@@ -57,7 +58,7 @@ public class TestResourceProvider : MonoBehaviour
         GUILayout.TextArea(text);
 
         if (provider != null && provider.IsLoading)
-            GUILayout.Label(provider.LoadProgress.ToString());
+            GUILayout.Label(provider.LoadProgress.ToString(CultureInfo.InvariantCulture));
     }
 
     [ContextMenu("Test In Editor")]
