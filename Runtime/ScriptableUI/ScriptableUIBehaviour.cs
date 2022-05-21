@@ -79,9 +79,16 @@ namespace UnityCommon
         /// </summary>
         public virtual Camera RenderCamera { get => ObjectUtils.IsValid(TopmostCanvas) ? TopmostCanvas.worldCamera : null; set => SetRenderCamera(value); }
 
+        /// <summary>
+        /// Game object to focus on next navigation input (eg, arrow keys on keyboard or dpad on gamepad).
+        /// </summary>
         protected static GameObject FocusOnNavigation { get; set; }
 
+        /// <summary>
+        /// Canvas group component attached to the host game object, if any.
+        /// </summary>
         protected virtual CanvasGroup CanvasGroup { get; private set; }
+        /// <inheritdoc cref="controlOpacity"/>
         protected virtual bool ControlOpacity => controlOpacity;
 
         [Tooltip("Whether to permanently disable interaction with the object, no matter the visibility. Requires `Canvas Group` component on the same game object.")]
