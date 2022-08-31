@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEditor;
+using UnityEditor.PackageManager;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
@@ -17,6 +18,13 @@ namespace UnityCommon
             Task OnPackagePostProcessAsync ();
         }
 
+        public enum DistributionType
+        {
+            Legacy,
+            UPM
+        }
+
+        private static DistributionType Distribution { get => (DistributionType)PlayerPrefs.GetInt(prefsPrefix + "Distribution"); set => PlayerPrefs.SetInt(prefsPrefix + "Distribution", (int)value); }
         private static string PackageName { get => PlayerPrefs.GetString(prefsPrefix + "PackageName"); set => PlayerPrefs.SetString(prefsPrefix + "PackageName", value); }
         private static string Copyright { get => PlayerPrefs.GetString(prefsPrefix + "Copyright"); set => PlayerPrefs.SetString(prefsPrefix + "Copyright", value); }
         private static string LicenseFilePath { get => PlayerPrefs.GetString(prefsPrefix + "LicenseFilePath"); set => PlayerPrefs.SetString(prefsPrefix + "LicenseFilePath", value); }
@@ -95,6 +103,7 @@ namespace UnityCommon
             EditorGUILayout.LabelField("Package Exporter Settings", EditorStyles.boldLabel);
             EditorGUILayout.HelpBox("Settings are stored in editor's PlayerPrefs and won't be exposed in builds or project assets.", MessageType.Info);
             EditorGUILayout.Space();
+            Distribution = (DistributionType)EditorGUILayout.EnumPopup("Distribution", Distribution);
             PackageName = EditorGUILayout.TextField("Package Name", PackageName);
             Copyright = EditorGUILayout.TextField("Copyright Notice", Copyright);
             OverrideNamespace = EditorGUILayout.TextField("Override Namespace", OverrideNamespace);
@@ -249,7 +258,15 @@ namespace UnityCommon
             // Export the package.
             DisplayProgressBar("Writing package file...", .5f);
             if (ExportAsUnityPackage)
-                AssetDatabase.ExportPackage(AssetsPath, OutputPath + "/" + OutputFileName + ".unitypackage", ExportPackageOptions.Recurse);
+            {
+                if (Distribution == DistributionType.Legacy)
+                    AssetDatabase.ExportPackage(AssetsPath, OutputPath + "/" + OutputFileName + ".unitypackage", ExportPackageOptions.Recurse);
+                else
+                {
+                    var request = Client.Pack(AssetsPath, OutputPath);
+                    while (!request.IsCompleted) await Task.Delay(100);
+                }
+            }
             else
             {
                 try
