@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -11,11 +11,13 @@ namespace UnityCommon
     public class Semaphore : IDisposable
     {
         private readonly Queue<UniTaskCompletionSource> waiters = new Queue<UniTaskCompletionSource>();
+        private readonly int maxCount;
         private int count;
 
-        public Semaphore (int initialCount)
+        public Semaphore (int initialCount, int maxCount = int.MaxValue)
         {
             count = initialCount;
+            this.maxCount = maxCount;
         }
 
         public UniTask WaitAsync () => WaitAsync(CancellationToken.None);
@@ -41,6 +43,7 @@ namespace UnityCommon
         {
             for (int i = 0; i < releaseCount; i++)
             {
+                if (count + 1 > maxCount) break;
                 if (waiters.Count > 0)
                     waiters.Dequeue().TrySetResult();
                 count++;
