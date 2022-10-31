@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace UnityCommon
@@ -8,7 +9,7 @@ namespace UnityCommon
     {
         public int Count => queue.Count;
 
-        private readonly Queue<T> queue = new Queue<T>();
+        private readonly ConcurrentQueue<T> queue = new ConcurrentQueue<T>();
         private readonly Semaphore semaphore = new Semaphore(0);
 
         public void Enqueue (T item)
@@ -22,7 +23,7 @@ namespace UnityCommon
             while (!token.Canceled)
             {
                 await semaphore.WaitAsync(token.CancellationToken);
-                return queue.Dequeue();
+                if (queue.TryDequeue(out var message)) return message;
             }
             throw new OperationCanceledException();
         }
