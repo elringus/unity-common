@@ -44,7 +44,8 @@ namespace UnityCommon
             for (int i = 0; i < releaseCount; i++)
             {
                 if (count + 1 > maxCount) break;
-                if (waiters.Count > 0) ReleaseWaiter();
+                if (waiters.TryDequeue(out var waiter))
+                    waiter.TrySetResult();
                 count++;
             }
         }
@@ -52,18 +53,8 @@ namespace UnityCommon
         public void Dispose ()
         {
             while (!waiters.IsEmpty)
-            {
-                waiters.TryDequeue(out var waiter);
-                waiter.TrySetCanceled();
-            }
-        }
-
-        private void ReleaseWaiter ()
-        {
-            var waiter = default(UniTaskCompletionSource);
-            while (waiter is null)
-                waiters.TryDequeue(out waiter);
-            waiter.TrySetResult();
+                if (waiters.TryDequeue(out var waiter))
+                    waiter.TrySetCanceled();
         }
     }
 }
