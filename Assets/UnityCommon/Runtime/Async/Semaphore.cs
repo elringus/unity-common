@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Threading;
 
 namespace UnityCommon
@@ -10,7 +10,7 @@ namespace UnityCommon
     /// </summary>
     public class Semaphore : IDisposable
     {
-        private readonly Queue<UniTaskCompletionSource> waiters = new Queue<UniTaskCompletionSource>();
+        private readonly ConcurrentQueue<UniTaskCompletionSource> waiters = new ConcurrentQueue<UniTaskCompletionSource>();
         private readonly int maxCount;
         private int count;
 
@@ -44,17 +44,17 @@ namespace UnityCommon
             for (int i = 0; i < releaseCount; i++)
             {
                 if (count + 1 > maxCount) break;
-                if (waiters.Count > 0)
-                    waiters.Dequeue().TrySetResult();
+                if (waiters.TryDequeue(out var waiter))
+                    waiter.TrySetResult();
                 count++;
             }
         }
 
         public void Dispose ()
         {
-            foreach (var waiter in waiters)
-                waiter.TrySetCanceled();
-            waiters.Clear();
+            while (!waiters.IsEmpty)
+                if (waiters.TryDequeue(out var waiter))
+                    waiter.TrySetCanceled();
         }
     }
 }
