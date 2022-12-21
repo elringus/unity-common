@@ -16,16 +16,18 @@ namespace UnityCommon
         public static GameObject GetHoveredGameObject (EventSystem eventSystem)
         {
             #if ENABLE_LEGACY_INPUT_MANAGER
-            if (!eventSystem) throw new UnityException("Provided event system is not valid.");
+            if (!eventSystem) throw new Error("Provided event system is not valid.");
 
             var pointerEventData = new PointerEventData(eventSystem);
             pointerEventData.position = Input.touchCount > 0 ? (Vector3)Input.GetTouch(0).position : Input.mousePosition;
 
             raycastResults.Clear();
             eventSystem.RaycastAll(pointerEventData, raycastResults);
-            if (raycastResults.Count > 0)
-                return raycastResults[0].gameObject;
-            return null;
+            var topmost = default(RaycastResult?);
+            foreach (var result in raycastResults)
+                if (!topmost.HasValue || topmost.Value.distance > result.distance)
+                    topmost = result;
+            return topmost?.gameObject;
             #else
             Debug.LogWarning("`UnityCommon.GetHoveredGameObject` requires legacy input system, which is disabled; the method will always return null.");
             return null;
