@@ -4,8 +4,8 @@ mergeInto(LibraryManager.library, {
     FS.syncfs(false, function (err) { });
   },
 
-  OpenBlank: function () {
-    window.open('about:blank', '_self');
+  OpenURL: function (url, target) {
+    window.open(UTF8ToString(url), UTF8ToString(target));
   }
 
 });
