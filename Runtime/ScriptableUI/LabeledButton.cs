@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -5,7 +6,7 @@ namespace UnityCommon
 {
     public class LabeledButton : Button
     {
-        public virtual Text Label => labelText ? labelText : labelText = GetComponentInChildren<Text>();
+        public virtual TMP_Text Label => labelText ? labelText : labelText = GetComponentInChildren<TMP_Text>();
         public virtual ColorBlock LabelColorBlock => labelColors;
         public virtual Color LabelColorMultiplier
         {
@@ -13,7 +14,7 @@ namespace UnityCommon
             set { labelColorMultiplier = value; DoStateTransition(currentSelectionState, false); }
         }
 
-        [SerializeField] private Text labelText;
+        [SerializeField] private TMP_Text labelText;
         [SerializeField] private ColorBlock labelColors = ColorBlock.defaultColorBlock;
 
         private Color labelColorMultiplier = Color.white;
