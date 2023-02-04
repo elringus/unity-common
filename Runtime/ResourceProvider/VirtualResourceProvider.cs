@@ -35,6 +35,11 @@ namespace UnityCommon
 
         public void AddResource<T> (string path, T obj) where T : UnityEngine.Object
         {
+            Resources.Add(path, new Resource<T>(path, obj));
+        }
+
+        public void SetResource<T> (string path, T obj) where T : UnityEngine.Object
+        {
             Resources[path] = new Resource<T>(path, obj);
         }
 
