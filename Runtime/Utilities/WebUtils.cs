@@ -18,5 +18,16 @@ namespace UnityCommon
                 default: return AudioType.UNKNOWN;
             }
         }
+
+        /// <summary>
+        /// Opens blank window in the current tab when executed on WebGL build.
+        /// Has no effect in editor and on other platforms.
+        /// </summary>
+        public static void OpenBlank ()
+        {
+            #if UNITY_WEBGL && !UNITY_EDITOR
+            WebGLExtensions.OpenBlank();
+            #endif
+        }
     }
 }

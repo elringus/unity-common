@@ -10,6 +10,12 @@ namespace UnityCommon
         /// </summary>
         [DllImport("__Internal")]
         public static extern void SyncFs ();
+
+        /// <summary>
+        /// Opens blank window in the current tab.
+        /// </summary>
+        [DllImport("__Internal")]
+        public static extern void OpenBlank ();
     }
 }
 #endif
