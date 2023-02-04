@@ -1,9 +1,9 @@
 using System;
-using UnityEngine.UI;
+using TMPro;
 
 namespace UnityCommon
 {
-    public class ScriptableDropdown : ScriptableUIControl<Dropdown>
+    public class ScriptableDropdown : ScriptableUIControl<TMP_Dropdown>
     {
         public event Action<int> OnDropdownValueChanged;
 
