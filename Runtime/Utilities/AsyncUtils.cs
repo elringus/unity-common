@@ -17,6 +17,7 @@ namespace UnityCommon
         /// </summary>
         public static YieldAwaitable WaitEndOfFrameAsync (AsyncToken asyncToken = default)
         {
+            // "LastPostLateUpdate" causes issues with rendering, using the one before.
             return UniTask.Yield(PlayerLoopTiming.PostLateUpdate, asyncToken);
         }
 
