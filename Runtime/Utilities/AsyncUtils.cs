@@ -17,7 +17,7 @@ namespace UnityCommon
         /// </summary>
         public static YieldAwaitable WaitEndOfFrameAsync (AsyncToken asyncToken = default)
         {
-            return UniTask.Yield(PlayerLoopTiming.PostLateUpdate, asyncToken);
+            return UniTask.Yield(PlayerLoopTiming.LastPostLateUpdate, asyncToken);
         }
 
         public static async UniTask DelayFrameAsync (int frameCount, AsyncToken asyncToken = default)
