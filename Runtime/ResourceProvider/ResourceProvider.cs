@@ -153,7 +153,7 @@ namespace UnityCommon
         {
             if (path is null) path = string.Empty;
 
-            if (LocatedFolders.ContainsKey(path)) return LocatedFolders[path];
+            if (LocatedFolders.TryGetValue(path, out var cached)) return cached;
 
             var locateKey = new Tuple<string, Type>(path, typeof(Folder));
 
