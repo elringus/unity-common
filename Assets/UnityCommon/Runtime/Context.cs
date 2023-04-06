@@ -155,10 +155,10 @@ namespace UnityCommon
             var objType = obj.GetType();
             var reference = new WeakReference(obj);
 
-            if (instance.references.ContainsKey(objType))
+            if (instance.references.TryGetValue(objType, out var existing))
             {
-                Debug.Assert(!assertSingleInstance, string.Format("Attempted to register multiple objects with type '{0}' while asserting single instance.", objType.Name));
-                instance.references[objType].Add(reference);
+                Debug.Assert(!assertSingleInstance, $"Attempted to register multiple objects with type '{objType.Name}' while asserting single instance.");
+                existing.Add(reference);
             }
             else instance.references.Add(objType, new List<WeakReference>() { reference });
         }
