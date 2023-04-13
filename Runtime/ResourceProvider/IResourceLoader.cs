@@ -36,7 +36,7 @@ namespace UnityCommon
         /// <summary>
         /// Locates paths of all the available resources (optionally) filtered by a base path.
         /// </summary>
-        UniTask<IReadOnlyCollection<string>> LocateAsync (string path);
+        UniTask<IReadOnlyCollection<string>> LocateAsync (string path = null);
         /// <summary>
         /// Checks whether a resource with the provided path is available (can be loaded).
         /// </summary>
