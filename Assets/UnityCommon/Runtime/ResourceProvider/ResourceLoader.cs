@@ -36,6 +36,15 @@ namespace UnityCommon
         }
 
         /// <summary>
+        /// Event invoked when resource is loaded.
+        /// </summary>
+        public event System.Action<Resource<TResource>> OnLoaded;
+        /// <summary>
+        /// When invoked when resource is unloaded.
+        /// </summary>
+        public event System.Action<Resource<TResource>> OnUnloaded;
+
+        /// <summary>
         /// Whether any of the providers used by this loader is currently loading anything.
         /// </summary>
         public virtual bool LoadingAny => ProvisionSources.Any(s => s.Provider.IsLoading);
@@ -132,7 +141,7 @@ namespace UnityCommon
                 if (!await source.Provider.ResourceExistsAsync<TResource>(fullPath)) continue;
 
                 var resource = await source.Provider.LoadResourceAsync<TResource>(fullPath);
-                LoadedResources.Add(new LoadedResource(resource, source));
+                AddLoadedResource(new LoadedResource(resource, source));
                 return resource;
             }
 
@@ -173,7 +182,7 @@ namespace UnityCommon
             foreach (var resource in resources)
             {
                 var (source, _) = loadData[resource.Path];
-                LoadedResources.Add(new LoadedResource(resource, source));
+                AddLoadedResource(new LoadedResource(resource, source));
                 result.Add(resource);
             }
 
@@ -221,14 +230,21 @@ namespace UnityCommon
             var resource = GetLoadedResource(path);
             resource?.ProvisionSource.Provider.UnloadResource(resource.FullPath);
 
-            LoadedResources.RemoveAll(r => !r.Valid || r.LocalPath.EqualsFast(path));
+            for (int i = LoadedResources.Count - 1; i >= 0; i--)
+            {
+                var loaded = LoadedResources[i];
+                if (!loaded.Valid || loaded.LocalPath.EqualsFast(path))
+                    RemoveLoadedResource(loaded);
+            }
         }
 
         public virtual void UnloadAll ()
         {
             foreach (var resource in LoadedResources)
                 resource.ProvisionSource.Provider.UnloadResource(resource.FullPath);
-            LoadedResources.Clear();
+
+            for (int i = LoadedResources.Count - 1; i >= 0; i--)
+                RemoveLoadedResource(LoadedResources[i]);
         }
 
         /// <summary>
@@ -250,6 +266,18 @@ namespace UnityCommon
         protected virtual LoadedResource GetLoadedResource (string localPath)
         {
             return LoadedResources.FirstOrDefault(r => r.Valid && r.LocalPath.EqualsFast(localPath));
+        }
+
+        protected virtual void AddLoadedResource (LoadedResource resource)
+        {
+            LoadedResources.Add(resource);
+            OnLoaded?.Invoke(resource.Resource);
+        }
+
+        protected virtual void RemoveLoadedResource (LoadedResource resource)
+        {
+            LoadedResources.Remove(resource);
+            OnUnloaded?.Invoke(resource.Resource);
         }
 
         Resource IResourceLoader.GetLoadedOrNull (string path) => GetLoadedOrNull(path);
