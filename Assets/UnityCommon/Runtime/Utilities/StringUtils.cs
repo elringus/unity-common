@@ -98,7 +98,9 @@ namespace UnityCommon
             {
                 var startIndex = content.IndexOf(startMatch, comp) + startMatch.Length;
                 var endIndex = content.IndexOf(endMatch, startIndex, comp);
-                return content.Substring(startIndex, endIndex - startIndex);
+                var length = endIndex - startIndex;
+                if (length <= 0) return null;
+                return content.Substring(startIndex, length);
             }
             return null;
         }
