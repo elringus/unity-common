@@ -27,7 +27,8 @@ namespace UnityCommon
     /// </remarks>
     [Serializable]
     public abstract class SerializableMap<TKey, TValue> : SerializableMap, 
-        IDictionary<TKey, TValue>, IDictionary, ISerializationCallbackReceiver, IDeserializationCallback, ISerializable
+        IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>, IDictionary, 
+        ISerializationCallbackReceiver, IDeserializationCallback, ISerializable
     {
         [SerializeField] private TKey[] keys;
         [SerializeField] private TValue[] values;
@@ -89,6 +90,8 @@ namespace UnityCommon
         #region IDictionary<TKey, TValue>
 
         public ICollection<TKey> Keys => ((IDictionary<TKey, TValue>)dictionary).Keys;
+        IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values => Values;
+        IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys => Keys;
         public ICollection<TValue> Values => ((IDictionary<TKey, TValue>)dictionary).Values;
         public int Count => ((IDictionary<TKey, TValue>)dictionary).Count;
         public bool IsReadOnly => ((IDictionary<TKey, TValue>)dictionary).IsReadOnly;
