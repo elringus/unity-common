@@ -13,25 +13,25 @@ namespace UnityCommon
         /// <summary>
         /// Get top-most hovered game object.
         /// </summary>
-        public static GameObject GetHoveredGameObject (EventSystem eventSystem)
+        public static GameObject GetHoveredGameObject ()
         {
+            var eventSystem = EventSystem.current;
+            if (!eventSystem) throw new Error("Failed to get hovered object: event system is not available.");
+            var data = new PointerEventData(eventSystem);
             #if ENABLE_LEGACY_INPUT_MANAGER
-            if (!eventSystem) throw new Error("Provided event system is not valid.");
-
-            var pointerEventData = new PointerEventData(eventSystem);
-            pointerEventData.position = Input.touchCount > 0 ? (Vector3)Input.GetTouch(0).position : Input.mousePosition;
-
+            data.position = Input.touchCount > 0 ? (Vector3)Input.GetTouch(0).position : Input.mousePosition;
+            #elif ENABLE_INPUT_SYSTEM && INPUT_SYSTEM_AVAILABLE
+            data.position = UnityEngine.InputSystem.Touchscreen.current?.touches.Count > 0
+                ? UnityEngine.InputSystem.Touchscreen.current.touches[0].position.value
+                : UnityEngine.InputSystem.Mouse.current?.position.value ?? Vector2.negativeInfinity;
+            #endif
             raycastResults.Clear();
-            eventSystem.RaycastAll(pointerEventData, raycastResults);
+            eventSystem.RaycastAll(data, raycastResults);
             var topmost = default(RaycastResult?);
             foreach (var result in raycastResults)
                 if (!topmost.HasValue || topmost.Value.distance > result.distance)
                     topmost = result;
             return topmost?.gameObject;
-            #else
-            Debug.LogWarning("`UnityCommon.GetHoveredGameObject` requires legacy input system, which is disabled; the method will always return null.");
-            return null;
-            #endif
         }
 
         public static void SafeInvoke (this Action action)
