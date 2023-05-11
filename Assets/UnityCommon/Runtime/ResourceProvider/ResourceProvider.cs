@@ -135,7 +135,7 @@ namespace UnityCommon
             {
                 var locateTask = LocateRunners[locateKey] as LocateResourcesRunner<T>;
                 if (locateTask is null) throw new Error($"Failed to wait for `{path}` resource location runner.");
-                await locateTask;
+                return await locateTask;
             }
 
             var locateRunner = CreateLocateResourcesRunner<T>(path);
