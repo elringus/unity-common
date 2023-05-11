@@ -22,8 +22,8 @@ namespace UnityCommon
             data.position = Input.touchCount > 0 ? (Vector3)Input.GetTouch(0).position : Input.mousePosition;
             #elif ENABLE_INPUT_SYSTEM && INPUT_SYSTEM_AVAILABLE
             data.position = UnityEngine.InputSystem.Touchscreen.current?.touches.Count > 0
-                ? UnityEngine.InputSystem.Touchscreen.current.touches[0].position.value
-                : UnityEngine.InputSystem.Mouse.current?.position.value ?? Vector2.negativeInfinity;
+                ? UnityEngine.InputSystem.Touchscreen.current.touches[0].position.ReadValue()
+                : UnityEngine.InputSystem.Mouse.current?.position.ReadValue() ?? Vector2.negativeInfinity;
             #endif
             raycastResults.Clear();
             eventSystem.RaycastAll(data, raycastResults);
