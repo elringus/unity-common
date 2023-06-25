@@ -29,7 +29,7 @@ namespace UnityCommon
             eventSystem.RaycastAll(data, raycastResults);
             var topmost = default(RaycastResult?);
             foreach (var result in raycastResults)
-                if (!topmost.HasValue || topmost.Value.distance > result.distance)
+                if (!topmost.HasValue || topmost.Value.distance < result.distance)
                     topmost = result;
             return topmost?.gameObject;
         }
