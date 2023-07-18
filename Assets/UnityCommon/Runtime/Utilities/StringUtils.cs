@@ -408,5 +408,15 @@ namespace UnityCommon
                 }
             }
         }
+
+        /// <summary>
+        /// Formats specified asset path as hyperlink.
+        /// </summary>
+        public static string BuildAssetLink (string path, int? line = null)
+        {
+            var lineRef = line.HasValue ? $" line=\"{line.Value}\"" : "";
+            var name = path + (line.HasValue ? $":{line.Value}" : "");
+            return $"<a href=\"{path}\"{lineRef}>{name}</a>";
+        }
     }
 }

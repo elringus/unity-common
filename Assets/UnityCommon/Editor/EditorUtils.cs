@@ -388,10 +388,7 @@ namespace UnityCommon
         /// </summary>
         public static string BuildAssetLink (Object asset, int? line = null)
         {
-            var path = AssetDatabase.GetAssetPath(asset);
-            var lineRef = line.HasValue ? $" line=\"{line.Value}\"" : "";
-            var name = path + (line.HasValue ? $":{line.Value}" : "");
-            return $"<a href=\"{path}\"{lineRef}>{name}</a>";
+            return StringUtils.BuildAssetLink(AssetDatabase.GetAssetPath(asset), line);
         }
     }
 }
