@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace UnityCommon
@@ -74,6 +74,7 @@ namespace UnityCommon
     /// <inheritdoc cref="TransientSaveSlotManager"/>
     public class TransientSaveSlotManager<TData> : TransientSaveSlotManager, ISaveSlotManager<TData> where TData : new()
     {
+        public static Func<TData> DefaultFactory { get; set; } = () => new TData();
         public virtual IReadOnlyCollection<string> ExistingSlotIds => SlotToData.Keys;
 
         protected virtual Dictionary<string, TData> SlotToData { get; } = new Dictionary<string, TData>();
@@ -96,7 +97,7 @@ namespace UnityCommon
 
         public virtual TData LoadOrDefault (string slotId)
         {
-            if (!SaveSlotExists(slotId)) Save(slotId, new TData());
+            if (!SaveSlotExists(slotId)) Save(slotId, DefaultFactory());
             return Load(slotId);
         }
 
