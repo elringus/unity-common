@@ -110,5 +110,19 @@ namespace UnityCommon
             return false;
             #endif
         }
+
+        /// <summary>
+        /// When in editor and specified object is a valid project asset,
+        /// returns asset's path formatted as hyperlink; otherwise, returns null.
+        /// </summary>
+        public static string BuildAssetLink (Object asset, int? line = null)
+        {
+            #if UNITY_EDITOR
+            if (!asset) return null;
+            return StringUtils.BuildAssetLink(UnityEditor.AssetDatabase.GetAssetPath(asset), line);
+            #else
+            return null;
+            #endif
+        }
     }
 }
