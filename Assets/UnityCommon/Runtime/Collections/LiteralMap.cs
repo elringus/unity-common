@@ -20,5 +20,8 @@ namespace UnityCommon
     {
         public SerializableLiteralStringMap () : base(StringComparer.OrdinalIgnoreCase) { }
         public SerializableLiteralStringMap (IDictionary<string, string> dictionary) : base(dictionary, StringComparer.OrdinalIgnoreCase) { }
+
+        public static implicit operator SerializableLiteralStringMap (System.Collections.Generic.Dictionary<string, string> dictionary)
+            => new SerializableLiteralStringMap(dictionary);
     }
 }
