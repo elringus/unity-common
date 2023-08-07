@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace UnityCommon
 {
@@ -22,7 +21,7 @@ namespace UnityCommon
         public SerializableLiteralStringMap () : base(StringComparer.OrdinalIgnoreCase) { }
         public SerializableLiteralStringMap (IDictionary<string, string> dictionary) : base(dictionary, StringComparer.OrdinalIgnoreCase) { }
 
-        public static implicit operator SerializableLiteralStringMap ((string key, string value)[] pairs)
-            => new SerializableLiteralStringMap(pairs.ToDictionary(p => p.key, p => p.value));
+        public static implicit operator SerializableLiteralStringMap (System.Collections.Generic.Dictionary<string, string> dictionary)
+            => new SerializableLiteralStringMap(dictionary);
     }
 }

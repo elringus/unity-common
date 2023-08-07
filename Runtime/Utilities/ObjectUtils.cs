@@ -90,8 +90,6 @@ namespace UnityCommon
         {
             if (obj is Object unityObject)
                 return unityObject != null && unityObject;
-            var d = new SerializableLiteralStringMap();
-            d = new[] { ("", "") };
             return false;
         }
 
