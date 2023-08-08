@@ -414,7 +414,7 @@ namespace UnityCommon
         /// </summary>
         public static string BuildAssetLink (string path, int? line = null)
         {
-            var lineRef = line.HasValue ? $" line=\"{line.Value}\"" : "";
+            var lineRef = $" line=\"{line ?? 0}\"";
             var name = path + (line.HasValue ? $":{line.Value}" : "");
             return $"<a href=\"{path}\"{lineRef}>{name}</a>";
         }
