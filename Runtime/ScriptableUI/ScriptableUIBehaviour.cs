@@ -231,10 +231,9 @@ namespace UnityCommon
         /// </summary>
         public virtual void ClearFocus ()
         {
-            if (EventSystem.current &&
-                EventSystem.current.currentSelectedGameObject &&
-                EventSystem.current.currentSelectedGameObject.transform.IsChildOf(transform))
-                EventSystem.current.SetSelectedGameObject(null);
+            if (EventUtils.Selected &&
+                EventUtils.Selected.transform.IsChildOf(transform))
+                EventUtils.Select(null);
         }
 
         /// <summary>
@@ -242,8 +241,7 @@ namespace UnityCommon
         /// </summary>
         public virtual void SetFocus ()
         {
-            if (EventSystem.current)
-                EventSystem.current.SetSelectedGameObject(gameObject);
+            EventUtils.Select(gameObject);
         }
 
         protected override void Awake ()
@@ -277,11 +275,11 @@ namespace UnityCommon
             if (visible) onShow?.Invoke();
             else onHide?.Invoke();
 
-            if (FocusObject && visible && EventSystem.current)
+            if (FocusObject && visible)
                 switch (FocusModeType)
                 {
                     case FocusMode.Visibility:
-                        EventSystem.current.SetSelectedGameObject(FocusObject);
+                        EventUtils.Select(FocusObject);
                         FocusOnNavigation = null;
                         break;
                     case FocusMode.Navigation:
@@ -292,11 +290,11 @@ namespace UnityCommon
 
         protected virtual void HandleNavigationFocus ()
         {
-            if (FocusModeType != FocusMode.Navigation || !FocusOnNavigation || !Visible || !EventSystem.current) return;
+            if (FocusModeType != FocusMode.Navigation || !FocusOnNavigation || !Visible) return;
 
             if (SampleInputSystemNavigation() || SampleLegacyInputNavigation())
             {
-                EventSystem.current.SetSelectedGameObject(FocusOnNavigation);
+                EventUtils.Select(FocusOnNavigation);
                 FocusOnNavigation = null;
             }
         }
