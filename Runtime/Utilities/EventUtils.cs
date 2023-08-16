@@ -34,6 +34,18 @@ namespace UnityCommon
             return topmost?.gameObject;
         }
 
+        /// <summary>
+        /// Focuses specified game object with the current event system;
+        /// does nothing when it's not or object is not valid.
+        /// </summary>
+        public static void Select (GameObject go)
+        {
+            if (!go) return;
+            var eventSystem = EventSystem.current;
+            if (!eventSystem) return;
+            eventSystem.SetSelectedGameObject(go);
+        }
+
         public static void SafeInvoke (this Action action)
         {
             action?.Invoke();
