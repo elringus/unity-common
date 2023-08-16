@@ -8,6 +8,11 @@ namespace UnityCommon
 {
     public static class EventUtils
     {
+        /// <summary>
+        /// Currently focused game object or null.
+        /// </summary>
+        public static GameObject Selected => !EventSystem.current ? null : EventSystem.current.currentSelectedGameObject;
+
         private static readonly List<RaycastResult> raycastResults = new List<RaycastResult>();
 
         /// <summary>
@@ -36,11 +41,10 @@ namespace UnityCommon
 
         /// <summary>
         /// Focuses specified game object with the current event system;
-        /// does nothing when it's not or object is not valid.
+        /// does nothing when it's not and blurs (removes focus) when go is null.
         /// </summary>
         public static void Select (GameObject go)
         {
-            if (!go) return;
             var eventSystem = EventSystem.current;
             if (!eventSystem) return;
             eventSystem.SetSelectedGameObject(go);
