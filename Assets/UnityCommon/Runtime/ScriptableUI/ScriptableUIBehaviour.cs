@@ -256,12 +256,17 @@ namespace UnityCommon
                 CanvasGroup.blocksRaycasts = false;
             }
 
-            SetVisibility(VisibleOnAwake);
+            SetVisibilityOnAwake();
         }
 
         protected virtual void Update ()
         {
             HandleNavigationFocus();
+        }
+
+        protected virtual void SetVisibilityOnAwake ()
+        {
+            SetVisibility(VisibleOnAwake);
         }
 
         /// <summary>
